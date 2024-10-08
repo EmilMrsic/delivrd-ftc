@@ -4,9 +4,10 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const { to } = await req.json();
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   try {
     const actionCodeSettings = {
-      url: `http:localhost:3000/complete-signin`,
+      url: `${baseUrl}/complete-signin`,
       handleCodeInApp: true, // Important for email link sign-in
     };
 
