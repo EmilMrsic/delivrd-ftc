@@ -1,0 +1,31 @@
+export interface IUser {
+  id: string;
+  displayName: string;
+  email: string;
+}
+
+export type Color = {
+  name: string;
+  preferred: boolean;
+};
+
+export type Vehicle = {
+  id?: string;
+  client?: string;
+  carMake?: string;
+  carModel?: string;
+  price?: number;
+  files?: string[];
+  notes?: string;
+  discountPrice?: string;
+  inventoryStatus?: string;
+  name?: string;
+  brand?: string;
+  isNew?: boolean;
+  zipCode?: string;
+  trim?: string;
+  exteriorColors?: Color[];
+  interiorColors?: Color[];
+  drivetrain?: string;
+  createdAt?: string;
+};
