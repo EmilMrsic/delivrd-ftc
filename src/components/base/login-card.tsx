@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Lock } from "lucide-react";
@@ -8,6 +8,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 const emailSchema = z.object({
   email: z
     .string()
@@ -18,6 +19,7 @@ const LoginCard = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const sendEmail = async (email: string) => {
     try {
@@ -35,7 +37,6 @@ const LoginCard = () => {
 
   const sendLoginEmail = async (email: string) => {
     try {
-
       const emailData = {
         to: email,
       };
@@ -56,7 +57,7 @@ const LoginCard = () => {
 
       const q = query(
         collection(db, "Dealers"),
-        where("YourEmail", "==", parsedEmail),
+        where("YourEmail", "==", parsedEmail)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
@@ -68,7 +69,8 @@ const LoginCard = () => {
           displayName: userData.SalesPersonName,
           brand: userData.Brand,
         };
-        sendLoginEmail(user.email)
+
+        sendLoginEmail(user.email);
       } else {
         await sendEmail(parsedEmail);
       }
@@ -81,6 +83,10 @@ const LoginCard = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) router.push("/bid");
+  }, []);
 
   return (
     <div className="bg-white max-w-[400px] lg:w-[400px]  flex flex-col rounded-xl p-5 gap-5">

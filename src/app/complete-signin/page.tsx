@@ -1,7 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
+import {
+  getAuth,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+} from "firebase/auth";
 import { auth, db } from "@/firebase/config";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -81,6 +85,18 @@ export default function CompleteSignIn() {
     window.localStorage.setItem("emailForSignIn", email);
     handleSignIn();
   };
+
+  useEffect(() => {
+    getAuth().onAuthStateChanged(function (user) {
+      if (user) {
+        user.getIdToken().then(function (idToken) {
+          localStorage.setItem("token", idToken);
+        });
+        localStorage.setItem("refresToken", user.refreshToken);
+      }
+    });
+    if (localStorage.getItem("token")) router.push("/bid");
+  }, []);
 
   return (
     <div className="bg-[#171717] h-screen w-screen flex flex-col gap-4 justify-center items-center">
