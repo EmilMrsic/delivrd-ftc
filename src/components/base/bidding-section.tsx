@@ -29,7 +29,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 
 export default function BiddingSection() {
   const { toast } = useToast();
@@ -42,6 +43,8 @@ export default function BiddingSection() {
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("available");
   const [subTab, setSubTab] = useState("new");
+  const [sortColumn, setSortColumn] = useState<keyof Vehicle>("carMake");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const [user, setUser] = useState<null | IUser>(null);
 
@@ -237,6 +240,15 @@ export default function BiddingSection() {
     }
   }, [showSelected]);
 
+  const toggleSort = (column: keyof Vehicle) => {
+    if (column === sortColumn) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
   useEffect(() => {
     setFilteredBidVehicles(bidVehicles);
     setFilteredVehicles(vehicles);
@@ -276,6 +288,14 @@ export default function BiddingSection() {
     };
     setFilteredVehicles(filterVehicles());
   }, [subTab, vehicles]);
+
+  const sortedData = [...filteredBidVehicles].sort((a: any, b: any) => {
+    if (a[sortColumn] < b[sortColumn]) return sortDirection === "asc" ? -1 : 1;
+    if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  console.log(filteredBidVehicles);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -349,58 +369,107 @@ export default function BiddingSection() {
                 ))}
               </div>
             ) : (
-              <Table className="">
-                <TableCaption>A list of your recent bids.</TableCaption>
-                <TableHeader className="bg-[#ebeaea]">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableHead className="text-left">Make</TableHead>
-                    <TableHead className="text-left">Model</TableHead>
-                    <TableHead className="text-left">Trim</TableHead>
-                    <TableHead className="text-left">Price</TableHead>
-                    <TableHead className="text-left">
-                      Discounted Price
-                    </TableHead>
-                    <TableHead className="text-left">
-                      Inventory Status
-                    </TableHead>
-                    <TableHead className="text-left">
-                      Additional comments
-                    </TableHead>
-                    <TableHead className="text-left">Files</TableHead>
+                    {[
+                      "Make",
+                      "Model",
+                      "Trim",
+                      "Price",
+                      "Discounted Price",
+                      "Inventory Status",
+                      "Additional Comments",
+                      "Files",
+                    ].map((header) => (
+                      <TableHead
+                        key={header}
+                        className="cursor-pointer"
+                        onClick={() => toggleSort("carMake" as keyof Vehicle)}
+                      >
+                        <div className="flex items-center font-semibold">
+                          {header}
+                          {header === "Make" ? (
+                            sortDirection === "asc" ? (
+                              <Image
+                                className="h-4 w-4 ml-1"
+                                height={16}
+                                width={16}
+                                alt="Image"
+                                src={"/arrow-up.svg"}
+                              />
+                            ) : (
+                              <Image
+                                className="h-4 w-4 ml-1 rotate-[180deg]"
+                                height={16}
+                                width={16}
+                                alt="Image"
+                                src={"/arrow-up.svg"}
+                              />
+                            )
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      </TableHead>
+                    ))}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredBidVehicles.map((bid, index) => (
-                    <TableRow key={"filteredBidVehicles_" + index}>
+                  {sortedData.map((vehicle, index) => (
+                    <TableRow
+                      key={index}
+                      className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                    >
                       <TableCell className="font-medium">
-                        {bid.carMake}
+                        {vehicle.carMake}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {bid.carModel}
+                        {vehicle.carModel}
                       </TableCell>
-                      <TableCell className="font-medium">{bid.trim}</TableCell>
-                      <TableCell>{bid.price}</TableCell>
-                      <TableCell>{bid.discountPrice}</TableCell>
-                      <TableCell>{bid.inventoryStatus}</TableCell>
-                      <TableCell>{bid.notes}</TableCell>
-                      <TableCell className="text-left">
-                        {bid.files?.map((file: string, index) => {
-                          return (
-                            <Link
-                              key={"bidFiles" + index}
-                              href={file}
-                              target="_blank"
+                      <TableCell className="max-w-[340px] font-medium">
+                        {vehicle.trim}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        ${vehicle.price?.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        ${vehicle.discountPrice?.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className="rounded-full font-medium"
+                          variant={
+                            vehicle.inventoryStatus === "In Stock"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {vehicle.inventoryStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {vehicle.notes}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {vehicle.files?.map((file, fileIndex: number) => (
+                            <Button
+                              key={fileIndex}
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
                             >
                               <Image
-                                src={file}
-                                width={100}
-                                height={100}
-                                alt="Attachments"
-                                className="transition-opacity duration-300 ease-in-out hover:opacity-50 rounded-lg"
+                                className="h-4 w-4"
+                                height={16}
+                                width={16}
+                                alt="Image"
+                                src={"/file.svg"}
                               />
-                            </Link>
-                          );
-                        })}
+                            </Button>
+                          ))}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

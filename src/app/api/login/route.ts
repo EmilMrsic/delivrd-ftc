@@ -4,7 +4,10 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const { to } = await req.json();
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  // const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const protocol = req.headers.get("x-forwarded-proto") || "http";
+  const host = req.headers.get("host");
+  const baseUrl = `${protocol}://${host}`;
   try {
     const actionCodeSettings = {
       url: `${baseUrl}/complete-signin`,
