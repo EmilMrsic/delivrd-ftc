@@ -32,6 +32,18 @@ import {
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 
+const headers = [
+  { label: "Make", column: "carMake" },
+  { label: "Model", column: "carModel" },
+  { label: "Trim", column: "" },
+  { label: "Submitted Date", column: "createdAt" },
+  { label: "Price", column: "price" },
+  { label: "Discounted Price", column: "" },
+  { label: "Inventory Status", column: "" },
+  { label: "Additional Comments", column: "" },
+  { label: "Files", column: "" },
+];
+
 export default function BiddingSection() {
   const { toast } = useToast();
   const [showSelected, setShowSelected] = useState(false);
@@ -68,6 +80,16 @@ export default function BiddingSection() {
     }
   };
 
+  function getCurrentTimestamp() {
+    const today = new Date();
+
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+    const year = today.getFullYear();
+
+    return `${month}/${day}/${year}`;
+  }
+
   const submitBid = async (
     vehicleId: string,
     price: string,
@@ -101,7 +123,7 @@ export default function BiddingSection() {
         price: parseFloat(price),
         comments: message,
         files: fileUrls,
-        timestamp: serverTimestamp(),
+        timestamp: getCurrentTimestamp(),
         discountPrice: discountPrice,
         inventoryStatus: inventoryStatus,
       });
@@ -125,6 +147,17 @@ export default function BiddingSection() {
     const parsedUser = user && JSON.parse(user);
     setUser(parsedUser);
   }, []);
+
+  function formatTimestamp(timestamp: { seconds: number }) {
+    if (!timestamp || !timestamp.seconds) return "";
+
+    const date = new Date(timestamp.seconds * 1000); // Convert seconds to milliseconds
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+    const year = date.getFullYear();
+
+    return `${month}/${day}/${year}`;
+  }
 
   const fetchVehicles = async () => {
     const user = localStorage.getItem("user");
@@ -151,7 +184,6 @@ export default function BiddingSection() {
             exteriorColors,
             interiorColors,
             drivetrain: data.Drivetrain || "Unknown",
-            createdAt: data.createdAt,
           };
         });
 
@@ -168,6 +200,7 @@ export default function BiddingSection() {
 
         const bidData: Vehicle[] = bidQuerySnapshot.docs.map((doc) => {
           const data = doc.data();
+          console.log({ data });
           return {
             price: data.price ?? 0,
             discountPrice: data.discountPrice ?? 0,
@@ -175,6 +208,10 @@ export default function BiddingSection() {
             notes: data.comments ?? "",
             files: data.files || [],
             client: data.clientId || "",
+            createdAt:
+              typeof data.timestamp === "string"
+                ? data.timestamp
+                : formatTimestamp(data.timestamp),
           };
         });
 
@@ -242,13 +279,14 @@ export default function BiddingSection() {
 
   const toggleSort = (column: keyof Vehicle) => {
     if (column === sortColumn) {
+      // Toggle between 'asc' and 'desc'
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
+      // Set new column to sort by, default to ascending
       setSortColumn(column);
       setSortDirection("asc");
     }
   };
-
   useEffect(() => {
     setFilteredBidVehicles(bidVehicles);
     setFilteredVehicles(vehicles);
@@ -287,25 +325,22 @@ export default function BiddingSection() {
       }
     };
     setFilteredVehicles(filterVehicles());
-  }, [subTab, vehicles]);
+  }, [subTab, vehicles, tab]);
 
   const sortedData = [...filteredBidVehicles].sort((a: any, b: any) => {
     if (a[sortColumn] < b[sortColumn]) return sortDirection === "asc" ? -1 : 1;
     if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
-
-  console.log(filteredBidVehicles);
-
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen  relative bg-background text-foreground">
       <Header user={user} />
 
       <main className="container mx-auto px-4 py-8">
         <Tabs
           value={tab}
           defaultValue="account"
-          className="w-[400px] mb-2"
+          className=" mb-2"
           onValueChange={(value) => setTab(value)}
         >
           <TabsList>
@@ -339,7 +374,7 @@ export default function BiddingSection() {
                 <Tabs
                   value={subTab}
                   defaultValue="all"
-                  className="ml-8"
+                  className="ml-8 md:static fixed top-[8%] z-50 right-0 -left-4"
                   onValueChange={(value) => setSubTab(value)}
                 >
                   <TabsList>
@@ -372,43 +407,30 @@ export default function BiddingSection() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    {[
-                      "Make",
-                      "Model",
-                      "Trim",
-                      "Price",
-                      "Discounted Price",
-                      "Inventory Status",
-                      "Additional Comments",
-                      "Files",
-                    ].map((header) => (
+                    {headers.map(({ label, column }) => (
                       <TableHead
-                        key={header}
-                        className="cursor-pointer"
-                        onClick={() => toggleSort("carMake" as keyof Vehicle)}
+                        key={label}
+                        className={column ? "cursor-pointer" : ""}
+                        onClick={() =>
+                          column && toggleSort(column as keyof Vehicle)
+                        } // Toggle sort on click
                       >
                         <div className="flex items-center font-semibold">
-                          {header}
-                          {header === "Make" ? (
-                            sortDirection === "asc" ? (
-                              <Image
-                                className="h-4 w-4 ml-1"
-                                height={16}
-                                width={16}
-                                alt="Image"
-                                src={"/arrow-up.svg"}
-                              />
-                            ) : (
-                              <Image
-                                className="h-4 w-4 ml-1 rotate-[180deg]"
-                                height={16}
-                                width={16}
-                                alt="Image"
-                                src={"/arrow-up.svg"}
-                              />
-                            )
-                          ) : (
-                            <></>
+                          {label}
+
+                          {/* Show sort icon only if the column is sortable */}
+                          {column && (
+                            <Image
+                              className={`h-4 w-4 ml-1 transition-transform duration-300 ${
+                                sortColumn === column && sortDirection === "asc"
+                                  ? "" // No rotation for ascending order
+                                  : "rotate-180" // Rotate for descending order
+                              }`}
+                              height={16}
+                              width={16}
+                              alt="Sort Icon"
+                              src="/arrow-up.svg"
+                            />
                           )}
                         </div>
                       </TableHead>
@@ -427,8 +449,11 @@ export default function BiddingSection() {
                       <TableCell className="font-medium">
                         {vehicle.carModel}
                       </TableCell>
-                      <TableCell className="max-w-[340px] font-medium">
+                      <TableCell className="max-w-[200px] font-medium">
                         {vehicle.trim}
+                      </TableCell>
+                      <TableCell className=" font-medium">
+                        {vehicle.createdAt}
                       </TableCell>
                       <TableCell className="font-medium">
                         ${vehicle.price?.toLocaleString()}
@@ -459,6 +484,7 @@ export default function BiddingSection() {
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
+                              onClick={() => window.open(file, "_blank")}
                             >
                               <Image
                                 className="h-4 w-4"

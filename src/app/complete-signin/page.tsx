@@ -89,17 +89,22 @@ export default function CompleteSignIn() {
   useEffect(() => {
     getAuth().onAuthStateChanged(function (user) {
       if (user) {
+        setEmail(user.email ?? "");
         user.getIdToken().then(function (idToken) {
           localStorage.setItem("token", idToken);
         });
-        localStorage.setItem("refresToken", user.refreshToken);
+        localStorage.setItem("refreshToken", user.refreshToken);
       }
     });
     if (localStorage.getItem("token")) router.push("/bid");
   }, []);
 
+  useEffect(() => {
+    handleSignIn();
+  }, [email]);
+
   return (
-    <div className="bg-[#171717] h-screen w-screen flex flex-col gap-4 justify-center items-center">
+    <div className="bg-[#202125] h-screen w-screen flex flex-col gap-4 justify-center items-center">
       <div className="bg-white max-w-[400px] lg:w-[400px]  flex flex-col rounded-xl p-5 gap-5">
         <h1 className="text-3xl font-bold text-center mb-2">
           Complete Sign-In
