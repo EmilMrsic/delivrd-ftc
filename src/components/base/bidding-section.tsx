@@ -451,7 +451,7 @@ export default function BiddingSection() {
                       <TableCell className="font-medium">
                         {vehicle.carModel}
                       </TableCell>
-                      <TableCell className="max-w-[200px] font-medium">
+                      <TableCell className="max-w-[350px] font-medium">
                         {vehicle.trim}
                       </TableCell>
                       <TableCell className=" font-medium">
@@ -475,7 +475,7 @@ export default function BiddingSection() {
                           {vehicle.inventoryStatus}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium max-w-[280px]">
                         {vehicle.notes}
                       </TableCell>
                       <TableCell>
