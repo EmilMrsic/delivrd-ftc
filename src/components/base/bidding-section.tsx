@@ -336,53 +336,55 @@ export default function BiddingSection() {
     <div className="min-h-screen  relative bg-background text-foreground">
       <Header user={user} />
 
-      <main className="container mx-auto px-4 py-8">
-        <Tabs
-          value={tab}
-          defaultValue="account"
-          className=" mb-2"
-          onValueChange={(value) => setTab(value)}
-        >
-          <TabsList>
-            <TabsTrigger value="available">Available</TabsTrigger>
-            <TabsTrigger value="previous">Previous Bids</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <div className="flex items-center justify-between mb-8">
-          <div className="text-lg font-semibold">
-            Selected Vehicles:{" "}
-            <span className="text-primary">{selectedVehicles.length}</span>
-          </div>
-          <div className="space-x-1">
-            <div className="flex items-center">
-              {tab == "available" && (
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="showSelected"
-                    checked={showSelected}
-                    onCheckedChange={() => setShowSelected(!showSelected)}
-                  />
-                  <Label
-                    htmlFor="showSelected"
-                    className="text-sm font-medium "
+      <main className="container mx-auto px-4 md:py-8 pb-8">
+        <div className="block md:bg-transparent bg-white md:border-none border-b top-[145px] md:pt-0 pt-8 md:static sticky z-50">
+          <Tabs
+            value={tab}
+            defaultValue="account"
+            className="md:text-start text-center mb-2"
+            onValueChange={(value) => setTab(value)}
+          >
+            <TabsList>
+              <TabsTrigger value="available">Available</TabsTrigger>
+              <TabsTrigger value="previous">Previous Bids</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="flex md:flex-row md:gap-0 gap-2 flex-col items-center justify-between mb-8">
+            <div className="text-lg font-semibold">
+              Selected Vehicles:{" "}
+              <span className="text-primary">{selectedVehicles.length}</span>
+            </div>
+            <div className="space-x-1">
+              <div className="flex md:flex-row md:gap-0 gap-3 flex-col items-center">
+                {tab == "available" && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="showSelected"
+                      checked={showSelected}
+                      onCheckedChange={() => setShowSelected(!showSelected)}
+                    />
+                    <Label
+                      htmlFor="showSelected"
+                      className="text-sm font-medium "
+                    >
+                      Show only selected vehicles
+                    </Label>
+                  </div>
+                )}
+                <div>
+                  <Tabs
+                    value={subTab}
+                    defaultValue="all"
+                    className="ml-0 md:ml-8"
+                    onValueChange={(value) => setSubTab(value)}
                   >
-                    Show only selected vehicles
-                  </Label>
+                    <TabsList>
+                      <TabsTrigger value="all">All</TabsTrigger>
+                      <TabsTrigger value="new">New</TabsTrigger>
+                      <TabsTrigger value="used">Used</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
-              )}
-              <div>
-                <Tabs
-                  value={subTab}
-                  defaultValue="all"
-                  className="ml-8 md:static fixed top-[8%] z-50 right-0 -left-4"
-                  onValueChange={(value) => setSubTab(value)}
-                >
-                  <TabsList>
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="new">New</TabsTrigger>
-                    <TabsTrigger value="used">Used</TabsTrigger>
-                  </TabsList>
-                </Tabs>
               </div>
             </div>
           </div>
@@ -392,7 +394,7 @@ export default function BiddingSection() {
         ) : (
           <>
             {tab == "available" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-3">
                 {filteredVehicles?.map((vehicle, index) => (
                   <VehicleCard
                     key={`vehicle-card-${vehicle.id}-${index}`}
