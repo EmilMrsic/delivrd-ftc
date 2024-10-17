@@ -289,6 +289,7 @@ export default function BiddingSection() {
   };
   useEffect(() => {
     setFilteredBidVehicles(bidVehicles);
+
     setFilteredVehicles(vehicles);
     setSelectedVehicles([]);
   }, [tab]);
@@ -297,35 +298,37 @@ export default function BiddingSection() {
     const user = localStorage.getItem("user");
     const parsedUser = user && JSON.parse(user);
     const filterVehicles = () => {
-      switch (subTab) {
-        case "all":
-          return vehicles.filter((vehicle) => {
-            if (vehicle.isNew) {
-              if (Array.isArray(parsedUser.brand)) {
-                return parsedUser.brand.includes(vehicle.brand);
+      if (!showSelected) {
+        switch (subTab) {
+          case "all":
+            return vehicles.filter((vehicle) => {
+              if (vehicle.isNew) {
+                if (Array.isArray(parsedUser.brand)) {
+                  return parsedUser.brand.includes(vehicle.brand);
+                } else {
+                  return vehicle.brand === parsedUser.brand;
+                }
               } else {
-                return vehicle.brand === parsedUser.brand;
+                return !vehicle.isNew;
               }
-            } else {
-              return !vehicle.isNew;
-            }
-          });
-        case "new":
-          return vehicles.filter((vehicle) => {
-            if (vehicle.isNew && Array.isArray(parsedUser.brand)) {
-              if (parsedUser.brand.includes(vehicle.brand)) return vehicle;
-            } else {
-              vehicle.brand === parsedUser.brand && vehicle.isNew && vehicle;
-            }
-          });
-        case "used":
-          return vehicles.filter((vehicle) => !vehicle.isNew);
-        default:
-          return vehicles;
+            });
+          case "new":
+            return vehicles.filter((vehicle) => {
+              if (vehicle.isNew && Array.isArray(parsedUser.brand)) {
+                if (parsedUser.brand.includes(vehicle.brand)) return vehicle;
+              } else {
+                vehicle.brand === parsedUser.brand && vehicle.isNew && vehicle;
+              }
+            });
+          case "used":
+            return vehicles.filter((vehicle) => !vehicle.isNew);
+          default:
+            return vehicles;
+        }
       }
     };
-    setFilteredVehicles(filterVehicles());
-  }, [subTab, vehicles, tab]);
+    !showSelected && setFilteredVehicles(filterVehicles() ?? []);
+  }, [subTab, vehicles, tab, showSelected]);
 
   const sortedData = [...filteredBidVehicles].sort((a: any, b: any) => {
     if (a[sortColumn] < b[sortColumn]) return sortDirection === "asc" ? -1 : 1;
