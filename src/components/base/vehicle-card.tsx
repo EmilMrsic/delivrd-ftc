@@ -265,15 +265,17 @@ const VehicleCard: FC<IVehicleCardProps> = ({
           </Label>
           <Textarea
             id={`message-${vehicle.id}`}
-            placeholder="Enter any additional information"
+            placeholder={`Vehicle MSRP:\nDealer Discount:\nRebates:\nNotes...\n\nLink to vehicle`}
             value={formValues.message}
             onChange={(e) =>
               setFormValues({ ...formValues, message: e.target.value })
             }
+            rows={6}
+            className="min-h-[150px]"
           />
         </div>
         <div className="flex flex-col gap-2 w-full">
-          <Label htmlFor={`file-${vehicle.id}`}>Upload files</Label>
+          <Label htmlFor={`file-${vehicle.id}`}>Upload files | T-Sheets & Window Stickers</Label>
           <Input
             id={`file-${vehicle.id}`}
             type="file"
