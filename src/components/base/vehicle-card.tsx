@@ -2,6 +2,7 @@ import React, { FC, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -29,7 +30,7 @@ interface IVehicleCardProps {
     message: string,
     discountPrice: string,
     inventoryStatus: string,
-    files: FileList | null,
+    files: FileList | null
   ) => void;
 }
 
@@ -99,15 +100,18 @@ const VehicleCard: FC<IVehicleCardProps> = ({
         formValues.message,
         formValues.discountPrice,
         formValues.inventoryStatus,
-        formValues.files,
+        formValues.files
       );
     }
   };
   return (
     <Card
       key={vehicle.id}
-      className={` ${!vehicle.isNew ? "bg-[#FFEFCE]" : ""} relative z-10 transition-all duration-300 ${selectedVehicles.includes(vehicle.id || "") ? "ring-2 ring-primary" : ""
-        }`}
+      className={` ${
+        !vehicle.isNew ? "bg-[#FFEFCE]" : ""
+      } relative z-10 transition-all duration-300 ${
+        selectedVehicles.includes(vehicle.id || "") ? "ring-2 ring-primary" : ""
+      }`}
     >
       {newEntry && (
         <div className="w-full flex justify-center">
@@ -120,39 +124,48 @@ const VehicleCard: FC<IVehicleCardProps> = ({
           </Badge>
         </div>
       )}
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id={`select-${vehicle.id}`}
-              checked={selectedVehicles.includes(vehicle.id || "")}
-              onCheckedChange={() => toggleVehicleSelection(vehicle.id || "")}
-            />
-            <Label
-              htmlFor={`select-${vehicle.id}`}
-              className="text-sm font-medium"
-            >
-              Bid on this one
-            </Label>
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="text-sm text-muted-foreground">New or Used:</span>
-            <Badge
-              variant="outline"
-              className={`font-semibold ${vehicle.isNew
-                ? "bg-green-100 text-green-800 border-green-300"
-                : "bg-blue-100 text-blue-800 border-blue-300"
-                }`}
-            >
-              {vehicle.isNew ? "New" : "Used"}
-            </Badge>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="pb-0">
-        <CardTitle className="text-xl mb-2">
+      <CardHeader className="pb-2 bg-gradient-to-r from-[#0989E5] to-[#202125] mb-5">
+        <CardTitle className="text-xl mb-2 text-white flex items-center gap-3">
+          <Image
+            src="/car.svg"
+            width={25}
+            height={25}
+            alt="car"
+            className="transform scale-x-[-1] filter invert"
+          />
           {vehicle.brand + " " + vehicle.name}
         </CardTitle>
+      </CardHeader>
+
+      <div className="flex items-center justify-between mx-6 ">
+        <div className="flex items-center space-x-2 mb-2">
+          <Checkbox
+            id={`select-${vehicle.id}`}
+            checked={selectedVehicles.includes(vehicle.id || "")}
+            onCheckedChange={() => toggleVehicleSelection(vehicle.id || "")}
+          />
+          <Label
+            htmlFor={`select-${vehicle.id}`}
+            className="text-sm font-medium"
+          >
+            Bid on this one
+          </Label>
+        </div>
+        <div className="flex items-center space-x-1">
+          <span className="text-sm text-muted-foreground">New or Used:</span>
+          <Badge
+            variant="outline"
+            className={`font-semibold ${
+              vehicle.isNew
+                ? "bg-green-100 text-green-800 border-green-300"
+                : "bg-blue-100 text-blue-800 border-blue-300"
+            }`}
+          >
+            {vehicle.isNew ? "New" : "Used"}
+          </Badge>
+        </div>
+      </div>
+      <CardContent className="pb-0">
         <p className="text-sm text-muted-foreground mb-1">
           Zip Code: {vehicle.zipCode}
         </p>
@@ -205,7 +218,11 @@ const VehicleCard: FC<IVehicleCardProps> = ({
           </div>
         </div>
       </CardContent>
-      <CardFooter className={`flex flex-col gap-4 bg-${!vehicle.isNew ? "bg-[#FFEFCE]" : 'muted/50'} mt-6 p-6`}>
+      <CardFooter
+        className={`flex flex-col gap-4 bg-${
+          !vehicle.isNew ? "bg-[#FFEFCE]" : "muted/50"
+        } mt-6 p-6`}
+      >
         <div className="flex flex-col gap-2 w-full">
           <Label htmlFor={`price-${vehicle.id}`}>
             <strong>Price - Excluding Tax & Title*</strong>
@@ -293,7 +310,10 @@ const VehicleCard: FC<IVehicleCardProps> = ({
             ))}
           </div>
         )}
-        <Button className="w-full mt-2" onClick={handleSubmit}>
+        <Button
+          className="w-full mt-2 bg-gradient-to-r from-[#0989E5] to-[#202125]"
+          onClick={handleSubmit}
+        >
           Submit Bid
         </Button>
       </CardFooter>

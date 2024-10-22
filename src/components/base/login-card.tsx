@@ -87,7 +87,7 @@ const LoginCard = () => {
   return (
     <div className="bg-white max-w-[400px] lg:w-[400px]  flex flex-col rounded-xl p-5 gap-5">
       <h1 className="text-3xl font-bold text-center mb-2">
-        First To Call Bids
+        Putting Dreams in Driveways
       </h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <Input

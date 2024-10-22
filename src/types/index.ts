@@ -2,6 +2,7 @@ export interface IUser {
   id: string;
   displayName: string;
   email: string;
+  brand: string;
 }
 
 export type Color = {

@@ -66,6 +66,8 @@ export default function BiddingSection() {
     );
   };
 
+  console.log({ user });
+
   const uploadFile = async (file: File): Promise<string | null> => {
     try {
       const timestamp = Date.now();
