@@ -30,3 +30,13 @@ export type Vehicle = {
   drivetrain?: string;
   createdAt?: string;
 };
+
+export type Negotiation = {
+  id: string;
+  negotiations_Client: string | null;
+  negotiations_Brand: string | null;
+  negotiations_Model: string | null;
+  negotiations_Invoice_Status: string | null;
+  negotiations_Created: string | null;
+  lastUpdated: string;
+};

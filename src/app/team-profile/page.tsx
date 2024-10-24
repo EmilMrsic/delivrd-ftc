@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input";
 import {
   Phone,
   User,
-  Calendar,
   Car,
   DollarSign,
   FileText,
@@ -30,6 +29,11 @@ import {
   Send,
   Play,
 } from "lucide-react";
+
+import { useSearchParams } from "next/navigation";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { parseColorOptions } from "@/lib/utils";
 
 interface VoteState {
   [key: string]: number; // Maps dealership names to votes (1 for upvote, -1 for downvote)
@@ -90,6 +94,10 @@ type DealField = keyof DealDetails;
 
 export default function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
+  const params = useSearchParams();
+  const negotiationId = params.get("id");
+  const [negotiation, setNegotiation] = useState<any>(null);
+
   const [comments, setComments] = useState<CommentState>({
     "Honda World": [
       "This offer seems to be the best value for money.",
@@ -177,6 +185,8 @@ export default function ProjectProfile() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const dealDetailsRef = useRef(null);
 
   useEffect(() => {
@@ -350,6 +360,33 @@ export default function ProjectProfile() {
     },
   };
 
+  useEffect(() => {
+    const getNegotiation = async () => {
+      if (!negotiationId) return;
+
+      try {
+        // Reference to the specific document in the 'negotiations' collection
+        const negotiationDocRef = doc(db, "negotiations", negotiationId);
+
+        // Fetch the document from Firestore
+        const docSnap = await getDoc(negotiationDocRef);
+
+        if (docSnap.exists()) {
+          // Set the negotiation data if the document exists
+          setNegotiation(docSnap.data() as any);
+        } else {
+          console.log("No such negotiation!");
+        }
+      } catch (error) {
+        console.error("Error fetching negotiation:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getNegotiation();
+  }, [negotiationId]);
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -363,7 +400,7 @@ export default function ProjectProfile() {
         </div>
         <div className="text-right">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-            Brandon Smith
+            {negotiation?.negotiations_Client}
           </h1>
         </div>
       </div>
@@ -373,21 +410,30 @@ export default function ProjectProfile() {
           <div className="flex justify-between items-center">
             <span className="font-semibold flex items-center">
               <Car className="mr-2 h-4 w-4" />
-              {dealDetails.make} {dealDetails.model}
+              {negotiation?.negotiations_Brand}{" "}
+              {negotiation?.negotiations_Model}
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.budget}
+              {negotiation?.negotiations_Budget ?? "No budget available"}
             </span>
           </div>
           <div className="flex justify-between items-center">
             <span>
               <ThumbsUp className="inline mr-1 h-4 w-4" />
-              {dealDetails.desiredColors.exterior}
+              {negotiation?.negotiations_Color_Options ? (
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: negotiation?.negotiations_Color_Options,
+                  }}
+                />
+              ) : (
+                "No color options available"
+              )}
             </span>
-            <span>
+            <span className="flex items-center">
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.monthlyBudget}/mo
+              {negotiation?.negotiations_Payment_Budget}/mo
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
@@ -400,17 +446,17 @@ export default function ProjectProfile() {
               >
                 <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
               </svg>
-              Trade In: {dealDetails.tradeIn}
+              Trade In:{" "}
+              {negotiation?.negotiations_Trade_Details ?? "No Trade In"}
             </span>
-            <span>
-              <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.financeType}
-            </span>
+            <span>{negotiation?.negotiations_How_To_Pay}</span>
           </div>
           <div className="flex justify-between items-center text-sm">
             <span>
               <Car className="inline mr-1 h-4 w-4" />
-              Drivetrain: {dealDetails.drivetrain}
+              Drivetrain:{" "}
+              {negotiation?.negotiations_Drivetrain ??
+                "No Drivetrain Available"}
             </span>
           </div>
         </div>
@@ -483,7 +529,8 @@ export default function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {dealDetails.features}
+                    {negotiation?.negotiations_Trim_Package_Options ??
+                      "No options available"}
                   </p>
                 </div>
                 <Separator className="my-4" />
@@ -536,7 +583,7 @@ export default function ProjectProfile() {
                     <span>
                       Phone:{" "}
                       <EditableField
-                        value={clientDetails.phone}
+                        value={negotiation?.negotiations_Phone}
                         field="phone"
                         section="client"
                       />
@@ -569,7 +616,7 @@ export default function ProjectProfile() {
                     <span>
                       Zip:{" "}
                       <EditableField
-                        value={clientDetails.zip}
+                        value={negotiation?.negotiations_Zip_Code ?? 0}
                         field="zip"
                         section="client"
                       />
@@ -582,7 +629,10 @@ export default function ProjectProfile() {
                     <span>
                       Deal Stage:{" "}
                       <EditableField
-                        value={clientDetails.dealStage}
+                        value={
+                          negotiation?.negotiations_Status ??
+                          "Status not available"
+                        }
                         field="dealStage"
                         section="client"
                       />
@@ -604,7 +654,10 @@ export default function ProjectProfile() {
                     <span>
                       City:{" "}
                       <EditableField
-                        value={clientDetails.city}
+                        value={
+                          negotiation?.negotiations_Address ??
+                          "City not available"
+                        }
                         field="city"
                         section="client"
                       />
@@ -626,7 +679,10 @@ export default function ProjectProfile() {
                     <span>
                       State:{" "}
                       <EditableField
-                        value={clientDetails.state}
+                        value={
+                          negotiation?.negotiations_Address ??
+                          "State not available"
+                        }
                         field="state"
                         section="client"
                       />
@@ -942,7 +998,10 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Condition:</strong>{" "}
                     <EditableField
-                      value={dealDetails.condition}
+                      value={
+                        negotiation?.negotiations_New_or_Used ??
+                        "Condition not available"
+                      }
                       field="condition"
                       section="deal"
                     />
@@ -953,7 +1012,9 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Vehicle of Interest:</strong>{" "}
                     <EditableField
-                      value={dealDetails.make}
+                      value={
+                        negotiation?.negotiations_Brand ?? "Brand not available"
+                      }
                       field="make"
                       section="deal"
                     />
@@ -964,7 +1025,9 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Model:</strong>{" "}
                     <EditableField
-                      value={dealDetails.model}
+                      value={
+                        negotiation?.negotiations_Model ?? "Model not available"
+                      }
                       field="model"
                       section="deal"
                     />
@@ -986,7 +1049,9 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Trim:</strong>{" "}
                     <EditableField
-                      value={dealDetails.trim}
+                      value={
+                        negotiation?.negotiations_Trim ?? "Trim not available"
+                      }
                       field="trim"
                       section="deal"
                     />
@@ -997,7 +1062,10 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Drivetrain:</strong>{" "}
                     <EditableField
-                      value={dealDetails.drivetrain}
+                      value={
+                        negotiation?.negotiations_Drivetrain ??
+                        "Drivetrain not available"
+                      }
                       field="drivetrain"
                       section="deal"
                     />
@@ -1015,7 +1083,10 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Trade In:</strong>{" "}
                     <EditableField
-                      value={dealDetails.tradeIn}
+                      value={
+                        negotiation?.negotiations_Trade_Details ??
+                        "Trade details not available"
+                      }
                       field="tradeIn"
                       section="deal"
                     />
@@ -1026,7 +1097,10 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Finance Type:</strong>{" "}
                     <EditableField
-                      value={dealDetails.financeType}
+                      value={
+                        negotiation?.negotiations_How_To_Pay ??
+                        "No finance type"
+                      }
                       field="financeType"
                       section="deal"
                     />
@@ -1037,7 +1111,10 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Budget:</strong>{" "}
                     <EditableField
-                      value={dealDetails.budget}
+                      value={
+                        negotiation?.negotiations_Budget ??
+                        "Negotiation budget not available"
+                      }
                       field="budget"
                       section="deal"
                     />
@@ -1048,7 +1125,10 @@ export default function ProjectProfile() {
                   <span>
                     <strong>Monthly Budget:</strong>{" "}
                     <EditableField
-                      value={dealDetails.monthlyBudget}
+                      value={
+                        negotiation?.negotiations_Payment_Budget ??
+                        "No monthly budget"
+                      }
                       field="monthlyBudget"
                       section="deal"
                     />
@@ -1060,7 +1140,8 @@ export default function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {dealDetails.features}
+                    {negotiation?.negotiations_Trim_Package_Options ??
+                      "Trim details not available"}
                   </p>
                 </div>
                 <Separator className="my-4" />
