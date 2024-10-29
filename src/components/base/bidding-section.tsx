@@ -66,8 +66,6 @@ export default function BiddingSection() {
     );
   };
 
-  console.log({ user });
-
   const uploadFile = async (file: File): Promise<string | null> => {
     try {
       const timestamp = Date.now();
@@ -166,9 +164,20 @@ export default function BiddingSection() {
     const parsedUser = user && JSON.parse(user);
 
     try {
-      if (parsedUser && parsedUser.brand) {
+      if (parsedUser) {
         setLoading(true);
         const clientQuery = query(collection(db, "Clients"));
+        const dealerQuery = query(
+          collection(db, "Dealers"),
+          where("id", "==", parsedUser.dealerId)
+        );
+        const dealerSnapShot = await getDocs(dealerQuery);
+
+        const dealerData = dealerSnapShot.docs.map((doc) => doc.data())[0];
+
+        if (dealerData) parsedUser.brand = dealerData.Brand;
+
+        localStorage.setItem("user", JSON.stringify(parsedUser));
 
         const querySnapshot = await getDocs(clientQuery);
         const vehicleData = querySnapshot.docs.map((doc) => {
@@ -202,7 +211,6 @@ export default function BiddingSection() {
 
         const bidData: Vehicle[] = bidQuerySnapshot.docs.map((doc) => {
           const data = doc.data();
-          console.log({ data });
           return {
             price: data.price ?? 0,
             discountPrice: data.discountPrice ?? 0,

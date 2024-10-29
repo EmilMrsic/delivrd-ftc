@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,24 +30,28 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MoreHorizontal, Search, Filter, ChevronDown } from "lucide-react";
 import ProjectProfile from "@/components/base/project-profile";
+import { collection, getDocs, query } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { Negotiation } from "@/types";
+import { useRouter } from "next/navigation";
 
 const NOW = new Date("2024-10-17");
 
 const stages = [
-  { name: "Actively Negotiating", category: "momentum" },
-  { name: "Contacted", category: "momentum" },
-  { name: "Deal Started", category: "momentum" },
+  { name: "PAID", category: "paid" },
+  { name: "Contacted", category: "paid" },
+  { name: "Deal Started", category: "paid" },
   { name: "Follow Up", category: "uncertain" },
-  { name: "Scheduled", category: "momentum" },
-  { name: "Proposal Sent", category: "momentum" },
-  { name: "Ready & Confirmed", category: "momentum" },
-  { name: "Paid", category: "momentum" },
-  { name: "Shipping", category: "momentum" },
-  { name: "Delivery Scheduled", category: "momentum" },
+  { name: "Scheduled", category: "paid" },
+  { name: "Proposal Sent", category: "paid" },
+  { name: "Ready & Confirmed", category: "paid" },
+  { name: "Paid", category: "paid" },
+  { name: "Shipping", category: "paid" },
+  { name: "Delivery Scheduled", category: "paid" },
   { name: "Tomi Needs To Review", category: "uncertain" },
-  { name: "Ask for Review", category: "momentum" },
+  { name: "Ask for Review", category: "paid" },
   { name: "Client Nurture", category: "uncertain" },
-  { name: "Paid Need to finalize", category: "momentum" },
+  { name: "Paid Need to finalize", category: "paid" },
   { name: "Follow Up Issue", category: "negative" },
   { name: "Paid Holding", category: "uncertain" },
   { name: "Paid Lost Contact", category: "negative" },
@@ -55,77 +59,13 @@ const stages = [
   { name: "Client Delayed 2 Weeks", category: "negative" },
   { name: "Client Delayed Other", category: "negative" },
   { name: "Manually Added", category: "uncertain" },
-  { name: "Insta-Pay", category: "momentum" },
+  { name: "Insta-Pay", category: "paid" },
   { name: "Long Term Order", category: "uncertain" },
   { name: "Lost", category: "negative" },
   { name: "No Show", category: "negative" },
   { name: "Unqualified", category: "negative" },
   { name: "Refunded", category: "negative" },
   { name: "Canceled", category: "negative" },
-];
-
-// Mock data for demonstration
-const deals = [
-  {
-    id: 1,
-    name: "Brandon Smith",
-    stage: "Paid",
-    submittedDate: "2024-07-01",
-    lastUpdateDate: "2024-07-12",
-    city: "Los Angeles",
-    state: "CA",
-    make: "Honda",
-    model: "CR-V",
-    paymentType: "Lease",
-  },
-  {
-    id: 2,
-    name: "Emily Johnson",
-    stage: "Actively Negotiating",
-    submittedDate: "2024-07-03",
-    lastUpdateDate: "2024-10-10",
-    city: "New York",
-    state: "NY",
-    make: "Toyota",
-    model: "Camry",
-    paymentType: "Finance",
-  },
-  {
-    id: 3,
-    name: "Michael Brown",
-    stage: "Contacted",
-    submittedDate: "2024-07-05",
-    lastUpdateDate: "2024-07-05",
-    city: "Chicago",
-    state: "IL",
-    make: "Ford",
-    model: "F-150",
-    paymentType: "Cash",
-  },
-  {
-    id: 4,
-    name: "Sarah Davis",
-    stage: "Proposal Sent",
-    submittedDate: "2024-06-28",
-    lastUpdateDate: "2024-10-11",
-    city: "Houston",
-    state: "TX",
-    make: "Chevrolet",
-    model: "Equinox",
-    paymentType: "Lease",
-  },
-  {
-    id: 5,
-    name: "David Wilson",
-    stage: "Follow Up",
-    submittedDate: "2024-07-02",
-    lastUpdateDate: "2024-10-09",
-    city: "Phoenix",
-    state: "AZ",
-    make: "Nissan",
-    model: "Altima",
-    paymentType: "Finance",
-  },
 ];
 
 const formatDate = (dateString: string) => {
@@ -159,7 +99,7 @@ const getStageColor = (stageName: string) => {
       return "bg-red-100 text-red-800 border-red-300";
     case "uncertain":
       return "bg-gray-100 text-gray-800 border-gray-300";
-    case "momentum":
+    case "paid":
       return "bg-green-100 text-green-800 border-green-300";
     default:
       return "bg-blue-100 text-blue-800 border-blue-300";
@@ -168,7 +108,11 @@ const getStageColor = (stageName: string) => {
 
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredDeals, setFilteredDeals] = useState(deals);
+  const [filteredDeals, setFilteredDeals] = useState<Negotiation[] | undefined>(
+    []
+  );
+  const router = useRouter();
+
   const [filters, setFilters] = useState({
     stages: [] as string[],
     makes: [] as string[],
@@ -200,28 +144,60 @@ export default function DealList() {
     });
   };
 
+  const fetchAllNegotiation = async () => {
+    try {
+      const negotiationQuery = query(collection(db, "negotiations"));
+      const querySnapshot = await getDocs(negotiationQuery);
+
+      const negotiationData = querySnapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            negotiations_Client: data.negotiations_Client,
+            negotiations_Brand: data.negotiations_Brand,
+            negotiations_Model: data.negotiations_Model,
+            negotiations_Invoice_Status: data.negotiations_Invoice_Status,
+            negotiations_Created: data.negotiations_Created,
+            lastUpdated: data.negotiations_Status_Updated, // Assuming this is a Firestore Timestamp
+          };
+        })
+        .filter(
+          (negotiation) =>
+            negotiation.negotiations_Client &&
+            negotiation.negotiations_Brand &&
+            negotiation.negotiations_Model &&
+            negotiation.negotiations_Invoice_Status
+        ); // Filter to include only those with all specified attributes
+
+      return negotiationData; // Return the filtered data
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const applyFilters = (term: string, currentFilters: typeof filters) => {
-    const filtered = deals.filter(
+    const filtered = filteredDeals?.filter(
       (deal) =>
-        (deal.name.toLowerCase().includes(term.toLowerCase()) ||
-          deal.stage.toLowerCase().includes(term.toLowerCase()) ||
-          deal.city.toLowerCase().includes(term.toLowerCase()) ||
-          deal.state.toLowerCase().includes(term.toLowerCase())) &&
-        (currentFilters.stages.length === 0 ||
-          currentFilters.stages.includes(deal.stage)) &&
-        (currentFilters.makes.length === 0 ||
-          currentFilters.makes.includes(deal.make)) &&
-        (currentFilters.models.length === 0 ||
-          currentFilters.models.includes(deal.model)) &&
-        (currentFilters.paymentTypes.length === 0 ||
-          currentFilters.paymentTypes.includes(deal.paymentType))
+        deal.negotiations_Client?.toLowerCase().includes(term.toLowerCase()) ||
+        deal.negotiations_Invoice_Status
+          ?.toLowerCase()
+          .includes(term.toLowerCase()) ||
+        ((currentFilters.makes.length === 0 ||
+          currentFilters.makes.includes(deal.negotiations_Brand ?? "")) &&
+          (currentFilters.models.length === 0 ||
+            currentFilters.models.includes(deal.negotiations_Model ?? "")) &&
+          (currentFilters.paymentTypes.length === 0 ||
+            currentFilters.paymentTypes.includes(
+              deal.negotiations_Invoice_Status ?? ""
+            )))
     );
     setFilteredDeals(filtered);
   };
 
-  const handleStageChange = (dealId: number, newStage: string) => {
-    const updatedDeals = filteredDeals.map((deal) =>
-      deal.id === dealId
+  const handleStageChange = (dealId: string, newStage: string) => {
+    const updatedDeals = filteredDeals?.map((deal) =>
+      deal?.id ?? "" === dealId
         ? {
             ...deal,
             stage: newStage,
@@ -231,6 +207,10 @@ export default function DealList() {
     );
     setFilteredDeals(updatedDeals);
   };
+
+  useEffect(() => {
+    fetchAllNegotiation().then((res) => setFilteredDeals(res));
+  }, []);
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
@@ -310,13 +290,17 @@ export default function DealList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="w-56">
                         {Array.from(
-                          new Set(deals.map((deal) => deal.make))
-                        ).map((make) => (
+                          new Set(
+                            filteredDeals?.map(
+                              (deal) => deal.negotiations_Brand
+                            )
+                          )
+                        ).map((make: any) => (
                           <DropdownMenuCheckboxItem
                             key={make}
-                            checked={filters.makes.includes(make)}
+                            checked={filters.makes.includes(make ?? "")}
                             onCheckedChange={() =>
-                              handleFilterChange("makes", make)
+                              handleFilterChange("makes", make ?? "")
                             }
                           >
                             {make}
@@ -324,23 +308,6 @@ export default function DealList() {
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Payment Types</h4>
-                    {Array.from(
-                      new Set(deals.map((deal) => deal.paymentType))
-                    ).map((type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`payment-${type}`}
-                          checked={filters.paymentTypes.includes(type)}
-                          onCheckedChange={() =>
-                            handleFilterChange("paymentTypes", type)
-                          }
-                        />
-                        <Label htmlFor={`payment-${type}`}>{type}</Label>
-                      </div>
-                    ))}
                   </div>
                 </div>
               </PopoverContent>
@@ -357,96 +324,129 @@ export default function DealList() {
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {filteredDeals.map((deal) => (
-                <TableRow key={deal.id}>
-                  <TableCell className="font-medium">
-                    <div>
-                      <span>{deal.name}</span>
-                      <div className="text-sm text-gray-400">
-                        {deal.city}, {deal.state}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {deal.make} {deal.model}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Badge
-                          variant="outline"
-                          className={`cursor-pointer ${getStageColor(
-                            deal.stage
-                          )}`}
-                        >
-                          {deal.stage}
-                        </Badge>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56">
-                        <DropdownMenuLabel>Change Stage</DropdownMenuLabel>
-                        {stages.map((stage) => (
-                          <DropdownMenuItem
-                            key={stage.name}
-                            onClick={() =>
-                              handleStageChange(deal.id, stage.name)
-                            }
+            {filteredDeals?.length ? (
+              <TableBody>
+                {filteredDeals?.map((deal) => (
+                  <TableRow
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/team-profile?id=${deal.id}`)}
+                    key={deal.id}
+                  >
+                    <TableCell className="font-medium max-w-[220px]">
+                      <span>{deal.negotiations_Client}</span>
+                    </TableCell>
+                    <TableCell className="max-w-[180px]">
+                      {deal.negotiations_Brand} {deal.negotiations_Model}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Badge
+                            variant="outline"
+                            className={`cursor-pointer ${getStageColor(
+                              deal.negotiations_Invoice_Status ?? ""
+                            )}`}
                           >
-                            {stage.name}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-
-                  <TableCell>
-                    <div>{formatDate(deal.submittedDate)}</div>
-                    <div className="text-xs text-gray-400">
-                      {getElapsedTime(deal.submittedDate, NOW)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>{formatDate(deal.lastUpdateDate)}</div>
-                    <div className="text-xs text-gray-400">
-                      {getElapsedTime(deal.lastUpdateDate, NOW)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <Dialog>
-                          <DialogTrigger asChild>
+                            {deal.negotiations_Invoice_Status}
+                          </Badge>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                          <DropdownMenuLabel>Change Stage</DropdownMenuLabel>
+                          {stages.map((stage) => (
                             <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()}
+                              key={stage.name}
+                              onClick={() =>
+                                handleStageChange(deal.id, stage.name)
+                              }
                             >
-                              View Details
+                              {stage.name}
                             </DropdownMenuItem>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-7xl">
-                            <ProjectProfile
-                              name="Test"
-                              description="Text Description"
-                              status="Active"
-                              manager={{ name: "Test", avatar: "Test Avatar" }}
-                              team={[{ name: "Test", avatar: "Test Avatar" }]}
-                              startDate="2024-10-21"
-                              endDate="2027-10-21"
-                            />
-                          </DialogContent>
-                        </Dialog>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+
+                    <TableCell>
+                      <div>{formatDate(deal.negotiations_Created ?? "")}</div>
+                      <div className="text-xs text-gray-400">
+                        {getElapsedTime(deal.negotiations_Created ?? "", NOW)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>{formatDate(deal.lastUpdated)}</div>
+                      <div className="text-xs text-gray-400">
+                        {getElapsedTime(deal.lastUpdated, NOW)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                View Details
+                              </DropdownMenuItem>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-7xl">
+                              <ProjectProfile
+                                name={deal.negotiations_Client ?? ""}
+                                description="Text Description"
+                                status={deal.negotiations_Invoice_Status ?? ""}
+                                manager={{
+                                  name: "Test",
+                                  avatar: "Test Avatar",
+                                }}
+                                team={[{ name: "Test", avatar: "Test Avatar" }]}
+                                startDate={formatDate(
+                                  deal.negotiations_Created ?? ""
+                                )}
+                                endDate={formatDate(deal.lastUpdated ?? "")}
+                              />
+                            </DialogContent>
+                          </Dialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            ) : (
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    <svg
+                      className="animate-spin h-8 w-8 text-gray-400 mx-auto"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                      ></path>
+                    </svg>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
+              </TableBody>
+            )}
           </Table>
         </CardContent>
       </Card>

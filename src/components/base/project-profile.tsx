@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface ProjectProfileProps {
   name: string;
   description: string;
-  status: "Active" | "Completed" | "On Hold";
+  status: string;
   manager: {
     name: string;
     avatar: string;
