@@ -48,8 +48,8 @@ export default function CompleteSignIn() {
       const { email: parsedEmail } = parsedData;
 
       const q = query(
-        collection(db, "Dealers"),
-        where("YourEmail", "==", parsedEmail)
+        collection(db, "users"),
+        where("email", "==", parsedEmail)
       );
       const querySnapshot = await getDocs(q);
       const userData = querySnapshot.docs[0].data();
@@ -57,23 +57,32 @@ export default function CompleteSignIn() {
         email: userData.YourEmail,
         phone: userData.SalesPersonPhone,
         id: userData.id,
-        displayName: userData.SalesPersonName,
+        displayName: userData.name,
+        privilege: userData.privilege,
         brand: userData.Brand,
-        lastLogin: userData.lastLogin ? new Date(userData.lastLogin) : "",
+        profilePic: userData.profile_pic,
+        dealerId: userData.dealer_id[0],
+        // lastLogin: userData.lastLogin ? new Date(userData.lastLogin) : "",
       };
       localStorage.setItem("user", JSON.stringify(user));
       toast({
         title: "Logged in",
         //   variant: "destructive",
       });
-      if (user) {
-        const date = new Date();
-        const dealerRef = doc(db, "Dealers", user.id);
-        await updateDoc(dealerRef, {
-          lastLogin: date.toISOString(),
-        });
+      // if (user) {
+      //   const date = new Date();
+      //   const dealerRef = doc(db, "Dealers", user.id);
+      //   await updateDoc(dealerRef, {
+      //     lastLogin: date.toISOString(),
+      //   });
+      // }
+      if (user.privilege === "Dealer") {
+        router.push("/bid"); // Redirect to the app/dashboard after successful login
+      } else if (user.privilege === "Client") {
+        router.push("/client"); // Redirect to the app/dashboard after successful login
+      } else {
+        router.push("/team-dashboard"); // Redirect to the app/dashboard after successful login
       }
-      router.push("/bid"); // Redirect to the app/dashboard after successful login
     } catch (error) {
       setMessage("Failed to sign in. Please try again.");
     }
@@ -87,6 +96,9 @@ export default function CompleteSignIn() {
   };
 
   useEffect(() => {
+    const user = localStorage.getItem("user");
+    let parsedUser;
+    if (user) parsedUser = JSON.parse(user ?? "");
     getAuth().onAuthStateChanged(function (user) {
       if (user) {
         setEmail(user.email ?? "");
@@ -96,7 +108,17 @@ export default function CompleteSignIn() {
         localStorage.setItem("refreshToken", user.refreshToken);
       }
     });
-    if (localStorage.getItem("token")) router.push("/bid");
+    if (localStorage.getItem("token")) {
+      if (parsedUser && parsedUser.privilege) {
+        if (parsedUser.privilege === "Dealer") {
+          router.push("/bid"); // Redirect to the app/dashboard after successful login
+        } else if (parsedUser.privilege === "Client") {
+          router.push("/client"); // Redirect to the app/dashboard after successful login
+        } else {
+          router.push("/team-dashboard"); // Redirect to the app/dashboard after successful login
+        }
+      }
+    }
   }, []);
 
   useEffect(() => {
