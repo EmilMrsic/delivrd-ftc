@@ -125,9 +125,11 @@ export default function ProjectProfile() {
     const user = localStorage.getItem("user");
     setUserData(JSON.parse(user ?? ""));
   }, []);
+
   useEffect(() => {
     handleSetDealNegotiatorData(userData?.deal_negotiator[0] ?? "");
   }, [userData]);
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -404,7 +406,8 @@ export default function ProjectProfile() {
                 <Avatar className="h-16 w-16">
                   <AvatarImage
                     src={
-                      dealNegotiatorData.profile_pic ??
+                      (dealNegotiatorData?.profile_pic &&
+                        dealNegotiatorData?.profile_pic) ??
                       `/placeholder.svg?height=60&width=60`
                     }
                     alt="Staff"
@@ -413,10 +416,10 @@ export default function ProjectProfile() {
                 </Avatar>
                 <div>
                   <div className="font-semibold text-lg text-[#202125]">
-                    {dealNegotiatorData.name}
+                    {dealNegotiatorData?.name ?? ""}
                   </div>
                   <div className="text-[#202125]">
-                    {dealNegotiatorData.role}
+                    {dealNegotiatorData.role ?? ""}
                   </div>
                   <div className="mt-1 text-sm text-[#202125]">
                     <p>Contact Delivrd (text messages preferred)</p>
@@ -441,7 +444,7 @@ export default function ProjectProfile() {
                       <div className="aspect-w-16 aspect-h-9">
                         <iframe
                           src={
-                            dealNegotiatorData.video_link ??
+                            dealNegotiatorData?.video_link ??
                             "https://www.youtube.com/embed/dQw4w9WgXcQ"
                           }
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
