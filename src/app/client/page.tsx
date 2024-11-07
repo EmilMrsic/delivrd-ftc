@@ -22,10 +22,13 @@ import {
   Share2,
 } from "lucide-react";
 import { IUser } from "@/types";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/firebase/config";
 
 export default function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [dealNegotiatorData, setDealNegotiatorData] = useState<any>();
   const [userData, setUserData] = useState<IUser>();
   const dealDetailsRef = useRef(null);
   const [clientDetails] = useState({
@@ -83,6 +86,13 @@ export default function ProjectProfile() {
     console.log("Sharing deal progress...");
   };
 
+  const handleSetDealNegotiatorData = async (id: string) => {
+    const q = query(collection(db, "team delivrd"), where("id", "==", id));
+    const querySnapshot = await getDocs(q);
+    const dealNegotiatorData = querySnapshot.docs[0]?.data();
+    setDealNegotiatorData(dealNegotiatorData);
+  };
+
   const offerDetails = {
     "Honda World": {
       images: [
@@ -115,7 +125,9 @@ export default function ProjectProfile() {
     const user = localStorage.getItem("user");
     setUserData(JSON.parse(user ?? ""));
   }, []);
-
+  useEffect(() => {
+    handleSetDealNegotiatorData(userData?.deal_negotiator[0] ?? "");
+  }, [userData]);
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -391,16 +403,21 @@ export default function ProjectProfile() {
               <div className="flex items-center space-x-4 mt-2">
                 <Avatar className="h-16 w-16">
                   <AvatarImage
-                    src="/placeholder.svg?height=60&width=60"
+                    src={
+                      dealNegotiatorData.profile_pic ??
+                      `/placeholder.svg?height=60&width=60`
+                    }
                     alt="Staff"
                   />
                   <AvatarFallback>TO</AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="font-semibold text-lg text-[#202125]">
-                    Troy Paul
+                    {dealNegotiatorData.name}
                   </div>
-                  <div className="text-[#202125]">Deal Negotiator</div>
+                  <div className="text-[#202125]">
+                    {dealNegotiatorData.role}
+                  </div>
                   <div className="mt-1 text-sm text-[#202125]">
                     <p>Contact Delivrd (text messages preferred)</p>
                     <p className="font-semibold">(386) 270-3530</p>
@@ -423,30 +440,10 @@ export default function ProjectProfile() {
                       </DialogHeader>
                       <div className="aspect-w-16 aspect-h-9">
                         <iframe
-                          src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        ></iframe>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div className="cursor-pointer">
-                        <img
-                          src="/placeholder.svg?height=50&width=70"
-                          alt="Video 2 Thumbnail"
-                          className="rounded-md"
-                        />
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Video 2</DialogTitle>
-                      </DialogHeader>
-                      <div className="aspect-w-16 aspect-h-9">
-                        <iframe
-                          src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                          src={
+                            dealNegotiatorData.video_link ??
+                            "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                          }
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe>
