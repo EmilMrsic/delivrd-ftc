@@ -56,18 +56,18 @@ const LoginCard = () => {
       const { email: parsedEmail } = parsedData;
 
       const q = query(
-        collection(db, "Dealers"),
-        where("YourEmail", "==", parsedEmail)
+        collection(db, "users"),
+        where("email", "==", parsedEmail)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
         const user = {
-          email: userData.YourEmail,
-          phone: userData.SalesPersonPhone,
-          id: userData.id,
-          displayName: userData.SalesPersonName,
-          brand: userData.Brand,
+          email: userData.email,
+          // phone: userData.SalesPersonPhone,
+          // id: userData.id,
+          // displayName: userData.SalesPersonName,
+          // brand: userData.Brand,
         };
 
         sendLoginEmail(user.email);

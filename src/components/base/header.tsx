@@ -46,9 +46,7 @@ const Header: FC<IHeaderProps> = ({ user }) => {
             </span>
             <div className="flex items-center">
               <span className="text-white text-xs">
-                {user
-                  ? user.displayName + "  |" || user.email
-                  : "Not logged in"}
+                {user ? user.name + "  |" || user.email : "Not logged in"}
               </span>
               <Button
                 onClick={handleLogout}
