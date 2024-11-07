@@ -53,35 +53,19 @@ export default function CompleteSignIn() {
       );
       const querySnapshot = await getDocs(q);
       const userData = querySnapshot.docs[0].data();
-      const user = {
-        email: userData.YourEmail,
-        phone: userData.SalesPersonPhone,
-        id: userData.id,
-        displayName: userData.name,
-        privilege: userData.privilege,
-        brand: userData.Brand,
-        profilePic: userData.profile_pic,
-        dealerId: userData.dealer_id[0],
-        // lastLogin: userData.lastLogin ? new Date(userData.lastLogin) : "",
-      };
-      localStorage.setItem("user", JSON.stringify(user));
+
+      localStorage.setItem("user", JSON.stringify(userData));
       toast({
         title: "Logged in",
         //   variant: "destructive",
       });
-      // if (user) {
-      //   const date = new Date();
-      //   const dealerRef = doc(db, "Dealers", user.id);
-      //   await updateDoc(dealerRef, {
-      //     lastLogin: date.toISOString(),
-      //   });
-      // }
-      if (user.privilege === "Dealer") {
-        router.push("/bid"); // Redirect to the app/dashboard after successful login
-      } else if (user.privilege === "Client") {
-        router.push("/client"); // Redirect to the app/dashboard after successful login
+
+      if (userData.privilege[0] === "Dealer") {
+        router.push("/bid");
+      } else if (userData.privilege[0] === "Client") {
+        router.push("/client");
       } else {
-        router.push("/team-dashboard"); // Redirect to the app/dashboard after successful login
+        router.push("/team-dashboard");
       }
     } catch (error) {
       setMessage("Failed to sign in. Please try again.");

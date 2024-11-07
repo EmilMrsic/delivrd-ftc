@@ -33,7 +33,6 @@ import {
 import { useSearchParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { parseColorOptions } from "@/lib/utils";
 
 interface VoteState {
   [key: string]: number; // Maps dealership names to votes (1 for upvote, -1 for downvote)

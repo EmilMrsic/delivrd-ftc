@@ -21,10 +21,12 @@ import {
   Mail,
   Share2,
 } from "lucide-react";
+import { IUser } from "@/types";
 
 export default function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [userData, setUserData] = useState<IUser>();
   const dealDetailsRef = useRef(null);
   const [clientDetails] = useState({
     phone: "(555) 123-4567",
@@ -109,6 +111,11 @@ export default function ProjectProfile() {
     },
   };
 
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    setUserData(JSON.parse(user ?? ""));
+  }, []);
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -122,7 +129,7 @@ export default function ProjectProfile() {
         </div>
         <div className="text-right">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-            Brandon Smith
+            {userData?.name}
           </h1>
         </div>
       </div>
@@ -132,7 +139,7 @@ export default function ProjectProfile() {
           <div className="flex justify-between items-center">
             <span className="font-semibold flex items-center">
               <Car className="mr-2 h-4 w-4" />
-              {dealDetails.make} {dealDetails.model}
+              {userData?.brand} {userData?.model[0]}
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
@@ -153,7 +160,7 @@ export default function ProjectProfile() {
                   clipRule="evenodd"
                 />
               </svg>
-              {dealDetails.desiredColors.exterior}
+              {userData?.color_options.exterior.preferred}
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
@@ -170,7 +177,7 @@ export default function ProjectProfile() {
               >
                 <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
               </svg>
-              Trade In: {dealDetails.tradeIn}
+              Trade In: {userData?.trade_details}
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
@@ -180,7 +187,7 @@ export default function ProjectProfile() {
           <div className="flex justify-between items-center text-sm">
             <span>
               <Car className="inline mr-1 h-4 w-4" />
-              Drivetrain: {dealDetails.drivetrain}
+              Drivetrain: {userData?.drive_train}
             </span>
           </div>
         </div>
@@ -249,7 +256,7 @@ export default function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {dealDetails.features}
+                    {userData?.trim_and_package_options}
                   </p>
                 </div>
                 <Separator className="my-4" />
@@ -270,7 +277,7 @@ export default function ProjectProfile() {
                     </svg>
                     <span>
                       <strong>Desired Exterior:</strong>{" "}
-                      {dealDetails.desiredColors.exterior}
+                      {userData?.color_options.exterior.preferred}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
@@ -288,21 +295,21 @@ export default function ProjectProfile() {
                     </svg>
                     <span>
                       <strong>Desired Interior:</strong>{" "}
-                      {dealDetails.desiredColors.interior}
+                      {userData?.color_options.interior.preferred}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <X className="h-5 w-5 text-red-500" />
                     <span>
                       <strong>Exterior Deal Breakers:</strong>{" "}
-                      {dealDetails.dealBreakers.exterior}
+                      {userData?.color_options.exterior.not_preferred}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <X className="h-5 w-5 text-red-500" />
                     <span>
                       <strong>Interior Deal Breakers:</strong>{" "}
-                      {dealDetails.dealBreakers.interior}
+                      {userData?.color_options.interior.not_preferred}
                     </span>
                   </div>
                 </div>
@@ -321,11 +328,11 @@ export default function ProjectProfile() {
                 <div className="space-y-2">
                   <div className="flex  items-center space-x-2 text-[#202125]">
                     <Phone className="h-5 w-5 text-[#0989E5]" />
-                    <span>Phone: {clientDetails.phone}</span>
+                    <span>Phone: {userData?.phone}</span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <Mail className="h-5 w-5 text-[#0989E5]" />
-                    <span>Email: {clientDetails.email}</span>
+                    <span>Email: {userData?.email}</span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <svg
@@ -361,7 +368,7 @@ export default function ProjectProfile() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>City: {clientDetails.city}</span>
+                    <span>City: {userData?.city}</span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <svg
@@ -376,7 +383,7 @@ export default function ProjectProfile() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>State: {clientDetails.state}</span>
+                    <span>State: {userData?.state}</span>
                   </div>
                 </div>
               </div>
@@ -533,19 +540,19 @@ export default function ProjectProfile() {
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <Car className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Condition:</strong> {dealDetails.condition}
+                    <strong>Condition:</strong> {userData?.condition}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <Car className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Vehicle of Interest:</strong> {dealDetails.make}
+                    <strong>Vehicle of Interest:</strong> {userData?.brand}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <Car className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Model:</strong> {dealDetails.model}
+                    <strong>Model:</strong> {userData?.model[0]}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
@@ -562,13 +569,13 @@ export default function ProjectProfile() {
                     />
                   </svg>
                   <span>
-                    <strong>Trim:</strong> {dealDetails.trim}
+                    <strong>Trim:</strong> {userData?.trim_and_package_options}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <Car className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Drivetrain:</strong> {dealDetails.drivetrain}
+                    <strong>Drivetrain:</strong> {userData?.drive_train}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
@@ -581,7 +588,7 @@ export default function ProjectProfile() {
                     <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
                   </svg>
                   <span>
-                    <strong>Trade In:</strong> {dealDetails.tradeIn}
+                    <strong>Trade In:</strong> {userData?.trade_details}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
@@ -629,7 +636,7 @@ export default function ProjectProfile() {
                     </svg>
                     <span>
                       <strong>Desired Exterior:</strong>{" "}
-                      {dealDetails.desiredColors.exterior}
+                      {userData?.color_options.exterior.preferred}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
@@ -647,21 +654,21 @@ export default function ProjectProfile() {
                     </svg>
                     <span>
                       <strong>Desired Interior:</strong>{" "}
-                      {dealDetails.desiredColors.interior}
+                      {userData?.color_options.interior.preferred}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <X className="h-5 w-5 text-red-500" />
                     <span>
                       <strong>Exterior Deal Breakers:</strong>{" "}
-                      {dealDetails.dealBreakers.exterior}
+                      {userData?.color_options.exterior.not_preferred}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <X className="h-5 w-5 text-red-500" />
                     <span>
                       <strong>Interior Deal Breakers:</strong>{" "}
-                      {dealDetails.dealBreakers.interior}
+                      {userData?.color_options.interior.not_preferred}
                     </span>
                   </div>
                 </div>
