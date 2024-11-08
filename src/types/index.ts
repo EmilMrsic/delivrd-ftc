@@ -68,6 +68,28 @@ export interface IUser {
   invoice_status: string;
 }
 
+export interface DealNegotiator {
+  activeDeals: string[];
+  deals: string[];
+  email: string;
+  id: string;
+  name: string;
+  profile_pic: string;
+  role: string;
+  video_link: string[];
+}
+
+export interface IncomingBid {
+  clientId: string;
+  comments: string;
+  dealerId: string;
+  discountPrice: string;
+  files: string[];
+  inventoryStatus: string;
+  price: number;
+  timestamp: string;
+}
+
 export type Color = {
   name: string;
   preferred: boolean;

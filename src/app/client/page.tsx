@@ -4,13 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
   Phone,
   User,
@@ -21,14 +15,22 @@ import {
   Mail,
   Share2,
 } from "lucide-react";
-import { IUser } from "@/types";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { DealNegotiator, IncomingBid, IUser } from "@/types";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 
 export default function ProjectProfile() {
-  const [openDialog, setOpenDialog] = useState<string | null>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
-  const [dealNegotiatorData, setDealNegotiatorData] = useState<any>();
+  const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
+  const [dealNegotiatorData, setDealNegotiatorData] =
+    useState<DealNegotiator>();
   const [userData, setUserData] = useState<IUser>();
   const dealDetailsRef = useRef(null);
   const [clientDetails] = useState({
@@ -62,6 +64,15 @@ export default function ProjectProfile() {
       "Leather seats, panoramic sunroof, advanced safety features including lane departure warning and adaptive cruise control. The customer is particularly interested in the fuel efficiency of the hybrid model and the spacious cargo area for family trips.",
   });
 
+  const isVimeoLink = (url: string): boolean => {
+    return url.includes("vimeo.com");
+  };
+
+  // Function to check if a URL is a YouTube link
+  const isYouTubeLink = (url: string): boolean => {
+    return url.includes("youtube.com") || url.includes("youtu.be");
+  };
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -82,7 +93,6 @@ export default function ProjectProfile() {
   }, []);
 
   const shareProgress = () => {
-    // Implement share progress logic here
     console.log("Sharing deal progress...");
   };
 
@@ -90,35 +100,43 @@ export default function ProjectProfile() {
     const q = query(collection(db, "team delivrd"), where("id", "==", id));
     const querySnapshot = await getDocs(q);
     const dealNegotiatorData = querySnapshot.docs[0]?.data();
-    setDealNegotiatorData(dealNegotiatorData);
+    setDealNegotiatorData(dealNegotiatorData as DealNegotiator);
   };
+  const fetchNegotiationsAndBids = async () => {
+    if (!userData?.negotiation_id?.length) return;
 
-  const offerDetails = {
-    "Honda World": {
-      images: [
-        "/placeholder.svg?height=200&width=300",
-        "/placeholder.svg?height=200&width=300",
-        "/placeholder.svg?height=200&width=300",
-      ],
-      details:
-        "This Honda CR-V EX-L AWD is in excellent condition with low mileage. It comes with a comprehensive warranty package and free maintenance for the first year. The leather interior is well-maintained, and all safety features are up-to-date. This offer represents the best value for the client's budget.",
-    },
-    "AutoNation Honda": {
-      images: [
-        "/placeholder.svg?height=200&width=300",
-        "/placeholder.svg?height=200&width=300",
-      ],
-      details:
-        "The AutoNation Honda offer includes a slightly higher-trim CR-V with additional features like a panoramic sunroof and upgraded sound system. While it's slightly above budget, the extra features might justify the cost for some clients. The dealership is also offering an extended warranty at a discounted rate.",
-    },
-    "Honda of Downtown": {
-      images: [
-        "/placeholder.svg?height=200&width=300",
-        "/placeholder.svg?height=200&width=300",
-      ],
-      details:
-        "This offer from Honda of Downtown is for a brand new CR-V with all the latest features. While it's above the client's budget, they're including several premium add-ons like all-weather floor mats, a cargo cover, and a roof rack. The higher price also comes with a more comprehensive warranty package.",
-    },
+    const allIncomingBids: IncomingBid[] = [];
+
+    try {
+      for (const negotiationId of userData.negotiation_id) {
+        const negotiationRef = doc(db, "negotiations", negotiationId);
+        const negotiationSnap = await getDoc(negotiationRef);
+
+        if (negotiationSnap.exists()) {
+          const negotiationData = negotiationSnap.data() as any;
+          const incomingBidsArray = negotiationData.incoming_bids;
+
+          if (
+            Array.isArray(incomingBidsArray) &&
+            incomingBidsArray.length > 0
+          ) {
+            const incomingBidsQuery = query(
+              collection(db, "Incoming Bids"),
+              where("bid_id", "in", incomingBidsArray)
+            );
+
+            const querySnapshot = await getDocs(incomingBidsQuery);
+            querySnapshot.forEach((doc) => {
+              allIncomingBids.push(doc.data() as IncomingBid);
+            });
+          }
+        }
+      }
+
+      setIncomingBids(allIncomingBids);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
 
   useEffect(() => {
@@ -129,6 +147,10 @@ export default function ProjectProfile() {
   useEffect(() => {
     handleSetDealNegotiatorData(userData?.deal_negotiator[0] ?? "");
   }, [userData]);
+
+  useEffect(() => {
+    fetchNegotiationsAndBids();
+  }, [dealNegotiatorData]);
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
@@ -427,32 +449,40 @@ export default function ProjectProfile() {
                   </div>
                 </div>
                 <div className="flex space-x-2 ml-auto">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div className="cursor-pointer">
-                        <img
-                          src="/placeholder.svg?height=50&width=70"
-                          alt="Video 1 Thumbnail"
-                          className="rounded-md"
-                        />
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Video 1</DialogTitle>
-                      </DialogHeader>
-                      <div className="aspect-w-16 aspect-h-9">
-                        <iframe
-                          src={
-                            dealNegotiatorData?.video_link ??
-                            "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                          }
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        ></iframe>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <>
+                    {dealNegotiatorData?.video_link &&
+                      dealNegotiatorData.video_link.map((item, index) => (
+                        <Dialog key={index}>
+                          <DialogTrigger asChild>
+                            <div className="relative w-full h-[400px]">
+                              {isVimeoLink(item) ? (
+                                <iframe
+                                  src={`https://player.vimeo.com/video/${
+                                    item.split("/")[3]
+                                  }`}
+                                  width="100%"
+                                  height="100%"
+                                  frameBorder="0"
+                                  allow="autoplay; fullscreen"
+                                />
+                              ) : isYouTubeLink(item) ? (
+                                <iframe
+                                  src={`https://www.youtube.com/embed/${
+                                    item.split("v=")[1]?.split("&")[0]
+                                  }`}
+                                  width="100%"
+                                  height="100%"
+                                  frameBorder="0"
+                                  allow="autoplay; fullscreen"
+                                />
+                              ) : (
+                                <p>Video not available</p>
+                              )}
+                            </div>
+                          </DialogTrigger>
+                        </Dialog>
+                      ))}
+                  </>
                 </div>
               </div>
             </CardContent>
@@ -466,63 +496,43 @@ export default function ProjectProfile() {
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-8">
-                {Object.entries(offerDetails || {}).map(
-                  ([dealership, details]) => (
-                    <div
-                      key={dealership}
-                      className="border-l-4 border-l-blue-500 pl-4 pb-6"
-                    >
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-lg font-semibold text-[#202125]">
-                          {dealership} Offer
-                        </h3>
-                      </div>
-                      <time className="block mb-2 text-sm text-[#202125]">
-                        July 12, 2023
-                      </time>
-                      <p className="text-[#202125] mb-4">
-                        Best offer received: $35,500, 36-month lease, $450/month
-                      </p>
-                      <div className="flex space-x-2 mb-4">
-                        <Dialog
-                          open={openDialog === dealership}
-                          onOpenChange={(isOpen: boolean) =>
-                            setOpenDialog(isOpen ? dealership : null)
-                          }
-                        >
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <FileText className="mr-2 h-4 w-4" />
-                              View Offer
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                              <DialogTitle>
-                                {dealership} Offer Details
-                              </DialogTitle>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                              <div className="grid grid-cols-3 gap-4">
-                                {details.images.map((src, index) => (
-                                  <img
-                                    key={index}
-                                    src={src}
-                                    alt={`Offer image ${index + 1}`}
-                                    className="w-full h-auto rounded-lg"
-                                  />
-                                ))}
-                              </div>
-                              <p className="text-sm text-gray-500">
-                                {details.details}
-                              </p>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
+                {incomingBids.map((item, index) => (
+                  <div
+                    key={index}
+                    className="border-l-4 border-l-blue-500 pl-4 pb-6"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-lg font-semibold text-[#202125]">
+                        Honda Offer
+                      </h3>
                     </div>
-                  )
-                )}
+                    <time className="block mb-2 text-sm text-[#202125]">
+                      {item?.timestamp}
+                    </time>
+                    <p className="text-[#202125] mb-4">
+                      {item?.comments.length
+                        ? item?.comments
+                        : "No comments available"}
+                    </p>
+                    <div className="flex space-x-2 mb-4">
+                      {item.files.length ? (
+                        item.files.map((file, index) => (
+                          <Button
+                            key={index}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(file, "_blank")}
+                          >
+                            <FileText className="mr-2 h-4 w-4" />
+                            {"View Offer" + " " + Number(index + 1)}
+                          </Button>
+                        ))
+                      ) : (
+                        <>No offers available</>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
