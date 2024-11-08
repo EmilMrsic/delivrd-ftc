@@ -419,7 +419,7 @@ export default function ProjectProfile() {
                     {dealNegotiatorData?.name ?? ""}
                   </div>
                   <div className="text-[#202125]">
-                    {dealNegotiatorData.role ?? ""}
+                    {dealNegotiatorData?.role ?? ""}
                   </div>
                   <div className="mt-1 text-sm text-[#202125]">
                     <p>Contact Delivrd (text messages preferred)</p>
