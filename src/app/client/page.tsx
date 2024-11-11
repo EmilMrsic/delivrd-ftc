@@ -25,12 +25,18 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { formatDate } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 export default function ProjectProfile() {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
+  const [dealerData, setDealerData] = useState<any>();
   const [dealNegotiatorData, setDealNegotiatorData] =
     useState<DealNegotiator>();
+  const params = useSearchParams();
+  const id = params.get("id");
   const [userData, setUserData] = useState<IUser>();
   const dealDetailsRef = useRef(null);
   const [clientDetails] = useState({
@@ -93,7 +99,12 @@ export default function ProjectProfile() {
   }, []);
 
   const shareProgress = () => {
-    console.log("Sharing deal progress...");
+    navigator.clipboard.writeText(`${window.location.href}/${userData?.id}`);
+    toast({
+      title: "Link copied to clipboard",
+
+      //   variant: "destructive",
+    });
   };
 
   const handleSetDealNegotiatorData = async (id: string) => {
@@ -140,9 +151,19 @@ export default function ProjectProfile() {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    setUserData(JSON.parse(user ?? ""));
-  }, []);
+    if (!id) {
+      const user = localStorage.getItem("user");
+      setUserData(JSON.parse(user ?? ""));
+    } else {
+      const fetchUserData = async () => {
+        const q = query(collection(db, "users"), where("id", "==", id));
+        const querySnapshot = await getDocs(q);
+        const userData = querySnapshot.docs[0]?.data();
+        setUserData(userData as IUser);
+      };
+      fetchUserData();
+    }
+  }, [params]);
 
   useEffect(() => {
     handleSetDealNegotiatorData(userData?.deal_negotiator[0] ?? "");
@@ -151,6 +172,29 @@ export default function ProjectProfile() {
   useEffect(() => {
     fetchNegotiationsAndBids();
   }, [dealNegotiatorData]);
+
+  useEffect(() => {
+    const fetchDealersData = async (incomingBid: IncomingBid[]) => {
+      try {
+        const dealerPromises = incomingBid.map(async (bid) => {
+          const q = query(
+            collection(db, "Dealers"),
+            where("id", "==", bid.dealerId)
+          );
+          const querySnapshot = await getDocs(q);
+          const dealerInfo = querySnapshot.docs[0]?.data();
+          return dealerInfo;
+        });
+
+        const allDealersData = await Promise.all(dealerPromises);
+        setDealerData(allDealersData as any);
+      } catch (error) {
+        console.error("Error fetching dealer data:", error);
+      }
+    };
+
+    fetchDealersData(incomingBids);
+  }, [incomingBids]);
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
@@ -450,38 +494,43 @@ export default function ProjectProfile() {
                 </div>
                 <div className="flex space-x-2 ml-auto">
                   <>
-                    {dealNegotiatorData?.video_link &&
-                      dealNegotiatorData.video_link.map((item, index) => (
-                        <Dialog key={index}>
-                          <DialogTrigger asChild>
-                            <div className="relative w-full h-[400px]">
-                              {isVimeoLink(item) ? (
-                                <iframe
-                                  src={`https://player.vimeo.com/video/${
-                                    item.split("/")[3]
-                                  }`}
-                                  width="100%"
-                                  height="100%"
-                                  frameBorder="0"
-                                  allow="autoplay; fullscreen"
-                                />
-                              ) : isYouTubeLink(item) ? (
-                                <iframe
-                                  src={`https://www.youtube.com/embed/${
-                                    item.split("v=")[1]?.split("&")[0]
-                                  }`}
-                                  width="100%"
-                                  height="100%"
-                                  frameBorder="0"
-                                  allow="autoplay; fullscreen"
-                                />
-                              ) : (
-                                <p>Video not available</p>
-                              )}
-                            </div>
-                          </DialogTrigger>
-                        </Dialog>
-                      ))}
+                    {dealNegotiatorData?.video_link && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div className="relative w-full h-[400px]">
+                            {isVimeoLink(
+                              dealNegotiatorData?.video_link ?? ""
+                            ) ? (
+                              <iframe
+                                src={`https://player.vimeo.com/video/${
+                                  dealNegotiatorData?.video_link.split("/")[3]
+                                }`}
+                                width="100%"
+                                height="100%"
+                                frameBorder="0"
+                                allow="autoplay; fullscreen"
+                              />
+                            ) : isYouTubeLink(
+                                dealNegotiatorData?.video_link
+                              ) ? (
+                              <iframe
+                                src={`https://www.youtube.com/embed/${
+                                  dealNegotiatorData?.video_link
+                                    .split("v=")[1]
+                                    ?.split("&")[0]
+                                }`}
+                                width="100%"
+                                height="100%"
+                                frameBorder="0"
+                                allow="autoplay; fullscreen"
+                              />
+                            ) : (
+                              <p>Video not available</p>
+                            )}
+                          </div>
+                        </DialogTrigger>
+                      </Dialog>
+                    )}
                   </>
                 </div>
               </div>
@@ -491,7 +540,7 @@ export default function ProjectProfile() {
           <Card className="bg-white shadow-lg">
             <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
               <CardTitle className="flex items-center">
-                <FileText className="mr-2" /> Deal Timeline
+                <FileText className="mr-2" /> Incoming Bids
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -503,16 +552,17 @@ export default function ProjectProfile() {
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-lg font-semibold text-[#202125]">
-                        Honda Offer
+                        {dealerData ? dealerData[index]?.Dealership ?? "" : ""}
                       </h3>
                     </div>
                     <time className="block mb-2 text-sm text-[#202125]">
-                      {item?.timestamp}
+                      {formatDate(item?.timestamp)}
                     </time>
-                    <p className="text-[#202125] mb-4">
+                    <p className="text-[#202125] mb-4 text-sm">
+                      Discounted Price: $
                       {item?.comments.length
-                        ? item?.comments
-                        : "No comments available"}
+                        ? item?.discountPrice
+                        : "No discounted price available"}
                     </p>
                     <div className="flex space-x-2 mb-4">
                       {item.files.length ? (

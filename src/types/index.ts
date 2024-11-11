@@ -76,7 +76,7 @@ export interface DealNegotiator {
   name: string;
   profile_pic: string;
   role: string;
-  video_link: string[];
+  video_link: string;
 }
 
 export interface IncomingBid {
