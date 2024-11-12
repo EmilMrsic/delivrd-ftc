@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Phone,
   User,
@@ -74,7 +74,27 @@ export default function ProjectProfile() {
     return url.includes("vimeo.com");
   };
 
-  // Function to check if a URL is a YouTube link
+  const parseComment = (comment: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    return comment.split(urlRegex).map((part: string, index: number) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   const isYouTubeLink = (url: string): boolean => {
     return url.includes("youtube.com") || url.includes("youtu.be");
   };
@@ -159,6 +179,7 @@ export default function ProjectProfile() {
         const q = query(collection(db, "users"), where("id", "==", id));
         const querySnapshot = await getDocs(q);
         const userData = querySnapshot.docs[0]?.data();
+        console.log(userData);
         setUserData(userData as IUser);
       };
       fetchUserData();
@@ -223,7 +244,7 @@ export default function ProjectProfile() {
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.budget}
+              {userData?.deals[0].payment_budget}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -244,7 +265,7 @@ export default function ProjectProfile() {
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.monthlyBudget}/mo
+              {userData?.total_budget[0]}/mo
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
@@ -261,7 +282,7 @@ export default function ProjectProfile() {
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.financeType}
+              {userData?.deals[0].payment_type}
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
@@ -336,7 +357,7 @@ export default function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {userData?.trim_and_package_options}
+                    {/* {userData?.trim_and_package_options} */}
                   </p>
                 </div>
                 <Separator className="my-4" />
@@ -427,7 +448,7 @@ export default function ProjectProfile() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>Zip: {clientDetails.zip}</span>
+                    <span>Zip: {userData?.deals[0].zip_code}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -559,28 +580,78 @@ export default function ProjectProfile() {
                       {formatDate(item?.timestamp)}
                     </time>
                     <p className="text-[#202125] mb-4 text-sm">
-                      Discounted Price: $
+                      Price: $
                       {item?.comments.length
-                        ? item?.discountPrice
-                        : "No discounted price available"}
+                        ? item?.price
+                        : "No price available"}
                     </p>
-                    <div className="flex space-x-2 mb-4">
-                      {item.files.length ? (
-                        item.files.map((file, index) => (
-                          <Button
-                            key={index}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(file, "_blank")}
-                          >
-                            <FileText className="mr-2 h-4 w-4" />
-                            {"View Offer" + " " + Number(index + 1)}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="flex space-x-2 mb-4">
+                          <Button key={index} variant="outline" size="sm">
+                            View Offer
                           </Button>
-                        ))
-                      ) : (
-                        <>No offers available</>
-                      )}
-                    </div>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent className="p-6 bg-white rounded-md shadow-lg max-w-2xl w-full">
+                        <div className="text-[#202125] space-y-4">
+                          <p className="text-2xl font-bold">
+                            {dealerData
+                              ? dealerData[index]?.Dealership ?? ""
+                              : ""}{" "}
+                            Detail
+                          </p>
+
+                          <div className="flex space-x-4">
+                            {item.files.map((file, index) => (
+                              <div
+                                onClick={() => window.open(file, "_blank")}
+                                key={index}
+                                className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md"
+                              >
+                                <FileText className="text-black text-lg" />
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="space-y-1">
+                            <p className="font-semibold text-lg">
+                              {dealerData[index]?.SalesPersonName}
+                            </p>
+                            <p>
+                              {dealerData[index]?.City},{" "}
+                              {dealerData[index]?.State}
+                            </p>
+                            <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
+                              {item?.inventoryStatus}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between mt-4 border-t pt-4">
+                            <div>
+                              <p className="text-gray-500">Date Submitted</p>
+                              <p>{formatDate(item.timestamp)}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Price</p>
+                              <p className="text-2xl font-semibold">
+                                ${item.price}
+                              </p>
+                              <p className="text-gray-500">
+                                Total Discount: ${item.discountPrice}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="border-t pt-4">
+                            <p className="font-semibold mb-2">
+                              Additional Comments
+                            </p>
+                            <p>{parseComment(item.comments)}</p>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 ))}
               </div>
@@ -654,19 +725,21 @@ export default function ProjectProfile() {
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Finance Type:</strong> {dealDetails.financeType}
+                    <strong>Finance Type:</strong>{" "}
+                    {userData?.deals[0]?.payment_type}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Budget:</strong> {dealDetails.budget}
+                    <strong>Budget:</strong> {userData?.deals[0]?.payment_type}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Monthly Budget:</strong> {dealDetails.monthlyBudget}
+                    <strong>Monthly Budget:</strong> $
+                    {userData?.total_budget[0]}
                   </span>
                 </div>
                 <Separator className="my-4" />
@@ -675,7 +748,7 @@ export default function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {dealDetails.features}
+                    {/* {dealDetails.features} */}
                   </p>
                 </div>
                 <Separator className="my-4" />
