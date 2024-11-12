@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Phone,
   User,
@@ -25,12 +25,18 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { formatDate } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 export default function ProjectProfile() {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
+  const [dealerData, setDealerData] = useState<any>();
   const [dealNegotiatorData, setDealNegotiatorData] =
     useState<DealNegotiator>();
+  const params = useSearchParams();
+  const id = params.get("id");
   const [userData, setUserData] = useState<IUser>();
   const dealDetailsRef = useRef(null);
   const [clientDetails] = useState({
@@ -68,7 +74,27 @@ export default function ProjectProfile() {
     return url.includes("vimeo.com");
   };
 
-  // Function to check if a URL is a YouTube link
+  const parseComment = (comment: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    return comment.split(urlRegex).map((part: string, index: number) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   const isYouTubeLink = (url: string): boolean => {
     return url.includes("youtube.com") || url.includes("youtu.be");
   };
@@ -93,7 +119,12 @@ export default function ProjectProfile() {
   }, []);
 
   const shareProgress = () => {
-    console.log("Sharing deal progress...");
+    navigator.clipboard.writeText(`${window.location.href}/${userData?.id}`);
+    toast({
+      title: "Link copied to clipboard",
+
+      //   variant: "destructive",
+    });
   };
 
   const handleSetDealNegotiatorData = async (id: string) => {
@@ -140,9 +171,20 @@ export default function ProjectProfile() {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    setUserData(JSON.parse(user ?? ""));
-  }, []);
+    if (!id) {
+      const user = localStorage.getItem("user");
+      setUserData(JSON.parse(user ?? ""));
+    } else {
+      const fetchUserData = async () => {
+        const q = query(collection(db, "users"), where("id", "==", id));
+        const querySnapshot = await getDocs(q);
+        const userData = querySnapshot.docs[0]?.data();
+        console.log(userData);
+        setUserData(userData as IUser);
+      };
+      fetchUserData();
+    }
+  }, [params]);
 
   useEffect(() => {
     handleSetDealNegotiatorData(userData?.deal_negotiator[0] ?? "");
@@ -151,6 +193,29 @@ export default function ProjectProfile() {
   useEffect(() => {
     fetchNegotiationsAndBids();
   }, [dealNegotiatorData]);
+
+  useEffect(() => {
+    const fetchDealersData = async (incomingBid: IncomingBid[]) => {
+      try {
+        const dealerPromises = incomingBid.map(async (bid) => {
+          const q = query(
+            collection(db, "Dealers"),
+            where("id", "==", bid.dealerId)
+          );
+          const querySnapshot = await getDocs(q);
+          const dealerInfo = querySnapshot.docs[0]?.data();
+          return dealerInfo;
+        });
+
+        const allDealersData = await Promise.all(dealerPromises);
+        setDealerData(allDealersData as any);
+      } catch (error) {
+        console.error("Error fetching dealer data:", error);
+      }
+    };
+
+    fetchDealersData(incomingBids);
+  }, [incomingBids]);
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
@@ -179,7 +244,7 @@ export default function ProjectProfile() {
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.budget}
+              {userData?.deals[0].payment_budget}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -200,7 +265,7 @@ export default function ProjectProfile() {
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.monthlyBudget}/mo
+              {userData?.total_budget[0]}/mo
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
@@ -217,7 +282,7 @@ export default function ProjectProfile() {
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {dealDetails.financeType}
+              {userData?.deals[0].payment_type}
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
@@ -292,7 +357,7 @@ export default function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {userData?.trim_and_package_options}
+                    {/* {userData?.trim_and_package_options} */}
                   </p>
                 </div>
                 <Separator className="my-4" />
@@ -383,7 +448,7 @@ export default function ProjectProfile() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>Zip: {clientDetails.zip}</span>
+                    <span>Zip: {userData?.deals[0].zip_code}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -450,38 +515,43 @@ export default function ProjectProfile() {
                 </div>
                 <div className="flex space-x-2 ml-auto">
                   <>
-                    {dealNegotiatorData?.video_link &&
-                      dealNegotiatorData.video_link.map((item, index) => (
-                        <Dialog key={index}>
-                          <DialogTrigger asChild>
-                            <div className="relative w-full h-[400px]">
-                              {isVimeoLink(item) ? (
-                                <iframe
-                                  src={`https://player.vimeo.com/video/${
-                                    item.split("/")[3]
-                                  }`}
-                                  width="100%"
-                                  height="100%"
-                                  frameBorder="0"
-                                  allow="autoplay; fullscreen"
-                                />
-                              ) : isYouTubeLink(item) ? (
-                                <iframe
-                                  src={`https://www.youtube.com/embed/${
-                                    item.split("v=")[1]?.split("&")[0]
-                                  }`}
-                                  width="100%"
-                                  height="100%"
-                                  frameBorder="0"
-                                  allow="autoplay; fullscreen"
-                                />
-                              ) : (
-                                <p>Video not available</p>
-                              )}
-                            </div>
-                          </DialogTrigger>
-                        </Dialog>
-                      ))}
+                    {dealNegotiatorData?.video_link && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div className="relative w-full h-[400px]">
+                            {isVimeoLink(
+                              dealNegotiatorData?.video_link ?? ""
+                            ) ? (
+                              <iframe
+                                src={`https://player.vimeo.com/video/${
+                                  dealNegotiatorData?.video_link.split("/")[3]
+                                }`}
+                                width="100%"
+                                height="100%"
+                                frameBorder="0"
+                                allow="autoplay; fullscreen"
+                              />
+                            ) : isYouTubeLink(
+                                dealNegotiatorData?.video_link
+                              ) ? (
+                              <iframe
+                                src={`https://www.youtube.com/embed/${
+                                  dealNegotiatorData?.video_link
+                                    .split("v=")[1]
+                                    ?.split("&")[0]
+                                }`}
+                                width="100%"
+                                height="100%"
+                                frameBorder="0"
+                                allow="autoplay; fullscreen"
+                              />
+                            ) : (
+                              <p>Video not available</p>
+                            )}
+                          </div>
+                        </DialogTrigger>
+                      </Dialog>
+                    )}
                   </>
                 </div>
               </div>
@@ -491,7 +561,7 @@ export default function ProjectProfile() {
           <Card className="bg-white shadow-lg">
             <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
               <CardTitle className="flex items-center">
-                <FileText className="mr-2" /> Deal Timeline
+                <FileText className="mr-2" /> Incoming Bids
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -503,34 +573,85 @@ export default function ProjectProfile() {
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-lg font-semibold text-[#202125]">
-                        Honda Offer
+                        {dealerData ? dealerData[index]?.Dealership ?? "" : ""}
                       </h3>
                     </div>
                     <time className="block mb-2 text-sm text-[#202125]">
-                      {item?.timestamp}
+                      {formatDate(item?.timestamp)}
                     </time>
-                    <p className="text-[#202125] mb-4">
+                    <p className="text-[#202125] mb-4 text-sm">
+                      Price: $
                       {item?.comments.length
-                        ? item?.comments
-                        : "No comments available"}
+                        ? item?.price
+                        : "No price available"}
                     </p>
-                    <div className="flex space-x-2 mb-4">
-                      {item.files.length ? (
-                        item.files.map((file, index) => (
-                          <Button
-                            key={index}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(file, "_blank")}
-                          >
-                            <FileText className="mr-2 h-4 w-4" />
-                            {"View Offer" + " " + Number(index + 1)}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="flex space-x-2 mb-4">
+                          <Button key={index} variant="outline" size="sm">
+                            View Offer
                           </Button>
-                        ))
-                      ) : (
-                        <>No offers available</>
-                      )}
-                    </div>
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent className="p-6 bg-white rounded-md shadow-lg max-w-2xl w-full">
+                        <div className="text-[#202125] space-y-4">
+                          <p className="text-2xl font-bold">
+                            {dealerData
+                              ? dealerData[index]?.Dealership ?? ""
+                              : ""}{" "}
+                            Detail
+                          </p>
+
+                          <div className="flex space-x-4">
+                            {item.files.map((file, index) => (
+                              <div
+                                onClick={() => window.open(file, "_blank")}
+                                key={index}
+                                className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md"
+                              >
+                                <FileText className="text-black text-lg" />
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="space-y-1">
+                            <p className="font-semibold text-lg">
+                              {dealerData[index]?.SalesPersonName}
+                            </p>
+                            <p>
+                              {dealerData[index]?.City},{" "}
+                              {dealerData[index]?.State}
+                            </p>
+                            <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
+                              {item?.inventoryStatus}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between mt-4 border-t pt-4">
+                            <div>
+                              <p className="text-gray-500">Date Submitted</p>
+                              <p>{formatDate(item.timestamp)}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Price</p>
+                              <p className="text-2xl font-semibold">
+                                ${item.price}
+                              </p>
+                              <p className="text-gray-500">
+                                Total Discount: ${item.discountPrice}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="border-t pt-4">
+                            <p className="font-semibold mb-2">
+                              Additional Comments
+                            </p>
+                            <p>{parseComment(item.comments)}</p>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 ))}
               </div>
@@ -604,19 +725,21 @@ export default function ProjectProfile() {
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Finance Type:</strong> {dealDetails.financeType}
+                    <strong>Finance Type:</strong>{" "}
+                    {userData?.deals[0]?.payment_type}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Budget:</strong> {dealDetails.budget}
+                    <strong>Budget:</strong> {userData?.deals[0]?.payment_type}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Monthly Budget:</strong> {dealDetails.monthlyBudget}
+                    <strong>Monthly Budget:</strong> $
+                    {userData?.total_budget[0]}
                   </span>
                 </div>
                 <Separator className="my-4" />
@@ -625,7 +748,7 @@ export default function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {dealDetails.features}
+                    {/* {dealDetails.features} */}
                   </p>
                 </div>
                 <Separator className="my-4" />

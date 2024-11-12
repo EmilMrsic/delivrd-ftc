@@ -63,7 +63,7 @@ export default function CompleteSignIn() {
       if (userData.privilege[0] === "Dealer") {
         router.push("/bid");
       } else if (userData.privilege[0] === "Client") {
-        router.push("/client");
+        router.push(`/client?id=${userData.id}`);
       } else {
         router.push("/team-dashboard");
       }

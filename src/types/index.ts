@@ -3,6 +3,7 @@ export interface IUser {
   trade_details: string;
   revenue: number;
   is_onboarding_complete: boolean | null;
+  total_budget: number[];
   privilege: string[];
   email: string;
   payment_type: string;
@@ -76,7 +77,7 @@ export interface DealNegotiator {
   name: string;
   profile_pic: string;
   role: string;
-  video_link: string[];
+  video_link: string;
 }
 
 export interface IncomingBid {
