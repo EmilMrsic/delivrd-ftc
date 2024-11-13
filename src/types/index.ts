@@ -80,6 +80,43 @@ export interface DealNegotiator {
   video_link: string;
 }
 
+export interface NegotiationData {
+  deals: string[]; // Array of strings, where [0: ""]
+  id: string;
+  incoming_bids: any[]; // Array of any type as the content is not specified
+  negotiations_Address: string | null;
+  negotiations_Brand: string | null;
+  negotiations_Budget: string | null;
+  negotiations_Client: string;
+  negotiations_Color_Options: any[]; // Array of any type as the content is not specified
+  negotiations_Created: string; // ISO date string
+  negotiations_Deal_Start_Date: string | null; // null if not provided
+  negotiations_Drivetrain: string | null;
+  negotiations_Email: string;
+  negotiations_First_Name: string;
+  negotiations_How_To_Pay: string | null;
+  negotiations_Invoice_Link: string | null;
+  negotiations_Invoice_Status: string | null;
+  negotiations_Invoice_Status_Updates_Log: string | null;
+  negotiations_Last_Name: string;
+  negotiations_Model: string | null;
+  negotiations_New_or_Used: string | null;
+  negotiations_Onboarding_Complete: string;
+  negotiations_Payment_Budget: string | null;
+  negotiations_Phone: string;
+  negotiations_Privilege_Level_From_Users: string[]; // Array of strings, example includes "Client"
+  negotiations_Project_Short_Link: string | null;
+  negotiations_Status: string | null;
+  negotiations_Status_Updated: string | null;
+  negotiations_Trade_Details: string | null;
+  negotiations_Travel_Limit: string | null;
+  negotiations_Trim: string | null;
+  negotiations_Trim_Package_Options: string | null;
+  negotiations_Zip_Code: string | null;
+  negotiations_city: string | null;
+  negotiations_state: string | null;
+}
+
 export interface IncomingBid {
   clientId: string;
   comments: string;
