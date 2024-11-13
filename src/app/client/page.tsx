@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+
 import {
   Phone,
   User,
@@ -15,7 +16,8 @@ import {
   Mail,
   Share2,
 } from "lucide-react";
-import { DealNegotiator, IncomingBid, IUser } from "@/types";
+
+import { DealNegotiator, IncomingBid, IUser, NegotiationData } from "@/types";
 import {
   collection,
   doc,
@@ -32,6 +34,8 @@ import { toast } from "@/hooks/use-toast";
 export default function ProjectProfile() {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
+  const [negotiationData, setNegotiationData] = useState<NegotiationData[]>([]);
+
   const [dealerData, setDealerData] = useState<any>();
   const [dealNegotiatorData, setDealNegotiatorData] =
     useState<DealNegotiator>();
@@ -137,6 +141,7 @@ export default function ProjectProfile() {
     if (!userData?.negotiation_id?.length) return;
 
     const allIncomingBids: IncomingBid[] = [];
+    const negotiation: NegotiationData[] = [];
 
     try {
       for (const negotiationId of userData.negotiation_id) {
@@ -146,6 +151,7 @@ export default function ProjectProfile() {
         if (negotiationSnap.exists()) {
           const negotiationData = negotiationSnap.data() as any;
           const incomingBidsArray = negotiationData.incoming_bids;
+          negotiation.push(negotiationData);
 
           if (
             Array.isArray(incomingBidsArray) &&
@@ -165,6 +171,7 @@ export default function ProjectProfile() {
       }
 
       setIncomingBids(allIncomingBids);
+      setNegotiationData(negotiation);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -244,7 +251,7 @@ export default function ProjectProfile() {
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {userData?.deals[0].payment_budget}
+              {negotiationData[0]?.negotiations_Budget}
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -265,7 +272,7 @@ export default function ProjectProfile() {
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {userData?.total_budget[0]}/mo
+              {negotiationData[0]?.negotiations_Payment_Budget}/mo
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
@@ -603,15 +610,39 @@ export default function ProjectProfile() {
                           </p>
 
                           <div className="flex space-x-4">
-                            {item.files.map((file, index) => (
-                              <div
-                                onClick={() => window.open(file, "_blank")}
-                                key={index}
-                                className="w-24 h-24 bg-gray-200 flex items-center justify-center rounded-md"
-                              >
-                                <FileText className="text-black text-lg" />
-                              </div>
-                            ))}
+                            {item.files.map((file, index) => {
+                              const isImage = [
+                                "jpg",
+                                "jpeg",
+                                "png",
+                                "gif",
+                                "bmp",
+                                "webp",
+                              ].some((ext) => file.toLowerCase().includes(ext));
+                              return (
+                                <div
+                                  key={index}
+                                  onClick={() => window.open(file, "_blank")}
+                                  className="bg-transparent w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
+                                >
+                                  {isImage ? (
+                                    <img
+                                      src={file}
+                                      alt="Uploaded file"
+                                      className="object-cover w-full h-full"
+                                    />
+                                  ) : (
+                                    <embed
+                                      type="application/pdf"
+                                      width="100%"
+                                      height="100%"
+                                      src={file}
+                                      style={{ zIndex: -1 }}
+                                    />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
 
                           <div className="space-y-1">
@@ -732,14 +763,15 @@ export default function ProjectProfile() {
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Budget:</strong> {userData?.deals[0]?.payment_type}
+                    <strong>Budget:</strong> $
+                    {negotiationData[0]?.negotiations_Budget}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
                   <span>
                     <strong>Monthly Budget:</strong> $
-                    {userData?.total_budget[0]}
+                    {negotiationData[0]?.negotiations_Payment_Budget}
                   </span>
                 </div>
                 <Separator className="my-4" />
