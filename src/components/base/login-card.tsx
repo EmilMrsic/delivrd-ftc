@@ -55,6 +55,8 @@ const LoginCard = () => {
       const parsedData = emailSchema.parse({ email });
       const { email: parsedEmail } = parsedData;
 
+      console.log(email);
+
       const q = query(
         collection(db, "users"),
         where("email", "==", parsedEmail)
