@@ -32,7 +32,7 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import Head from "next/head";
 
-export default function ProjectProfile() {
+function ProjectProfile() {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [negotiationData, setNegotiationData] = useState<NegotiationData[]>([]);
@@ -121,7 +121,7 @@ export default function ProjectProfile() {
         observer.unobserve(dealDetailsRef.current);
       }
     };
-  }, []);
+  }, [dealDetailsRef.current]);
 
   const shareProgress = () => {
     navigator.clipboard.writeText(`${window.location.href}/${userData?.id}`);
@@ -226,7 +226,7 @@ export default function ProjectProfile() {
   }, [incomingBids]);
 
   return (
-    <Suspense>
+    <>
       <Head>
         <meta property="og:title" content={userData?.name} />
         <meta property="og:description" content="Active vehicle negotiation" />
@@ -253,7 +253,7 @@ export default function ProjectProfile() {
         </div>
 
         {showStickyHeader && (
-          <div className="md:hidden sticky top-0 z-10 bg-gradient-to-r from-[#202125] to-[#0989E5] text-white p-4 rounded-lg shadow-md space-y-2">
+          <div className="md:hidden sticky w-full top-0 z-10 bg-gradient-to-r from-[#202125] to-[#0989E5] text-white p-4 rounded-lg shadow-md space-y-2">
             <div className="flex justify-between items-center">
               <span className="font-semibold flex items-center">
                 <Car className="mr-2 h-4 w-4" />
@@ -314,67 +314,96 @@ export default function ProjectProfile() {
         <div className="grid container grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             <div className="md:hidden">
-              <Card className="bg-white shadow-lg" ref={dealDetailsRef}>
-                <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white p-4">
-                  <CardTitle className="flex items-center text-lg">
+              <Card className="bg-white shadow-lg mb-5" ref={dealDetailsRef}>
+                <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
+                  <CardTitle className="flex items-center">
                     <Car className="mr-2" /> Deal Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 p-4">
-                  {Object.entries(dealDetails).map(([key, value]) => {
-                    if (typeof value === "string" && key !== "features") {
-                      return (
-                        <div
-                          key={key}
-                          className="flex items-center space-x-2 text-[#202125]"
-                        >
-                          {key === "condition" ||
-                          key === "make" ||
-                          key === "model" ? (
-                            <Car className="h-5 w-5 text-[#0989E5]" />
-                          ) : key === "trim" ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5 text-[#0989E5]"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          ) : key === "tradeIn" ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5 text-[#0989E5]"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
-                            </svg>
-                          ) : (
-                            <DollarSign className="h-5 w-5 text-[#0989E5]" />
-                          )}
-                          <span className="flex-grow">
-                            <strong>
-                              {key.charAt(0).toUpperCase() + key.slice(1)}:
-                            </strong>{" "}
-                            {value}
-                          </span>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
+                <CardContent className="space-y-4 p-6">
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <Car className="h-5 w-5 text-[#0989E5]" />
+                    <span>
+                      <strong>Condition:</strong> {userData?.condition}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <Car className="h-5 w-5 text-[#0989E5]" />
+                    <span>
+                      <strong>Vehicle of Interest:</strong> {userData?.brand}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <Car className="h-5 w-5 text-[#0989E5]" />
+                    <span>
+                      <strong>Model:</strong> {userData?.model[0]}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-[#0989E5]"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>
+                      <strong>Trim:</strong>{" "}
+                      {userData?.trim_and_package_options}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <Car className="h-5 w-5 text-[#0989E5]" />
+                    <span>
+                      <strong>Drivetrain:</strong> {userData?.drive_train}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-[#0989E5]"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+                    </svg>
+                    <span>
+                      <strong>Trade In:</strong> {userData?.trade_details}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <DollarSign className="h-5 w-5 text-[#0989E5]" />
+                    <span>
+                      <strong>Finance Type:</strong>{" "}
+                      {userData?.deals[0]?.payment_type}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <DollarSign className="h-5 w-5 text-[#0989E5]" />
+                    <span>
+                      <strong>Budget:</strong> $
+                      {negotiationData[0]?.negotiations_Budget}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[#202125]">
+                    <DollarSign className="h-5 w-5 text-[#0989E5]" />
+                    <span>
+                      <strong>Monthly Budget:</strong> $
+                      {negotiationData[0]?.negotiations_Payment_Budget}
+                    </span>
+                  </div>
                   <Separator className="my-4" />
                   <div className="space-y-2">
                     <h3 className="font-semibold text-lg">
                       Features and Trim Details
                     </h3>
                     <p className="text-sm text-gray-600">
-                      {/* {userData?.trim_and_package_options} */}
+                      {/* {dealDetails.features} */}
                     </p>
                   </div>
                   <Separator className="my-4" />
@@ -431,6 +460,14 @@ export default function ProjectProfile() {
                       </span>
                     </div>
                   </div>
+                  <Separator className="my-4" />
+                  <Button
+                    onClick={shareProgress}
+                    className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share Your Deal Progress
+                  </Button>
                 </CardContent>
               </Card>
             </div>
@@ -705,7 +742,7 @@ export default function ProjectProfile() {
           </div>
 
           <div className="md:col-span-1">
-            <div className="md:sticky md:top-4">
+            <div className="md:sticky md:flex hidden md:top-4">
               <Card className="bg-white shadow-lg">
                 <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
                   <CardTitle className="flex items-center">
@@ -866,6 +903,16 @@ export default function ProjectProfile() {
           </div>
         </div>
       </div>
+    </>
+  );
+}
+
+function Profile() {
+  return (
+    <Suspense fallback={"Loading"}>
+      <ProjectProfile />
     </Suspense>
   );
 }
+
+export default Profile;
