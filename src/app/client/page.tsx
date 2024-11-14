@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -226,7 +226,7 @@ export default function ProjectProfile() {
   }, [incomingBids]);
 
   return (
-    <>
+    <Suspense>
       <Head>
         <meta property="og:title" content={userData?.name} />
         <meta property="og:description" content="Active vehicle negotiation" />
@@ -866,6 +866,6 @@ export default function ProjectProfile() {
           </div>
         </div>
       </div>
-    </>
+    </Suspense>
   );
 }
