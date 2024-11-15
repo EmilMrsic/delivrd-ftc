@@ -60,11 +60,11 @@ export default function CompleteSignIn() {
         //   variant: "destructive",
       });
 
-      if (userData.privilege[0] === "Dealer") {
+      if (userData.privilege === "Dealer") {
         router.push("/bid");
-      } else if (userData.privilege[0] === "Client") {
-        router.push(`/client?id=${userData.id}`);
-      } else {
+      } else if (userData.privilege === "Client") {
+        router.push(`/client/${userData.id}`);
+      } else if (userData.privilege === "Team") {
         router.push("/team-dashboard");
       }
     } catch (error) {

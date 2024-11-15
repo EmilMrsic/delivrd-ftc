@@ -80,6 +80,19 @@ export interface DealNegotiator {
   video_link: string;
 }
 
+export type DealerData = {
+  Brand: string[];
+  City: string;
+  Dealership: string;
+  Position: string;
+  SalesPersonName: string;
+  SalesPersonPhone: string;
+  State: string;
+  YourEmail: string;
+  YourWebsite: string;
+  id: string;
+};
+
 export interface NegotiationData {
   deals: string[]; // Array of strings, where [0: ""]
   id: string;

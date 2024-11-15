@@ -1,5 +1,7 @@
+import { db } from "@/firebase/config";
 import { Color } from "@/types";
 import { clsx, type ClassValue } from "clsx";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -67,3 +69,12 @@ export function formatDate(inputDate: string) {
 
   return `${month} ${day}, ${year}`;
 }
+
+export const getUser = async (id: string) => {
+  const q = query(collection(db, "users"), where("id", "==", id));
+  const querySnapshot = await getDocs(q);
+  if (!querySnapshot.empty) {
+    const userData = querySnapshot.docs[0].data();
+    return userData;
+  }
+};
