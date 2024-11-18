@@ -169,11 +169,11 @@ export default function BiddingSection() {
         const clientQuery = query(collection(db, "Clients"));
         const dealerQuery = query(
           collection(db, "Dealers"),
-          where("id", "==", parsedUser.dealerId)
+          where("id", "==", parsedUser.dealer_id[0])
         );
         const dealerSnapShot = await getDocs(dealerQuery);
 
-        const dealerData = dealerSnapShot.docs.map((doc) => doc.data())[0];
+        const dealerData: any = dealerSnapShot.docs[0].data();
 
         if (dealerData) parsedUser.brand = dealerData.Brand;
 
@@ -189,7 +189,7 @@ export default function BiddingSection() {
             id: doc.id,
             name: data.Model || "Unknown Model",
             brand: data.Brand || "Unknown Brand",
-            isNew: data.NewOrUsed === "New",
+            NewOrUsed: data.NewOrUsed,
             zipCode: data.ZipCode || "",
             trim: data.Trim || "",
             exteriorColors,
@@ -201,7 +201,7 @@ export default function BiddingSection() {
         //get all the bids submitted by the logged in user
         const incomingBidQuery = query(
           collection(db, "Incoming Bids"),
-          where("dealerId", "==", parsedUser.id)
+          where("dealerId", "==", parsedUser.dealer_id[0])
         );
         const bidQuerySnapshot = await getDocs(incomingBidQuery);
         const bidVehicleClientIds = bidQuerySnapshot.docs.map((doc) => {
@@ -224,7 +224,6 @@ export default function BiddingSection() {
                 : formatTimestamp(data.timestamp),
           };
         });
-
         //filter vehicles for which we've already bid
         const filteredBidVehicles = vehicleData.filter((data) => {
           return bidVehicleClientIds.includes(data.id);
@@ -310,30 +309,33 @@ export default function BiddingSection() {
       switch (subTab) {
         case "all":
           return vehicles.filter((vehicle) => {
-            if (vehicle.isNew) {
-              if (Array.isArray(parsedUser.brand)) {
-                return parsedUser.brand.includes(vehicle.brand);
-              } else {
-                return vehicle.brand === parsedUser.brand;
-              }
-            } else {
-              return !vehicle.isNew;
+            if (vehicle.NewOrUsed === "New") {
+              return Array.isArray(parsedUser.brand)
+                ? parsedUser.brand.includes(vehicle.brand)
+                : vehicle.brand === parsedUser.brand;
             }
+            // Include all Used vehicles
+            return vehicle.NewOrUsed === "Used";
           });
+
         case "new":
           return vehicles.filter((vehicle) => {
-            if (vehicle.isNew && Array.isArray(parsedUser.brand)) {
-              if (parsedUser.brand.includes(vehicle.brand)) return vehicle;
-            } else {
-              vehicle.brand === parsedUser.brand && vehicle.isNew && vehicle;
-            }
+            return (
+              vehicle.NewOrUsed === "New" &&
+              (Array.isArray(parsedUser.brand)
+                ? parsedUser.brand.includes(vehicle.brand)
+                : vehicle.brand === parsedUser.brand)
+            );
           });
+
         case "used":
-          return vehicles.filter((vehicle) => !vehicle.isNew);
+          return vehicles.filter((vehicle) => vehicle.NewOrUsed === "Used");
+
         default:
           return vehicles;
       }
     };
+
     setFilteredVehicles(filterVehicles());
   }, [subTab, vehicles, tab]);
 
