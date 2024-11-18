@@ -42,7 +42,7 @@ const Header: FC<IHeaderProps> = ({ user }) => {
           </motion.div>
           <div className="flex flex-col items-end mr-2">
             <span className="bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-              {user?.brand}
+              {Array.isArray(user?.brand) ? user.brand.join(", ") : user?.brand}
             </span>
             <div className="flex items-center">
               <span className="text-white text-xs">

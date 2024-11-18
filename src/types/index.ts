@@ -158,7 +158,7 @@ export type Vehicle = {
   inventoryStatus?: string;
   name?: string;
   brand?: string;
-  isNew?: boolean;
+  NewOrUsed?: string;
   zipCode?: string;
   trim?: string;
   exteriorColors?: Color[];

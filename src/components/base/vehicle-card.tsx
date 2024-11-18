@@ -108,7 +108,7 @@ const VehicleCard: FC<IVehicleCardProps> = ({
     <Card
       key={vehicle.id}
       className={` ${
-        !vehicle.isNew ? "bg-[#FFEFCE]" : ""
+        vehicle.NewOrUsed === "Used" ? "bg-[#FFEFCE]" : ""
       } relative z-10 transition-all duration-300 ${
         selectedVehicles.includes(vehicle.id || "") ? "ring-2 ring-primary" : ""
       }`}
@@ -156,12 +156,12 @@ const VehicleCard: FC<IVehicleCardProps> = ({
           <Badge
             variant="outline"
             className={`font-semibold ${
-              vehicle.isNew
+              vehicle.NewOrUsed === "New"
                 ? "bg-green-100 text-green-800 border-green-300"
                 : "bg-blue-100 text-blue-800 border-blue-300"
             }`}
           >
-            {vehicle.isNew ? "New" : "Used"}
+            {vehicle.NewOrUsed === "New" ? "New" : "Used"}
           </Badge>
         </div>
       </div>
@@ -220,7 +220,7 @@ const VehicleCard: FC<IVehicleCardProps> = ({
       </CardContent>
       <CardFooter
         className={`flex flex-col gap-4 bg-${
-          !vehicle.isNew ? "bg-[#FFEFCE]" : "muted/50"
+          vehicle.NewOrUsed === "Used" ? "bg-[#FFEFCE]" : "muted/50"
         } mt-6 p-6`}
       >
         <div className="flex flex-col gap-2 w-full">
