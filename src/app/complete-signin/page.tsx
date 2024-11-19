@@ -103,40 +103,6 @@ export default function CompleteSignIn() {
       } else if (parsedUser.privilege === "Team") {
         router.push("/team-dashboard");
       }
-    } else {
-      // Validate Firebase Auth session
-      const unsubscribe = getAuth().onAuthStateChanged(async (authUser) => {
-        if (authUser) {
-          const token = await authUser.getIdToken();
-          localStorage.setItem("token", token);
-          localStorage.setItem("refreshToken", authUser.refreshToken);
-
-          // Fetch user data based on email
-          const q = query(
-            collection(db, "users"),
-            where("email", "==", authUser.email)
-          );
-          const querySnapshot = await getDocs(q);
-
-          if (!querySnapshot.empty) {
-            const userData = querySnapshot.docs[0].data();
-
-            localStorage.setItem("user", JSON.stringify(userData));
-            localStorage.setItem("emailForSignIn", authUser.email ?? "");
-
-            // Redirect based on privilege
-            if (userData.privilege === "Dealer") {
-              router.push("/bid");
-            } else if (userData.privilege === "Client") {
-              router.push(`/client/${userData.id}`);
-            } else if (userData.privilege === "Team") {
-              router.push("/team-dashboard");
-            }
-          }
-        }
-      });
-
-      return () => unsubscribe(); // Cleanup on unmount
     }
   }, [router]);
 
