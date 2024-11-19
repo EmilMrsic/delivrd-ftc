@@ -118,7 +118,7 @@ export default function BiddingSection() {
       // Change this line to use addDoc instead of setDoc
       const bidRef = collection(db, "Incoming Bids");
       await addDoc(bidRef, {
-        dealerId: user.id,
+        dealerId: user.dealer_id[0],
         clientId: vehicleId,
         price: parseFloat(price),
         comments: message,
