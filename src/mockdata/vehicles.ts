@@ -5,7 +5,7 @@ export const vehicles: Vehicle[] = [
     id: "1",
     name: "Toyota 4 Runner",
     brand: "Toyota",
-    isNew: true,
+    NewOrUsed: "New",
     zipCode: "94806",
     trim: "TRD Off-Road Premium, Underground color, with KDSS, Moonroof and Off Road Premium Plus Package",
     exteriorColors: [
@@ -23,7 +23,7 @@ export const vehicles: Vehicle[] = [
     id: "2",
     name: "Honda Civic",
     brand: "Honda",
-    isNew: false,
+    NewOrUsed: "Used",
     zipCode: "90210",
     trim: "Sport Touring, Sonic Gray Pearl, with Honda Sensing",
     exteriorColors: [
@@ -41,7 +41,7 @@ export const vehicles: Vehicle[] = [
     id: "3",
     name: "Ford F-150",
     brand: "Ford",
-    isNew: true,
+    NewOrUsed: "New",
     zipCode: "48226",
     trim: "Lariat, Antimatter Blue, with 502A High Package",
     exteriorColors: [
