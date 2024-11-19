@@ -42,6 +42,7 @@ export default function CompleteSignIn() {
 
   const handleSignIn = async () => {
     try {
+      // Authenticate via Firebase
       await signInWithEmailLink(auth, email, window.location.href);
 
       const parsedData = emailSchema.parse({ email });
@@ -52,22 +53,29 @@ export default function CompleteSignIn() {
         where("email", "==", parsedEmail)
       );
       const querySnapshot = await getDocs(q);
-      const userData = querySnapshot.docs[0].data();
 
-      localStorage.setItem("user", JSON.stringify(userData));
-      toast({
-        title: "Logged in",
-        //   variant: "destructive",
-      });
+      if (!querySnapshot.empty) {
+        const userData = querySnapshot.docs[0].data();
 
-      if (userData.privilege === "Dealer") {
-        router.push("/bid");
-      } else if (userData.privilege === "Client") {
-        router.push(`/client/${userData.id}`);
-      } else if (userData.privilege === "Team") {
-        router.push("/team-dashboard");
+        // Store user and email in localStorage
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("emailForSignIn", userData.email);
+
+        toast({ title: "Logged in" });
+
+        // Redirect based on privilege
+        if (userData.privilege === "Dealer") {
+          router.push("/bid");
+        } else if (userData.privilege === "Client") {
+          router.push(`/client/${userData.id}`);
+        } else if (userData.privilege === "Team") {
+          router.push("/team-dashboard");
+        }
+      } else {
+        throw new Error("User data not found");
       }
     } catch (error) {
+      console.error("Sign-in failed:", error);
       setMessage("Failed to sign in. Please try again.");
     }
   };
@@ -80,34 +88,57 @@ export default function CompleteSignIn() {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    let parsedUser;
-    if (user) parsedUser = JSON.parse(user ?? "");
-    getAuth().onAuthStateChanged(function (user) {
-      if (user) {
-        setEmail(user.email ?? "");
-        user.getIdToken().then(function (idToken) {
-          localStorage.setItem("token", idToken);
-        });
-        localStorage.setItem("refreshToken", user.refreshToken);
-      }
-    });
-    if (localStorage.getItem("token")) {
-      if (parsedUser && parsedUser.privilege) {
-        if (parsedUser.privilege === "Dealer") {
-          router.push("/bid"); // Redirect to the app/dashboard after successful login
-        } else if (parsedUser.privilege === "Client") {
-          router.push("/client"); // Redirect to the app/dashboard after successful login
-        } else {
-          router.push("/team-dashboard"); // Redirect to the app/dashboard after successful login
-        }
-      }
-    }
-  }, []);
+    const storedUser = localStorage.getItem("user");
+    const storedEmail = localStorage.getItem("emailForSignIn");
+    const currentEmail = localStorage.getItem("currentEmail");
 
-  useEffect(() => {
-    handleSignIn();
-  }, [email]);
+    if (storedUser && storedEmail === currentEmail) {
+      const parsedUser = JSON.parse(storedUser);
+
+      // Redirect based on privilege
+      if (parsedUser.privilege === "Dealer") {
+        router.push("/bid");
+      } else if (parsedUser.privilege === "Client") {
+        router.push(`/client/${parsedUser.id}`);
+      } else if (parsedUser.privilege === "Team") {
+        router.push("/team-dashboard");
+      }
+    } else {
+      // Validate Firebase Auth session
+      const unsubscribe = getAuth().onAuthStateChanged(async (authUser) => {
+        if (authUser) {
+          const token = await authUser.getIdToken();
+          localStorage.setItem("token", token);
+          localStorage.setItem("refreshToken", authUser.refreshToken);
+
+          // Fetch user data based on email
+          const q = query(
+            collection(db, "users"),
+            where("email", "==", authUser.email)
+          );
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            const userData = querySnapshot.docs[0].data();
+
+            localStorage.setItem("user", JSON.stringify(userData));
+            localStorage.setItem("emailForSignIn", authUser.email ?? "");
+
+            // Redirect based on privilege
+            if (userData.privilege === "Dealer") {
+              router.push("/bid");
+            } else if (userData.privilege === "Client") {
+              router.push(`/client/${userData.id}`);
+            } else if (userData.privilege === "Team") {
+              router.push("/team-dashboard");
+            }
+          }
+        }
+      });
+
+      return () => unsubscribe(); // Cleanup on unmount
+    }
+  }, [router]);
 
   return (
     <div className="bg-[#202125] h-screen w-screen flex flex-col gap-4 justify-center items-center">
