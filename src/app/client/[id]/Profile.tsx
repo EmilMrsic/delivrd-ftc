@@ -24,6 +24,7 @@ import DealDetailCard from "@/components/Client/DealDetailCard";
 import ClientOverviewCard from "@/components/Client/ClientOverviewCard";
 import IncomingBidsCard from "@/components/Client/IncomingBidsCard/IncomingBidsCard";
 import ClientStickyHeader from "@/components/Client/ClientStickyHeader";
+import { Loader } from "@/components/base/loader";
 
 function ProjectProfile() {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
@@ -150,7 +151,11 @@ function ProjectProfile() {
     fetchDealersData(incomingBids);
   }, [incomingBids]);
 
-  return (
+  return userData &&
+    incomingBids &&
+    dealNegotiatorData &&
+    dealerData &&
+    negotiationData ? (
     <>
       <div className=" justify-items-center	 mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
         <div className="flex container justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -321,6 +326,10 @@ function ProjectProfile() {
         </div>
       </div>
     </>
+  ) : (
+    <div className="flex justify-center items-center h-[100vh] ">
+      <Loader />
+    </div>
   );
 }
 
