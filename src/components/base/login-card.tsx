@@ -55,8 +55,6 @@ const LoginCard = () => {
       const parsedData = emailSchema.parse({ email });
       const { email: parsedEmail } = parsedData;
 
-      console.log(email);
-
       const q = query(
         collection(db, "users"),
         where("email", "==", parsedEmail)
@@ -71,6 +69,8 @@ const LoginCard = () => {
           // displayName: userData.SalesPersonName,
           // brand: userData.Brand,
         };
+
+        localStorage.setItem("currentEmail", user.email);
 
         sendLoginEmail(user.email);
       } else {
