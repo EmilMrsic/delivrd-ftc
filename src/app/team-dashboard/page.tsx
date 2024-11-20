@@ -123,7 +123,17 @@ export default function DealList() {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value;
     setSearchTerm(term);
-    applyFilters(term, filters);
+    const filterDeals = filteredDeals?.filter(
+      (deal) =>
+        deal.negotiations_Client &&
+        deal.negotiations_Client
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+    );
+    console.log({ filterDeals });
+    setFilteredDeals(filterDeals);
+
+    // applyFilters(term, filters);
   };
 
   const handleFilterChange = (
@@ -168,7 +178,7 @@ export default function DealList() {
             negotiation.negotiations_Client &&
             negotiation.negotiations_Brand &&
             negotiation.negotiations_Model &&
-            negotiation.negotiations_Invoice_Status
+            negotiation.negotiations_Status
         ); // Filter to include only those with all specified attributes
 
       return negotiationData; // Return the filtered data
