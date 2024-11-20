@@ -3,10 +3,22 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const { to } = await req.json();
-  const subject = "Magic Link";
-  const text =
-    "It looks like you’re not on our First To Call List. Please follow this link (https://formless.ai/c/HdovmWUnYjN7) to register to have 24-hour access to see all the deals we have live + submit your bids. Thank you, The Delivered Team.";
-  const html = "";
+  const subject = "Sign up for Delivrd";
+  const html =
+    `<!DOCTYPE html>
+  <html>
+  <body>
+  <p>Hey 👋,</p>
+  <p>Your email (<strong>${to}</strong>) is not in our system. Don't worry, here's how to sign up:</p>
+  <p>
+    Dealers doing the first to call list click <a href="https://formless.ai/c/HdovmWUnYjN7">here</a>
+  </p>
+  <p>
+    Looking to retain our service for your next car? Hire us or book a consultation session first  <a href="https://www.delivrdto.me/schedule">here</a>
+  </p>
+  <p>Do not reply to this email, it is an automated system that does not receive emails.</p>
+  </body>
+  </html>`;
   try {
     const emailData = new URLSearchParams();
     emailData.append(
@@ -15,7 +27,6 @@ export async function POST(req: Request) {
     );
     emailData.append("to", to);
     emailData.append("subject", subject);
-    emailData.append("text", text);
     emailData.append("html", html);
 
     const response = await axios.post(
