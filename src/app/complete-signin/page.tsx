@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   getAuth,
@@ -9,6 +9,7 @@ import {
 import { auth, db } from "@/firebase/config";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/base/loader";
 import { Lock } from "lucide-react";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
@@ -30,13 +31,18 @@ const emailSchema = z.object({
 
 export default function CompleteSignIn() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [signInStage, setSignInStage] = useState("Verifying");
   const [message, setMessage] = useState("");
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
 
   useEffect(() => {
     // Check if the current URL contains a sign-in link
-    if (isSignInWithEmailLink(auth, window.location.href)) {
-      setMessage("Please provide your email to complete the sign-in");
+    if (isSignInWithEmailLink(auth, window.location.href) & email) {
+      window.localStorage.setItem("emailForSignIn", email);
+      handleSignIn();
+    } else {
+      setSignInStage("Failed");
     }
   }, []);
 
@@ -44,13 +50,14 @@ export default function CompleteSignIn() {
     try {
       // Authenticate via Firebase
       await signInWithEmailLink(auth, email, window.location.href);
+      setSignInStage("Signing In");
 
       const parsedData = emailSchema.parse({ email });
       const { email: parsedEmail } = parsedData;
 
       const q = query(
         collection(db, "users"),
-        where("email", "==", parsedEmail)
+        where("email", "==", parsedEmail),
       );
       const querySnapshot = await getDocs(q);
 
@@ -76,15 +83,9 @@ export default function CompleteSignIn() {
       }
     } catch (error) {
       console.error("Sign-in failed:", error);
+      setSignInStage("Failed");
       setMessage("Failed to sign in. Please try again.");
     }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleEmailSubmit = (e: any) => {
-    e.preventDefault();
-    window.localStorage.setItem("emailForSignIn", email);
-    handleSignIn();
   };
 
   useEffect(() => {
@@ -109,25 +110,10 @@ export default function CompleteSignIn() {
   return (
     <div className="bg-[#202125] h-screen w-screen flex flex-col gap-4 justify-center items-center">
       <div className="bg-white max-w-[400px] lg:w-[400px]  flex flex-col rounded-xl p-5 gap-5">
-        <h1 className="text-3xl font-bold text-center mb-2">
-          Complete Sign-In
-        </h1>
-        <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3">
-          <Input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          {message && <p className="text-white-500 text-sm">{message}</p>}
-          <Button
-            type="submit"
-            className="bg-blue-500 flex gap-5 hover:bg-blue-600"
-          >
-            <Lock className="w-4" stroke="#2B5CAD" />
-            Confirm email to authenticate
-          </Button>
-        </form>
+        <h1 className="text-3xl font-bold text-center">{signInStage}</h1>
+        <div clasName="bg-black">
+          {signInStage !== "Failed" && <Loader size={5} />}
+        </div>
       </div>
     </div>
   );
