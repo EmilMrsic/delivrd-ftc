@@ -131,6 +131,48 @@ export interface NegotiationData {
   negotiations_state: string | null;
 }
 
+export interface EditNegotiationData {
+  id: string;
+  clientInfo: {
+    negotiations_Client: string;
+    negotiations_First_Name: string;
+    negotiations_Last_Name: string;
+    negotiations_Email: string;
+    negotiations_Phone: string;
+    negotiations_Zip_Code: string | null;
+    negotiations_city: string | null;
+    negotiations_state: string | null;
+  };
+  dealInfo: {
+    negotiations_Brand: string | null;
+    negotiations_Budget: string | null;
+    negotiations_Created: string;
+    negotiations_Deal_Start_Date: string | null;
+    negotiations_Drivetrain: string | null;
+    negotiations_Model: string | null;
+    negotiations_How_To_Pay: string | null;
+    negotiations_Invoice_Link: string | null;
+    negotiations_Invoice_Status: string | null;
+    negotiations_Invoice_Status_Updates_Log: string | null;
+    negotiations_New_or_Used: string | null;
+    negotiations_Payment_Budget: string | null;
+    negotiations_Privilege_Level_From_Users: string[];
+    negotiations_Project_Short_Link: string | null;
+    negotiations_Status: string | null;
+    negotiations_Status_Updated: string | null;
+    negotiations_Trade_Details: string | null;
+    negotiations_Travel_Limit: string | null;
+    negotiations_Trim: string | null;
+    negotiations_Trim_Package_Options: string | null;
+  };
+  otherData: {
+    deals: string[];
+    incoming_bids: any[];
+    negotiations_Address: string | null;
+    negotiations_Color_Options: any[];
+  };
+}
+
 export interface IncomingBid {
   clientId: string;
   comments: string;
@@ -176,4 +218,5 @@ export type Negotiation = {
   negotiations_Invoice_Status: string | null;
   negotiations_Created: string | null;
   lastUpdated: string;
+  negotiations_Status: string;
 };
