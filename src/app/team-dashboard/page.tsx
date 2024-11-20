@@ -159,6 +159,7 @@ export default function DealList() {
             negotiations_Model: data.negotiations_Model,
             negotiations_Invoice_Status: data.negotiations_Invoice_Status,
             negotiations_Created: data.negotiations_Created,
+            negotiations_Status: data.negotiations_Status,
             lastUpdated: data.negotiations_Status_Updated, // Assuming this is a Firestore Timestamp
           };
         })
@@ -329,25 +330,30 @@ export default function DealList() {
                 {filteredDeals?.map((deal) => (
                   <TableRow
                     className="cursor-pointer"
-                    onClick={() => router.push(`/team-profile?id=${deal.id}`)}
                     key={deal.id}
+                    onClick={(e) => {
+                      router.push(`/team-profile?id=${deal.id}`);
+                    }}
                   >
                     <TableCell className="font-medium max-w-[220px]">
                       <span>{deal.negotiations_Client}</span>
                     </TableCell>
+
                     <TableCell className="max-w-[180px]">
                       {deal.negotiations_Brand} {deal.negotiations_Model}
                     </TableCell>
+
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Badge
+                            data-interactive
                             variant="outline"
                             className={`cursor-pointer ${getStageColor(
                               deal.negotiations_Invoice_Status ?? ""
                             )}`}
                           >
-                            {deal.negotiations_Invoice_Status}
+                            {deal.negotiations_Status}
                           </Badge>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56">
@@ -355,9 +361,10 @@ export default function DealList() {
                           {stages.map((stage) => (
                             <DropdownMenuItem
                               key={stage.name}
-                              onClick={() =>
-                                handleStageChange(deal.id, stage.name)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStageChange(deal.id, stage.name);
+                              }}
                             >
                               {stage.name}
                             </DropdownMenuItem>
@@ -372,16 +379,22 @@ export default function DealList() {
                         {getElapsedTime(deal.negotiations_Created ?? "", NOW)}
                       </div>
                     </TableCell>
+
                     <TableCell>
                       <div>{formatDate(deal.lastUpdated)}</div>
                       <div className="text-xs text-gray-400">
                         {getElapsedTime(deal.lastUpdated, NOW)}
                       </div>
                     </TableCell>
+
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
+                          <Button
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            data-interactive
+                          >
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
@@ -391,12 +404,18 @@ export default function DealList() {
                           <Dialog>
                             <DialogTrigger asChild>
                               <DropdownMenuItem
-                                onSelect={(e) => e.preventDefault()}
+                                data-interactive
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row click
+                                }}
                               >
                                 View Details
                               </DropdownMenuItem>
                             </DialogTrigger>
-                            <DialogContent className="max-w-7xl">
+                            <DialogContent
+                              className="max-w-7xl"
+                              onClick={(e) => e.stopPropagation()} // Ensure dialog stays open
+                            >
                               <ProjectProfile
                                 name={deal.negotiations_Client ?? ""}
                                 description="Text Description"

@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, Suspense } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -13,7 +12,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 
 import {
   Phone,
@@ -33,6 +31,15 @@ import {
 import { useSearchParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { EditNegotiationData } from "@/types";
+import {
+  mapNegotiationData,
+  dealStageOptions,
+  vehicleOfInterest,
+} from "@/lib/utils";
+import EditableInput from "@/components/base/input-field";
+import EditableDropdown from "@/components/base/editable-dropdown";
+import SearchableDropdown from "@/components/base/searchable-dropdown";
 
 interface VoteState {
   [key: string]: number; // Maps dealership names to votes (1 for upvote, -1 for downvote)
@@ -88,14 +95,13 @@ type DealDetails = {
   features: string;
 };
 
-type ClientField = keyof ClientDetails;
-type DealField = keyof DealDetails;
-
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
   const params = useSearchParams();
   const negotiationId = params.get("id");
-  const [negotiation, setNegotiation] = useState<any>(null);
+  const [negotiation, setNegotiation] = useState<EditNegotiationData | null>(
+    null
+  );
 
   const [comments, setComments] = useState<CommentState>({
     "Honda World": [
@@ -151,15 +157,7 @@ function ProjectProfile() {
     },
   ]);
   const [newInternalNote, setNewInternalNote] = useState("");
-  const [clientDetails, setClientDetails] = useState<ClientDetails>({
-    phone: "(555) 123-4567",
-    email: "brandon.smith@example.com",
-    zip: "90210",
-    city: "Los Angeles",
-    state: "CA",
-    dealStage: "Actively Negotiating",
-    startDate: "July 1, 2023",
-  });
+
   const [dealDetails, setDealDetails] = useState<DealDetails>({
     condition: "New",
     make: "Honda",
@@ -182,7 +180,6 @@ function ProjectProfile() {
       "Leather seats, panoramic sunroof, advanced safety features including lane departure warning and adaptive cruise control. The customer is particularly interested in the fuel efficiency of the hybrid model and the spacious cargo area for family trips.",
   });
   const [editingField, setEditingField] = useState<string | null>(null);
-  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -224,6 +221,23 @@ function ProjectProfile() {
       setNewComment("");
       setCommentingDealership(null);
     }
+  };
+
+  const handleChange = (
+    parentKey: string,
+    childKey: string,
+    newValue: string
+  ) => {
+    setNegotiation((prevState: any) => {
+      const updatedParent = {
+        ...prevState[parentKey],
+        [childKey]: newValue,
+      };
+      return {
+        ...prevState,
+        [parentKey]: updatedParent,
+      };
+    });
   };
 
   const handleVote = (dealership: string, value: number) => {
@@ -279,58 +293,6 @@ function ProjectProfile() {
     }
   };
 
-  const handleEditField = (
-    field: string,
-    value: string | { exterior: string; interior: string },
-    section: "client" | "deal"
-  ) => {
-    if (section === "client") {
-      setClientDetails((prev) => ({ ...prev, [field]: value }));
-    } else {
-      setDealDetails((prev) => ({ ...prev, [field]: value }));
-    }
-    setEditingField(null);
-  };
-
-  const EditableField: React.FC<{
-    value: string;
-    field: ClientField | DealField;
-    section: "deal" | "client";
-  }> = ({ value, field, section }) => (
-    <span
-      onClick={() => setEditingField(field)}
-      className="cursor-pointer border-b border-orange-200"
-    >
-      {editingField === field ? (
-        <Input
-          value={value}
-          onChange={(e) =>
-            section === "client"
-              ? setClientDetails((prev) => ({
-                  ...prev,
-                  [field]: e.target.value,
-                }))
-              : setDealDetails((prev) => ({
-                  ...prev,
-                  [field]: e.target.value,
-                }))
-          }
-          onBlur={() =>
-            handleEditField(
-              field,
-              section === "client"
-                ? clientDetails[field as ClientField]
-                : dealDetails[field as DealField],
-              section
-            )
-          }
-          className="w-full"
-        />
-      ) : (
-        value
-      )}
-    </span>
-  );
   const offerDetails: OfferDetails = {
     "Honda World": {
       images: [
@@ -364,15 +326,12 @@ function ProjectProfile() {
       if (!negotiationId) return;
 
       try {
-        // Reference to the specific document in the 'negotiations' collection
         const negotiationDocRef = doc(db, "negotiations", negotiationId);
 
-        // Fetch the document from Firestore
         const docSnap = await getDoc(negotiationDocRef);
 
         if (docSnap.exists()) {
-          // Set the negotiation data if the document exists
-          setNegotiation(docSnap.data() as any);
+          setNegotiation(mapNegotiationData(docSnap.data()));
         } else {
           console.log("No such negotiation!");
         }
@@ -399,7 +358,7 @@ function ProjectProfile() {
         </div>
         <div className="text-right">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-            {negotiation?.negotiations_Client}
+            {negotiation?.clientInfo?.negotiations_Client}
           </h1>
         </div>
       </div>
@@ -409,21 +368,22 @@ function ProjectProfile() {
           <div className="flex justify-between items-center">
             <span className="font-semibold flex items-center">
               <Car className="mr-2 h-4 w-4" />
-              {negotiation?.negotiations_Brand}{" "}
-              {negotiation?.negotiations_Model}
+              {negotiation?.dealInfo?.negotiations_Brand}{" "}
+              {negotiation?.dealInfo?.negotiations_Model}
             </span>
             <span>
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {negotiation?.negotiations_Budget ?? "No budget available"}
+              {negotiation?.dealInfo?.negotiations_Budget ??
+                "No budget available"}
             </span>
           </div>
           <div className="flex justify-between items-center">
             <span>
               <ThumbsUp className="inline mr-1 h-4 w-4" />
-              {negotiation?.negotiations_Color_Options ? (
+              {negotiation?.otherData?.negotiations_Color_Options ? (
                 <span
                   dangerouslySetInnerHTML={{
-                    __html: negotiation?.negotiations_Color_Options,
+                    __html: negotiation?.otherData?.negotiations_Color_Options,
                   }}
                 />
               ) : (
@@ -432,7 +392,7 @@ function ProjectProfile() {
             </span>
             <span className="flex items-center">
               <DollarSign className="inline mr-1 h-4 w-4" />
-              {negotiation?.negotiations_Payment_Budget}/mo
+              {negotiation?.dealInfo?.negotiations_Payment_Budget}/mo
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
@@ -446,15 +406,16 @@ function ProjectProfile() {
                 <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
               </svg>
               Trade In:{" "}
-              {negotiation?.negotiations_Trade_Details ?? "No Trade In"}
+              {negotiation?.dealInfo?.negotiations_Trade_Details ??
+                "No Trade In"}
             </span>
-            <span>{negotiation?.negotiations_How_To_Pay}</span>
+            <span>{negotiation?.dealInfo?.negotiations_How_To_Pay}</span>
           </div>
           <div className="flex justify-between items-center text-sm">
             <span>
               <Car className="inline mr-1 h-4 w-4" />
               Drivetrain:{" "}
-              {negotiation?.negotiations_Drivetrain ??
+              {negotiation?.dealInfo?.negotiations_Drivetrain ??
                 "No Drivetrain Available"}
             </span>
           </div>
@@ -511,11 +472,17 @@ function ProjectProfile() {
                           <strong>
                             {key.charAt(0).toUpperCase() + key.slice(1)}:
                           </strong>{" "}
-                          <EditableField
+                          {/* <EditableInput
+                            onChange={(newValue) =>
+                              handleChange(
+                                "clientInfo",
+                                "negotiations_Phone",
+                                newValue
+                              )
+                            }
+                            label="Phone"
                             value={value}
-                            field={key as keyof ClientDetails}
-                            section="deal"
-                          />
+                          /> */}
                         </span>
                       </div>
                     );
@@ -528,7 +495,7 @@ function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {negotiation?.negotiations_Trim_Package_Options ??
+                    {negotiation?.dealInfo?.negotiations_Trim_Package_Options ??
                       "No options available"}
                   </p>
                 </div>
@@ -580,22 +547,40 @@ function ProjectProfile() {
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <Phone className="h-5 w-5 text-[#0989E5]" />
                     <span>
-                      Phone:{" "}
-                      <EditableField
-                        value={negotiation?.negotiations_Phone}
-                        field="phone"
-                        section="client"
+                      <EditableInput
+                        label="Phone"
+                        value={
+                          negotiation?.clientInfo?.negotiations_Phone ?? ""
+                        }
+                        field="negotiations_Phone"
+                        negotiationId={negotiationId ?? ""}
+                        onChange={(newValue) =>
+                          handleChange(
+                            "clientInfo",
+                            "negotiations_Phone",
+                            newValue
+                          )
+                        }
                       />
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <Mail className="h-5 w-5 text-[#0989E5]" />
                     <span>
-                      Email:{" "}
-                      <EditableField
-                        value={clientDetails.email}
-                        field="email"
-                        section="client"
+                      <EditableInput
+                        label="Email"
+                        field="negotiations_Email"
+                        negotiationId={negotiationId ?? ""}
+                        value={
+                          negotiation?.clientInfo?.negotiations_Email ?? ""
+                        }
+                        onChange={(newValue) =>
+                          handleChange(
+                            "clientInfo",
+                            "negotiations_Email",
+                            newValue
+                          )
+                        }
                       />
                     </span>
                   </div>
@@ -613,11 +598,20 @@ function ProjectProfile() {
                       />
                     </svg>
                     <span>
-                      Zip:{" "}
-                      <EditableField
-                        value={negotiation?.negotiations_Zip_Code ?? 0}
-                        field="zip"
-                        section="client"
+                      <EditableInput
+                        field="negotiations_Zip_Code"
+                        negotiationId={negotiationId ?? ""}
+                        label="Zip"
+                        value={
+                          negotiation?.clientInfo?.negotiations_Zip_Code ?? ""
+                        }
+                        onChange={(newValue) =>
+                          handleChange(
+                            "clientInfo",
+                            "negotiations_Zip_Code",
+                            newValue
+                          )
+                        }
                       />
                     </span>
                   </div>
@@ -625,17 +619,13 @@ function ProjectProfile() {
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <FileText className="h-5 w-5 text-[#0989E5]" />
-                    <span>
-                      Deal Stage:{" "}
-                      <EditableField
-                        value={
-                          negotiation?.negotiations_Status ??
-                          "Status not available"
-                        }
-                        field="dealStage"
-                        section="client"
-                      />
-                    </span>
+                    <SearchableDropdown
+                      options={dealStageOptions}
+                      field="negotiations_Status"
+                      negotiationId={negotiationId ?? ""}
+                      label="Deal Stage"
+                      value={negotiation?.dealInfo?.negotiations_Status ?? ""}
+                    />
                   </div>
                   <div className="flex items-center space-x-2 text-[#202125]">
                     <svg
@@ -651,14 +641,18 @@ function ProjectProfile() {
                       />
                     </svg>
                     <span>
-                      City:{" "}
-                      <EditableField
-                        value={
-                          negotiation?.negotiations_Address ??
-                          "City not available"
+                      <EditableInput
+                        field="negotiations_city"
+                        negotiationId={negotiationId ?? ""}
+                        label="City"
+                        value={negotiation?.clientInfo?.negotiations_city ?? ""}
+                        onChange={(newValue) =>
+                          handleChange(
+                            "clientInfo",
+                            "negotiations_city",
+                            newValue
+                          )
                         }
-                        field="city"
-                        section="client"
                       />
                     </span>
                   </div>
@@ -676,14 +670,20 @@ function ProjectProfile() {
                       />
                     </svg>
                     <span>
-                      State:{" "}
-                      <EditableField
+                      <EditableInput
+                        field="negotiations_state"
+                        negotiationId={negotiationId ?? ""}
+                        label="State"
                         value={
-                          negotiation?.negotiations_Address ??
-                          "State not available"
+                          negotiation?.clientInfo?.negotiations_state ?? ""
                         }
-                        field="state"
-                        section="client"
+                        onChange={(newValue) =>
+                          handleChange(
+                            "clientInfo",
+                            "negotiations_state",
+                            newValue
+                          )
+                        }
                       />
                     </span>
                   </div>
@@ -995,42 +995,51 @@ function ProjectProfile() {
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <Car className="h-5 w-5 text-[#0989E5]" />
                   <span>
-                    <strong>Condition:</strong>{" "}
-                    <EditableField
+                    <EditableDropdown
+                      options={["New", "Used"]}
+                      label="Condition"
                       value={
-                        negotiation?.negotiations_New_or_Used ??
-                        "Condition not available"
+                        negotiation?.dealInfo?.negotiations_New_or_Used ?? ""
                       }
-                      field="condition"
-                      section="deal"
+                      negotiationId={negotiationId ?? ""}
+                      field="negotiations_New_or_Used"
+                      onChange={(newValue) =>
+                        handleChange(
+                          "dealInfo",
+                          "negotiations_New_or_Used",
+                          newValue
+                        )
+                      }
                     />
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <Car className="h-5 w-5 text-[#0989E5]" />
-                  <span>
-                    <strong>Vehicle of Interest:</strong>{" "}
-                    <EditableField
-                      value={
-                        negotiation?.negotiations_Brand ?? "Brand not available"
-                      }
-                      field="make"
-                      section="deal"
-                    />
-                  </span>
+                  <EditableDropdown
+                    options={vehicleOfInterest}
+                    label="Vehicle of Interest"
+                    value={negotiation?.dealInfo?.negotiations_Brand ?? ""}
+                    negotiationId={negotiationId ?? ""}
+                    field="negotiations_Brand"
+                    onChange={(newValue) =>
+                      handleChange("dealInfo", "negotiations_Brand", newValue)
+                    }
+                  />
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <Car className="h-5 w-5 text-[#0989E5]" />
-                  <span>
-                    <strong>Model:</strong>{" "}
-                    <EditableField
-                      value={
-                        negotiation?.negotiations_Model ?? "Model not available"
-                      }
-                      field="model"
-                      section="deal"
-                    />
-                  </span>
+                  <EditableInput
+                    label="Model"
+                    value={
+                      negotiation?.dealInfo?.negotiations_Model ??
+                      "Model not available"
+                    }
+                    negotiationId={negotiationId ?? ""}
+                    field="negotiations_Model"
+                    onChange={(newValue) =>
+                      handleChange("dealInfo", "negotiations_Model", newValue)
+                    }
+                  />
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <svg
@@ -1045,30 +1054,40 @@ function ProjectProfile() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span>
-                    <strong>Trim:</strong>{" "}
-                    <EditableField
-                      value={
-                        negotiation?.negotiations_Trim ?? "Trim not available"
-                      }
-                      field="trim"
-                      section="deal"
-                    />
-                  </span>
+                  <EditableInput
+                    label="Trim"
+                    value={
+                      negotiation?.dealInfo?.negotiations_Trim ??
+                      "Trim info not available"
+                    }
+                    negotiationId={negotiationId ?? ""}
+                    field="negotiations_Trim"
+                    onChange={(newValue) =>
+                      handleChange("dealInfo", "negotiations_Trim", newValue)
+                    }
+                  />
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <Car className="h-5 w-5 text-[#0989E5]" />
-                  <span>
-                    <strong>Drivetrain:</strong>{" "}
-                    <EditableField
-                      value={
-                        negotiation?.negotiations_Drivetrain ??
-                        "Drivetrain not available"
-                      }
-                      field="drivetrain"
-                      section="deal"
-                    />
-                  </span>
+                  <EditableDropdown
+                    options={[
+                      "No Preference",
+                      "Two-wheel drive",
+                      "Four-wheel drive",
+                      "All-wheel drive",
+                    ]}
+                    label="Drivetrain"
+                    value={negotiation?.dealInfo?.negotiations_Drivetrain ?? ""}
+                    negotiationId={negotiationId ?? ""}
+                    field="negotiations_Drivetrain"
+                    onChange={(newValue) =>
+                      handleChange(
+                        "dealInfo",
+                        "negotiations_Drivetrain",
+                        newValue
+                      )
+                    }
+                  />
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <svg
@@ -1079,59 +1098,76 @@ function ProjectProfile() {
                   >
                     <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
                   </svg>
-                  <span>
-                    <strong>Trade In:</strong>{" "}
-                    <EditableField
-                      value={
-                        negotiation?.negotiations_Trade_Details ??
-                        "Trade details not available"
-                      }
-                      field="tradeIn"
-                      section="deal"
-                    />
-                  </span>
+                  <EditableInput
+                    label="Trade In"
+                    value={
+                      negotiation?.dealInfo?.negotiations_Trade_Details ??
+                      "Trade in not available"
+                    }
+                    negotiationId={negotiationId ?? ""}
+                    field="negotiations_Trade_Details"
+                    onChange={(newValue) =>
+                      handleChange(
+                        "dealInfo",
+                        "negotiations_Trade_Details",
+                        newValue
+                      )
+                    }
+                  />
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
-                  <span>
-                    <strong>Finance Type:</strong>{" "}
-                    <EditableField
-                      value={
-                        negotiation?.negotiations_How_To_Pay ??
-                        "No finance type"
-                      }
-                      field="financeType"
-                      section="deal"
-                    />
-                  </span>
+                  <EditableDropdown
+                    options={["Lease", "Cash", "Finance"]}
+                    label="Finance Type"
+                    value={
+                      negotiation?.dealInfo?.negotiations_How_To_Pay ??
+                      "No finance type"
+                    }
+                    negotiationId={negotiationId ?? ""}
+                    field="negotiations_How_To_Pay"
+                    onChange={(newValue) =>
+                      handleChange(
+                        "dealInfo",
+                        "negotiations_How_To_Pay",
+                        newValue
+                      )
+                    }
+                  />
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
-                  <span>
-                    <strong>Budget:</strong>{" "}
-                    <EditableField
-                      value={
-                        negotiation?.negotiations_Budget ??
-                        "Negotiation budget not available"
-                      }
-                      field="budget"
-                      section="deal"
-                    />
-                  </span>
+                  <EditableInput
+                    label="Budget"
+                    value={
+                      negotiation?.dealInfo?.negotiations_Budget ??
+                      "No negotiation budget"
+                    }
+                    negotiationId={negotiationId ?? ""}
+                    field="negotiations_Budget"
+                    onChange={(newValue) =>
+                      handleChange("dealInfo", "negotiations_Budget", newValue)
+                    }
+                  />
                 </div>
                 <div className="flex items-center space-x-2 text-[#202125]">
                   <DollarSign className="h-5 w-5 text-[#0989E5]" />
-                  <span>
-                    <strong>Monthly Budget:</strong>{" "}
-                    <EditableField
-                      value={
-                        negotiation?.negotiations_Payment_Budget ??
-                        "No monthly budget"
-                      }
-                      field="monthlyBudget"
-                      section="deal"
-                    />
-                  </span>
+                  <EditableInput
+                    label="Monthly Budget"
+                    value={
+                      negotiation?.dealInfo?.negotiations_Payment_Budget ??
+                      "No monthly budget"
+                    }
+                    negotiationId={negotiationId ?? ""}
+                    field="negotiations_Payment_Budget"
+                    onChange={(newValue) =>
+                      handleChange(
+                        "dealInfo",
+                        "negotiations_Payment_Budget",
+                        newValue
+                      )
+                    }
+                  />
                 </div>
                 <Separator className="my-4" />
                 <div className="space-y-2">
@@ -1139,7 +1175,7 @@ function ProjectProfile() {
                     Features and Trim Details
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {negotiation?.negotiations_Trim_Package_Options ??
+                    {negotiation?.dealInfo?.negotiations_Trim_Package_Options ??
                       "Trim details not available"}
                   </p>
                 </div>

@@ -21,11 +21,23 @@ body {
   position: relative;
 }
 
+.css-1u9des2-indicatorSeparator {
+  display: none !important;
+}
+.css-13cymwt-control {
+  border-top: none !important;
+  border-right: none !important;
+  border-left: none !important;
+  border-bottom: 2px solid orange !important;
+  border-radius: 0 !important;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
 }
+
 @layer base {
   :root {
     --background: 0 0% 100%;
