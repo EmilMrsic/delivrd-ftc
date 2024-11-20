@@ -26,8 +26,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { MoreHorizontal, Search, Filter, ChevronDown } from "lucide-react";
 import ProjectProfile from "@/components/base/project-profile";
 import { collection, getDocs, query } from "firebase/firestore";
@@ -111,6 +110,10 @@ export default function DealList() {
   const [filteredDeals, setFilteredDeals] = useState<Negotiation[] | undefined>(
     []
   );
+  const [originalDeals, setOriginalDeals] = useState<Negotiation[] | undefined>(
+    []
+  );
+
   const router = useRouter();
 
   const [filters, setFilters] = useState({
@@ -123,17 +126,21 @@ export default function DealList() {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value;
     setSearchTerm(term);
-    const filterDeals = filteredDeals?.filter(
+
+    // If search term is empty, reset to the original list of deals
+    if (term.length === 0) {
+      setFilteredDeals(originalDeals); // Reset to the original unfiltered data
+      return;
+    }
+
+    // Filter the deals based on the search term
+    const filtered = filteredDeals?.filter(
       (deal) =>
         deal.negotiations_Client &&
-        deal.negotiations_Client
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
+        deal.negotiations_Client.toLowerCase().includes(term.toLowerCase())
     );
-    console.log({ filterDeals });
-    setFilteredDeals(filterDeals);
 
-    // applyFilters(term, filters);
+    setFilteredDeals(filtered);
   };
 
   const handleFilterChange = (
@@ -220,7 +227,10 @@ export default function DealList() {
   };
 
   useEffect(() => {
-    fetchAllNegotiation().then((res) => setFilteredDeals(res));
+    fetchAllNegotiation().then((res) => {
+      setOriginalDeals(res);
+      setFilteredDeals(res);
+    });
   }, []);
 
   return (
