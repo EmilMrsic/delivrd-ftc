@@ -15,27 +15,6 @@ const IncomingBidsCard = ({
   dealerData: DealerData[];
   children: React.ReactNode;
 }) => {
-  const parseComment = (comment: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-    return comment.split(urlRegex).map((part: string, index: number) => {
-      if (urlRegex.test(part)) {
-        return (
-          <a
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline"
-          >
-            {part}
-          </a>
-        );
-      }
-      return part;
-    });
-  };
-
   return (
     <Card className="bg-white shadow-lg">
       <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">

@@ -91,6 +91,7 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
       negotiations_Zip_Code: data.negotiations_Zip_Code || null,
       negotiations_city: data.negotiations_city || null,
       negotiations_state: data.negotiations_state || null,
+      negotiations_deal_coordinator: data.negotiations_deal_coordinator,
     },
     dealInfo: {
       negotiations_Brand: data.negotiations_Brand || null,
@@ -120,7 +121,7 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
     },
     otherData: {
       deals: data.deals || [],
-      incoming_bids: data.incoming_bids || [],
+      incoming_bids: data.incoming_bids,
       negotiations_Address: data.negotiations_Address || null,
       negotiations_Color_Options: data.negotiations_Color_Options || [],
     },

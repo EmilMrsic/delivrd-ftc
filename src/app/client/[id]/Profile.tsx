@@ -213,10 +213,7 @@ function ProjectProfile() {
                       {formatDate(item?.timestamp)}
                     </time>
                     <p className="text-[#202125] mb-4 text-sm">
-                      Price: $
-                      {item?.comments.length
-                        ? item?.price
-                        : "No price available"}
+                      Price: ${item?.price ? item?.price : "No price available"}
                     </p>
                     <Dialog>
                       <DialogTrigger asChild>
