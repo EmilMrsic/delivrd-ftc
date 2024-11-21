@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 
 interface EditableDropdownProps {
   label: string;
-  options: string[]; // Options to be displayed in the dropdown
+  options: string[];
   value: string;
-  negotiationId: string; // Negotiation ID to update in Firestore
-  field: string; // The specific field that should be updated in the negotiation document
+  negotiationId: string;
+  field: string;
   onChange: (newValue: string) => void;
+  userField?: string;
 }
 
 const EditableDropdown: React.FC<EditableDropdownProps> = ({
@@ -18,6 +26,7 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
   negotiationId,
   field,
   onChange,
+  userField,
 }) => {
   const [selectedValue, setSelectedValue] = useState(value);
 
@@ -28,11 +37,33 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
   const handleSelect = async (newValue: string) => {
     if (negotiationId && field) {
       try {
+        const usersQuery = query(
+          collection(db, "users"),
+          where("negotiations", "array-contains", negotiationId)
+        );
+
+        const userSnapshot = await getDocs(usersQuery);
+
+        if (userSnapshot.empty) {
+          console.error(
+            "No user found with this negotiationId:",
+            negotiationId
+          );
+          return;
+        }
+
+        const userDoc = userSnapshot.docs[0];
         const negotiationDocRef = doc(db, "negotiations", negotiationId);
 
         await updateDoc(negotiationDocRef, {
           [field]: newValue,
         });
+
+        const userDocRef = doc(db, "users", userDoc.id);
+        if (userField)
+          await updateDoc(userDocRef, {
+            [userField]: value,
+          });
 
         console.log(
           "Updated negotiation field:",

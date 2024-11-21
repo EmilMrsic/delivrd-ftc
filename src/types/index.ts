@@ -142,6 +142,7 @@ export interface EditNegotiationData {
     negotiations_Zip_Code: string | null;
     negotiations_city: string | null;
     negotiations_state: string | null;
+    negotiations_deal_coordinator: string;
   };
   dealInfo: {
     negotiations_Brand: string | null;
@@ -167,9 +168,20 @@ export interface EditNegotiationData {
   };
   otherData: {
     deals: string[];
-    incoming_bids: any[];
+    incoming_bids: string[];
     negotiations_Address: string | null;
-    negotiations_Color_Options: any[];
+    negotiations_Color_Options: [
+      {
+        not_preferred: string;
+        preferred: string;
+        type: "Exterior";
+      },
+      {
+        not_preferred: string;
+        preferred: string;
+        type: "Interior";
+      }
+    ];
   };
 }
 

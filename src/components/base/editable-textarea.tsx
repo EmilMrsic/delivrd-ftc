@@ -9,8 +9,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 
-interface EditableInputProps {
-  label: string;
+interface EditableTextAreaProps {
   value: string;
   onChange: (newValue: string) => void;
   negotiationId: string;
@@ -18,8 +17,7 @@ interface EditableInputProps {
   userField?: string;
 }
 
-const EditableInput: React.FC<EditableInputProps> = ({
-  label,
+const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   value,
   onChange,
   negotiationId,
@@ -28,7 +26,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.value !== value) {
@@ -76,11 +74,9 @@ const EditableInput: React.FC<EditableInputProps> = ({
   };
 
   return (
-    <div className="flex items-center w-full">
-      <label className="font-bold text-[15px]">{label}:</label>
-      <input
+    <div className="flex items-center w-full h-[170px]">
+      <textarea
         ref={inputRef}
-        type="text"
         defaultValue={value}
         onChange={(e) => {
           onChange(e.target.value);
@@ -90,14 +86,14 @@ const EditableInput: React.FC<EditableInputProps> = ({
           setIsFocused(false);
           handleBlur();
         }}
-        className={` ${
+        className={` resize-none ${
           isFocused
             ? "border-2 rounded border-blue-500" // Box border when focused
             : "border-b-2 border-orange-500" // Bottom orange border when not focused
-        } px-2 py-1 focus:outline-none`}
+        } px-2 py-1 w-full h-full focus:outline-none`}
       />
     </div>
   );
 };
 
-export default EditableInput;
+export default EditableTextArea;
