@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   const baseUrl = `${protocol}://${host}`;
   try {
     const actionCodeSettings = {
-      url: `${baseUrl}/complete-signin`,
+      url: `${baseUrl}/complete-signin?email=${to}`,
       handleCodeInApp: true, // Important for email link sign-in
     };
 
