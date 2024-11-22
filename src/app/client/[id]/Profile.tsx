@@ -270,7 +270,7 @@ function ProjectProfile() {
 
                           <div className="space-y-1">
                             <p className="font-semibold text-lg">
-                              {dealerData[index]?.SalesPersonName}
+                              {dealNegotiatorData?.name}
                             </p>
                             <p>
                               {dealerData[index]?.City},{" "}

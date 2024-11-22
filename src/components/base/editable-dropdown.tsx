@@ -8,6 +8,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditableDropdownProps {
   label: string;
@@ -29,6 +30,7 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
   userField,
 }) => {
   const [selectedValue, setSelectedValue] = useState(value);
+  const { toast } = useToast();
 
   useEffect(() => {
     setSelectedValue(value);
@@ -71,6 +73,7 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
           "with value:",
           newValue
         );
+        toast({ title: "Field Updated" });
       } catch (error) {
         console.error("Error updating negotiation:", error);
       }
