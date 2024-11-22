@@ -8,6 +8,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditableInputProps {
   label: string;
@@ -27,6 +28,8 @@ const EditableInput: React.FC<EditableInputProps> = ({
   userField,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+
+  const { toast } = useToast();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -67,7 +70,9 @@ const EditableInput: React.FC<EditableInputProps> = ({
         await updateDoc(negotiationDocRef, {
           [field]: value,
         });
-
+        toast({
+          title: "Field Updated",
+        });
         console.log("Updated negotiation field:", field, "with value:", value);
       } catch (error) {
         console.error("Error handling blur operation:", error);

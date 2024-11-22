@@ -8,6 +8,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditableTextAreaProps {
   value: string;
@@ -27,6 +28,8 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   const [isFocused, setIsFocused] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.value !== value) {
@@ -64,6 +67,10 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
 
         await updateDoc(negotiationDocRef, {
           [field]: value,
+        });
+
+        toast({
+          title: "Field Updated",
         });
 
         console.log("Updated negotiation field:", field, "with value:", value);
