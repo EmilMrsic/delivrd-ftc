@@ -4,14 +4,13 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const { to } = await req.json();
   const subject = "Sign up for Delivrd";
-  const html =
-    `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html>
   <body>
   <p>Hey 👋,</p>
   <p>Your email (<strong>${to}</strong>) is not in our system. Don't worry, here's how to sign up:</p>
   <p>
-    Dealers doing the first to call list click <a href="https://formless.ai/c/HdovmWUnYjN7">here</a>
+    Dealers joining the first to call list click <a href="https://formless.ai/c/HdovmWUnYjN7">here</a>
   </p>
   <p>
     Looking to retain our service for your next car? Hire us or book a consultation session first  <a href="https://www.delivrdto.me/schedule">here</a>
