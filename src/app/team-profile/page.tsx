@@ -142,10 +142,37 @@ function ProjectProfile() {
     newValue: string
   ) => {
     setNegotiation((prevState: any) => {
-      const updatedParent = {
-        ...prevState[parentKey],
-        [childKey]: newValue,
-      };
+      let updatedParent: any = {};
+
+      if (
+        parentKey === "otherData" &&
+        childKey.startsWith("negotiations_Color_Options")
+      ) {
+        updatedParent = { ...prevState[parentKey] };
+        const regex = /negotiations_Color_Options\[(\d+)\]\.(\w+)/;
+        const match = childKey.match(regex);
+
+        if (match) {
+          const index = parseInt(match[1]);
+          const field = match[2];
+
+          if (
+            Array.isArray(updatedParent.negotiations_Color_Options) &&
+            updatedParent.negotiations_Color_Options[index]
+          ) {
+            updatedParent.negotiations_Color_Options[index] = {
+              ...updatedParent.negotiations_Color_Options[index],
+              [field]: newValue,
+            };
+          }
+        }
+      } else {
+        updatedParent = {
+          ...prevState[parentKey],
+          [childKey]: newValue,
+        };
+      }
+
       return {
         ...prevState,
         [parentKey]: updatedParent,

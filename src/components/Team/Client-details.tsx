@@ -54,6 +54,21 @@ const ClientDetails = ({
               </span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
+              <User className="h-5 w-5 text-[#0989E5]" />
+              <span>
+                <EditableInput
+                  label="Name"
+                  value={negotiation?.clientInfo?.negotiations_Client ?? ""}
+                  userField="name"
+                  field="negotiations_Client"
+                  negotiationId={negotiationId ?? ""}
+                  onChange={(newValue) =>
+                    handleChange("clientInfo", "negotiations_Client", newValue)
+                  }
+                />
+              </span>
+            </div>
+            <div className="flex items-center space-x-2 text-[#202125]">
               <Mail className="h-5 w-5 text-[#0989E5]" />
               <span>
                 <EditableInput
@@ -83,7 +98,6 @@ const ClientDetails = ({
               </svg>
               <span>
                 <EditableInput
-                  userField="deals[0].zip_code"
                   field="negotiations_Zip_Code"
                   negotiationId={negotiationId ?? ""}
                   label="Zip"
@@ -125,7 +139,6 @@ const ClientDetails = ({
               </svg>
               <span>
                 <EditableInput
-                  userField="city"
                   field="negotiations_city"
                   negotiationId={negotiationId ?? ""}
                   label="City"

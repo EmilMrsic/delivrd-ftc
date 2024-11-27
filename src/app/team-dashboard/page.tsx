@@ -29,7 +29,7 @@ import {
 
 import { MoreHorizontal, Search, Filter, ChevronDown } from "lucide-react";
 import ProjectProfile from "@/components/base/project-profile";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, or, query } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { Negotiation } from "@/types";
 import { useRouter } from "next/navigation";
@@ -120,7 +120,7 @@ export default function DealList() {
 
   const totalPages = Math.ceil(filteredDeals?.length ?? 1 / ITEMS_PER_PAGE);
 
-  const currentDeals = filteredDeals?.slice(
+  let currentDeals = filteredDeals?.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -144,13 +144,11 @@ export default function DealList() {
     const term = event.target.value;
     setSearchTerm(term);
 
-    // If search term is empty, reset to the original list of deals
     if (term.length === 0) {
-      setFilteredDeals(originalDeals); // Reset to the original unfiltered data
+      setFilteredDeals(originalDeals);
       return;
     }
 
-    // Filter the deals based on the search term
     const filtered = filteredDeals?.filter(
       (deal) =>
         deal.negotiations_Client &&
@@ -173,7 +171,19 @@ export default function DealList() {
       } else {
         updatedFilters[filterType] = [...updatedFilters[filterType], value];
       }
-      applyFilters(searchTerm, updatedFilters);
+      if (
+        updatedFilters.makes.length === 0 &&
+        updatedFilters.models.length === 0 &&
+        updatedFilters.stages.length === 0 &&
+        updatedFilters.paymentTypes.length === 0
+      ) {
+        currentDeals = originalDeals?.slice(
+          (currentPage - 1) * ITEMS_PER_PAGE,
+          currentPage * ITEMS_PER_PAGE
+        );
+      } else {
+        applyFilters(value, updatedFilters);
+      }
       return updatedFilters;
     });
   };
