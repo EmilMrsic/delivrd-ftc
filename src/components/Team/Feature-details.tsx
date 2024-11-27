@@ -11,7 +11,7 @@ import { vehicleOfInterest } from "@/lib/utils";
 type FeatureDetailsProps = {
   negotiation: EditNegotiationData | null;
   negotiationId: string | null;
-  handleChange: (section: string, field: string, value: string) => void;
+  handleChange: (section: string, child: string, value: string) => void;
   setShowStickyHeader?: (item: boolean) => void;
 };
 
@@ -53,7 +53,6 @@ const FeatureDetails = ({
           <Car className="h-5 w-5 text-[#0989E5]" />
           <span>
             <EditableDropdown
-              userField="condition"
               options={["New", "Used"]}
               label="Condition"
               value={negotiation?.dealInfo?.negotiations_New_or_Used ?? ""}
@@ -68,7 +67,6 @@ const FeatureDetails = ({
         <div className="flex items-center space-x-2 text-[#202125]">
           <Car className="h-5 w-5 text-[#0989E5]" />
           <EditableDropdown
-            userField="brand"
             options={vehicleOfInterest}
             label="Vehicle of Interest"
             value={negotiation?.dealInfo?.negotiations_Brand ?? ""}
@@ -122,7 +120,6 @@ const FeatureDetails = ({
         <div className="flex items-center space-x-2 text-[#202125]">
           <Car className="h-5 w-5 text-[#0989E5]" />
           <EditableDropdown
-            userField="drive_train"
             options={[
               "No Preference",
               "Two-wheel drive",
@@ -163,7 +160,6 @@ const FeatureDetails = ({
         <div className="flex items-center space-x-2 text-[#202125]">
           <DollarSign className="h-5 w-5 text-[#0989E5]" />
           <EditableDropdown
-            userField="payment_type"
             options={["Lease", "Cash", "Finance"]}
             label="Finance Type"
             value={
@@ -231,37 +227,85 @@ const FeatureDetails = ({
           <h3 className="font-semibold text-lg">Colors</h3>
           <div className="flex items-center space-x-2 text-[#202125]">
             <ThumbsUp className="h-5 w-5 text-[#0989E5]" />
-            <span>
-              <strong>Desired Exterior:</strong>{" "}
-              {negotiation?.otherData?.negotiations_Color_Options[0]?.preferred}
-            </span>
+            <EditableInput
+              negotiations={negotiation}
+              label="Desired Exterior"
+              value={
+                negotiation?.otherData?.negotiations_Color_Options[0]
+                  ?.preferred ?? "No preference"
+              }
+              negotiationId={negotiationId ?? ""}
+              field="negotiations_Color_Options[0].preferred"
+              onChange={(newValue) =>
+                handleChange(
+                  "otherData",
+                  "negotiations_Color_Options[0].preferred",
+                  newValue
+                )
+              }
+            />
           </div>
           <div className="flex items-center space-x-2 text-[#202125]">
             <ThumbsUp className="h-5 w-5 text-[#0989E5]" />
-            <span>
-              <strong>Desired Interior:</strong>{" "}
-              {negotiation?.otherData?.negotiations_Color_Options[1]?.preferred}
-            </span>
-          </div>
-          <div className="flex items-center space-x-2 text-[#202125]">
-            <X className="h-5 w-5 text-red-500" />
-            <span>
-              <strong>Exterior Deal Breakers:</strong>{" "}
-              {
-                negotiation?.otherData?.negotiations_Color_Options[0]
-                  ?.not_preferred
-              }
-            </span>
-          </div>
-          <div className="flex items-center space-x-2 text-[#202125]">
-            <X className="h-5 w-5 text-red-500" />
-            <span>
-              <strong>Interior Deal Breakers:</strong>{" "}
-              {
+            <EditableInput
+              negotiations={negotiation}
+              label="Desired Interior"
+              value={
                 negotiation?.otherData?.negotiations_Color_Options[1]
-                  ?.not_preferred
+                  ?.preferred ?? "No preference"
               }
-            </span>
+              negotiationId={negotiationId ?? ""}
+              field="negotiations_Color_Options[1].preferred"
+              onChange={(newValue) =>
+                handleChange(
+                  "otherData",
+                  "negotiations_Color_Options[1].preferred",
+                  newValue
+                )
+              }
+            />
+          </div>
+          <div className="flex items-center space-x-2 text-[#202125]">
+            <X className="h-5 w-5 text-red-500" />
+            <EditableInput
+              negotiations={negotiation}
+              label="Exterior Deal Breaker"
+              value={
+                negotiation?.otherData?.negotiations_Color_Options[0]
+                  ?.not_preferred ?? "No preference"
+              }
+              negotiationId={negotiationId ?? ""}
+              field="negotiations_Color_Options[0]
+                  .not_preferred"
+              onChange={(newValue) =>
+                handleChange(
+                  "otherData",
+                  "negotiations_Color_Options[0].not_preferred",
+                  newValue
+                )
+              }
+            />
+          </div>
+          <div className="flex items-center space-x-2 text-[#202125]">
+            <X className="h-5 w-5 text-red-500" />
+            <EditableInput
+              negotiations={negotiation}
+              label="Interior Deal Breaker"
+              value={
+                negotiation?.otherData?.negotiations_Color_Options[1]
+                  ?.not_preferred ?? "No preference"
+              }
+              negotiationId={negotiationId ?? ""}
+              field="negotiations_Color_Options[1]
+                  .not_preferred"
+              onChange={(newValue) =>
+                handleChange(
+                  "otherData",
+                  "negotiations_Color_Options[1].not_preferred",
+                  newValue
+                )
+              }
+            />
           </div>
         </div>
       </CardContent>

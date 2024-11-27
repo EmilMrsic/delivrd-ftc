@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useToast } from "@/hooks/use-toast";
+import { EditNegotiationData } from "@/types";
 
 interface EditableInputProps {
   label: string;
@@ -17,6 +18,7 @@ interface EditableInputProps {
   negotiationId: string;
   field: string;
   userField?: string;
+  negotiations?: EditNegotiationData | null;
 }
 
 const EditableInput: React.FC<EditableInputProps> = ({
@@ -26,6 +28,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
   negotiationId,
   field,
   userField,
+  negotiations,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -60,24 +63,64 @@ const EditableInput: React.FC<EditableInputProps> = ({
         const userDoc = userSnapshot.docs[0];
         console.log("User found:", userDoc.id, userDoc.data());
         const userDocRef = doc(db, "users", userDoc.id);
-        if (userField)
+
+        if (userField) {
           await updateDoc(userDocRef, {
             [userField]: value,
           });
+        }
 
         const negotiationDocRef = doc(db, "negotiations", negotiationId);
 
-        await updateDoc(negotiationDocRef, {
-          [field]: value,
-        });
-        toast({
-          title: "Field Updated",
-        });
-        console.log("Updated negotiation field:", field, "with value:", value);
+        const colorOptions =
+          negotiations?.otherData?.negotiations_Color_Options;
+
+        if (field.includes("negotiations_Color_Options") && colorOptions) {
+          const index = parseInt(field.split("[")[1].split("]")[0]);
+          const property = field.split(".")[1];
+
+          if (index >= 0 && index < colorOptions.length) {
+            const updatedColorOptions = [...colorOptions];
+            updatedColorOptions[index] = {
+              ...updatedColorOptions[index],
+              [property]: value,
+            };
+
+            await updateDoc(negotiationDocRef, {
+              negotiations_Color_Options: updatedColorOptions,
+            });
+            toast({
+              title: "Field Updated",
+            });
+          } else {
+            console.error(
+              "Index out of bounds for negotiations_Color_Options array"
+            );
+          }
+        } else {
+          await updateDoc(negotiationDocRef, {
+            [field]: value,
+          });
+          toast({
+            title: "Field Updated",
+          });
+          console.log(
+            "Updated negotiation field:",
+            field,
+            "with value:",
+            value
+          );
+        }
       } catch (error) {
         console.error("Error handling blur operation:", error);
       }
     }
+  };
+  const truncateValue = (value: string) => {
+    if (value.length > 20) {
+      return `${value.slice(0, 20)}...`;
+    }
+    return value;
   };
 
   return (
@@ -86,7 +129,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
       <input
         ref={inputRef}
         type="text"
-        defaultValue={value}
+        value={isFocused ? value : truncateValue(value)}
         onChange={(e) => {
           onChange(e.target.value);
         }}
@@ -97,8 +140,8 @@ const EditableInput: React.FC<EditableInputProps> = ({
         }}
         className={` ${
           isFocused
-            ? "border-2 rounded border-blue-500" // Box border when focused
-            : "border-b-2 border-orange-500" // Bottom orange border when not focused
+            ? "border-2 rounded border-blue-500"
+            : "border-b-2 border-orange-500"
         } px-2 py-1 focus:outline-none`}
       />
     </div>
