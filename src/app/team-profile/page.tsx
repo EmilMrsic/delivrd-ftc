@@ -346,7 +346,6 @@ function ProjectProfile() {
         ) as IncomingBid[];
 
         setIncomingBids(validBids);
-        console.log("Found Incoming Bids:", validBids);
       } catch (error) {
         console.error("Error fetching incoming bids:", error);
       }

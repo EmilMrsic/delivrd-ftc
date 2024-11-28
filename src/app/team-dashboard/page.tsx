@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -20,52 +19,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { dealStageOptions, vehicleOfInterest } from "@/lib/utils";
 
 import { MoreHorizontal, Search, Filter, ChevronDown } from "lucide-react";
-import ProjectProfile from "@/components/base/project-profile";
-import { collection, getDocs, or, query } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { Negotiation } from "@/types";
+import { DealNegotiator, NegotiationData } from "@/types";
 import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
+import DealNegotiatorDialog from "@/components/Team/deal-negotiator-dialog";
 
 const NOW = new Date("2024-10-17");
-
-const stages = [
-  { name: "PAID", category: "paid" },
-  { name: "Contacted", category: "paid" },
-  { name: "Deal Started", category: "paid" },
-  { name: "Follow Up", category: "uncertain" },
-  { name: "Scheduled", category: "paid" },
-  { name: "Proposal Sent", category: "paid" },
-  { name: "Ready & Confirmed", category: "paid" },
-  { name: "Paid", category: "paid" },
-  { name: "Shipping", category: "paid" },
-  { name: "Delivery Scheduled", category: "paid" },
-  { name: "Tomi Needs To Review", category: "uncertain" },
-  { name: "Ask for Review", category: "paid" },
-  { name: "Client Nurture", category: "uncertain" },
-  { name: "Paid Need to finalize", category: "paid" },
-  { name: "Follow Up Issue", category: "negative" },
-  { name: "Paid Holding", category: "uncertain" },
-  { name: "Paid Lost Contact", category: "negative" },
-  { name: "Client Delayed 1 Week", category: "negative" },
-  { name: "Client Delayed 2 Weeks", category: "negative" },
-  { name: "Client Delayed Other", category: "negative" },
-  { name: "Manually Added", category: "uncertain" },
-  { name: "Insta-Pay", category: "paid" },
-  { name: "Long Term Order", category: "uncertain" },
-  { name: "Lost", category: "negative" },
-  { name: "No Show", category: "negative" },
-  { name: "Unqualified", category: "negative" },
-  { name: "Refunded", category: "negative" },
-  { name: "Canceled", category: "negative" },
-];
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -89,40 +58,29 @@ const getElapsedTime = (startDate: string, endDate: Date) => {
   }
 };
 
-const getStageColor = (stageName: string) => {
-  const stage = stages.find((s) => s.name === stageName);
-  if (!stage) return "bg-gray-100 text-gray-800 border-gray-300";
-
-  switch (stage.category) {
-    case "negative":
-      return "bg-red-100 text-red-800 border-red-300";
-    case "uncertain":
-      return "bg-gray-100 text-gray-800 border-gray-300";
-    case "paid":
-      return "bg-green-100 text-green-800 border-green-300";
-    default:
-      return "bg-blue-100 text-blue-800 border-blue-300";
-  }
-};
-
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredDeals, setFilteredDeals] = useState<Negotiation[] | undefined>(
-    []
-  );
-  const [originalDeals, setOriginalDeals] = useState<Negotiation[] | undefined>(
-    []
-  );
+  const [filteredDeals, setFilteredDeals] = useState<
+    NegotiationData[] | undefined
+  >([]);
+  const [originalDeals, setOriginalDeals] = useState<
+    NegotiationData[] | undefined
+  >([]);
+  const [stopPropagation, setStopPropagation] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [negotiatorData, setNegotiatorData] = useState<DealNegotiator>();
 
-  const ITEMS_PER_PAGE = 25;
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const itemsPerPageOptions = [25, 50, 75, 100];
+  const router = useRouter();
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(filteredDeals?.length ?? 1 / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredDeals?.length ?? 1 / itemsPerPage);
 
   let currentDeals = filteredDeals?.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   const handlePageChange = (page: number) => {
@@ -131,17 +89,14 @@ export default function DealList() {
     }
   };
 
-  const router = useRouter();
-
   const [filters, setFilters] = useState({
     stages: [] as string[],
     makes: [] as string[],
     models: [] as string[],
-    paymentTypes: [] as string[],
   });
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const term = event.target.value;
+    const term = event.target.value.toLowerCase();
     setSearchTerm(term);
 
     if (term.length === 0) {
@@ -149,11 +104,14 @@ export default function DealList() {
       return;
     }
 
-    const filtered = filteredDeals?.filter(
-      (deal) =>
-        deal.negotiations_Client &&
-        deal.negotiations_Client.toLowerCase().includes(term.toLowerCase())
-    );
+    const filtered = originalDeals?.filter((deal) => {
+      return (
+        deal.negotiations_Client?.toLowerCase().includes(term) ||
+        deal.negotiations_Brand?.toLowerCase().includes(term) ||
+        deal.negotiations_Model?.toLowerCase().includes(term) ||
+        deal.negotiations_Status?.toLowerCase().includes(term)
+      );
+    });
 
     setFilteredDeals(filtered);
   };
@@ -164,6 +122,7 @@ export default function DealList() {
   ) => {
     setFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
+
       if (updatedFilters[filterType].includes(value)) {
         updatedFilters[filterType] = updatedFilters[filterType].filter(
           (item) => item !== value
@@ -171,86 +130,96 @@ export default function DealList() {
       } else {
         updatedFilters[filterType] = [...updatedFilters[filterType], value];
       }
+
       if (
         updatedFilters.makes.length === 0 &&
-        updatedFilters.models.length === 0 &&
-        updatedFilters.stages.length === 0 &&
-        updatedFilters.paymentTypes.length === 0
+        updatedFilters.stages.length === 0
       ) {
-        currentDeals = originalDeals?.slice(
-          (currentPage - 1) * ITEMS_PER_PAGE,
-          currentPage * ITEMS_PER_PAGE
-        );
+        setFilteredDeals(originalDeals);
       } else {
-        applyFilters(value, updatedFilters);
+        applyFilters(updatedFilters);
       }
+
       return updatedFilters;
     });
   };
 
   const fetchAllNegotiation = async () => {
     try {
-      const negotiationQuery = query(collection(db, "negotiations"));
-      const querySnapshot = await getDocs(negotiationQuery);
+      const userData = localStorage.getItem("user");
+      const parseUserData = JSON.parse(userData ?? "");
+      const id = parseUserData.deal_coordinator_id;
 
-      const negotiationData = querySnapshot.docs
-        .map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            negotiations_Client: data.negotiations_Client,
-            negotiations_Brand: data.negotiations_Brand,
-            negotiations_Model: data.negotiations_Model,
-            negotiations_Invoice_Status: data.negotiations_Invoice_Status,
-            negotiations_Created: data.negotiations_Created,
-            negotiations_Status: data.negotiations_Status,
-            lastUpdated: data.negotiations_Status_Updated, // Assuming this is a Firestore Timestamp
-          };
-        })
-        .filter(
-          (negotiation) =>
-            negotiation.negotiations_Client &&
-            negotiation.negotiations_Brand &&
-            negotiation.negotiations_Model &&
-            negotiation.negotiations_Status
-        ); // Filter to include only those with all specified attributes
+      if (!id) {
+        console.log("deal_coordinator_id not found in user data");
+        return;
+      }
 
-      return negotiationData; // Return the filtered data
+      const teamDocRef = doc(db, "team delivrd", id);
+      const teamSnapshot = await getDoc(teamDocRef);
+
+      if (!teamSnapshot.exists()) {
+        console.log("Team document not found");
+        return;
+      }
+
+      const teamData = teamSnapshot.data();
+      setNegotiatorData(teamData as DealNegotiator);
+      const activeDeals = teamData.active_deals;
+
+      if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
+        console.log("No active deals found");
+        return;
+      }
+
+      const negotiationsData = [];
+      for (const id of activeDeals) {
+        const negotiationDocRef = doc(db, "negotiations", id);
+        const negotiationSnapshot = await getDoc(negotiationDocRef);
+
+        if (negotiationSnapshot.exists()) {
+          const data = negotiationSnapshot.data();
+          negotiationsData.push(data);
+        }
+      }
+
+      return negotiationsData as NegotiationData[];
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching negotiations:", error);
     }
   };
 
-  const applyFilters = (term: string, currentFilters: typeof filters) => {
-    const filtered = filteredDeals?.filter(
-      (deal) =>
-        deal.negotiations_Client?.toLowerCase().includes(term.toLowerCase()) ||
-        deal.negotiations_Invoice_Status
-          ?.toLowerCase()
-          .includes(term.toLowerCase()) ||
-        ((currentFilters.makes.length === 0 ||
-          currentFilters.makes.includes(deal.negotiations_Brand ?? "")) &&
-          (currentFilters.models.length === 0 ||
-            currentFilters.models.includes(deal.negotiations_Model ?? "")) &&
-          (currentFilters.paymentTypes.length === 0 ||
-            currentFilters.paymentTypes.includes(
-              deal.negotiations_Invoice_Status ?? ""
-            )))
-    );
+  const applyFilters = (currentFilters: typeof filters) => {
+    const filtered = originalDeals?.filter((deal) => {
+      const matchesStage =
+        currentFilters.stages.length === 0 ||
+        currentFilters.stages.includes(deal.negotiations_Status ?? "");
+
+      const matchesMake =
+        currentFilters.makes.length === 0 ||
+        currentFilters.makes.includes(deal.negotiations_Brand ?? "");
+
+      return matchesStage && matchesMake;
+    });
+
     setFilteredDeals(filtered);
   };
 
-  const handleStageChange = (dealId: string, newStage: string) => {
-    const updatedDeals = filteredDeals?.map((deal) =>
-      deal?.id ?? "" === dealId
-        ? {
-            ...deal,
-            stage: newStage,
-            lastUpdateDate: NOW.toISOString().split("T")[0],
-          }
-        : deal
-    );
-    setFilteredDeals(updatedDeals);
+  const handleStageChange = async (id: string, newStage: string) => {
+    try {
+      await updateDoc(doc(db, "negotiations", id), {
+        negotiations_Status: newStage,
+      });
+
+      setFilteredDeals((prevDeals) =>
+        prevDeals?.map((deal) =>
+          deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
+        )
+      );
+      toast({ title: "Status updated" });
+    } catch (error) {
+      console.error("Error updating stage:", error);
+    }
   };
 
   useEffect(() => {
@@ -309,16 +278,16 @@ export default function DealList() {
                           <ChevronDown className="ml-2 h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56">
-                        {stages.map((stage) => (
+                      <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                        {dealStageOptions.map((stage, index) => (
                           <DropdownMenuCheckboxItem
-                            key={stage.name}
-                            checked={filters.stages.includes(stage.name)}
+                            key={index}
+                            checked={filters.stages.includes(stage)}
                             onCheckedChange={() =>
-                              handleFilterChange("stages", stage.name)
+                              handleFilterChange("stages", stage)
                             }
                           >
-                            {stage.name}
+                            {stage}
                           </DropdownMenuCheckboxItem>
                         ))}
                       </DropdownMenuContent>
@@ -336,16 +305,10 @@ export default function DealList() {
                           <ChevronDown className="ml-2 h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56">
-                        {Array.from(
-                          new Set(
-                            filteredDeals?.map(
-                              (deal) => deal.negotiations_Brand
-                            )
-                          )
-                        ).map((make: any) => (
+                      <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                        {vehicleOfInterest.map((make: string, index) => (
                           <DropdownMenuCheckboxItem
-                            key={make}
+                            key={index}
                             checked={filters.makes.includes(make ?? "")}
                             onCheckedChange={() =>
                               handleFilterChange("makes", make ?? "")
@@ -361,14 +324,16 @@ export default function DealList() {
               </PopoverContent>
             </Popover>
           </div>
-          <Table>
+          <Table className="overflow-visible">
             <TableHeader>
               <TableRow>
                 <TableHead>Client</TableHead>
                 <TableHead>Make/Model</TableHead>
                 <TableHead>Stage</TableHead>
+                <TableHead>State</TableHead>
                 <TableHead>Submitted Date</TableHead>
                 <TableHead>Last Update</TableHead>
+                <TableHead>Start Date</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -379,7 +344,14 @@ export default function DealList() {
                     className="cursor-pointer"
                     key={deal.id}
                     onClick={(e) => {
-                      router.push(`/team-profile?id=${deal.id}`);
+                      if (!stopPropagation) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/team-profile?id=${deal.id}`);
+                      } else {
+                        console.log(stopPropagation);
+                        setStopPropagation(false);
+                      }
                     }}
                   >
                     <TableCell className="font-medium max-w-[220px]">
@@ -391,34 +363,34 @@ export default function DealList() {
                     </TableCell>
 
                     <TableCell>
-                      <DropdownMenu>
+                      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                         <DropdownMenuTrigger asChild>
-                          <Badge
-                            data-interactive
+                          <Button
                             variant="outline"
-                            className={`cursor-pointer ${getStageColor(
-                              deal.negotiations_Invoice_Status ?? ""
-                            )}`}
+                            className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
                           >
-                            {deal.negotiations_Status}
-                          </Badge>
+                            <p>{deal.negotiations_Status}</p>
+                          </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56">
-                          <DropdownMenuLabel>Change Stage</DropdownMenuLabel>
-                          {stages.map((stage) => (
+                        <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                          {dealStageOptions.map((stage: string) => (
                             <DropdownMenuItem
-                              key={stage.name}
+                              key={stage}
                               onClick={(e) => {
+                                e.preventDefault();
                                 e.stopPropagation();
-                                handleStageChange(deal.id, stage.name);
+                                handleStageChange(deal.id, stage); // Update stage
+                                setIsOpen(false);
                               }}
                             >
-                              {stage.name}
+                              {stage}
                             </DropdownMenuItem>
                           ))}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
+
+                    <TableCell>{deal.negotiations_state}</TableCell>
 
                     <TableCell>
                       <div>{formatDate(deal.negotiations_Created ?? "")}</div>
@@ -428,57 +400,44 @@ export default function DealList() {
                     </TableCell>
 
                     <TableCell>
-                      <div>{formatDate(deal.lastUpdated)}</div>
+                      <div>
+                        {formatDate(deal.negotiations_Status_Updated ?? "")}
+                      </div>
                       <div className="text-xs text-gray-400">
-                        {getElapsedTime(deal.lastUpdated, NOW)}
+                        {getElapsedTime(
+                          deal.negotiations_Status_Updated ?? "",
+                          NOW
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        {formatDate(deal.negotiations_Deal_Start_Date ?? "")}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {getElapsedTime(
+                          deal.negotiations_Deal_Start_Date ?? "",
+                          NOW
+                        )}
                       </div>
                     </TableCell>
 
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="h-8 w-8 p-0"
-                            data-interactive
-                          >
+                          <Button variant="ghost" className="h-8 w-8 p-0">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <DropdownMenuItem
-                                data-interactive
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Prevent row click
-                                }}
-                              >
-                                View Details
-                              </DropdownMenuItem>
-                            </DialogTrigger>
-                            <DialogContent
-                              className="max-w-7xl"
-                              onClick={(e) => e.stopPropagation()} // Ensure dialog stays open
-                            >
-                              <ProjectProfile
-                                name={deal.negotiations_Client ?? ""}
-                                description="Text Description"
-                                status={deal.negotiations_Invoice_Status ?? ""}
-                                manager={{
-                                  name: "Test",
-                                  avatar: "Test Avatar",
-                                }}
-                                team={[{ name: "Test", avatar: "Test Avatar" }]}
-                                startDate={formatDate(
-                                  deal.negotiations_Created ?? ""
-                                )}
-                                endDate={formatDate(deal.lastUpdated ?? "")}
-                              />
-                            </DialogContent>
-                          </Dialog>
+                          <DealNegotiatorDialog
+                            setStopPropogation={setStopPropagation}
+                            deal={deal}
+                            dealNegotiator={negotiatorData}
+                            formatDate={formatDate}
+                          />
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -488,7 +447,7 @@ export default function DealList() {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={8} className="text-center py-4">
                     <svg
                       className="animate-spin h-8 w-8 text-gray-400 mx-auto"
                       xmlns="http://www.w3.org/2000/svg"

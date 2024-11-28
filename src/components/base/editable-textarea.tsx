@@ -80,11 +80,22 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      const isTruncated = value.length > 20 && !isFocused;
+      inputRef.current.value = isTruncated ? value.slice(0, 20) : value;
+      inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+    }
+  }, [value, isFocused]);
+
   return (
-    <div className="flex items-center w-full h-[170px]">
+    <div className="flex items-center w-full">
       <textarea
         ref={inputRef}
-        defaultValue={value}
+        value={
+          isFocused || value.length <= 20 ? value : value.slice(0, 20) + "..."
+        }
         onChange={(e) => {
           onChange(e.target.value);
         }}
@@ -95,9 +106,14 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
         }}
         className={` resize-none ${
           isFocused
-            ? "border-2 rounded border-blue-500" // Box border when focused
-            : "border-b-2 border-orange-500" // Bottom orange border when not focused
+            ? "border-2 rounded border-blue-500"
+            : "border-b-2 border-orange-500"
         } px-2 py-1 w-full h-full focus:outline-none`}
+        style={{
+          overflow: "hidden",
+
+          height: "auto",
+        }}
       />
     </div>
   );
