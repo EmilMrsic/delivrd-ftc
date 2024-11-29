@@ -33,6 +33,8 @@ import { DealNegotiator, NegotiationData } from "@/types";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import DealNegotiatorDialog from "@/components/Team/deal-negotiator-dialog";
+import TeamTablePagination from "@/components/Team/team-table-pagination";
+import FilterPopup from "@/components/Team/filter-popup";
 
 const NOW = new Date("2024-10-17");
 
@@ -69,10 +71,9 @@ export default function DealList() {
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState(false);
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiator>();
+  const router = useRouter();
 
   const [itemsPerPage, setItemsPerPage] = useState(25);
-  const itemsPerPageOptions = [25, 50, 75, 100];
-  const router = useRouter();
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -83,10 +84,12 @@ export default function DealList() {
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (page: number) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+  const handleItemsPerPageChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const newItemsPerPage = Number(e.target.value);
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
   };
 
   const [filters, setFilters] = useState({
@@ -257,72 +260,11 @@ export default function DealList() {
                 className="pl-8"
               />
             </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filter
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none mb-2">Stages</h4>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between"
-                        >
-                          Select Stages
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                        {dealStageOptions.map((stage, index) => (
-                          <DropdownMenuCheckboxItem
-                            key={index}
-                            checked={filters.stages.includes(stage)}
-                            onCheckedChange={() =>
-                              handleFilterChange("stages", stage)
-                            }
-                          >
-                            {stage}
-                          </DropdownMenuCheckboxItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none mb-2">Makes</h4>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between"
-                        >
-                          Select Makes
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                        {vehicleOfInterest.map((make: string, index) => (
-                          <DropdownMenuCheckboxItem
-                            key={index}
-                            checked={filters.makes.includes(make ?? "")}
-                            onCheckedChange={() =>
-                              handleFilterChange("makes", make ?? "")
-                            }
-                          >
-                            {make}
-                          </DropdownMenuCheckboxItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+
+            <FilterPopup
+              handleFilterChange={handleFilterChange}
+              filters={filters}
+            />
           </div>
           <Table className="overflow-visible">
             <TableHeader>
@@ -473,25 +415,13 @@ export default function DealList() {
               </TableBody>
             )}
           </Table>
-          <div className="flex justify-between items-center mt-4">
-            <Button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-4 py-2 text-white bg-black rounded disabled:opacity-50"
-            >
-              Previous
-            </Button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 text-white bg-black rounded disabled:opacity-50"
-            >
-              Next
-            </Button>
-          </div>
+          <TeamTablePagination
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+            handleItemsPerPageChange={handleItemsPerPageChange}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+          />
         </CardContent>
       </Card>
     </div>
