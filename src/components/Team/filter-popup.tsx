@@ -9,16 +9,23 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { dealStageOptions, vehicleOfInterest } from "@/lib/utils";
+import { DealNegotiator } from "@/types";
 
 type FilterPopupProps = {
   filters: any;
   handleFilterChange: (
-    type: "stages" | "makes" | "models",
+    type: "stages" | "makes" | "models" | "dealCoordinators",
     value: string
   ) => void;
+
+  dealCoordinators: DealNegotiator[];
 };
 
-const FilterPopup = ({ filters, handleFilterChange }: FilterPopupProps) => {
+const FilterPopup = ({
+  filters,
+  handleFilterChange,
+  dealCoordinators,
+}: FilterPopupProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -70,6 +77,30 @@ const FilterPopup = ({ filters, handleFilterChange }: FilterPopupProps) => {
                     }
                   >
                     {make}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="space-y-2">
+            <h4 className="font-medium leading-none mb-2">Deal Coordinators</h4>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  Select Deal Coordinators
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                {dealCoordinators.map((coordinator, index) => (
+                  <DropdownMenuCheckboxItem
+                    key={index}
+                    checked={filters.dealCoordinators.includes(coordinator.id)}
+                    onCheckedChange={() =>
+                      handleFilterChange("dealCoordinators", coordinator.id)
+                    }
+                  >
+                    {coordinator.name}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>

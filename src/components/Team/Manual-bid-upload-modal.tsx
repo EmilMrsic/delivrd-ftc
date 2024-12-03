@@ -1,7 +1,6 @@
 "use client";
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
-import { Button } from "../ui/button";
 import { UploadIcon } from "lucide-react";
 import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, storage } from "@/firebase/config";
@@ -49,7 +48,6 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
 
   const [loader, setLoader] = useState<boolean>(false);
@@ -125,6 +123,7 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       ) as string[];
     }
     const bidData = {
+      negotiationId: id,
       dealerName: formData.dealerName,
       dealerNumber: formData.dealerNumber,
       salesPersonName: formData.salesPersonName ?? "",

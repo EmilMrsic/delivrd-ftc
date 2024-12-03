@@ -93,9 +93,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
     <div className="flex items-center w-full">
       <textarea
         ref={inputRef}
-        value={
-          isFocused || value.length <= 20 ? value : value.slice(0, 20) + "..."
-        }
+        value={value}
         onChange={(e) => {
           onChange(e.target.value);
         }}
