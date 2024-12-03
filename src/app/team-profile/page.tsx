@@ -25,12 +25,18 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { DealNegotiator, EditNegotiationData, IncomingBid } from "@/types";
+import {
+  DealerData,
+  DealNegotiator,
+  EditNegotiationData,
+  IncomingBid,
+} from "@/types";
 import { formatDate, mapNegotiationData } from "@/lib/utils";
 import FeatureDetails from "@/components/Team/Feature-details";
 import StickyHeader from "@/components/Team/Sticky-header";
 import ClientDetails from "@/components/Team/Client-details";
 import ManualBidUpload from "@/components/Team/Manual-bid-upload-modal";
+import Link from "next/link";
 
 interface VoteState {
   [key: string]: number;
@@ -59,6 +65,7 @@ function ProjectProfile() {
   );
   const [dealNegotiator, setDealNegotiator] = useState<DealNegotiator>();
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
+  const [dealers, setDealers] = useState<DealerData[]>([]);
 
   const [comments, setComments] = useState<CommentState>({
     "Honda World": [
@@ -261,6 +268,31 @@ function ProjectProfile() {
     },
   };
 
+  const fetchDealers = async () => {
+    const dealersData = [];
+
+    for (const bid of incomingBids) {
+      const id = bid.dealerId;
+
+      try {
+        const dealerRef = doc(db, "Dealers", id); // Adjust "Dealers" to match your Firestore collection name
+        const dealerSnap = await getDoc(dealerRef);
+
+        if (dealerSnap.exists()) {
+          dealersData.push({ id: dealerSnap.id, ...dealerSnap.data() });
+        } else {
+          console.warn(`Dealer with ID ${id} not found`);
+        }
+      } catch (error) {
+        console.error(`Error fetching dealer data for ID ${id}:`, error);
+      }
+    }
+
+    console.log(dealersData);
+
+    return dealersData;
+  };
+
   useEffect(() => {
     const getNegotiation = async () => {
       if (!negotiationId) return;
@@ -360,20 +392,25 @@ function ProjectProfile() {
     return comment.split(urlRegex).map((part: string, index: number) => {
       if (urlRegex.test(part)) {
         return (
-          <a
+          <Link
             key={index}
             href={part}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 underline"
+            className="text-blue-600 underline text-wrap break-words"
           >
             {part}
-          </a>
+          </Link>
         );
       }
       return part;
     });
   };
+
+  useEffect(() => {
+    fetchDealers().then((res) => setDealers(res as DealerData[]));
+  }, [incomingBids]);
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -438,17 +475,17 @@ function ProjectProfile() {
                     >
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-lg font-semibold text-[#202125]">
-                          {Object.keys(offerDetails)[index]} Offer
+                          {dealers[index]?.Dealership ?? ""} Offer
                         </h3>
                         <div className="flex space-x-2">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                              handleVote(Object.keys(offerDetails)[index], 1)
+                              handleVote(dealers[index]?.Dealership ?? "", 1)
                             }
                             className={
-                              votes[Object.keys(offerDetails)[index]] === 1
+                              votes[dealers[index]?.Dealership ?? ""] === 1
                                 ? "bg-green-500 text-white"
                                 : ""
                             }
@@ -459,10 +496,10 @@ function ProjectProfile() {
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                              handleVote(Object.keys(offerDetails)[index], -1)
+                              handleVote(dealers[index]?.Dealership ?? "", -1)
                             }
                             className={
-                              votes[Object.keys(offerDetails)[index]] === -1
+                              votes[dealers[index]?.Dealership ?? ""] === -1
                                 ? "bg-yellow-500 text-white"
                                 : ""
                             }
@@ -482,10 +519,10 @@ function ProjectProfile() {
                       </p>
                       <div className="flex space-x-2 mb-4">
                         <Dialog
-                          open={openDialog === Object.keys(offerDetails)[index]}
+                          open={openDialog === dealers[index]?.Dealership}
                           onOpenChange={(isOpen) =>
                             setOpenDialog(
-                              isOpen ? Object.keys(offerDetails)[index] : null
+                              isOpen ? dealers[index]?.Dealership ?? "" : null
                             )
                           }
                         >
@@ -498,7 +535,7 @@ function ProjectProfile() {
                           <DialogContent style={{ background: "white" }}>
                             <div className="text-[#202125] space-y-4">
                               <p className="text-2xl font-bold">
-                                {Object.keys(offerDetails)[index]} Detail
+                                {dealers[index]?.Dealership} Detail
                               </p>
 
                               <div className="flex space-x-4">
@@ -543,11 +580,11 @@ function ProjectProfile() {
 
                               <div className="space-y-1">
                                 <p className="font-semibold text-lg">
-                                  {dealNegotiator?.name}
+                                  {dealers[index]?.SalesPersonName}
                                 </p>
                                 <p>
-                                  City
-                                  <br /> State
+                                  {dealers[index]?.City}
+                                  <br /> {dealers[index]?.State}
                                 </p>
                                 <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
                                   {bidDetails?.inventoryStatus}

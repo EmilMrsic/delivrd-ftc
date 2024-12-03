@@ -107,7 +107,7 @@ const FeatureDetails = ({
           <EditableInput
             label="Trim"
             value={
-              negotiation?.dealInfo?.negotiations_Trim ??
+              negotiation?.dealInfo?.negotiations_Trim_Package_Options ??
               "Trim info not available"
             }
             negotiationId={negotiationId ?? ""}

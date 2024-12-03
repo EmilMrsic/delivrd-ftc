@@ -129,6 +129,7 @@ export interface NegotiationData {
   negotiations_Zip_Code: string | null;
   negotiations_city: string | null;
   negotiations_state: string | null;
+  negotiations_deal_coordinator: string | null;
 }
 
 export interface EditNegotiationData {

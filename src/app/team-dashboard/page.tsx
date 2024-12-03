@@ -19,15 +19,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { dealStageOptions, vehicleOfInterest } from "@/lib/utils";
 
-import { MoreHorizontal, Search, Filter, ChevronDown } from "lucide-react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { dealStageOptions } from "@/lib/utils";
+
+import { MoreHorizontal, Search } from "lucide-react";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { DealNegotiator, NegotiationData } from "@/types";
 import { useRouter } from "next/navigation";
@@ -69,8 +71,14 @@ export default function DealList() {
     NegotiationData[] | undefined
   >([]);
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
+  const [openNegotiatorState, setOpenNegotiatorState] = useState<
+    Record<string, boolean>
+  >({});
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiator>();
+  const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
+    []
+  );
   const router = useRouter();
 
   const [itemsPerPage, setItemsPerPage] = useState(25);
@@ -92,10 +100,25 @@ export default function DealList() {
     setCurrentPage(1);
   };
 
+  const toggleDropdown = (id: string, isOpen: boolean) => {
+    setOpenStates((prev) => ({
+      ...prev,
+      [id]: isOpen,
+    }));
+  };
+
+  const toggleNegotiatorDropdown = (id: string, isOpen: boolean) => {
+    setOpenNegotiatorState((prev) => ({
+      ...prev,
+      [id]: isOpen,
+    }));
+  };
+
   const [filters, setFilters] = useState({
     stages: [] as string[],
     makes: [] as string[],
     models: [] as string[],
+    dealCoordinators: [] as string[],
   });
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,7 +159,8 @@ export default function DealList() {
 
       if (
         updatedFilters.makes.length === 0 &&
-        updatedFilters.stages.length === 0
+        updatedFilters.stages.length === 0 &&
+        updatedFilters.dealCoordinators.length === 0 // Check coordinators
       ) {
         setFilteredDeals(originalDeals);
       } else {
@@ -202,7 +226,13 @@ export default function DealList() {
         currentFilters.makes.length === 0 ||
         currentFilters.makes.includes(deal.negotiations_Brand ?? "");
 
-      return matchesStage && matchesMake;
+      const matchesCoordinators =
+        currentFilters.dealCoordinators.length === 0 || // Use currentFilters here
+        currentFilters.dealCoordinators.includes(
+          deal.negotiations_deal_coordinator ?? ""
+        );
+
+      return matchesStage && matchesMake && matchesCoordinators;
     });
 
     setFilteredDeals(filtered);
@@ -225,11 +255,54 @@ export default function DealList() {
     }
   };
 
+  const updateDealNegotiator = async (id: string, newNegotiatorId: string) => {
+    try {
+      const dealRef = doc(db, "negotiations", id);
+
+      await updateDoc(dealRef, {
+        negotiations_deal_coordinator: newNegotiatorId,
+      });
+
+      setFilteredDeals((prevDeals) =>
+        prevDeals?.map((deal) =>
+          deal.id === id
+            ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
+            : deal
+        )
+      );
+
+      console.log("Negotiator updated successfully!");
+      toast({ title: "Negotiator updated successfully" });
+    } catch (error) {
+      console.error("Error updating negotiator: ", error);
+    }
+  };
+
+  const getAllDealNegotiator = async () => {
+    try {
+      const teamCollection = collection(db, "team delivrd");
+
+      const querySnapshot = await getDocs(teamCollection);
+
+      const negotiatiatorData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("Fetched negotiations:", negotiatiatorData);
+      return negotiatiatorData as DealNegotiator[];
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     fetchAllNegotiation().then((res) => {
       setOriginalDeals(res);
       setFilteredDeals(res);
     });
+
+    getAllDealNegotiator().then((res) => setAllDealNegotiator(res ?? []));
   }, []);
 
   return (
@@ -262,6 +335,7 @@ export default function DealList() {
             </div>
 
             <FilterPopup
+              dealCoordinators={allDealNegotiator}
               handleFilterChange={handleFilterChange}
               filters={filters}
             />
@@ -270,9 +344,11 @@ export default function DealList() {
             <TableHeader>
               <TableRow>
                 <TableHead>Client</TableHead>
-                <TableHead>Make/Model</TableHead>
+                <TableHead>Make</TableHead>
+                <TableHead>Model</TableHead>
                 <TableHead>Stage</TableHead>
                 <TableHead>State</TableHead>
+                <TableHead>Deal Negotiator</TableHead>
                 <TableHead>Submitted Date</TableHead>
                 <TableHead>Last Update</TableHead>
                 <TableHead>Start Date</TableHead>
@@ -281,7 +357,7 @@ export default function DealList() {
             </TableHeader>
             {currentDeals?.length ? (
               <TableBody>
-                {currentDeals?.map((deal) => (
+                {currentDeals?.map((deal, index) => (
                   <TableRow
                     className="cursor-pointer"
                     key={deal.id}
@@ -301,11 +377,18 @@ export default function DealList() {
                     </TableCell>
 
                     <TableCell className="max-w-[180px]">
-                      {deal.negotiations_Brand} {deal.negotiations_Model}
+                      {deal.negotiations_Brand}
                     </TableCell>
 
+                    <TableCell>{deal.negotiations_Model}</TableCell>
+
                     <TableCell>
-                      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+                      <DropdownMenu
+                        open={openStates[deal.id] || false}
+                        onOpenChange={(isOpen) =>
+                          toggleDropdown(deal.id, isOpen)
+                        }
+                      >
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="outline"
@@ -322,7 +405,7 @@ export default function DealList() {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 handleStageChange(deal.id, stage); // Update stage
-                                setIsOpen(false);
+                                toggleDropdown(deal.id, false);
                               }}
                             >
                               {stage}
@@ -333,6 +416,59 @@ export default function DealList() {
                     </TableCell>
 
                     <TableCell>{deal.negotiations_state}</TableCell>
+
+                    <TableCell>
+                      <DropdownMenu
+                        open={openNegotiatorState[deal.id] || false}
+                        onOpenChange={(isOpen) =>
+                          toggleNegotiatorDropdown(deal.id, isOpen)
+                        }
+                      >
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
+                          >
+                            <p>
+                              {allDealNegotiator.some(
+                                (negotiator) =>
+                                  negotiator.id ===
+                                  deal.negotiations_deal_coordinator
+                              ) ? (
+                                <p>
+                                  {
+                                    allDealNegotiator.find(
+                                      (negotiator) =>
+                                        negotiator.id ===
+                                        deal.negotiations_deal_coordinator
+                                    )?.name
+                                  }
+                                </p>
+                              ) : (
+                                <p>Not Assigned</p>
+                              )}
+                            </p>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                          {allDealNegotiator.map(
+                            (negotiator: DealNegotiator, index) => (
+                              <DropdownMenuItem
+                                key={index}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  updateDealNegotiator(deal.id, negotiator.id);
+                                  toggleNegotiatorDropdown(deal.id, false);
+                                }}
+                              >
+                                {negotiator.name}
+                              </DropdownMenuItem>
+                            )
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
 
                     <TableCell>
                       <div>{formatDate(deal.negotiations_Created ?? "")}</div>
@@ -389,7 +525,7 @@ export default function DealList() {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-4">
+                  <TableCell colSpan={10} className="text-center py-4">
                     <svg
                       className="animate-spin h-8 w-8 text-gray-400 mx-auto"
                       xmlns="http://www.w3.org/2000/svg"
