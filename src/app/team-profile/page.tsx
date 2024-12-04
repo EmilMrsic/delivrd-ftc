@@ -17,6 +17,7 @@ import {
 
 import { useSearchParams } from "next/navigation";
 import {
+  addDoc,
   collection,
   doc,
   getDoc,
@@ -26,6 +27,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import {
+  BidComments,
   DealerData,
   DealNegotiator,
   EditNegotiationData,
@@ -37,13 +39,10 @@ import StickyHeader from "@/components/Team/Sticky-header";
 import ClientDetails from "@/components/Team/Client-details";
 import ManualBidUpload from "@/components/Team/Manual-bid-upload-modal";
 import Link from "next/link";
+import { toast } from "@/hooks/use-toast";
 
 interface VoteState {
   [key: string]: number;
-}
-
-interface CommentState {
-  [key: string]: string[];
 }
 
 type ActivityLog = {
@@ -52,9 +51,19 @@ type ActivityLog = {
   user: string;
 }[];
 
-type OfferDetails = {
-  [key: string]: any;
+type GroupedBidComments = {
+  [bid_id: string]: BidComments[];
 };
+
+function getCurrentTimestamp() {
+  const today = new Date();
+
+  const day = String(today.getDate()).padStart(2, "0");
+  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const year = today.getFullYear();
+
+  return `${month}/${day}/${year}`;
+}
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -66,28 +75,17 @@ function ProjectProfile() {
   const [dealNegotiator, setDealNegotiator] = useState<DealNegotiator>();
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [dealers, setDealers] = useState<DealerData[]>([]);
+  const [bidCommentsByBidId, setBidCommentsByBidId] =
+    useState<GroupedBidComments>({});
 
-  const [comments, setComments] = useState<CommentState>({
-    "Honda World": [
-      "This offer seems to be the best value for money.",
-      "The warranty package is quite comprehensive.",
-      "I like the free maintenance for the first year.",
-    ],
-    "AutoNation Honda": [
-      "The higher trim level might be worth considering.",
-      "The panoramic sunroof is a nice feature.",
-    ],
-    "Honda of Downtown": [],
-  });
   const [votes, setVotes] = useState<VoteState>({
     "Honda World": 1,
     "AutoNation Honda": 1,
     "Honda of Downtown": 1,
   });
-  const [newComment, setNewComment] = useState("");
-  const [commentingDealership, setCommentingDealership] = useState<
-    string | null
-  >(null);
+  const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
+  const [commentingBidId, setCommentingBidId] = useState<string | null>(null);
+
   const [activityLog, setActivityLog] = useState<ActivityLog>([
     {
       timestamp: "2023-07-15 09:30:00",
@@ -124,23 +122,32 @@ function ProjectProfile() {
 
   const [showStickyHeader, setShowStickyHeader] = useState(false);
 
-  const addComment = (dealership: string) => {
-    if (newComment.trim()) {
-      setComments((prevComments) => ({
-        ...prevComments,
-        [dealership]: [...(prevComments[dealership] || []), newComment],
-      }));
-      setActivityLog((prevLog) => [
-        {
-          timestamp: new Date().toLocaleString(),
-          action: `Comment added to ${dealership} offer`,
-          user: "Troy Paul",
-        },
-        ...prevLog,
-      ]);
-      setNewComment("");
-      setCommentingDealership(null);
-    }
+  const addComment = async (bid_id: string) => {
+    if (!newComment[bid_id]?.trim()) return;
+
+    const newCommentData: BidComments = {
+      bid_id,
+      client: negotiation?.clientInfo.negotiations_Client ?? "",
+      comment: newComment[bid_id],
+      deal_coordinator: dealNegotiator?.id ?? "",
+      deal_coordinator_name: dealNegotiator?.name ?? "",
+      link_status: "Active",
+      negotiation_id: negotiationId ?? "",
+      time: getCurrentTimestamp(),
+    };
+
+    setBidCommentsByBidId((prev) => ({
+      ...prev,
+      [bid_id]: [...(prev[bid_id] || []), newCommentData],
+    }));
+
+    setNewComment((prev) => ({
+      ...prev,
+      [bid_id]: "",
+    }));
+    const commentRef = collection(db, "bid comment");
+    await addDoc(commentRef, newCommentData);
+    toast({ title: "Comment added successfully" });
   };
 
   const handleChange = (
@@ -240,34 +247,6 @@ function ProjectProfile() {
     }
   };
 
-  const offerDetails: OfferDetails = {
-    "Honda World": {
-      images: [
-        "/placeholder.svg?height=200&width=300",
-        "/placeholder.svg?height=200&width=300",
-        "/placeholder.svg?height=200&width=300",
-      ],
-      details:
-        "This Honda CR-V EX-L AWD is in excellent condition with low mileage. It comes with a comprehensive warranty package and free maintenance for the first year. The leather interior is well-maintained, and all safety features are up-to-date. This offer represents the best value for the client's budget.",
-    },
-    "AutoNation Honda": {
-      images: [
-        "/placeholder.svg?height=200&width=300",
-        "/placeholder.svg?height=200&width=300",
-      ],
-      details:
-        "The AutoNation Honda offer includes a slightly higher-trim CR-V with additional features like a panoramic sunroof and upgraded sound system. While it's slightly above budget, the extra features might justify the cost for some clients. The dealership is also offering an extended warranty at a discounted rate.",
-    },
-    "Honda of Downtown": {
-      images: [
-        "/placeholder.svg?height=200&width=300",
-        "/placeholder.svg?height=200&width=300",
-      ],
-      details:
-        "This offer from Honda of Downtown is for a brand new CR-V with all the latest features. While it's above the client's budget, they're including several premium add-ons like all-weather floor mats, a cargo cover, and a roof rack. The higher price also comes with a more comprehensive warranty package.",
-    },
-  };
-
   const fetchDealers = async () => {
     const dealersData = [];
 
@@ -287,8 +266,6 @@ function ProjectProfile() {
         console.error(`Error fetching dealer data for ID ${id}:`, error);
       }
     }
-
-    console.log(dealersData);
 
     return dealersData;
   };
@@ -386,6 +363,44 @@ function ProjectProfile() {
     getBidsByIds(negotiation?.otherData?.incoming_bids ?? []);
   }, [negotiation]);
 
+  const fetchBidComments = async () => {
+    const groupedBidComments: GroupedBidComments = {};
+    const bidCommentsRef = collection(db, "bid comment");
+
+    for (const bid of incomingBids) {
+      const bid_id = bid.bid_id;
+
+      console.log(`Fetching bid comments for bid_id: ${bid_id}`);
+
+      try {
+        const bidCommentQuery = query(
+          bidCommentsRef,
+          where("bid_id", "==", bid_id)
+        );
+
+        const bidCommentSnap = await getDocs(bidCommentQuery);
+
+        if (!bidCommentSnap.empty) {
+          bidCommentSnap.forEach((doc) => {
+            const bidCommentData = doc.data() as BidComments;
+
+            if (!groupedBidComments[bid_id]) {
+              groupedBidComments[bid_id] = [];
+            }
+
+            groupedBidComments[bid_id].push(bidCommentData);
+          });
+        } else {
+          console.warn(`No comments found for bid ID ${bid_id}`);
+        }
+      } catch (error) {
+        console.error(`Error fetching bid comment for ID ${bid_id}:`, error);
+      }
+    }
+
+    setBidCommentsByBidId(groupedBidComments);
+  };
+
   const parseComment = (comment: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
 
@@ -409,6 +424,7 @@ function ProjectProfile() {
 
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
+    fetchBidComments();
   }, [incomingBids]);
 
   return (
@@ -622,59 +638,73 @@ function ProjectProfile() {
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            setCommentingDealership(
-                              Object.keys(offerDetails)[index]
+                            setCommentingBidId(
+                              commentingBidId === bidDetails.bid_id
+                                ? null
+                                : bidDetails.bid_id
                             )
                           }
                         >
                           <Plus className="mr-2 h-4 w-4" />
                           Add Comment
                         </Button>
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            sendUpdate(Object.keys(offerDetails)[index])
-                          }
+                          onClick={() => sendUpdate(dealers[index]?.Dealership)}
                           className="bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
                         >
                           <Send className="mr-2 h-4 w-4" />
                           Send Update
-                        </Button>
+                        </Button> */}
                       </div>
-                      {commentingDealership ===
-                        Object.keys(offerDetails)[index] && (
+                      {commentingBidId === bidDetails.bid_id && (
                         <div className="mb-4">
                           <Textarea
                             placeholder="Add a comment..."
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
+                            value={newComment[bidDetails.bid_id] || ""} // Use specific comment for this bid_id
+                            onChange={(e) =>
+                              setNewComment((prev) => ({
+                                ...prev,
+                                [bidDetails.bid_id]: e.target.value, // Update comment for this bid_id
+                              }))
+                            }
                             className="mb-2"
                           />
                           <Button
-                            onClick={() =>
-                              addComment(Object.keys(offerDetails)[index])
+                            onClick={
+                              () => addComment(bidDetails.bid_id) // Pass the specific bid_id to the addComment function
                             }
                           >
                             Submit Comment
                           </Button>
                         </div>
                       )}
-                      {comments[Object.keys(offerDetails)[index]]?.map(
-                        (comment, index) => (
-                          <div
-                            key={index}
-                            className={`mt-2 p-2 rounded-md ${getCardBorderColor(
-                              votes[Object.keys(offerDetails)[index]]
-                            )} ${getCommentColor(
-                              votes[Object.keys(offerDetails)[index]]
-                            )}`}
-                          >
-                            <p className="text-sm text-gray-600">
-                              <strong>{dealNegotiator?.name}:</strong> {comment}
-                            </p>
-                          </div>
+
+                      {bidCommentsByBidId[bidDetails.bid_id] &&
+                      bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
+                        bidCommentsByBidId[bidDetails.bid_id].map(
+                          (comment, index) => (
+                            <div
+                              key={index}
+                              className="p-2 bg-gray-100 rounded mt-1"
+                            >
+                              <p>
+                                <strong>
+                                  {comment.deal_coordinator_name}:
+                                </strong>{" "}
+                                {comment.comment}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {comment.time}
+                              </p>
+                            </div>
+                          )
                         )
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          No comments available for this bid.
+                        </p>
                       )}
                     </div>
                   ))

@@ -186,7 +186,19 @@ export interface EditNegotiationData {
   };
 }
 
+export interface BidComments {
+  bid_id: string;
+  client: string;
+  comment: string;
+  deal_coordinator: string;
+  deal_coordinator_name: string;
+  link_status: string;
+  negotiation_id: string;
+  time: string;
+}
+
 export interface IncomingBid {
+  bid_id: string;
   clientId: string;
   comments: string;
   dealerId: string;
