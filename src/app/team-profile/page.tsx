@@ -810,7 +810,7 @@ function ProjectProfile() {
                     </Avatar>
                     <div
                       className={`p-3 rounded-lg flex-grow ${
-                        note.deal_coordinator_name === "Troy Paul"
+                        note.deal_coordinator_name === dealNegotiator?.name
                           ? "bg-blue-100"
                           : "bg-gray-100"
                       }`}
