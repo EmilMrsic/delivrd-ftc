@@ -32,6 +32,7 @@ import {
   DealNegotiator,
   EditNegotiationData,
   IncomingBid,
+  InternalNotes,
 } from "@/types";
 import { formatDate, mapNegotiationData } from "@/lib/utils";
 import FeatureDetails from "@/components/Team/Feature-details";
@@ -72,7 +73,16 @@ function ProjectProfile() {
   const [negotiation, setNegotiation] = useState<EditNegotiationData | null>(
     null
   );
+  const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
+    []
+  );
+  const [mentionSuggestions, setMentionSuggestions] = useState<
+    DealNegotiator[]
+  >([]);
+  const [isMentioning, setIsMentioning] = useState<boolean>(false);
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState<number>(-1);
   const [dealNegotiator, setDealNegotiator] = useState<DealNegotiator>();
+  const [allInternalNotes, setAllInternalNotes] = useState<InternalNotes[]>([]);
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [dealers, setDealers] = useState<DealerData[]>([]);
   const [bidCommentsByBidId, setBidCommentsByBidId] =
@@ -103,22 +113,8 @@ function ProjectProfile() {
       user: "Troy Paul",
     },
   ]);
-  const [internalNotes, setInternalNotes] = useState([
-    {
-      user: "Troy Paul",
-      avatar: "/placeholder.svg?height=40&width=40",
-      timestamp: "2023-07-15 11:30:00",
-      message:
-        "Let's focus on the Honda World offer. It seems the most promising.",
-    },
-    {
-      user: "Sarah Johnson",
-      avatar: "/placeholder.svg?height=40&width=40",
-      timestamp: "2023-07-15 12:15:00",
-      message: "Agreed. I'll prepare some additional negotiation points.",
-    },
-  ]);
-  const [newInternalNote, setNewInternalNote] = useState("");
+
+  const [newInternalNote, setNewInternalNote] = useState<string>("");
 
   const [showStickyHeader, setShowStickyHeader] = useState(false);
 
@@ -209,41 +205,80 @@ function ProjectProfile() {
     ]);
   };
 
-  const sendUpdate = (dealership: string) => {
-    setActivityLog((prevLog) => [
-      {
-        timestamp: new Date().toLocaleString(),
-        action: `Update sent for ${dealership} offer`,
-        user: "Troy Paul",
-      },
-      ...prevLog,
-    ]);
-  };
-
   const getCardBorderColor = (vote: number) => {
     if (vote === 1) return "border-l-green-500";
     if (vote === -1) return "border-l-yellow-500";
     return "border-l-blue-500";
   };
 
-  const getCommentColor = (vote: number) => {
-    if (vote === 1) return "bg-green-50";
-    if (vote === -1) return "bg-yellow-50";
-    return "bg-blue-50";
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const inputValue = e.target.value;
+    setNewInternalNote(inputValue);
+
+    const lastWord = inputValue.split(" ").pop() ?? "";
+    if (lastWord.startsWith("@")) {
+      setIsMentioning(true);
+      const query = lastWord.slice(1);
+      setMentionSuggestions(
+        allDealNegotiator.filter((negotiator) =>
+          negotiator.name.toLowerCase().includes(query.toLowerCase())
+        )
+      );
+    } else {
+      setIsMentioning(false);
+      setMentionSuggestions([]);
+    }
   };
 
-  const addInternalNote = () => {
+  const handleMentionSelect = (mention: DealNegotiator) => {
+    const newNote =
+      newInternalNote.substring(0, newInternalNote.lastIndexOf("@")) +
+      `@${mention.name} `;
+    setNewInternalNote(newNote);
+    setIsMentioning(false);
+    setMentionSuggestions([]);
+    setSelectedMentionIndex(-1);
+  };
+
+  const handleKeyboardNavigation = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
+    if (
+      e.key === "ArrowDown" &&
+      selectedMentionIndex < mentionSuggestions.length - 1
+    ) {
+      setSelectedMentionIndex(selectedMentionIndex + 1);
+    } else if (e.key === "ArrowUp" && selectedMentionIndex > 0) {
+      setSelectedMentionIndex(selectedMentionIndex - 1);
+    } else if (e.key === "Enter" && selectedMentionIndex >= 0) {
+      handleMentionSelect(mentionSuggestions[selectedMentionIndex]);
+    }
+  };
+
+  const addInternalNote = async (newInternalNote: string) => {
     if (newInternalNote.trim()) {
-      setInternalNotes((prevNotes) => [
-        ...prevNotes,
-        {
-          user: "Troy Paul",
-          avatar: "/placeholder.svg?height=40&width=40",
-          timestamp: new Date().toLocaleString(),
-          message: newInternalNote,
-        },
-      ]);
-      setNewInternalNote("");
+      if (incomingBids.length > 0 && negotiation && dealNegotiator) {
+        let newNote = {
+          bid_id: incomingBids[0]?.bid_id ?? "default_bid_id",
+          client:
+            negotiation?.clientInfo?.negotiations_Client ?? "Unknown Client",
+          deal_coordinator: dealNegotiator?.id ?? "Unknown ID",
+          deal_coordinator_name: dealNegotiator?.name ?? "Unknown Name",
+          negotiation_id: negotiationId ?? "Unknown Negotiation ID",
+          note: newInternalNote,
+          time: getCurrentTimestamp() ?? "Unknown Time",
+        };
+        setAllInternalNotes((prevNotes: InternalNotes[]) => [
+          ...prevNotes,
+          newNote,
+        ]);
+        setNewInternalNote("");
+        const notesRef = collection(db, "internal notes");
+        await addDoc(notesRef, newNote);
+        toast({ title: "Note added successfully" });
+      } else {
+        console.warn("Some required data is missing.");
+      }
     }
   };
 
@@ -401,6 +436,54 @@ function ProjectProfile() {
     setBidCommentsByBidId(groupedBidComments);
   };
 
+  const fetchBidNotes = async () => {
+    const bidNotesRef = collection(db, "internal notes");
+    let bidNotesData: InternalNotes[] = [];
+
+    for (const bid of incomingBids) {
+      const bid_id = bid.bid_id;
+
+      console.log(`Fetching bid comments for bid_id: ${bid_id}`);
+
+      try {
+        const bidNotesQuery = query(bidNotesRef, where("bid_id", "==", bid_id));
+
+        const bidNotesSnap = await getDocs(bidNotesQuery);
+
+        if (!bidNotesSnap.empty) {
+          bidNotesSnap.forEach((doc) => {
+            const notesData = doc.data() as InternalNotes;
+            bidNotesData.push(notesData);
+          });
+        } else {
+          console.warn(`No comments found for bid ID ${bid_id}`);
+        }
+      } catch (error) {
+        console.error(`Error fetching bid comment for ID ${bid_id}:`, error);
+      }
+    }
+
+    setAllInternalNotes(bidNotesData);
+  };
+
+  const getAllDealNegotiator = async () => {
+    try {
+      const teamCollection = collection(db, "team delivrd");
+
+      const querySnapshot = await getDocs(teamCollection);
+
+      const negotiatiatorData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("Fetched negotiations:", negotiatiatorData);
+      return negotiatiatorData as DealNegotiator[];
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const parseComment = (comment: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
 
@@ -425,6 +508,10 @@ function ProjectProfile() {
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
     fetchBidComments();
+    fetchBidNotes();
+    getAllDealNegotiator().then((res) =>
+      setAllDealNegotiator(res as DealNegotiator[])
+    );
   }, [incomingBids]);
 
   return (
@@ -648,34 +735,21 @@ function ProjectProfile() {
                           <Plus className="mr-2 h-4 w-4" />
                           Add Comment
                         </Button>
-                        {/* <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => sendUpdate(dealers[index]?.Dealership)}
-                          className="bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
-                        >
-                          <Send className="mr-2 h-4 w-4" />
-                          Send Update
-                        </Button> */}
                       </div>
                       {commentingBidId === bidDetails.bid_id && (
                         <div className="mb-4">
                           <Textarea
                             placeholder="Add a comment..."
-                            value={newComment[bidDetails.bid_id] || ""} // Use specific comment for this bid_id
+                            value={newComment[bidDetails.bid_id] || ""}
                             onChange={(e) =>
                               setNewComment((prev) => ({
                                 ...prev,
-                                [bidDetails.bid_id]: e.target.value, // Update comment for this bid_id
+                                [bidDetails.bid_id]: e.target.value,
                               }))
                             }
                             className="mb-2"
                           />
-                          <Button
-                            onClick={
-                              () => addComment(bidDetails.bid_id) // Pass the specific bid_id to the addComment function
-                            }
-                          >
+                          <Button onClick={() => addComment(bidDetails.bid_id)}>
                             Submit Comment
                           </Button>
                         </div>
@@ -723,26 +797,33 @@ function ProjectProfile() {
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
-                {internalNotes.map((note, index) => (
+                {allInternalNotes.map((note, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={note.avatar} alt={note.user} />
-                      <AvatarFallback>{note.user[0]}</AvatarFallback>
+                      <AvatarImage
+                        src={note.deal_coordinator_name[0]}
+                        alt={note.deal_coordinator_name[0]}
+                      />
+                      <AvatarFallback>
+                        {note.deal_coordinator_name[0]}
+                      </AvatarFallback>
                     </Avatar>
                     <div
                       className={`p-3 rounded-lg flex-grow ${
-                        note.user === "Troy Paul"
+                        note.deal_coordinator_name === "Troy Paul"
                           ? "bg-blue-100"
                           : "bg-gray-100"
                       }`}
                     >
                       <div className="flex justify-between items-center mb-1">
-                        <p className="font-semibold">{note.user}</p>
+                        <p className="font-semibold">
+                          {note.deal_coordinator_name}
+                        </p>
                         <p className="text-xs text-gray-500">
-                          {new Date(note.timestamp).toLocaleString()}
+                          {new Date(note.time).toLocaleString()}
                         </p>
                       </div>
-                      <p>{note.message}</p>
+                      <p>{note.note}</p>
                     </div>
                   </div>
                 ))}
@@ -751,10 +832,30 @@ function ProjectProfile() {
                 <Textarea
                   placeholder="Add a note..."
                   value={newInternalNote}
-                  onChange={(e) => setNewInternalNote(e.target.value)}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyboardNavigation}
                   className="flex-grow"
                 />
-                <Button onClick={addInternalNote}>Add Note</Button>
+                {isMentioning && mentionSuggestions.length > 0 && (
+                  <div className="absolute z-10 mt-[50px] w-[250px] bg-white border border-gray-300 rounded-md shadow-lg">
+                    <ul className="max-h-40 overflow-y-auto">
+                      {mentionSuggestions.map((mention, index) => (
+                        <li
+                          key={mention.id}
+                          onClick={() => handleMentionSelect(mention)}
+                          className={`p-2 cursor-pointer ${
+                            index === selectedMentionIndex ? "bg-gray-200" : ""
+                          }`}
+                        >
+                          {mention.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <Button onClick={() => addInternalNote(newInternalNote)}>
+                  Add Note
+                </Button>
               </div>
             </CardContent>
           </Card>
