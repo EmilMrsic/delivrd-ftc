@@ -196,6 +196,15 @@ export interface BidComments {
   negotiation_id: string;
   time: string;
 }
+export interface InternalNotes {
+  bid_id: string;
+  client: string;
+  note: string;
+  deal_coordinator: string;
+  deal_coordinator_name: string;
+  negotiation_id: string;
+  time: string;
+}
 
 export interface IncomingBid {
   bid_id: string;
