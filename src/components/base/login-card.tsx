@@ -32,6 +32,9 @@ const LoginCard = () => {
       });
     } catch (error) {
       console.error("Error sending email:", error);
+      toast({
+        title: `Something went wrong`,
+      });
     }
   };
 
@@ -46,6 +49,9 @@ const LoginCard = () => {
       });
     } catch (error) {
       console.error("Error sending email:", error);
+      toast({
+        title: `Something went wrong`,
+      });
     }
   };
 
