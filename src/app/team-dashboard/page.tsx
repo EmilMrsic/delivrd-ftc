@@ -149,10 +149,15 @@ export default function DealList() {
     try {
       const userData = localStorage.getItem("user");
       const parseUserData = JSON.parse(userData ?? "");
-      const id = parseUserData.deal_coordinator_id[0];
+      const id = Array.isArray(parseUserData.deal_coordinator_id)
+        ? parseUserData.deal_coordinator_id[0]
+        : parseUserData.deal_coordinator_id;
 
-      if (!id) {
-        console.log("deal_coordinator_id not found in user data");
+      if (!id || typeof id !== "string") {
+        console.error(
+          "Invalid deal_coordinator_id:",
+          parseUserData.deal_coordinator_id
+        );
         return;
       }
 
