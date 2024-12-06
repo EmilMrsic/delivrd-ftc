@@ -31,7 +31,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { DealNegotiator, NegotiationData } from "@/types";
+import { DealNegotiator, EditNegotiationData, NegotiationData } from "@/types";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import DealNegotiatorDialog from "@/components/Team/deal-negotiator-dialog";
@@ -64,12 +64,8 @@ const getElapsedTime = (startDate: string, endDate: Date) => {
 
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredDeals, setFilteredDeals] = useState<
-    NegotiationData[] | undefined
-  >([]);
-  const [originalDeals, setOriginalDeals] = useState<
-    NegotiationData[] | undefined
-  >([]);
+  const [filteredDeals, setFilteredDeals] = useState<NegotiationData[]>([]);
+  const [originalDeals, setOriginalDeals] = useState<NegotiationData[]>([]);
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
@@ -85,7 +81,7 @@ export default function DealList() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(filteredDeals?.length ?? 1 / itemsPerPage);
+  const totalPages = Math.ceil(filteredDeals?.length / itemsPerPage);
 
   let currentDeals = filteredDeals?.slice(
     (currentPage - 1) * itemsPerPage,
@@ -175,7 +171,7 @@ export default function DealList() {
     try {
       const userData = localStorage.getItem("user");
       const parseUserData = JSON.parse(userData ?? "");
-      const id = parseUserData.deal_coordinator_id;
+      const id = parseUserData.deal_coordinator_id[0];
 
       if (!id) {
         console.log("deal_coordinator_id not found in user data");
@@ -192,6 +188,7 @@ export default function DealList() {
 
       const teamData = teamSnapshot.data();
       setNegotiatorData(teamData as DealNegotiator);
+
       const activeDeals = teamData.active_deals;
 
       if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
@@ -210,7 +207,8 @@ export default function DealList() {
         }
       }
 
-      return negotiationsData as NegotiationData[];
+      setOriginalDeals(negotiationsData as NegotiationData[]);
+      setFilteredDeals(negotiationsData as NegotiationData[]);
     } catch (error) {
       console.error("Error fetching negotiations:", error);
     }
@@ -297,11 +295,10 @@ export default function DealList() {
   };
 
   useEffect(() => {
-    fetchAllNegotiation().then((res) => {
-      setOriginalDeals(res);
-      setFilteredDeals(res);
-    });
+    fetchAllNegotiation();
+  }, []);
 
+  useEffect(() => {
     getAllDealNegotiator().then((res) => setAllDealNegotiator(res ?? []));
   }, []);
 
