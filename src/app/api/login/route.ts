@@ -1,4 +1,3 @@
-
 import { initAdmin } from "@/firebaseAdmin";
 import axios from "axios";
 import { NextResponse } from "next/server";
@@ -21,8 +20,7 @@ export async function POST(req: Request) {
     const link = await auth.generateSignInWithEmailLink(to, actionCodeSettings);
 
     const subject = "Delivrd Login Link";
-    const html =
-      `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
   <html>
   <body>
   <p>Hey 👋,</p>
@@ -36,9 +34,9 @@ export async function POST(req: Request) {
     const emailData = new URLSearchParams();
     emailData.append(
       "from",
-      `Delivrd <postmaster@${process.env.NEXT_PUBLIC_MAILGUN_DOMAIN_NAME}>`,
+      `Delivrd <postmaster@${process.env.NEXT_PUBLIC_MAILGUN_DOMAIN_NAME}>`
     );
-    emailData.append("to", to);
+    emailData.append("to", "tabarak.sohail@thehexatown.com");
     emailData.append("subject", subject);
     emailData.append("html", html);
 
@@ -53,9 +51,9 @@ export async function POST(req: Request) {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      },
+      }
     );
-    console.log(response.data)
+    console.log(response.data);
     return NextResponse.json({ message: "Email sent successfully!" });
   } catch (error: any) {
     console.error("Error sending email:", error);
