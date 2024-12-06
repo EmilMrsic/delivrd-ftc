@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 
-import { dealStageOptions } from "@/lib/utils";
+import { dateFormat, dealStageOptions, getElapsedTime } from "@/lib/utils";
 
 import { MoreHorizontal, Search } from "lucide-react";
 import {
@@ -39,28 +39,6 @@ import TeamTablePagination from "@/components/Team/team-table-pagination";
 import FilterPopup from "@/components/Team/filter-popup";
 
 const NOW = new Date("2024-10-17");
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "2-digit",
-  });
-};
-
-const getElapsedTime = (startDate: string, endDate: Date) => {
-  const start = new Date(startDate);
-  const diffTime = Math.abs(endDate.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 7) {
-    return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
-  } else {
-    const diffWeeks = Math.floor(diffDays / 7);
-    return `${diffWeeks} week${diffWeeks !== 1 ? "s" : ""} ago`;
-  }
-};
 
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -468,7 +446,7 @@ export default function DealList() {
                     </TableCell>
 
                     <TableCell>
-                      <div>{formatDate(deal.negotiations_Created ?? "")}</div>
+                      <div>{dateFormat(deal.negotiations_Created ?? "")}</div>
                       <div className="text-xs text-gray-400">
                         {getElapsedTime(deal.negotiations_Created ?? "", NOW)}
                       </div>
@@ -476,7 +454,7 @@ export default function DealList() {
 
                     <TableCell>
                       <div>
-                        {formatDate(deal.negotiations_Status_Updated ?? "")}
+                        {dateFormat(deal.negotiations_Status_Updated ?? "")}
                       </div>
                       <div className="text-xs text-gray-400">
                         {getElapsedTime(
@@ -487,7 +465,7 @@ export default function DealList() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        {formatDate(deal.negotiations_Deal_Start_Date ?? "")}
+                        {dateFormat(deal.negotiations_Deal_Start_Date ?? "")}
                       </div>
                       <div className="text-xs text-gray-400">
                         {getElapsedTime(
@@ -511,7 +489,7 @@ export default function DealList() {
                             setStopPropogation={setStopPropagation}
                             deal={deal}
                             dealNegotiator={negotiatorData}
-                            formatDate={formatDate}
+                            formatDate={dateFormat}
                           />
                         </DropdownMenuContent>
                       </DropdownMenu>

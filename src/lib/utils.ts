@@ -70,6 +70,28 @@ export function formatDate(inputDate: string) {
   return `${month} ${day}, ${year}`;
 }
 
+export const getElapsedTime = (startDate: string, endDate: Date) => {
+  const start = new Date(startDate);
+  const diffTime = Math.abs(endDate.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 7) {
+    return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+  } else {
+    const diffWeeks = Math.floor(diffDays / 7);
+    return `${diffWeeks} week${diffWeeks !== 1 ? "s" : ""} ago`;
+  }
+};
+
+export const dateFormat = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "2-digit",
+  });
+};
+
 export const getUser = async (id: string) => {
   const q = query(collection(db, "users"), where("id", "==", id));
   const querySnapshot = await getDocs(q);

@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       "from",
       `Delivrd <postmaster@${process.env.NEXT_PUBLIC_MAILGUN_DOMAIN_NAME}>`
     );
-    emailData.append("to", "tabarak.sohail@thehexatown.com");
+    emailData.append("to", to);
     emailData.append("subject", subject);
     emailData.append("html", html);
 
@@ -57,6 +57,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Email sent successfully!" });
   } catch (error: any) {
     console.error("Error sending email:", error);
-    return NextResponse.json({ message: "Error sending email", error }, { status: error?.status || 500 });
+    return NextResponse.json(
+      { message: "Error sending email", error },
+      { status: error?.status || 500 }
+    );
   }
 }
