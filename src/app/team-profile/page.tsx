@@ -23,6 +23,7 @@ import {
   getDoc,
   getDocs,
   query,
+  setDoc,
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
@@ -190,27 +191,63 @@ function ProjectProfile() {
     });
   };
 
-  const handleVote = (dealership: string, value: number) => {
-    setVotes((prevVotes) => ({
-      ...prevVotes,
-      [dealership]: value,
-    }));
-    setActivityLog((prevLog) => [
-      {
-        timestamp: new Date().toLocaleString(),
-        action: `${value > 0 ? "Liked" : "Disliked"} ${dealership} offer`,
-        user: "Troy Paul",
-      },
-      ...prevLog,
-    ]);
-  };
+  const handleVote = async (bid_id: string, value: number) => {
+    try {
+      const bidsQuery = query(
+        collection(db, "Incoming Bids"),
+        where("bid_id", "==", bid_id)
+      );
+      const querySnapshot = await getDocs(bidsQuery);
 
-  const getCardBorderColor = (vote: number) => {
-    if (vote === 1) return "border-l-green-500";
-    if (vote === -1) return "border-l-yellow-500";
-    return "border-l-blue-500";
-  };
+      if (querySnapshot.empty) {
+        console.log("No matching bids found for bid_id:", bid_id);
+        return;
+      }
 
+      const docSnap = querySnapshot.docs[0];
+
+      console.log("Document data:", docSnap.data());
+
+      let currentVote = null;
+
+      if (docSnap.exists()) {
+        currentVote = docSnap.data().vote;
+      }
+
+      const voteType =
+        currentVote === (value === 1 ? "like" : "dislike")
+          ? "neutral"
+          : value === 1
+          ? "like"
+          : "dislike";
+
+      const internalNotesRef = doc(db, "Incoming Bids", docSnap.id);
+
+      await setDoc(
+        internalNotesRef,
+        {
+          vote: voteType,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
+      console.log(`Vote for ${bid_id} set to ${voteType}`);
+      setIncomingBids((prevState) =>
+        prevState.map((bid) =>
+          bid.bid_id === bid_id ? { ...bid, vote: voteType } : bid
+        )
+      );
+
+      voteType === "like"
+        ? toast({ title: "Bid liked successfully" })
+        : voteType === "dislike"
+        ? toast({ title: "Bid disliked successfully" })
+        : toast({ title: "Reaction removed successfully" });
+    } catch (error) {
+      console.error("Error updating vote in database:", error);
+    }
+  };
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const inputValue = e.target.value;
     setNewInternalNote(inputValue);
@@ -572,9 +609,13 @@ function ProjectProfile() {
                   incomingBids?.map((bidDetails, index) => (
                     <div
                       key={index}
-                      className={`border-l-4 pl-4 pb-6 ${getCardBorderColor(
-                        5
-                      )}`}
+                      className={`border-l-4 pl-4 pb-6 pt-2 pr-2 ${
+                        bidDetails.vote && bidDetails.vote === "like"
+                          ? "bg-green-100 border-green-600 "
+                          : bidDetails.vote === "dislike"
+                          ? "bg-orange-100 border-orange-600"
+                          : "bg-white border-blue-600"
+                      }`}
                     >
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-lg font-semibold text-[#202125]">
@@ -584,11 +625,9 @@ function ProjectProfile() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              handleVote(dealers[index]?.Dealership ?? "", 1)
-                            }
+                            onClick={() => handleVote(bidDetails.bid_id, 1)}
                             className={
-                              votes[dealers[index]?.Dealership ?? ""] === 1
+                              bidDetails.vote && bidDetails.vote === "like"
                                 ? "bg-green-500 text-white"
                                 : ""
                             }
@@ -598,11 +637,9 @@ function ProjectProfile() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              handleVote(dealers[index]?.Dealership ?? "", -1)
-                            }
+                            onClick={() => handleVote(bidDetails.bid_id, -1)}
                             className={
-                              votes[dealers[index]?.Dealership ?? ""] === -1
+                              bidDetails.vote && bidDetails.vote === "dislike"
                                 ? "bg-yellow-500 text-white"
                                 : ""
                             }
@@ -640,7 +677,6 @@ function ProjectProfile() {
                               <p className="text-2xl font-bold">
                                 {dealers[index]?.Dealership} Detail
                               </p>
-
                               <div className="flex space-x-4">
                                 {bidDetails.files.map((file, index) => {
                                   const isImage = [
@@ -801,23 +837,24 @@ function ProjectProfile() {
                   <div key={index} className="flex items-start space-x-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src={note.deal_coordinator_name[0]}
-                        alt={note.deal_coordinator_name[0]}
+                        src={negotiation?.clientInfo.negotiations_Client[0]}
+                        alt={negotiation?.clientInfo.negotiations_Client[0]}
                       />
                       <AvatarFallback>
-                        {note.deal_coordinator_name[0]}
+                        {negotiation?.clientInfo.negotiations_Client[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div
                       className={`p-3 rounded-lg flex-grow ${
-                        note.deal_coordinator_name === dealNegotiator?.name
+                        note.client ===
+                        negotiation?.clientInfo.negotiations_Client
                           ? "bg-blue-100"
                           : "bg-gray-100"
                       }`}
                     >
                       <div className="flex justify-between items-center mb-1">
                         <p className="font-semibold">
-                          {note.deal_coordinator_name}
+                          {negotiation?.clientInfo.negotiations_Client}
                         </p>
                         <p className="text-xs text-gray-500">
                           {new Date(note.time).toLocaleString()}
