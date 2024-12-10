@@ -216,6 +216,7 @@ export interface IncomingBid {
   inventoryStatus: string;
   price: number;
   timestamp: string;
+  vote?: "like" | "dislike" | "neutral";
 }
 
 export type Color = {
