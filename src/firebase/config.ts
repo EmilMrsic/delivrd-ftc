@@ -1,9 +1,12 @@
+"use client";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-
+import { getMessaging, getToken } from "firebase/messaging";
 // // Your web app's Firebase configuration
+
+export const FIREBASE_VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -23,4 +26,24 @@ const storage = getStorage(app);
 // Initialize Firestore
 const db = getFirestore(app);
 
-export { db, auth, storage };
+const messaging = getMessaging(app);
+
+export { db, auth, storage, messaging };
+
+export const requestForToken = () => {
+  return getToken(messaging, { vapidKey: FIREBASE_VAPID_KEY })
+    .then((currentToken) => {
+      if (currentToken) {
+        return currentToken;
+      } else {
+        alert(
+          "No registration token available. Request permission to generate one."
+        );
+        return null;
+      }
+    })
+    .catch((err) => {
+      alert("An error occurred while retrieving token - " + err);
+      return null;
+    });
+};

@@ -1,3 +1,5 @@
+import { string } from "zod";
+
 export interface IUser {
   phone: string;
   trade_details: string;
@@ -196,6 +198,13 @@ export interface BidComments {
   negotiation_id: string;
   time: string;
 }
+
+export interface notificationType {
+  title: string;
+  body: string;
+  link: string;
+}
+
 export interface InternalNotes {
   bid_id: string;
   client: string;

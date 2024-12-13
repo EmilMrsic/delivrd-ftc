@@ -226,3 +226,62 @@ export const vehicleOfInterest: string[] = [
   "Volkswagen",
   "Volvo",
 ];
+
+export const sendNotification = async (
+  token: string,
+  title: string,
+  content: string,
+  link: string
+) => {
+  const response = await fetch("/api/notification", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      deviceToken: token,
+      notification: {
+        title,
+        body: content,
+      },
+      data: {
+        link,
+      },
+    }),
+  });
+
+  const result = await response.json();
+  console.log(result);
+  if (result.success) {
+    console.log("Notification sent:", result.response);
+  } else {
+    console.error("Failed to send notification:", result.error);
+  }
+};
+
+export function getCurrentTimestamp() {
+  const today = new Date();
+
+  const day = String(today.getDate()).padStart(2, "0");
+  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const year = today.getFullYear();
+
+  return `${month}/${day}/${year}`;
+}
+
+export async function getUsersWithTeamPrivilege() {
+  try {
+    const usersRef = collection(db, "users");
+
+    const q = query(usersRef, where("privilege", "==", "Team"));
+
+    const querySnapshot = await getDocs(q);
+
+    const usersWithTeamPrivilege = querySnapshot.docs.map((doc) => doc.data());
+
+    return usersWithTeamPrivilege;
+  } catch (error) {
+    console.error("Error getting users with 'Team' privilege:", error);
+    throw error;
+  }
+}
