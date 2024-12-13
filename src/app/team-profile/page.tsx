@@ -6,14 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
-import {
-  FileText,
-  Plus,
-  ThumbsUp,
-  ThumbsDown,
-  Send,
-  UploadIcon,
-} from "lucide-react";
+import { FileText, Plus, ThumbsUp, ThumbsDown, BellIcon } from "lucide-react";
 
 import { useSearchParams } from "next/navigation";
 import {
@@ -26,7 +19,7 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-import { db } from "@/firebase/config";
+import { db, messaging } from "@/firebase/config";
 import {
   BidComments,
   DealerData,
@@ -35,17 +28,31 @@ import {
   IncomingBid,
   InternalNotes,
 } from "@/types";
-import { formatDate, mapNegotiationData } from "@/lib/utils";
+import {
+  formatDate,
+  getCurrentTimestamp,
+  getUsersWithTeamPrivilege,
+  mapNegotiationData,
+  sendNotification,
+} from "@/lib/utils";
 import FeatureDetails from "@/components/Team/Feature-details";
 import StickyHeader from "@/components/Team/Sticky-header";
 import ClientDetails from "@/components/Team/Client-details";
 import ManualBidUpload from "@/components/Team/Manual-bid-upload-modal";
 import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
-
-interface VoteState {
-  [key: string]: number;
-}
+import { onMessage } from "firebase/messaging";
+import { useAppSelector } from "../redux/store";
+import { useDispatch } from "react-redux";
+import {
+  setAllNotifications,
+  setNotificationCount,
+} from "../redux/Slice/notificationSlice";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
 
 type ActivityLog = {
   timestamp: string;
@@ -56,16 +63,6 @@ type ActivityLog = {
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
 };
-
-function getCurrentTimestamp() {
-  const today = new Date();
-
-  const day = String(today.getDate()).padStart(2, "0");
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
-  const year = today.getFullYear();
-
-  return `${month}/${day}/${year}`;
-}
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -88,16 +85,16 @@ function ProjectProfile() {
   const [dealers, setDealers] = useState<DealerData[]>([]);
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  const [votes, setVotes] = useState<VoteState>({
-    "Honda World": 1,
-    "AutoNation Honda": 1,
-    "Honda of Downtown": 1,
-  });
+  const { notification } = useAppSelector((state) => state.notification);
+  const { notificationCount } = useAppSelector((state) => state.notification);
+  const dispatch = useDispatch();
+
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
   const [commentingBidId, setCommentingBidId] = useState<string | null>(null);
 
-  const [activityLog, setActivityLog] = useState<ActivityLog>([
+  const [activityLog] = useState<ActivityLog>([
     {
       timestamp: "2023-07-15 09:30:00",
       action: "Deal created",
@@ -190,7 +187,6 @@ function ProjectProfile() {
       };
     });
   };
-
   const handleVote = async (bid_id: string, value: number) => {
     try {
       const bidsQuery = query(
@@ -232,7 +228,6 @@ function ProjectProfile() {
         { merge: true }
       );
 
-      console.log(`Vote for ${bid_id} set to ${voteType}`);
       setIncomingBids((prevState) =>
         prevState.map((bid) =>
           bid.bid_id === bid_id ? { ...bid, vote: voteType } : bid
@@ -294,6 +289,7 @@ function ProjectProfile() {
 
   const addInternalNote = async (newInternalNote: string) => {
     if (newInternalNote.trim()) {
+      const teamMembers = await getUsersWithTeamPrivilege();
       if (incomingBids.length > 0 && negotiation && dealNegotiator) {
         let newNote = {
           bid_id: incomingBids[0]?.bid_id ?? "default_bid_id",
@@ -309,9 +305,21 @@ function ProjectProfile() {
           ...prevNotes,
           newNote,
         ]);
-        setNewInternalNote("");
         const notesRef = collection(db, "internal notes");
         await addDoc(notesRef, newNote);
+        const teamWithToken = teamMembers.filter((item) => item.fcmToken);
+        teamWithToken.forEach((item) => {
+          if (item.fcmToken) {
+            sendNotification(
+              item.fcmToken,
+              `${negotiation.clientInfo.negotiations_Client} added a note`,
+              newInternalNote,
+              window.location.href
+            );
+          }
+        });
+        setNewInternalNote("");
+
         toast({ title: "Note added successfully" });
       } else {
         console.warn("Some required data is missing.");
@@ -326,7 +334,7 @@ function ProjectProfile() {
       const id = bid.dealerId;
 
       try {
-        const dealerRef = doc(db, "Dealers", id); // Adjust "Dealers" to match your Firestore collection name
+        const dealerRef = doc(db, "Dealers", id);
         const dealerSnap = await getDoc(dealerRef);
 
         if (dealerSnap.exists()) {
@@ -503,6 +511,10 @@ function ProjectProfile() {
     setAllInternalNotes(bidNotesData);
   };
 
+  const handleBellClick = () => {
+    dispatch(setNotificationCount(0));
+  };
+
   const getAllDealNegotiator = async () => {
     try {
       const teamCollection = collection(db, "team delivrd");
@@ -514,7 +526,6 @@ function ProjectProfile() {
         ...doc.data(),
       }));
 
-      console.log("Fetched negotiations:", negotiatiatorData);
       return negotiatiatorData as DealNegotiator[];
     } catch (error) {
       console.log(error);
@@ -542,6 +553,21 @@ function ProjectProfile() {
     });
   };
 
+  onMessage(messaging, (data: any) => {
+    const newData = { ...data.notification, ...data.data };
+    if (newData) dispatch(setAllNotifications(newData));
+  });
+
+  useEffect(() => {
+    if (!hasLoaded) {
+      console.log("hello from load");
+      setHasLoaded(true);
+    } else {
+      console.log("here");
+      dispatch(setNotificationCount(notificationCount + 1));
+    }
+  }, [notification]);
+
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
     fetchBidComments();
@@ -550,7 +576,6 @@ function ProjectProfile() {
       setAllDealNegotiator(res as DealNegotiator[])
     );
   }, [incomingBids]);
-
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -562,7 +587,45 @@ function ProjectProfile() {
           />
           <p className="text-white text-sm">Putting Dreams In Driveways</p>
         </div>
-        <div className="text-right">
+        <div className="text-right flex items-center gap-3">
+          <DropdownMenu onOpenChange={handleBellClick}>
+            <DropdownMenuTrigger>
+              <div className="relative">
+                <BellIcon className="w-6 h-6" color="#fff" />
+                {notificationCount > 0 && (
+                  <div className="absolute top-[-5px] right-[-5px] flex justify-center items-center w-4 h-4 bg-red-500 text-white text-xs rounded-full">
+                    {notificationCount}
+                  </div>
+                )}
+              </div>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="z-50 ">
+              <div
+                className={`bg-white flex flex-col ${
+                  notification.length ? "max-h-[300px]" : "h-auto"
+                }  overflow-y-scroll gap-3 p-2 z-10 rounded-xl`}
+              >
+                {notification.length ? (
+                  notification.map((item, index) => (
+                    <Link
+                      key={index}
+                      target="_blank"
+                      href={item.link ?? "/"}
+                      className="flex flex-col gap-1 p-3 rounded-[8px] items-start hover:bg-gray-200"
+                    >
+                      <p className="font-bold text-lg">{item.title}</p>
+                      <p className="font-normal text-gray-500 text-sm">
+                        {item.body}
+                      </p>
+                    </Link>
+                  ))
+                ) : (
+                  <p>No notifications available</p>
+                )}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
             {negotiation?.clientInfo?.negotiations_Client}
           </h1>

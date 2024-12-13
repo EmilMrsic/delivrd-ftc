@@ -3,6 +3,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
+import FcmTokenProvider from "@/components/FcmTokenProvider";
+import { ReduxProvider } from "./redux/provider";
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -29,8 +32,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Toaster />
-        {children}
+        <ReduxProvider>
+          <FcmTokenProvider />
+          <Toaster />
+          {children}
+        </ReduxProvider>
       </body>
     </html>
   );

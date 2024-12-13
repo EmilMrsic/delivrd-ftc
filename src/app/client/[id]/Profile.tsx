@@ -202,7 +202,13 @@ function ProjectProfile() {
                 {incomingBids.map((item, index) => (
                   <div
                     key={index}
-                    className="border-l-4 border-l-blue-500 pl-4 pb-6"
+                    className={`border-l-4 border-l-blue-500 pl-4 pb-6 ${
+                      item.vote && item.vote === "like"
+                        ? "bg-green-100 border-green-600 "
+                        : item.vote === "dislike"
+                        ? "bg-orange-100 border-orange-600"
+                        : "bg-white border-blue-600"
+                    }`}
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-lg font-semibold text-[#202125]">
