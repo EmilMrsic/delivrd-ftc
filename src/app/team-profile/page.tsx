@@ -560,10 +560,8 @@ function ProjectProfile() {
 
   useEffect(() => {
     if (!hasLoaded) {
-      console.log("hello from load");
       setHasLoaded(true);
     } else {
-      console.log("here");
       dispatch(setNotificationCount(notificationCount + 1));
     }
   }, [notification]);
