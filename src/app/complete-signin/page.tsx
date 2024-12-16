@@ -56,7 +56,7 @@ const SignInContent = ({
       const { email: parsedEmail } = parsedData;
       const q = query(
         collection(db, "users"),
-        where("email", "==", parsedEmail),
+        where("email", "==", parsedEmail)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
