@@ -120,6 +120,7 @@ function ProjectProfile() {
     if (!newComment[bid_id]?.trim()) return;
 
     const newCommentData: BidComments = {
+      client_phone_number: negotiation?.clientInfo.negotiations_Phone ?? "",
       bid_id,
       client: negotiation?.clientInfo.negotiations_Client ?? "",
       comment: newComment[bid_id],
