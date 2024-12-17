@@ -17,7 +17,6 @@ const FcmTokenProvider = () => {
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
         const token = await requestForToken();
-        console.log({ token });
         if (token) {
           const id = user.id;
           const userDocRef = doc(db, "users", id);

@@ -189,6 +189,7 @@ export interface EditNegotiationData {
 }
 
 export interface BidComments {
+  client_phone_number: string;
   bid_id: string;
   client: string;
   comment: string;
