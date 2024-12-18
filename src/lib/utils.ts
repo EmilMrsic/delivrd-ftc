@@ -93,6 +93,7 @@ export const dateFormat = (dateString: string) => {
 };
 
 export const getUser = async (id: string) => {
+  console.log("", { db });
   const q = query(collection(db, "users"), where("id", "==", id));
   const querySnapshot = await getDocs(q);
   if (!querySnapshot.empty) {
