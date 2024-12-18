@@ -1,10 +1,10 @@
-import { getUser } from "@/lib/utils";
+import { getUser } from "../../../../getUser";
 import Profile from "./Profile";
 
 export async function generateMetadata({ params }: { params: any }) {
   const user: any = await getUser(params.id);
 
-  const title = user?.name || "Default Title";
+  const title = user?.name || "Title";
   const description = "Active vehicle negotiation";
 
   return {
