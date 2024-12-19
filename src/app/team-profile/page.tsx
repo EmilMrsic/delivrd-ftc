@@ -77,6 +77,8 @@ function ProjectProfile() {
   const [mentionSuggestions, setMentionSuggestions] = useState<
     DealNegotiator[]
   >([]);
+  const [mentionedUsers, setMentionedUsers] = useState<DealNegotiator[]>([]);
+
   const [isMentioning, setIsMentioning] = useState<boolean>(false);
   const [selectedMentionIndex, setSelectedMentionIndex] = useState<number>(-1);
   const [dealNegotiator, setDealNegotiator] = useState<DealNegotiator>();
@@ -271,6 +273,7 @@ function ProjectProfile() {
     setIsMentioning(false);
     setMentionSuggestions([]);
     setSelectedMentionIndex(-1);
+    setMentionedUsers((prev) => [...prev, mention]);
   };
 
   const handleKeyboardNavigation = (
@@ -293,6 +296,7 @@ function ProjectProfile() {
       const teamMembers = await getUsersWithTeamPrivilege();
       if (incomingBids.length > 0 && negotiation && dealNegotiator) {
         let newNote = {
+          mentioned_user: mentionedUsers,
           bid_id: incomingBids[0]?.bid_id ?? "default_bid_id",
           client:
             negotiation?.clientInfo?.negotiations_Client ?? "Unknown Client",
@@ -320,6 +324,7 @@ function ProjectProfile() {
           }
         });
         setNewInternalNote("");
+        setMentionedUsers([]);
 
         toast({ title: "Note added successfully" });
       } else {
