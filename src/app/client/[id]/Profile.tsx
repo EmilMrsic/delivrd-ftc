@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
+  BidComments,
   DealerData,
   DealNegotiator,
   IncomingBid,
@@ -25,12 +26,18 @@ import ClientOverviewCard from "@/components/Client/ClientOverviewCard";
 import IncomingBidsCard from "@/components/Client/IncomingBidsCard/IncomingBidsCard";
 import ClientStickyHeader from "@/components/Client/ClientStickyHeader";
 import { Loader } from "@/components/base/loader";
+import { ThumbsDown, ThumbsUp } from "lucide-react";
+
+type GroupedBidComments = {
+  [bid_id: string]: BidComments[];
+};
 
 function ProjectProfile() {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [negotiationData, setNegotiationData] = useState<NegotiationData[]>([]);
-
+  const [bidCommentsByBidId, setBidCommentsByBidId] =
+    useState<GroupedBidComments>({});
   const [dealerData, setDealerData] = useState<DealerData[]>([]);
   const [dealNegotiatorData, setDealNegotiatorData] =
     useState<DealNegotiator>();
@@ -64,6 +71,41 @@ function ProjectProfile() {
     const querySnapshot = await getDocs(q);
     const dealNegotiatorData = querySnapshot.docs[0]?.data();
     setDealNegotiatorData(dealNegotiatorData as DealNegotiator);
+  };
+  const fetchBidComments = async () => {
+    const groupedBidComments: GroupedBidComments = {};
+    const bidCommentsRef = collection(db, "bid comment");
+
+    for (const bid of incomingBids) {
+      const bid_id = bid.bid_id;
+
+      try {
+        const bidCommentQuery = query(
+          bidCommentsRef,
+          where("bid_id", "==", bid_id)
+        );
+
+        const bidCommentSnap = await getDocs(bidCommentQuery);
+
+        if (!bidCommentSnap.empty) {
+          bidCommentSnap.forEach((doc) => {
+            const bidCommentData = doc.data() as BidComments;
+
+            if (!groupedBidComments[bid_id]) {
+              groupedBidComments[bid_id] = [];
+            }
+
+            groupedBidComments[bid_id].push(bidCommentData);
+          });
+        } else {
+          console.warn(`No comments found for bid ID ${bid_id}`);
+        }
+      } catch (error) {
+        console.error(`Error fetching bid comment for ID ${bid_id}:`, error);
+      }
+    }
+
+    setBidCommentsByBidId(groupedBidComments);
   };
   const fetchNegotiationsAndBids = async () => {
     if (!userData?.negotiation_id?.length) return;
@@ -132,9 +174,10 @@ function ProjectProfile() {
     const fetchDealersData = async (incomingBid: IncomingBid[]) => {
       try {
         const dealerPromises = incomingBid.map(async (bid) => {
+          console.log(bid.dealerId);
           const q = query(
             collection(db, "Dealers"),
-            where("id", "==", bid.dealerId)
+            where("id", "==", bid.dealerId ?? "")
           );
           const querySnapshot = await getDocs(q);
           const dealerInfo = querySnapshot.docs[0]?.data();
@@ -149,6 +192,7 @@ function ProjectProfile() {
     };
 
     fetchDealersData(incomingBids);
+    fetchBidComments();
   }, [incomingBids]);
 
   return userData &&
@@ -202,7 +246,7 @@ function ProjectProfile() {
                 {incomingBids.map((item, index) => (
                   <div
                     key={index}
-                    className={`border-l-4 border-l-blue-500 pl-4 pb-6 ${
+                    className={`pr-2 pt-2 border-l-4  pl-4 pb-6 ${
                       item.vote && item.vote === "like"
                         ? "bg-green-100 border-green-600 "
                         : item.vote === "dislike"
@@ -214,6 +258,30 @@ function ProjectProfile() {
                       <h3 className="text-lg font-semibold text-[#202125]">
                         {dealerData ? dealerData[index]?.Dealership ?? "" : ""}
                       </h3>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={
+                            item.vote === "like"
+                              ? "bg-green-500 text-white"
+                              : ""
+                          }
+                        >
+                          <ThumbsUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={
+                            item.vote === "dislike"
+                              ? "bg-yellow-500 text-white"
+                              : ""
+                          }
+                        >
+                          <ThumbsDown className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                     <time className="block mb-2 text-sm text-[#202125]">
                       {formatDate(item?.timestamp)}
@@ -312,6 +380,27 @@ function ProjectProfile() {
                         </div>
                       </DialogContent>
                     </Dialog>
+                    {bidCommentsByBidId[item?.bid_id] &&
+                    bidCommentsByBidId[item?.bid_id].length > 0 ? (
+                      bidCommentsByBidId[item?.bid_id].map((comment, index) => (
+                        <div
+                          key={index}
+                          className="p-2 bg-gray-100 rounded mt-1"
+                        >
+                          <p>
+                            <strong>{comment.deal_coordinator_name}:</strong>{" "}
+                            {comment.comment}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {comment.time}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">
+                        No comments available for this bid.
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
