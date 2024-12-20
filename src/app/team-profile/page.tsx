@@ -77,6 +77,7 @@ function ProjectProfile() {
   const [mentionSuggestions, setMentionSuggestions] = useState<
     DealNegotiator[]
   >([]);
+  const [user, setUser] = useState<any>();
   const [mentionedUsers, setMentionedUsers] = useState<DealNegotiator[]>([]);
 
   const [isMentioning, setIsMentioning] = useState<boolean>(false);
@@ -456,8 +457,6 @@ function ProjectProfile() {
     for (const bid of incomingBids) {
       const bid_id = bid.bid_id;
 
-      console.log(`Fetching bid comments for bid_id: ${bid_id}`);
-
       try {
         const bidCommentQuery = query(
           bidCommentsRef,
@@ -520,6 +519,11 @@ function ProjectProfile() {
   const handleBellClick = () => {
     dispatch(setNotificationCount(0));
   };
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    setUser(JSON.parse(user ?? ""));
+  }, []);
 
   const getAllDealNegotiator = async () => {
     try {
@@ -903,26 +907,18 @@ function ProjectProfile() {
                 {allInternalNotes.map((note, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={negotiation?.clientInfo.negotiations_Client[0]}
-                        alt={negotiation?.clientInfo.negotiations_Client[0]}
-                      />
-                      <AvatarFallback>
-                        {negotiation?.clientInfo.negotiations_Client[0]}
-                      </AvatarFallback>
+                      <AvatarImage src={user[0]} alt={user.name[0]} />
+                      <AvatarFallback>{user.name[0]}</AvatarFallback>
                     </Avatar>
                     <div
                       className={`p-3 rounded-lg flex-grow ${
-                        note.client ===
-                        negotiation?.clientInfo.negotiations_Client
+                        note.client === user.name
                           ? "bg-blue-100"
                           : "bg-gray-100"
                       }`}
                     >
                       <div className="flex justify-between items-center mb-1">
-                        <p className="font-semibold">
-                          {negotiation?.clientInfo.negotiations_Client}
-                        </p>
+                        <p className="font-semibold">{user.name}</p>
                         <p className="text-xs text-gray-500">
                           {new Date(note.time).toLocaleString()}
                         </p>
