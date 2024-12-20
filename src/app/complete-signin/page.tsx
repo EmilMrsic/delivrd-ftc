@@ -61,6 +61,7 @@ const SignInContent = ({
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
+        console.log({ userData });
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("emailForSignIn", userData.email);
         toast({ title: "Logged in" });
