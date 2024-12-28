@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 
 import { dateFormat, dealStageOptions, getElapsedTime } from "@/lib/utils";
 
-import { MoreHorizontal, Search } from "lucide-react";
+import { BellIcon, MoreHorizontal, Search } from "lucide-react";
 import {
   collection,
   doc,
@@ -31,12 +31,16 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { DealNegotiator, EditNegotiationData, NegotiationData } from "@/types";
+import { DealNegotiator, NegotiationData } from "@/types";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import DealNegotiatorDialog from "@/components/Team/deal-negotiator-dialog";
 import TeamTablePagination from "@/components/Team/team-table-pagination";
 import FilterPopup from "@/components/Team/filter-popup";
+import { useDispatch } from "react-redux";
+import { setNotificationCount } from "../redux/Slice/notificationSlice";
+import { useAppSelector } from "../redux/store";
+import Link from "next/link";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -53,6 +57,11 @@ export default function DealList() {
   const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
     []
   );
+
+  const { notification } = useAppSelector((state) => state.notification);
+  const { notificationCount } = useAppSelector((state) => state.notification);
+  const dispatch = useDispatch();
+
   const router = useRouter();
 
   const [itemsPerPage, setItemsPerPage] = useState(25);
@@ -72,6 +81,10 @@ export default function DealList() {
     const newItemsPerPage = Number(e.target.value);
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
+  };
+
+  const handleBellClick = () => {
+    dispatch(setNotificationCount(0));
   };
 
   const toggleDropdown = (id: string, isOpen: boolean) => {
@@ -233,7 +246,7 @@ export default function DealList() {
 
   const handleStageChange = async (id: string, newStage: string) => {
     try {
-      await updateDoc(doc(db, "negotiations", id), {
+      await updateDoc(doc(db, "negotiations", id ?? ""), {
         negotiations_Status: newStage,
       });
 
@@ -258,7 +271,7 @@ export default function DealList() {
       const dealRef = doc(db, "negotiations", id);
 
       await updateDoc(dealRef, {
-        negotiations_deal_coordinator: newNegotiatorId,
+        negotiations_deal_coordinator: newNegotiatorId ?? "",
       });
 
       setFilteredDeals((prevDeals) =>
@@ -344,13 +357,53 @@ export default function DealList() {
           />
           <p className="text-white text-sm">Putting Dreams In Driveways</p>
         </div>
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-            Client Deals Dashboard
-          </h1>
-          <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-            {negotiatorData?.name}
-          </h1>
+        <div className="flex items-center gap-3">
+          <DropdownMenu onOpenChange={handleBellClick}>
+            <DropdownMenuTrigger>
+              <div className="relative">
+                <BellIcon className="w-6 h-6" color="#fff" />
+                {notificationCount > 0 && (
+                  <div className="absolute top-[-5px] right-[-5px] flex justify-center items-center w-4 h-4 bg-red-500 text-white text-xs rounded-full">
+                    {notificationCount}
+                  </div>
+                )}
+              </div>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="z-50 ">
+              <div
+                className={`bg-white flex flex-col ${
+                  notification.length ? "max-h-[300px]" : "h-auto"
+                }  overflow-y-scroll gap-3 p-2 z-10 rounded-xl`}
+              >
+                {notification.length ? (
+                  notification.map((item, index) => (
+                    <Link
+                      key={index}
+                      target="_blank"
+                      href={item.link ?? "/"}
+                      className="flex flex-col gap-1 p-3 rounded-[8px] items-start hover:bg-gray-200"
+                    >
+                      <p className="font-bold text-lg">{item.title}</p>
+                      <p className="font-normal text-gray-500 text-sm">
+                        {item.body}
+                      </p>
+                    </Link>
+                  ))
+                ) : (
+                  <p>No notifications available</p>
+                )}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
+              Client Deals Dashboard
+            </h1>
+            <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
+              {negotiatorData?.name}
+            </h1>
+          </div>
         </div>
       </div>
       <Card className="bg-white shadow-lg">

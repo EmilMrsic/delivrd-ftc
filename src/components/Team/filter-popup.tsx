@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { ChevronDown, Filter } from "lucide-react";
@@ -26,8 +26,13 @@ const FilterPopup = ({
   handleFilterChange,
   dealCoordinators,
 }: FilterPopupProps) => {
+  const [searchStages, setSearchStages] = useState("");
+  const [searchMakes, setSearchMakes] = useState("");
+  const [searchCoordinators, setSearchCoordinators] = useState("");
+
   return (
     <div className="flex gap-4">
+      {/* Stages Dropdown */}
       <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -36,19 +41,35 @@ const FilterPopup = ({
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-            {dealStageOptions.map((stage, index) => (
-              <DropdownMenuCheckboxItem
-                key={index}
-                checked={filters.stages.includes(stage)}
-                onCheckedChange={() => handleFilterChange("stages", stage)}
-              >
-                {stage}
-              </DropdownMenuCheckboxItem>
-            ))}
+          <DropdownMenuContent className="w-56">
+            <input
+              type="text"
+              placeholder="Search stages..."
+              className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
+              onChange={
+                (e) => setSearchStages(e.target.value.toLowerCase()) // Update search state
+              }
+            />
+            <div className="h-56 overflow-scroll">
+              {dealStageOptions
+                .filter((stage) =>
+                  stage.toLowerCase().includes(searchStages.toLowerCase())
+                )
+                .map((stage, index) => (
+                  <DropdownMenuCheckboxItem
+                    key={index}
+                    checked={filters.stages.includes(stage)}
+                    onCheckedChange={() => handleFilterChange("stages", stage)}
+                  >
+                    {stage}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Makes Dropdown */}
       <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -57,19 +78,37 @@ const FilterPopup = ({
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-            {vehicleOfInterest.map((make: string, index) => (
-              <DropdownMenuCheckboxItem
-                key={index}
-                checked={filters.makes.includes(make ?? "")}
-                onCheckedChange={() => handleFilterChange("makes", make ?? "")}
-              >
-                {make}
-              </DropdownMenuCheckboxItem>
-            ))}
+          <DropdownMenuContent className="w-56">
+            <input
+              type="text"
+              placeholder="Search makes..."
+              className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
+              onChange={
+                (e) => setSearchMakes(e.target.value.toLowerCase()) // Update search state
+              }
+            />
+            <div className="h-56 overflow-scroll">
+              {vehicleOfInterest
+                .filter((make) =>
+                  make.toLowerCase().includes(searchMakes.toLowerCase())
+                )
+                .map((make: string, index) => (
+                  <DropdownMenuCheckboxItem
+                    key={index}
+                    checked={filters.makes.includes(make ?? "")}
+                    onCheckedChange={() =>
+                      handleFilterChange("makes", make ?? "")
+                    }
+                  >
+                    {make}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Deal Coordinators Dropdown */}
       <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -78,18 +117,34 @@ const FilterPopup = ({
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-            {dealCoordinators.map((coordinator, index) => (
-              <DropdownMenuCheckboxItem
-                key={index}
-                checked={filters.dealCoordinators.includes(coordinator.id)}
-                onCheckedChange={() =>
-                  handleFilterChange("dealCoordinators", coordinator.id)
-                }
-              >
-                {coordinator.name}
-              </DropdownMenuCheckboxItem>
-            ))}
+          <DropdownMenuContent className="w-56">
+            <input
+              type="text"
+              placeholder="Search coordinators..."
+              className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
+              onChange={
+                (e) => setSearchCoordinators(e.target.value.toLowerCase()) // Update search state
+              }
+            />
+            <div className="h-56 overflow-scroll">
+              {dealCoordinators
+                .filter((coordinator) =>
+                  coordinator.name
+                    .toLowerCase()
+                    .includes(searchCoordinators.toLowerCase())
+                )
+                .map((coordinator, index) => (
+                  <DropdownMenuCheckboxItem
+                    key={index}
+                    checked={filters.dealCoordinators.includes(coordinator.id)}
+                    onCheckedChange={() =>
+                      handleFilterChange("dealCoordinators", coordinator.id)
+                    }
+                  >
+                    {coordinator.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
