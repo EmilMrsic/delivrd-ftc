@@ -70,12 +70,17 @@ export function formatDate(inputDate: string) {
   return `${month} ${day}, ${year}`;
 }
 
-export const getElapsedTime = (startDate: string, endDate: Date) => {
+export const getElapsedTime = (
+  startDate: string,
+  endDate: Date = new Date()
+): string => {
   const start = new Date(startDate);
-  const diffTime = Math.abs(endDate.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffTime = endDate.getTime() - start.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays < 7) {
+  if (diffDays === 0) {
+    return "Today";
+  } else if (diffDays <= 6) {
     return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
   } else {
     const diffWeeks = Math.floor(diffDays / 7);
