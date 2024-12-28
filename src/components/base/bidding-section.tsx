@@ -121,11 +121,18 @@ export default function BiddingSection() {
         dealerId: user.dealer_id[0],
         clientId: vehicleId,
         price: parseFloat(price),
+        dealerName: "N/A",
+        dealerNumber: "N/A",
+        manual_add: false,
         comments: message,
         files: fileUrls,
         timestamp: getCurrentTimestamp(),
         discountPrice: discountPrice,
         inventoryStatus: inventoryStatus,
+        salesPersonName: "N/A",
+        negotiationId: "N/A",
+        city: "N/A",
+        state: "N/A",
       });
 
       toast({

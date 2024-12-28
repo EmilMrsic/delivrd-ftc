@@ -124,6 +124,8 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
     }
     const bidData = {
       negotiationId: id,
+      clientId: "N/A",
+      dealerId: "N/A",
       dealerName: formData.dealerName,
       dealerNumber: formData.dealerNumber,
       salesPersonName: formData.salesPersonName ?? "",
