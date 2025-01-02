@@ -22,7 +22,14 @@ import { Input } from "@/components/ui/input";
 
 import { dateFormat, dealStageOptions, getElapsedTime } from "@/lib/utils";
 
-import { BellIcon, MoreHorizontal, Search } from "lucide-react";
+import {
+  BellIcon,
+  Check,
+  Cross,
+  MoreHorizontal,
+  Search,
+  X,
+} from "lucide-react";
 import {
   collection,
   doc,
@@ -106,6 +113,7 @@ export default function DealList() {
     makes: [] as string[],
     models: [] as string[],
     dealCoordinators: [] as string[],
+    onboarding: [] as string[],
   });
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,7 +155,8 @@ export default function DealList() {
       if (
         updatedFilters.makes.length === 0 &&
         updatedFilters.stages.length === 0 &&
-        updatedFilters.dealCoordinators.length === 0 // Check coordinators
+        updatedFilters.dealCoordinators.length === 0 &&
+        updatedFilters.onboarding.length === 0
       ) {
         setFilteredDeals(originalDeals);
       } else {
@@ -221,12 +230,22 @@ export default function DealList() {
         currentFilters.makes.includes(deal.negotiations_Brand ?? "");
 
       const matchesCoordinators =
-        currentFilters.dealCoordinators.length === 0 || // Use currentFilters here
+        currentFilters.dealCoordinators.length === 0 ||
         currentFilters.dealCoordinators.includes(
           deal.negotiations_deal_coordinator ?? ""
         );
+      const onboardingStatus =
+        deal.hasOwnProperty("negotiations_Onboarding_Complete") &&
+        deal.negotiations_Onboarding_Complete === "Yes"
+          ? "Yes"
+          : "No";
+      const matchesOnboarding =
+        currentFilters.onboarding.length === 0 ||
+        currentFilters.onboarding.includes(onboardingStatus);
 
-      return matchesStage && matchesMake && matchesCoordinators;
+      return (
+        matchesStage && matchesMake && matchesCoordinators && matchesOnboarding
+      );
     });
 
     setFilteredDeals(filtered);
@@ -238,6 +257,7 @@ export default function DealList() {
       models: [],
       dealCoordinators: [],
       makes: [],
+      onboarding: [],
     };
 
     setFilters(resetFilters);
@@ -442,6 +462,7 @@ export default function DealList() {
                 <TableHead>Stage</TableHead>
                 <TableHead>State</TableHead>
                 <TableHead>Deal Negotiator</TableHead>
+                <TableHead>Onboarding Complete</TableHead>
                 <TableHead>Submitted Date</TableHead>
                 <TableHead>Last Update</TableHead>
                 <TableHead>Start Date</TableHead>
@@ -565,7 +586,14 @@ export default function DealList() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
-
+                    <TableCell className="text-center">
+                      {deal.negotiations_Onboarding_Complete &&
+                      deal.negotiations_Onboarding_Complete === "Yes" ? (
+                        <Check className="text-green-500" />
+                      ) : (
+                        <X className="text-red-500" />
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div>{dateFormat(deal.negotiations_Created ?? "")}</div>
                       <div className="text-xs text-[#0989E5]">
@@ -621,7 +649,7 @@ export default function DealList() {
             ) : (
               <TableBody>
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-4">
+                  <TableCell colSpan={11} className="text-center py-4">
                     <svg
                       className="animate-spin h-8 w-8 text-gray-400 mx-auto"
                       xmlns="http://www.w3.org/2000/svg"

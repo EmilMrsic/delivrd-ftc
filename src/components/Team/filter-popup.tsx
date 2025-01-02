@@ -14,7 +14,7 @@ import { DealNegotiator } from "@/types";
 type FilterPopupProps = {
   filters: any;
   handleFilterChange: (
-    type: "stages" | "makes" | "models" | "dealCoordinators",
+    type: "stages" | "makes" | "models" | "dealCoordinators" | "onboarding",
     value: string
   ) => void;
 
@@ -32,7 +32,6 @@ const FilterPopup = ({
 
   return (
     <div className="flex gap-4">
-      {/* Stages Dropdown */}
       <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -68,8 +67,6 @@ const FilterPopup = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* Makes Dropdown */}
       <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -107,8 +104,6 @@ const FilterPopup = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {/* Deal Coordinators Dropdown */}
       <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -144,6 +139,31 @@ const FilterPopup = ({
                     {coordinator.name}
                   </DropdownMenuCheckboxItem>
                 ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="space-y-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              Select Onboarding Status
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <div className="overflow-scroll">
+              {["Yes", "No"].map((status, index) => (
+                <DropdownMenuCheckboxItem
+                  key={index}
+                  checked={filters.onboarding.includes(status)}
+                  onCheckedChange={() =>
+                    handleFilterChange("onboarding", status)
+                  }
+                >
+                  {status}
+                </DropdownMenuCheckboxItem>
+              ))}
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
