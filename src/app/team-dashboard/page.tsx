@@ -53,7 +53,6 @@ import { useDispatch } from "react-redux";
 import { setNotificationCount } from "../redux/Slice/notificationSlice";
 import { useAppSelector } from "../redux/store";
 import Link from "next/link";
-import { setCurrentDealCoord } from "../redux/Slice/dealCoodinatorSlice";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
