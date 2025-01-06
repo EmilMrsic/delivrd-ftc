@@ -12,6 +12,7 @@ interface FormData {
   dealerName: string;
   dealerNumber: string;
   salesPersonName: string;
+  salesPersonEmail: string;
   city: string;
   state: string;
   priceExcludingTax: string;
@@ -24,6 +25,7 @@ interface FormData {
 interface Errors {
   dealerName?: string;
   dealerNumber?: string;
+  salesPersonEmail?: string;
   priceExcludingTax?: string;
   discountAmount?: string;
 }
@@ -33,6 +35,7 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
     dealerName: "",
     dealerNumber: "",
     salesPersonName: "",
+    salesPersonEmail: "",
     city: "",
     state: "",
     priceExcludingTax: "",
@@ -108,6 +111,11 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       formErrors.priceExcludingTax = "Price is required";
     if (!formData.discountAmount)
       formErrors.discountAmount = "Discount Amount is required";
+    if (!formData.salesPersonEmail) {
+      formErrors.salesPersonEmail = "Salesperson Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.salesPersonEmail)) {
+      formErrors.salesPersonEmail = "Invalid email format";
+    }
 
     setErrors(formErrors);
 
@@ -129,6 +137,7 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       dealerName: formData.dealerName,
       dealerNumber: formData.dealerNumber,
       salesPersonName: formData.salesPersonName ?? "",
+      salesPersonEmail: formData.salesPersonEmail ?? "",
       city: formData.city ?? "",
       state: formData.state ?? "",
       price: Number(formData.priceExcludingTax),
@@ -154,6 +163,7 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
         discountAmount: "",
         inventoryStatus: "In Stock",
         additionalComments: "",
+        salesPersonEmail: "",
         files: null,
       });
       toast({ title: "Bid created successfully" });
@@ -258,6 +268,18 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
                     type="text"
                     name="salesPersonName"
                     value={formData.salesPersonName}
+                    onChange={handleChange}
+                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium">
+                    Sales Person Email
+                  </label>
+                  <input
+                    type="email"
+                    name="salesPersonEmail"
+                    value={formData.salesPersonEmail}
                     onChange={handleChange}
                     className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />

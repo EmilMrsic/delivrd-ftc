@@ -133,6 +133,7 @@ export default function BiddingSection() {
         negotiationId: "N/A",
         city: "N/A",
         state: "N/A",
+        salesPersonEmail: "N/A",
       });
 
       toast({
