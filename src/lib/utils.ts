@@ -1,7 +1,14 @@
 import { db } from "@/firebase/config";
 import { Color, EditNegotiationData } from "@/types";
 import { clsx, type ClassValue } from "clsx";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -291,3 +298,38 @@ export async function getUsersWithTeamPrivilege() {
     throw error;
   }
 }
+
+export const fetchActiveDeals = async (id: string) => {
+  try {
+    const teamDocRef = doc(db, "team delivrd", id);
+    const teamSnapshot = await getDoc(teamDocRef);
+
+    if (!teamSnapshot.exists()) {
+      console.log("Team document not found");
+      return;
+    }
+
+    const teamData = teamSnapshot.data();
+
+    const activeDeals = teamData.active_deals;
+
+    if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
+      console.log("No active deals found");
+      return;
+    }
+
+    const negotiationsData = [];
+    for (const id of activeDeals) {
+      const negotiationDocRef = doc(db, "negotiations", id);
+      const negotiationSnapshot = await getDoc(negotiationDocRef);
+
+      if (negotiationSnapshot.exists()) {
+        const data = negotiationSnapshot.data();
+        negotiationsData.push(data);
+      }
+    }
+    return negotiationsData;
+  } catch (error) {
+    console.error("Error fetching negotiations:", error);
+  }
+};

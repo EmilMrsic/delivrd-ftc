@@ -3,6 +3,7 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { useSelector, TypedUseSelectorHook } from "react-redux";
 import allNotificationSlice from "./Slice/notificationSlice";
+import dealCoordinatorSlice from "./Slice/dealCoodinatorSlice";
 
 const persistConfig = {
   key: "root",
@@ -11,6 +12,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   notification: allNotificationSlice,
+  dealCoordinator: dealCoordinatorSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -20,7 +20,12 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 
-import { dateFormat, dealStageOptions, getElapsedTime } from "@/lib/utils";
+import {
+  dateFormat,
+  dealStageOptions,
+  fetchActiveDeals,
+  getElapsedTime,
+} from "@/lib/utils";
 
 import {
   BellIcon,
@@ -48,6 +53,7 @@ import { useDispatch } from "react-redux";
 import { setNotificationCount } from "../redux/Slice/notificationSlice";
 import { useAppSelector } from "../redux/store";
 import Link from "next/link";
+import { setCurrentDealCoord } from "../redux/Slice/dealCoodinatorSlice";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -112,7 +118,7 @@ export default function DealList() {
     stages: [] as string[],
     makes: [] as string[],
     models: [] as string[],
-    dealCoordinators: [] as string[],
+    dealCoordinators: "" as string,
     onboarding: [] as string[],
   });
 
@@ -137,29 +143,50 @@ export default function DealList() {
     setFilteredDeals(filtered);
   };
 
-  const handleFilterChange = (
+  const handleFilterChange = async (
     filterType: keyof typeof filters,
     value: string
   ) => {
     setFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
 
-      if (updatedFilters[filterType].includes(value)) {
-        updatedFilters[filterType] = updatedFilters[filterType].filter(
-          (item) => item !== value
-        );
-      } else {
-        updatedFilters[filterType] = [...updatedFilters[filterType], value];
-      }
+      if (filterType === "dealCoordinators") {
+        setFilteredDeals([]);
+        const userData = localStorage.getItem("user");
+        const parseUserData = JSON.parse(userData ?? "");
+        const id = Array.isArray(parseUserData.deal_coordinator_id)
+          ? parseUserData.deal_coordinator_id[0]
+          : parseUserData.deal_coordinator_id;
 
-      if (
-        updatedFilters.makes.length === 0 &&
-        updatedFilters.stages.length === 0 &&
-        updatedFilters.dealCoordinators.length === 0 &&
-        updatedFilters.onboarding.length === 0
-      ) {
-        setFilteredDeals(originalDeals);
+        if (!id || typeof id !== "string") {
+          console.error(
+            "Invalid deal_coordinator_id:",
+            parseUserData.deal_coordinator_id
+          );
+        }
+        if (updatedFilters.dealCoordinators === value) {
+          updatedFilters.dealCoordinators = "";
+          fetchActiveDeals(id).then((deals) => {
+            setOriginalDeals(deals as NegotiationData[]);
+            setFilteredDeals(deals as NegotiationData[]);
+          });
+        } else {
+          updatedFilters.dealCoordinators = value;
+
+          fetchActiveDeals(value).then((deals) => {
+            setOriginalDeals(deals as NegotiationData[]);
+            setFilteredDeals(deals as NegotiationData[]);
+          });
+        }
       } else {
+        if (updatedFilters[filterType].includes(value)) {
+          updatedFilters[filterType] = updatedFilters[filterType].filter(
+            (item) => item !== value
+          );
+        } else {
+          updatedFilters[filterType] = [...updatedFilters[filterType], value];
+        }
+
         applyFilters(updatedFilters);
       }
 
@@ -230,10 +257,9 @@ export default function DealList() {
         currentFilters.makes.includes(deal.negotiations_Brand ?? "");
 
       const matchesCoordinators =
-        currentFilters.dealCoordinators.length === 0 ||
-        currentFilters.dealCoordinators.includes(
-          deal.negotiations_deal_coordinator ?? ""
-        );
+        currentFilters.dealCoordinators === "" ||
+        currentFilters.dealCoordinators ===
+          (deal.negotiations_deal_coordinator ?? "");
       const onboardingStatus =
         deal.hasOwnProperty("negotiations_Onboarding_Complete") &&
         deal.negotiations_Onboarding_Complete === "Yes"
@@ -255,13 +281,31 @@ export default function DealList() {
     const resetFilters = {
       stages: [],
       models: [],
-      dealCoordinators: [],
+      dealCoordinators: "",
       makes: [],
       onboarding: [],
     };
+    setFilteredDeals([]);
+    const userData = localStorage.getItem("user");
+    const parseUserData = JSON.parse(userData ?? "");
+    const id = Array.isArray(parseUserData.deal_coordinator_id)
+      ? parseUserData.deal_coordinator_id[0]
+      : parseUserData.deal_coordinator_id;
+
+    if (!id || typeof id !== "string") {
+      console.error(
+        "Invalid deal_coordinator_id:",
+        parseUserData.deal_coordinator_id
+      );
+      return;
+    }
 
     setFilters(resetFilters);
     setFilteredDeals(originalDeals);
+    fetchActiveDeals(id).then((deals) => {
+      setOriginalDeals(deals as NegotiationData[]);
+      setFilteredDeals(deals as NegotiationData[]);
+    });
   };
 
   const handleStageChange = async (id: string, newStage: string) => {
