@@ -325,6 +325,7 @@ export const fetchActiveDeals = async (id: string) => {
 
       if (negotiationSnapshot.exists()) {
         const data = negotiationSnapshot.data();
+
         negotiationsData.push(data);
       }
     }
@@ -333,3 +334,16 @@ export const fetchActiveDeals = async (id: string) => {
     console.error("Error fetching negotiations:", error);
   }
 };
+
+export function generateRandomId(prefix = "rec", length = 16) {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let randomPart = "";
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    randomPart += characters[randomIndex];
+  }
+
+  return prefix + randomPart;
+}
