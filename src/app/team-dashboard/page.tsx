@@ -167,14 +167,24 @@ export default function DealList() {
           updatedFilters.dealCoordinators = "";
           fetchActiveDeals(id).then((deals) => {
             setOriginalDeals(deals as NegotiationData[]);
-            setFilteredDeals(deals as NegotiationData[]);
+            const defaultFilteredDeals = deals?.filter((deal) =>
+              ["Actively Negotiating", "Deal Started", "Paid"].includes(
+                deal.negotiations_Status ?? ""
+              )
+            );
+            setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
           });
         } else {
           updatedFilters.dealCoordinators = value;
 
           fetchActiveDeals(value).then((deals) => {
             setOriginalDeals(deals as NegotiationData[]);
-            setFilteredDeals(deals as NegotiationData[]);
+            const defaultFilteredDeals = deals?.filter((deal) =>
+              ["Actively Negotiating", "Deal Started", "Paid"].includes(
+                deal.negotiations_Status ?? ""
+              )
+            );
+            setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
           });
         }
       } else {
@@ -239,7 +249,12 @@ export default function DealList() {
       }
 
       setOriginalDeals(negotiationsData as NegotiationData[]);
-      setFilteredDeals(negotiationsData as NegotiationData[]);
+      const defaultFilteredDeals = negotiationsData.filter((deal) =>
+        ["Actively Negotiating", "Deal Started", "Paid"].includes(
+          deal.negotiations_Status ?? ""
+        )
+      );
+      setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
     } catch (error) {
       console.error("Error fetching negotiations:", error);
     }
@@ -248,9 +263,13 @@ export default function DealList() {
   const applyFilters = (currentFilters: typeof filters) => {
     const filtered = originalDeals?.filter((deal) => {
       const matchesStage =
-        currentFilters.stages.length === 0 ||
-        currentFilters.stages.includes(deal.negotiations_Status ?? "");
-
+        currentFilters.stages.length === 0
+          ? ["Actively Negotiating", "Deal Started", "Paid"].includes(
+              deal.negotiations_Status ?? ""
+            )
+          : currentFilters.stages.includes(
+              deal.negotiations_Status?.trim() ?? ""
+            );
       const matchesMake =
         currentFilters.makes.length === 0 ||
         currentFilters.makes.includes(deal.negotiations_Brand ?? "");
@@ -272,7 +291,6 @@ export default function DealList() {
         matchesStage && matchesMake && matchesCoordinators && matchesOnboarding
       );
     });
-
     setFilteredDeals(filtered);
   };
 
@@ -303,7 +321,13 @@ export default function DealList() {
     setFilteredDeals(originalDeals);
     fetchActiveDeals(id).then((deals) => {
       setOriginalDeals(deals as NegotiationData[]);
-      setFilteredDeals(deals as NegotiationData[]);
+
+      const defaultFilteredDeals = deals?.filter((deal) =>
+        ["Actively Negotiating", "Deal Started", "Paid"].includes(
+          deal.negotiations_Status ?? ""
+        )
+      );
+      setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
     });
   };
 
@@ -631,7 +655,8 @@ export default function DealList() {
                     </TableCell>
                     <TableCell className="text-center">
                       {deal.negotiations_Onboarding_Complete &&
-                      deal.negotiations_Onboarding_Complete === "Yes" ? (
+                      deal.negotiations_Onboarding_Complete.toLowerCase() ===
+                        "yes" ? (
                         <Check className="text-green-500" />
                       ) : (
                         <X className="text-red-500" />

@@ -339,45 +339,23 @@ function ProjectProfile() {
 
     for (const bid of incomingBids) {
       const id = bid.dealerId;
+      if (id !== "N/A" && id)
+        try {
+          const dealerRef = doc(db, "Dealers", id);
+          const dealerSnap = await getDoc(dealerRef);
 
-      try {
-        const dealerRef = doc(db, "Dealers", id);
-        const dealerSnap = await getDoc(dealerRef);
-
-        if (dealerSnap.exists()) {
-          dealersData.push({ id: dealerSnap.id, ...dealerSnap.data() });
-        } else {
-          console.warn(`Dealer with ID ${id} not found`);
+          if (dealerSnap.exists()) {
+            dealersData.push(dealerSnap.data());
+          } else {
+            console.warn(`Dealer with ID ${id} not found`);
+          }
+        } catch (error) {
+          console.error(`Error fetching dealer data for ID ${id}:`, error);
         }
-      } catch (error) {
-        console.error(`Error fetching dealer data for ID ${id}:`, error);
-      }
     }
 
     return dealersData;
   };
-
-  useEffect(() => {
-    const getNegotiation = async () => {
-      if (!negotiationId) return;
-
-      try {
-        const negotiationDocRef = doc(db, "negotiations", negotiationId);
-
-        const docSnap = await getDoc(negotiationDocRef);
-
-        if (docSnap.exists()) {
-          setNegotiation(mapNegotiationData(docSnap.data()));
-        } else {
-          console.log("No such negotiation!");
-        }
-      } catch (error) {
-        console.error("Error fetching negotiation:", error);
-      }
-    };
-
-    getNegotiation();
-  }, [negotiationId]);
 
   useEffect(() => {
     const getDealNegotiatorData = async () => {
@@ -436,6 +414,7 @@ function ProjectProfile() {
         });
 
         const bidsData = await Promise.all(bidsPromises);
+        console.log({ bidsData });
 
         const validBids: IncomingBid[] = bidsData.filter(
           (bid) => bid !== null
@@ -492,8 +471,6 @@ function ProjectProfile() {
 
     for (const bid of incomingBids) {
       const bid_id = bid.bid_id;
-
-      console.log(`Fetching bid comments for bid_id: ${bid_id}`);
 
       try {
         const bidNotesQuery = query(bidNotesRef, where("bid_id", "==", bid_id));
@@ -584,6 +561,30 @@ function ProjectProfile() {
       setAllDealNegotiator(res as DealNegotiator[])
     );
   }, [incomingBids]);
+
+  useEffect(() => {
+    const getNegotiation = async () => {
+      if (!negotiationId) return;
+
+      try {
+        const id = negotiationId;
+        const negotiationDocRef = doc(db, "negotiations", id);
+
+        const docSnap = await getDoc(negotiationDocRef);
+
+        if (docSnap.exists()) {
+          setNegotiation(mapNegotiationData(docSnap.data()));
+        } else {
+          console.log("No such negotiation!");
+        }
+      } catch (error) {
+        console.error("Error fetching negotiation:", error);
+      }
+    };
+
+    getNegotiation();
+  }, [negotiationId]);
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -690,7 +691,9 @@ function ProjectProfile() {
                     >
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-lg font-semibold text-[#202125]">
-                          {dealers[index]?.Dealership ?? ""} Offer
+                          {dealers[index]?.Dealership
+                            ? dealers[index]?.Dealership + " Offer"
+                            : "No Dealership"}
                         </h3>
                         <div className="flex space-x-2">
                           <Button
@@ -730,10 +733,10 @@ function ProjectProfile() {
                       </p>
                       <div className="flex space-x-2 mb-4">
                         <Dialog
-                          open={openDialog === dealers[index]?.Dealership}
+                          open={openDialog === bidDetails.bid_id}
                           onOpenChange={(isOpen) =>
                             setOpenDialog(
-                              isOpen ? dealers[index]?.Dealership ?? "" : null
+                              isOpen ? bidDetails.bid_id ?? "" : null
                             )
                           }
                         >

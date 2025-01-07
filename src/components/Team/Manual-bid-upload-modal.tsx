@@ -2,11 +2,20 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { UploadIcon } from "lucide-react";
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db, storage } from "@/firebase/config";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { generateRandomId } from "@/lib/utils";
+import { EditNegotiationData } from "@/types";
 
 interface FormData {
   dealerName: string;
@@ -76,15 +85,6 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       }));
     }
   };
-  function getCurrentTimestamp() {
-    const today = new Date();
-
-    const day = String(today.getDate()).padStart(2, "0");
-    const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
-    const year = today.getFullYear();
-
-    return `${month}/${day}/${year}`;
-  }
 
   const uploadFile = async (file: File): Promise<string | null> => {
     try {
@@ -130,7 +130,9 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
         Boolean
       ) as string[];
     }
+    const bid_id = generateRandomId();
     const bidData = {
+      bid_id,
       negotiationId: id,
       clientId: "N/A",
       dealerId: "N/A",
@@ -146,12 +148,12 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       comments: formData.additionalComments ?? "",
       files: fileUrls ?? [],
       manual_add: true,
-      timestamps: getCurrentTimestamp(),
+      timestamps: new Date(),
     };
 
     try {
       const bidRef = collection(db, "Incoming Bids");
-      const docRef = await addDoc(bidRef, bidData);
+      await addDoc(bidRef, bidData);
       setLoader(false);
       setFormData({
         dealerName: "",
@@ -169,36 +171,22 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       toast({ title: "Bid created successfully" });
       closeDialog();
 
-      setTimeout(async () => {
-        const bidDoc = await getDoc(docRef);
+      const negotiationRef = doc(db, "negotiations", id ?? "");
+      const negotiationDoc = await getDoc(negotiationRef);
 
-        if (bidDoc.exists()) {
-          const bidDataWithId = bidDoc.data();
-          const bidId = bidDataWithId.bid_id;
-          console.log("Bid created with bid_id:", bidId);
+      if (negotiationDoc.exists()) {
+        const negotiationData = negotiationDoc.data();
 
-          const negotiationRef = doc(db, "negotiations", id ?? "");
-          const negotiationDoc = await getDoc(negotiationRef);
+        await updateDoc(negotiationRef, {
+          incoming_bids: arrayUnion(bid_id),
+        });
 
-          if (negotiationDoc.exists()) {
-            const negotiationData = negotiationDoc.data();
-            const incomingBids = negotiationData?.incoming_bids || [];
-            incomingBids.push(bidId);
+        console.log("Negotiation updated successfully");
+      } else {
+        console.error("Negotiation document not found");
+        setLoader(false);
+      }
 
-            await updateDoc(negotiationRef, {
-              incoming_bids: incomingBids,
-            });
-
-            console.log("Negotiation updated successfully");
-          } else {
-            console.error("Negotiation document not found");
-            setLoader(false);
-          }
-        } else {
-          console.error("Bid document not found");
-          setLoader(false);
-        }
-      }, 20000);
       console.log("Bid uploaded successfully!");
     } catch (error) {
       console.error("Error uploading bid: ", error);
