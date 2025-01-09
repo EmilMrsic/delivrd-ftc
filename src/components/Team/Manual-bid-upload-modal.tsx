@@ -152,7 +152,7 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
     };
 
     try {
-      const bidRef = collection(db, "Incoming Bids");
+      const bidRef = collection(db, "manual bids");
       await addDoc(bidRef, bidData);
       setLoader(false);
       setFormData({
@@ -171,23 +171,26 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       toast({ title: "Bid created successfully" });
       closeDialog();
 
-      const negotiationRef = doc(db, "negotiations", id ?? "");
-      const negotiationDoc = await getDoc(negotiationRef);
+      //   const negotiationRef = doc(db, "negotiations", id ?? "");
+      //   const negotiationDoc = await getDoc(negotiationRef);
 
-      if (negotiationDoc.exists()) {
-        const negotiationData = negotiationDoc.data();
+      //   if (negotiationDoc.exists()) {
+      //     const negotiationData = negotiationDoc.data();
 
-        await updateDoc(negotiationRef, {
-          incoming_bids: arrayUnion(bid_id),
-        });
+      //     await updateDoc(negotiationRef, {
+      //       incoming_bids: arrayUnion(bid_id),
+      //     });
 
-        console.log("Negotiation updated successfully");
-      } else {
-        console.error("Negotiation document not found");
-        setLoader(false);
-      }
+      //     console.log("Negotiation updated successfully");
+      //   } else {
+      //     console.error("Negotiation document not found");
+      //     setLoader(false);
+      //   }
 
-      console.log("Bid uploaded successfully!");
+      //   console.log("Bid uploaded successfully!");
+      // } catch (error) {
+      //   console.error("Error uploading bid: ", error);
+      // }
     } catch (error) {
       console.error("Error uploading bid: ", error);
     }
