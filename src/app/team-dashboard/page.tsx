@@ -33,6 +33,7 @@ import {
   Cross,
   MoreHorizontal,
   Search,
+  StickyNoteIcon,
   X,
 } from "lucide-react";
 import {
@@ -40,10 +41,12 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { DealNegotiator, NegotiationData } from "@/types";
+import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import DealNegotiatorDialog from "@/components/Team/deal-negotiator-dialog";
@@ -59,9 +62,16 @@ const NOW = new Date(new Date().toISOString().split("T")[0]);
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredDeals, setFilteredDeals] = useState<NegotiationData[]>([]);
+  const [allInternalNotes, setAllInternalNotes] = useState<
+    Record<string, InternalNotes[]>
+  >({});
+
   const [originalDeals, setOriginalDeals] = useState<NegotiationData[]>([]);
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
+  const [openNoteState, setOpenNoteStates] = useState<Record<string, boolean>>(
+    {}
+  );
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
     Record<string, boolean>
   >({});
@@ -108,6 +118,13 @@ export default function DealList() {
 
   const toggleNegotiatorDropdown = (id: string, isOpen: boolean) => {
     setOpenNegotiatorState((prev) => ({
+      ...prev,
+      [id]: isOpen,
+    }));
+  };
+
+  const toggleInternalNotesDropdown = (id: string, isOpen: boolean) => {
+    setOpenNoteStates((prev) => ({
       ...prev,
       [id]: isOpen,
     }));
@@ -201,6 +218,47 @@ export default function DealList() {
 
       return updatedFilters;
     });
+  };
+
+  const fetchBidNotes = async () => {
+    const bidNotesRef = collection(db, "internal notes");
+    const bidNotesByNegotiation: Record<string, InternalNotes[]> = {};
+
+    for (const bid of filteredDeals) {
+      const negotiation_id = bid.id;
+
+      try {
+        const bidNotesQuery = query(
+          bidNotesRef,
+          where("negotiation_id", "==", negotiation_id)
+        );
+
+        const bidNotesSnap = await getDocs(bidNotesQuery);
+
+        if (!bidNotesSnap.empty) {
+          bidNotesSnap.forEach((doc) => {
+            const notesData = doc.data() as InternalNotes;
+
+            // Group notes by negotiation_id
+            if (!bidNotesByNegotiation[negotiation_id]) {
+              bidNotesByNegotiation[negotiation_id] = [];
+            }
+            bidNotesByNegotiation[negotiation_id].push(notesData);
+          });
+        } else {
+          console.warn(`No comments found for bid ID ${negotiation_id}`);
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching bid comment for ID ${negotiation_id}:`,
+          error
+        );
+      }
+    }
+
+    console.log(bidNotesByNegotiation);
+
+    setAllInternalNotes(bidNotesByNegotiation);
   };
 
   const fetchAllNegotiation = async () => {
@@ -433,6 +491,10 @@ export default function DealList() {
     }
   }, []);
 
+  useEffect(() => {
+    fetchBidNotes();
+  }, [filteredDeals]);
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -558,6 +620,40 @@ export default function DealList() {
                   >
                     <TableCell className="font-medium max-w-[220px]">
                       <span>{deal.negotiations_Client}</span>
+                      {allInternalNotes[deal?.id]?.length > 0 && (
+                        <DropdownMenu
+                          open={openNoteState[deal.id] || false}
+                          onOpenChange={(isOpen) =>
+                            toggleInternalNotesDropdown(deal.id, isOpen)
+                          }
+                        >
+                          <DropdownMenuTrigger asChild>
+                            <StickyNoteIcon
+                              height={15}
+                              width={15}
+                              className="ml-2 text-gray-500 cursor-pointer"
+                            />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            side="right"
+                            className="w-56 max-h-56 overflow-auto bg-white border border-gray-300 shadow-lg rounded-md p-2"
+                          >
+                            <p className="text-lg font-bold">Notes</p>
+                            {allInternalNotes[deal.id].map((note, index) => (
+                              <DropdownMenuItem
+                                key={index}
+                                className=" hover:bg-gray-100 rounded p-1"
+                              >
+                                <div className="flex flex-col">
+                                  <p className="text-black">{note.note}</p>
+                                  <p className="text-gray-700">{note.time}</p>
+                                </div>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </TableCell>
 
                     <TableCell className="max-w-[180px]">
