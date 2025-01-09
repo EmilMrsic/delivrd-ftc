@@ -295,7 +295,7 @@ function ProjectProfile() {
   const addInternalNote = async (newInternalNote: string) => {
     if (newInternalNote.trim()) {
       const teamMembers = await getUsersWithTeamPrivilege();
-      if (incomingBids.length > 0 && negotiation && dealNegotiator) {
+      if (negotiation && dealNegotiator) {
         let newNote = {
           mentioned_user: mentionedUsers,
           bid_id: incomingBids[0]?.bid_id ?? "default_bid_id",
@@ -465,32 +465,34 @@ function ProjectProfile() {
     setBidCommentsByBidId(groupedBidComments);
   };
 
-  const fetchBidNotes = async () => {
-    const bidNotesRef = collection(db, "internal notes");
-    let bidNotesData: InternalNotes[] = [];
+  const fetchBidNotes = async (negotiation_id: string) => {
+    const notesRef = collection(db, "internal notes"); // Reference to "internal notes" collection
+    let negotiationNotesData: InternalNotes[] = [];
 
-    for (const bid of incomingBids) {
-      const bid_id = bid.bid_id;
+    try {
+      // Query notes based on the provided "negotiation_id"
+      const notesQuery = query(
+        notesRef,
+        where("negotiation_id", "==", negotiation_id)
+      );
+      const notesSnap = await getDocs(notesQuery);
 
-      try {
-        const bidNotesQuery = query(bidNotesRef, where("bid_id", "==", bid_id));
-
-        const bidNotesSnap = await getDocs(bidNotesQuery);
-
-        if (!bidNotesSnap.empty) {
-          bidNotesSnap.forEach((doc) => {
-            const notesData = doc.data() as InternalNotes;
-            bidNotesData.push(notesData);
-          });
-        } else {
-          console.warn(`No comments found for bid ID ${bid_id}`);
-        }
-      } catch (error) {
-        console.error(`Error fetching bid comment for ID ${bid_id}:`, error);
+      if (!notesSnap.empty) {
+        notesSnap.forEach((doc) => {
+          const notesData = doc.data() as InternalNotes;
+          negotiationNotesData.push(notesData);
+        });
+      } else {
+        console.warn(`No notes found for negotiation ID ${negotiation_id}`);
       }
+    } catch (error) {
+      console.error(
+        `Error fetching notes for negotiation ID ${negotiation_id}:`,
+        error
+      );
     }
 
-    setAllInternalNotes(bidNotesData);
+    setAllInternalNotes(negotiationNotesData); // Update the state with fetched notes
   };
 
   const handleBellClick = () => {
@@ -556,7 +558,6 @@ function ProjectProfile() {
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
     fetchBidComments();
-    fetchBidNotes();
     getAllDealNegotiator().then((res) =>
       setAllDealNegotiator(res as DealNegotiator[])
     );
@@ -583,6 +584,7 @@ function ProjectProfile() {
     };
 
     getNegotiation();
+    fetchBidNotes(negotiationId ?? "");
   }, [negotiationId]);
 
   return (
