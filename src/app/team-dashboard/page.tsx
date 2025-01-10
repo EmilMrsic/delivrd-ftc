@@ -319,12 +319,24 @@ export default function DealList() {
   };
 
   const applyFilters = (currentFilters: typeof filters) => {
+    const otherStages = [
+      "Delivery Scheduled",
+      "Long Term Order",
+      "Shipping",
+      "Tomi Needs To Review",
+      "Ask for Review",
+      "Closed No Review",
+      "Follow Up Issue",
+    ];
+
     const filtered = originalDeals?.filter((deal) => {
       const matchesStage =
         currentFilters.stages.length === 0
           ? ["Actively Negotiating", "Deal Started", "Paid"].includes(
               deal.negotiations_Status ?? ""
             )
+          : currentFilters.stages.includes("Other Stages")
+          ? otherStages.includes(deal.negotiations_Status?.trim() ?? "")
           : currentFilters.stages.includes(
               deal.negotiations_Status?.trim() ?? ""
             );
