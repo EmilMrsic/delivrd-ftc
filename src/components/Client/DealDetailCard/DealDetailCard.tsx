@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Car, DollarSign, Share2, X } from "lucide-react";
@@ -21,7 +22,9 @@ const DealDetailCard = ({
   let lastScrollY = useRef(0);
 
   const shareProgress = () => {
-    navigator.clipboard.writeText(`${window.location.href}`);
+    if (typeof window !== "undefined" && navigator) {
+      window.navigator.clipboard.writeText(`${window.location.href}`);
+    }
     toast({
       title: "Link copied to clipboard",
     });

@@ -1,12 +1,14 @@
 "use client";
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import { getMessaging, getToken } from "firebase/messaging";
-// // Your web app's Firebase configuration
+import { getMessaging, getToken, isSupported } from "firebase/messaging";
 
+// Your web app's Firebase configuration
 export const FIREBASE_VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -20,30 +22,52 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const storage = getStorage(app);
 
-// Initialize Firestore
+// Firebase Services
+const storage = getStorage(app);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-const messaging = getMessaging(app);
+// Initialize Firebase Messaging
+let messaging: any;
+
+const initMessaging = async () => {
+  if (typeof window !== "undefined") {
+    const isMessagingSupported = await isSupported();
+    if (isMessagingSupported) {
+      messaging = getMessaging(app);
+    } else {
+      console.warn("Firebase Messaging is not supported in this browser.");
+    }
+  }
+};
+
+// Call the function to initialize messaging
+initMessaging();
 
 export { db, auth, storage, messaging };
 
-export const requestForToken = () => {
-  return getToken(messaging, { vapidKey: FIREBASE_VAPID_KEY })
-    .then((currentToken) => {
-      if (currentToken) {
-        return currentToken;
-      } else {
-        alert(
-          "No registration token available. Request permission to generate one."
-        );
-        return null;
-      }
-    })
-    .catch((err) => {
-      alert("An error occurred while retrieving token - " + err);
+// Request for FCM Token
+export const requestForToken = async () => {
+  try {
+    if (!messaging) {
+      console.warn("Messaging is not initialized or not supported.");
       return null;
+    }
+
+    const currentToken = await getToken(messaging, {
+      vapidKey: FIREBASE_VAPID_KEY,
     });
+    if (currentToken) {
+      return currentToken;
+    } else {
+      alert(
+        "No registration token available. Request permission to generate one."
+      );
+      return null;
+    }
+  } catch (err) {
+    alert("An error occurred while retrieving token: " + err);
+    return null;
+  }
 };
