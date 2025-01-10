@@ -164,7 +164,8 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
 };
 
 export const dealStageOptions = [
-  "Other Stages",
+  "Processing",
+  "Paid/Unassigned",
   "Contacted",
   "Scheduled",
   "Proposal Sent",
