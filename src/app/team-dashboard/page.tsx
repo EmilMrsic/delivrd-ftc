@@ -335,8 +335,11 @@ export default function DealList() {
           ? ["Actively Negotiating", "Deal Started", "Paid"].includes(
               deal.negotiations_Status ?? ""
             )
-          : currentFilters.stages.includes("Other Stages")
+          : currentFilters.stages.includes("Processing")
           ? otherStages.includes(deal.negotiations_Status?.trim() ?? "")
+          : currentFilters.stages.includes("Paid/Unassigned")
+          ? deal.negotiations_Status?.trim() === "Paid" &&
+            !deal.negotiations_deal_coordinator
           : currentFilters.stages.includes(
               deal.negotiations_Status?.trim() ?? ""
             );
@@ -479,35 +482,35 @@ export default function DealList() {
     getAllDealNegotiator().then((res) => setAllDealNegotiator(res ?? []));
   }, []);
 
-  useEffect(() => {
-    if (
-      "serviceWorker" in navigator &&
-      typeof window !== "undefined" &&
-      navigator
-    ) {
-      window.navigator.serviceWorker
-        .getRegistrations()
-        .then((registrations) => {
-          if (registrations.length === 0) {
-            window.navigator.serviceWorker
-              .register("../../../firebase-messaging-sw.js")
-              .then((registration) => {
-                console.log(
-                  "Service Worker registered successfully:",
-                  registration
-                );
-              })
-              .catch((error) => {
-                console.error("Service Worker registration failed:", error);
-              });
-          } else {
-            console.log("Service Worker is already registered");
-          }
-        });
-    } else {
-      console.log("Service Workers are not supported in this browser.");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (
+  //     "serviceWorker" in navigator &&
+  //     typeof window !== "undefined" &&
+  //     navigator
+  //   ) {
+  //     window.navigator.serviceWorker
+  //       .getRegistrations()
+  //       .then((registrations) => {
+  //         if (registrations.length === 0) {
+  //           window.navigator.serviceWorker
+  //             .register("../../../firebase-messaging-sw.js")
+  //             .then((registration) => {
+  //               console.log(
+  //                 "Service Worker registered successfully:",
+  //                 registration
+  //               );
+  //             })
+  //             .catch((error) => {
+  //               console.error("Service Worker registration failed:", error);
+  //             });
+  //         } else {
+  //           console.log("Service Worker is already registered");
+  //         }
+  //       });
+  //   } else {
+  //     console.log("Service Workers are not supported in this browser.");
+  //   }
+  // }, []);
 
   useEffect(() => {
     fetchBidNotes();
