@@ -1,5 +1,5 @@
 import { db } from "@/firebase/config";
-import { Color, EditNegotiationData } from "@/types";
+import { Color, EditNegotiationData, NegotiationData } from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import {
   collection,
@@ -102,16 +102,6 @@ export const dateFormat = (dateString: string) => {
     day: "2-digit",
     year: "2-digit",
   });
-};
-
-export const getUser = async (id: string) => {
-  console.log("", { db });
-  const q = query(collection(db, "users"), where("id", "==", id));
-  const querySnapshot = await getDocs(q);
-  if (!querySnapshot.empty) {
-    const userData = querySnapshot.docs[0].data();
-    return userData;
-  }
 };
 
 export const mapNegotiationData = (data: any): EditNegotiationData => {
@@ -278,7 +268,7 @@ export function getCurrentTimestamp() {
   const today = new Date();
 
   const day = String(today.getDate()).padStart(2, "0");
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const month = String(today.getMonth() + 1).padStart(2, "0");
   const year = today.getFullYear();
 
   return `${month}/${day}/${year}`;
@@ -308,7 +298,7 @@ export const fetchActiveDeals = async (id: string) => {
 
     if (!teamSnapshot.exists()) {
       console.log("Team document not found");
-      return;
+      return [];
     }
 
     const teamData = teamSnapshot.data();
@@ -317,23 +307,37 @@ export const fetchActiveDeals = async (id: string) => {
 
     if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
       console.log("No active deals found");
-      return;
+      return [];
     }
 
-    const negotiationsData = [];
-    for (const id of activeDeals) {
-      const negotiationDocRef = doc(db, "negotiations", id);
-      const negotiationSnapshot = await getDoc(negotiationDocRef);
-
-      if (negotiationSnapshot.exists()) {
-        const data = negotiationSnapshot.data();
-
-        negotiationsData.push(data);
+    const chunk = (array: string[], size: number) => {
+      const result = [];
+      for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
       }
+      return result;
+    };
+
+    const chunkedDeals = chunk(activeDeals, 30);
+    let allNegotiations: any = [];
+
+    for (const chunk of chunkedDeals) {
+      const negotiationsQuery = query(
+        collection(db, "negotiations"),
+        where("__name__", "in", chunk)
+      );
+
+      const negotiationsSnapshot = await getDocs(negotiationsQuery);
+      const negotiationsData = negotiationsSnapshot.docs.map((doc) =>
+        doc.data()
+      );
+      allNegotiations = [...allNegotiations, ...negotiationsData];
     }
-    return negotiationsData;
+
+    return allNegotiations;
   } catch (error) {
     console.error("Error fetching negotiations:", error);
+    return [];
   }
 };
 

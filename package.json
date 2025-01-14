@@ -29,6 +29,8 @@
     "firebase": "^10.13.1",
     "firebase-admin": "^13.0.1",
     "framer-motion": "^11.11.7",
+    "loadash": "^1.0.0",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.439.0",
     "next": "14.2.10",
     "react": "^18",
@@ -42,6 +44,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.14",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
