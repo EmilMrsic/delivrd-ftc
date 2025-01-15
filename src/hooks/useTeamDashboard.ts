@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import {
   collection,
@@ -19,7 +20,7 @@ const useTeamDashboard = () => {
   const [originalDeals, setOriginalDeals] = useState<NegotiationData[]>([]);
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiator>();
   const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
-    []
+    [],
   );
 
   const [itemsPerPage, setItemsPerPage] = useState(25);
@@ -47,7 +48,7 @@ const useTeamDashboard = () => {
       if (!id || typeof id !== "string") {
         console.error(
           "Invalid deal_coordinator_id:",
-          parseUserData.deal_coordinator_id
+          parseUserData.deal_coordinator_id,
         );
         return;
       }
@@ -78,7 +79,7 @@ const useTeamDashboard = () => {
       for (const idChunk of chunkedIds) {
         const negotiationsQuery = query(
           negotiationsCollectionRef,
-          where("__name__", "in", idChunk)
+          where("__name__", "in", idChunk),
         );
         const negotiationsSnapshot = await getDocs(negotiationsQuery);
 
@@ -91,8 +92,8 @@ const useTeamDashboard = () => {
       setOriginalDeals(negotiationsData as NegotiationData[]);
       const defaultFilteredDeals = negotiationsData.filter((deal) =>
         ["Actively Negotiating", "Deal Started", "Paid"].includes(
-          deal.negotiations_Status ?? ""
-        )
+          deal.negotiations_Status ?? "",
+        ),
       );
       setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
     } catch (error) {
@@ -137,7 +138,7 @@ const useTeamDashboard = () => {
       for (const idChunk of chunkedIds) {
         const bidNotesQuery = query(
           bidNotesRef,
-          where("negotiation_id", "in", idChunk)
+          where("negotiation_id", "in", idChunk),
         );
         const bidNotesSnap = await getDocs(bidNotesQuery);
 
@@ -172,8 +173,8 @@ const useTeamDashboard = () => {
     setCurrentDeals(
       filteredDeals?.slice(
         (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-      )
+        currentPage * itemsPerPage,
+      ),
     );
   }, [filteredDeals]);
 
