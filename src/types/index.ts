@@ -83,6 +83,12 @@ export interface DealNegotiator {
   video_link: string;
 }
 
+export type ActivityLog = {
+  timestamp: string;
+  action: string;
+  user: string;
+}[];
+
 export type DealerData = {
   Brand: string[];
   City: string;

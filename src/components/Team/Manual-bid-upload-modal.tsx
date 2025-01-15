@@ -149,6 +149,7 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       files: fileUrls ?? [],
       manual_add: true,
       timestamps: new Date(),
+      source: "firebase",
     };
 
     try {

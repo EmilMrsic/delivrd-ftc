@@ -155,9 +155,9 @@ const FilterPopup = ({
               {["Yes", "No"].map((status, index) => (
                 <DropdownMenuCheckboxItem
                   key={index}
-                  checked={filters.onboarding.includes(status)}
+                  checked={filters.onboarding.includes(status.toLowerCase())}
                   onCheckedChange={() =>
-                    handleFilterChange("onboarding", status)
+                    handleFilterChange("onboarding", status.toLowerCase())
                   }
                 >
                   {status}

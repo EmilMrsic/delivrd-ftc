@@ -199,9 +199,9 @@ export default function DealList() {
           (deal.negotiations_deal_coordinator ?? "");
       const onboardingStatus =
         deal.hasOwnProperty("negotiations_Onboarding_Complete") &&
-        deal.negotiations_Onboarding_Complete === "Yes"
-          ? "Yes"
-          : "No";
+        deal.negotiations_Onboarding_Complete.toLocaleLowerCase() === "yes"
+          ? "yes"
+          : "no";
       const matchesOnboarding =
         currentFilters.onboarding.length === 0 ||
         currentFilters.onboarding.includes(onboardingStatus);
@@ -305,36 +305,6 @@ export default function DealList() {
       console.error("Error updating negotiator: ", error);
     }
   };
-
-  // useEffect(() => {
-  //   if (
-  //     "serviceWorker" in navigator &&
-  //     typeof window !== "undefined" &&
-  //     navigator
-  //   ) {
-  //     window.navigator.serviceWorker
-  //       .getRegistrations()
-  //       .then((registrations) => {
-  //         if (registrations.length === 0) {
-  //           window.navigator.serviceWorker
-  //             .register("../../../firebase-messaging-sw.js")
-  //             .then((registration) => {
-  //               console.log(
-  //                 "Service Worker registered successfully:",
-  //                 registration
-  //               );
-  //             })
-  //             .catch((error) => {
-  //               console.error("Service Worker registration failed:", error);
-  //             });
-  //         } else {
-  //           console.log("Service Worker is already registered");
-  //         }
-  //       });
-  //   } else {
-  //     console.log("Service Workers are not supported in this browser.");
-  //   }
-  // }, []);
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
