@@ -199,9 +199,9 @@ export default function DealList() {
           (deal.negotiations_deal_coordinator ?? "");
       const onboardingStatus =
         deal.hasOwnProperty("negotiations_Onboarding_Complete") &&
-        deal.negotiations_Onboarding_Complete === "Yes"
-          ? "Yes"
-          : "No";
+        deal.negotiations_Onboarding_Complete.toLocaleLowerCase() === "yes"
+          ? "yes"
+          : "no";
       const matchesOnboarding =
         currentFilters.onboarding.length === 0 ||
         currentFilters.onboarding.includes(onboardingStatus);
