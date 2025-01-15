@@ -1,40 +1,22 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-
 import { FileText, Plus, ThumbsUp, ThumbsDown, BellIcon } from "lucide-react";
-
-import { useSearchParams } from "next/navigation";
 import {
   addDoc,
   collection,
   doc,
-  getDoc,
   getDocs,
   query,
   setDoc,
   where,
 } from "firebase/firestore";
 import { db, messaging } from "@/firebase/config";
-import {
-  BidComments,
-  DealerData,
-  DealNegotiator,
-  EditNegotiationData,
-  IncomingBid,
-  InternalNotes,
-} from "@/types";
-import {
-  formatDate,
-  getCurrentTimestamp,
-  getUsersWithTeamPrivilege,
-  mapNegotiationData,
-  sendNotification,
-} from "@/lib/utils";
+import { ActivityLog, BidComments } from "@/types";
+import { formatDate, getCurrentTimestamp } from "@/lib/utils";
 import FeatureDetails from "@/components/Team/Feature-details";
 import StickyHeader from "@/components/Team/Sticky-header";
 import ClientDetails from "@/components/Team/Client-details";
@@ -42,7 +24,6 @@ import ManualBidUpload from "@/components/Team/Manual-bid-upload-modal";
 import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
 import { onMessage } from "firebase/messaging";
-import { useAppSelector } from "../redux/store";
 import { useDispatch } from "react-redux";
 import {
   setAllNotifications,
@@ -53,45 +34,30 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-
-type ActivityLog = {
-  timestamp: string;
-  action: string;
-  user: string;
-}[];
-
-type GroupedBidComments = {
-  [bid_id: string]: BidComments[];
-};
+import ActivityLogSection from "@/components/Team/activity-log";
+import AddNoteSection from "@/components/Team/add-note-section";
+import useTeamProfile from "@/hooks/useTeamProfile";
+import VoteSection from "@/components/Team/vote-section";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
-  const params = useSearchParams();
-  const negotiationId = params.get("id");
-  const [negotiation, setNegotiation] = useState<EditNegotiationData | null>(
-    null
-  );
-  const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
-    []
-  );
-  const [mentionSuggestions, setMentionSuggestions] = useState<
-    DealNegotiator[]
-  >([]);
-  const [user, setUser] = useState<any>();
-  const [mentionedUsers, setMentionedUsers] = useState<DealNegotiator[]>([]);
 
-  const [isMentioning, setIsMentioning] = useState<boolean>(false);
-  const [selectedMentionIndex, setSelectedMentionIndex] = useState<number>(-1);
-  const [dealNegotiator, setDealNegotiator] = useState<DealNegotiator>();
-  const [allInternalNotes, setAllInternalNotes] = useState<InternalNotes[]>([]);
-  const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
-  const [dealers, setDealers] = useState<DealerData[]>([]);
-  const [bidCommentsByBidId, setBidCommentsByBidId] =
-    useState<GroupedBidComments>({});
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const {
+    dealNegotiator,
+    dealers,
+    user,
+    allDealNegotiator,
+    negotiation,
+    setNegotiation,
+    negotiationId,
+    notification,
+    notificationCount,
+    incomingBids,
+    setIncomingBids,
+    bidCommentsByBidId,
+    setBidCommentsByBidId,
+  } = useTeamProfile();
 
-  const { notification } = useAppSelector((state) => state.notification);
-  const { notificationCount } = useAppSelector((state) => state.notification);
   const dispatch = useDispatch();
 
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
@@ -114,8 +80,6 @@ function ProjectProfile() {
       user: "Troy Paul",
     },
   ]);
-
-  const [newInternalNote, setNewInternalNote] = useState<string>("");
 
   const [showStickyHeader, setShowStickyHeader] = useState(false);
 
@@ -191,334 +155,9 @@ function ProjectProfile() {
       };
     });
   };
-  const handleVote = async (bid_id: string, value: number) => {
-    try {
-      const bidsQuery = query(
-        collection(db, "Incoming Bids"),
-        where("bid_id", "==", bid_id)
-      );
-      const querySnapshot = await getDocs(bidsQuery);
-
-      if (querySnapshot.empty) {
-        console.log("No matching bids found for bid_id:", bid_id);
-        return;
-      }
-
-      const docSnap = querySnapshot.docs[0];
-
-      console.log("Document data:", docSnap.data());
-
-      let currentVote = null;
-
-      if (docSnap.exists()) {
-        currentVote = docSnap.data().vote;
-      }
-
-      const voteType =
-        currentVote === (value === 1 ? "like" : "dislike")
-          ? "neutral"
-          : value === 1
-          ? "like"
-          : "dislike";
-
-      const internalNotesRef = doc(db, "Incoming Bids", docSnap.id);
-
-      await setDoc(
-        internalNotesRef,
-        {
-          vote: voteType,
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true }
-      );
-
-      setIncomingBids((prevState) =>
-        prevState.map((bid) =>
-          bid.bid_id === bid_id ? { ...bid, vote: voteType } : bid
-        )
-      );
-
-      voteType === "like"
-        ? toast({ title: "Bid liked successfully" })
-        : voteType === "dislike"
-        ? toast({ title: "Bid disliked successfully" })
-        : toast({ title: "Reaction removed successfully" });
-    } catch (error) {
-      console.error("Error updating vote in database:", error);
-    }
-  };
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const inputValue = e.target.value;
-    setNewInternalNote(inputValue);
-
-    const lastWord = inputValue.split(" ").pop() ?? "";
-    if (lastWord.startsWith("@")) {
-      setIsMentioning(true);
-      const query = lastWord.slice(1);
-      setMentionSuggestions(
-        allDealNegotiator.filter((negotiator) =>
-          negotiator.name.toLowerCase().includes(query.toLowerCase())
-        )
-      );
-    } else {
-      setIsMentioning(false);
-      setMentionSuggestions([]);
-    }
-  };
-
-  const handleMentionSelect = (mention: DealNegotiator) => {
-    const newNote =
-      newInternalNote.substring(0, newInternalNote.lastIndexOf("@")) +
-      `@${mention.name} `;
-    setNewInternalNote(newNote);
-    setIsMentioning(false);
-    setMentionSuggestions([]);
-    setSelectedMentionIndex(-1);
-    setMentionedUsers((prev) => [...prev, mention]);
-  };
-
-  const handleKeyboardNavigation = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>
-  ) => {
-    if (
-      e.key === "ArrowDown" &&
-      selectedMentionIndex < mentionSuggestions.length - 1
-    ) {
-      setSelectedMentionIndex(selectedMentionIndex + 1);
-    } else if (e.key === "ArrowUp" && selectedMentionIndex > 0) {
-      setSelectedMentionIndex(selectedMentionIndex - 1);
-    } else if (e.key === "Enter" && selectedMentionIndex >= 0) {
-      handleMentionSelect(mentionSuggestions[selectedMentionIndex]);
-    }
-  };
-
-  const addInternalNote = async (newInternalNote: string) => {
-    if (newInternalNote.trim()) {
-      const teamMembers = await getUsersWithTeamPrivilege();
-      if (negotiation && dealNegotiator) {
-        let newNote = {
-          mentioned_user: mentionedUsers,
-          bid_id: incomingBids[0]?.bid_id ?? "default_bid_id",
-          client:
-            negotiation?.clientInfo?.negotiations_Client ?? "Unknown Client",
-          deal_coordinator: dealNegotiator?.id ?? "Unknown ID",
-          deal_coordinator_name: dealNegotiator?.name ?? "Unknown Name",
-          negotiation_id: negotiationId ?? "Unknown Negotiation ID",
-          note: newInternalNote,
-          time: getCurrentTimestamp() ?? "Unknown Time",
-        };
-        setAllInternalNotes((prevNotes: InternalNotes[]) => [
-          ...prevNotes,
-          newNote,
-        ]);
-        const notesRef = collection(db, "internal notes");
-        await addDoc(notesRef, newNote);
-        const teamWithToken = teamMembers.filter((item) => item.fcmToken);
-        teamWithToken.forEach((item) => {
-          if (item.fcmToken) {
-            sendNotification(
-              item.fcmToken,
-              `${negotiation.clientInfo.negotiations_Client} added a note`,
-              newInternalNote,
-              window.location.href
-            );
-          }
-        });
-        setNewInternalNote("");
-        setMentionedUsers([]);
-
-        toast({ title: "Note added successfully" });
-      } else {
-        console.warn("Some required data is missing.");
-      }
-    }
-  };
-
-  const fetchDealers = async () => {
-    const dealersData = [];
-
-    for (const bid of incomingBids) {
-      const id = bid.dealerId;
-      if (id !== "N/A" && id)
-        try {
-          const dealerRef = doc(db, "Dealers", id);
-          const dealerSnap = await getDoc(dealerRef);
-
-          if (dealerSnap.exists()) {
-            dealersData.push(dealerSnap.data());
-          } else {
-            console.warn(`Dealer with ID ${id} not found`);
-          }
-        } catch (error) {
-          console.error(`Error fetching dealer data for ID ${id}:`, error);
-        }
-    }
-
-    return dealersData;
-  };
-
-  useEffect(() => {
-    const getDealNegotiatorData = async () => {
-      if (!negotiation?.clientInfo?.negotiations_deal_coordinator) return;
-
-      try {
-        const teamDocRef = query(
-          collection(db, "team delivrd"),
-          where(
-            "id",
-            "==",
-            negotiation?.clientInfo?.negotiations_deal_coordinator
-          )
-        );
-
-        const querySnapshot = await getDocs(teamDocRef);
-
-        if (!querySnapshot.empty) {
-          const firstDoc = querySnapshot.docs[0];
-          setDealNegotiator(firstDoc.data() as DealNegotiator);
-        } else {
-          console.log("No deal negotiator!");
-        }
-      } catch (error) {
-        console.error("Error fetching negotiation:", error);
-      }
-    };
-
-    getDealNegotiatorData();
-  }, [negotiation]);
-
-  useEffect(() => {
-    const getBidsByIds = async (bidIds: string[]) => {
-      if (!bidIds || bidIds.length === 0) {
-        console.log("No bids to fetch.");
-        return;
-      }
-
-      try {
-        const incomingBidsCollection = collection(db, "Incoming Bids");
-
-        const bidsPromises = bidIds.map(async (bidId: string) => {
-          const bidsQuery = query(
-            incomingBidsCollection,
-            where("bid_id", "==", bidId)
-          );
-
-          const querySnapshot = await getDocs(bidsQuery);
-
-          if (!querySnapshot.empty) {
-            return querySnapshot.docs[0].data();
-          } else {
-            console.log(`No bid found for bid_id: ${bidId}`);
-            return null;
-          }
-        });
-
-        const bidsData = await Promise.all(bidsPromises);
-        console.log({ bidsData });
-
-        const validBids: IncomingBid[] = bidsData.filter(
-          (bid) => bid !== null
-        ) as IncomingBid[];
-
-        setIncomingBids(validBids);
-      } catch (error) {
-        console.error("Error fetching incoming bids:", error);
-      }
-    };
-
-    getBidsByIds(negotiation?.otherData?.incoming_bids ?? []);
-  }, [negotiation]);
-
-  const fetchBidComments = async () => {
-    const groupedBidComments: GroupedBidComments = {};
-    const bidCommentsRef = collection(db, "bid comment");
-
-    for (const bid of incomingBids) {
-      const bid_id = bid.bid_id;
-
-      try {
-        const bidCommentQuery = query(
-          bidCommentsRef,
-          where("bid_id", "==", bid_id)
-        );
-
-        const bidCommentSnap = await getDocs(bidCommentQuery);
-
-        if (!bidCommentSnap.empty) {
-          bidCommentSnap.forEach((doc) => {
-            const bidCommentData = doc.data() as BidComments;
-
-            if (!groupedBidComments[bid_id]) {
-              groupedBidComments[bid_id] = [];
-            }
-
-            groupedBidComments[bid_id].push(bidCommentData);
-          });
-        } else {
-          console.warn(`No comments found for bid ID ${bid_id}`);
-        }
-      } catch (error) {
-        console.error(`Error fetching bid comment for ID ${bid_id}:`, error);
-      }
-    }
-
-    setBidCommentsByBidId(groupedBidComments);
-  };
-
-  const fetchBidNotes = async (negotiation_id: string) => {
-    const notesRef = collection(db, "internal notes"); // Reference to "internal notes" collection
-    let negotiationNotesData: InternalNotes[] = [];
-
-    try {
-      // Query notes based on the provided "negotiation_id"
-      const notesQuery = query(
-        notesRef,
-        where("negotiation_id", "==", negotiation_id)
-      );
-      const notesSnap = await getDocs(notesQuery);
-
-      if (!notesSnap.empty) {
-        notesSnap.forEach((doc) => {
-          const notesData = doc.data() as InternalNotes;
-          negotiationNotesData.push(notesData);
-        });
-      } else {
-        console.warn(`No notes found for negotiation ID ${negotiation_id}`);
-      }
-    } catch (error) {
-      console.error(
-        `Error fetching notes for negotiation ID ${negotiation_id}:`,
-        error
-      );
-    }
-
-    setAllInternalNotes(negotiationNotesData); // Update the state with fetched notes
-  };
 
   const handleBellClick = () => {
     dispatch(setNotificationCount(0));
-  };
-
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    setUser(JSON.parse(user ?? ""));
-  }, []);
-
-  const getAllDealNegotiator = async () => {
-    try {
-      const teamCollection = collection(db, "team delivrd");
-
-      const querySnapshot = await getDocs(teamCollection);
-
-      const negotiatiatorData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      return negotiatiatorData as DealNegotiator[];
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const parseComment = (comment: string) => {
@@ -546,46 +185,6 @@ function ProjectProfile() {
     const newData = { ...data.notification, ...data.data };
     if (newData) dispatch(setAllNotifications(newData));
   });
-
-  useEffect(() => {
-    if (!hasLoaded) {
-      setHasLoaded(true);
-    } else {
-      dispatch(setNotificationCount(notificationCount + 1));
-    }
-  }, [notification]);
-
-  useEffect(() => {
-    fetchDealers().then((res) => setDealers(res as DealerData[]));
-    fetchBidComments();
-    getAllDealNegotiator().then((res) =>
-      setAllDealNegotiator(res as DealNegotiator[])
-    );
-  }, [incomingBids]);
-
-  useEffect(() => {
-    const getNegotiation = async () => {
-      if (!negotiationId) return;
-
-      try {
-        const id = negotiationId;
-        const negotiationDocRef = doc(db, "negotiations", id);
-
-        const docSnap = await getDoc(negotiationDocRef);
-
-        if (docSnap.exists()) {
-          setNegotiation(mapNegotiationData(docSnap.data()));
-        } else {
-          console.log("No such negotiation!");
-        }
-      } catch (error) {
-        console.error("Error fetching negotiation:", error);
-      }
-    };
-
-    getNegotiation();
-    fetchBidNotes(negotiationId ?? "");
-  }, [negotiationId]);
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
@@ -665,17 +264,15 @@ function ProjectProfile() {
 
           <Card className="bg-white shadow-lg">
             <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
-              <>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <FileText className="mr-2" />
-                    Incoming Bids
-                  </div>
-                  <div className="flex items-center">
-                    <ManualBidUpload id={negotiationId} />
-                  </div>
-                </CardTitle>
-              </>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <FileText className="mr-2" />
+                  Incoming Bids
+                </div>
+                <div className="flex items-center">
+                  <ManualBidUpload id={negotiationId} />
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-8">
@@ -697,32 +294,11 @@ function ProjectProfile() {
                             ? dealers[index]?.Dealership + " Offer"
                             : "No Dealership"}
                         </h3>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleVote(bidDetails.bid_id, 1)}
-                            className={
-                              bidDetails.vote && bidDetails.vote === "like"
-                                ? "bg-green-500 text-white"
-                                : ""
-                            }
-                          >
-                            <ThumbsUp className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleVote(bidDetails.bid_id, -1)}
-                            className={
-                              bidDetails.vote && bidDetails.vote === "dislike"
-                                ? "bg-yellow-500 text-white"
-                                : ""
-                            }
-                          >
-                            <ThumbsDown className="h-4 w-4" />
-                          </Button>
-                        </div>
+
+                        <VoteSection
+                          bidDetails={bidDetails}
+                          setIncomingBids={setIncomingBids}
+                        />
                       </div>
                       <time className="block mb-2 text-sm text-[#202125]">
                         {formatDate(bidDetails?.timestamp)}
@@ -833,6 +409,7 @@ function ProjectProfile() {
                             </div>
                           </DialogContent>
                         </Dialog>
+
                         <Button
                           variant="outline"
                           size="sm"
@@ -901,108 +478,15 @@ function ProjectProfile() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
-              <CardTitle className="flex items-center">
-                <FileText className="mr-2" /> Internal Notes
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
-                {allInternalNotes.map((note, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user[0]} alt={user.name[0]} />
-                      <AvatarFallback>{user.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div
-                      className={`p-3 rounded-lg flex-grow ${
-                        note.client === user.name
-                          ? "bg-blue-100"
-                          : "bg-gray-100"
-                      }`}
-                    >
-                      <div className="flex justify-between items-center mb-1">
-                        <p className="font-semibold">{user.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(note.time).toLocaleString()}
-                        </p>
-                      </div>
-                      <p>{note.note}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex space-x-2">
-                <Textarea
-                  placeholder="Add a note..."
-                  value={newInternalNote}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyboardNavigation}
-                  className="flex-grow"
-                />
-                {isMentioning && mentionSuggestions.length > 0 && (
-                  <div className="absolute z-10 mt-[50px] w-[250px] bg-white border border-gray-300 rounded-md shadow-lg">
-                    <ul className="max-h-40 overflow-y-auto">
-                      {mentionSuggestions.map((mention, index) => (
-                        <li
-                          key={mention.id}
-                          onClick={() => handleMentionSelect(mention)}
-                          className={`p-2 cursor-pointer ${
-                            index === selectedMentionIndex ? "bg-gray-200" : ""
-                          }`}
-                        >
-                          {mention.name}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <Button onClick={() => addInternalNote(newInternalNote)}>
-                  Add Note
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
-              <CardTitle className="flex items-center">
-                <FileText className="mr-2" /> Activity Log
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <ul className="space-y-4">
-                {activityLog.map((activity, index) => {
-                  const date = new Date(activity.timestamp);
-                  const formattedDate = date.toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  });
-                  const dayOfWeek = date.toLocaleDateString("en-US", {
-                    weekday: "long",
-                  });
-                  return (
-                    <li key={index} className="flex items-start">
-                      <div className="w-3 h-3 rounded-full bg-orange-500 z-10 mr-4 mt-1.5"></div>
-                      <div className="flex-grow">
-                        <p className="text-sm text-gray-600">
-                          <span className="font-semibold">{formattedDate}</span>
-                          <br />
-                          <span className="text-xs text-gray-400">
-                            {dayOfWeek}
-                          </span>
-                          <br />
-                          {activity.user}: {activity.action}
-                        </p>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </CardContent>
-          </Card>
+          <AddNoteSection
+            user={user}
+            negotiationId={negotiationId ?? ""}
+            negotiation={negotiation}
+            incomingBids={incomingBids}
+            allDealNegotiator={allDealNegotiator}
+            dealNegotiator={dealNegotiator}
+          />
+          <ActivityLogSection activityLog={activityLog} />
         </div>
 
         <div className="md:col-span-1">

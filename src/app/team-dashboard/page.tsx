@@ -306,36 +306,6 @@ export default function DealList() {
     }
   };
 
-  // useEffect(() => {
-  //   if (
-  //     "serviceWorker" in navigator &&
-  //     typeof window !== "undefined" &&
-  //     navigator
-  //   ) {
-  //     window.navigator.serviceWorker
-  //       .getRegistrations()
-  //       .then((registrations) => {
-  //         if (registrations.length === 0) {
-  //           window.navigator.serviceWorker
-  //             .register("../../../firebase-messaging-sw.js")
-  //             .then((registration) => {
-  //               console.log(
-  //                 "Service Worker registered successfully:",
-  //                 registration
-  //               );
-  //             })
-  //             .catch((error) => {
-  //               console.error("Service Worker registration failed:", error);
-  //             });
-  //         } else {
-  //           console.log("Service Worker is already registered");
-  //         }
-  //       });
-  //   } else {
-  //     console.log("Service Workers are not supported in this browser.");
-  //   }
-  // }, []);
-
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
