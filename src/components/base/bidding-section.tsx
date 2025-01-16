@@ -15,7 +15,7 @@ import VehicleCard from "./vehicle-card";
 import { db, storage } from "@/firebase/config";
 import { IUser, Vehicle } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { parseColorOptions } from "@/lib/utils";
+import { generateRandomId, parseColorOptions } from "@/lib/utils";
 import Image from "next/image";
 import { Loader } from "./loader";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -118,6 +118,7 @@ export default function BiddingSection() {
       // Change this line to use addDoc instead of setDoc
       const bidRef = collection(db, "Incoming Bids");
       await addDoc(bidRef, {
+        bid_id: generateRandomId(),
         dealerId: user.dealer_id[0],
         clientId: vehicleId,
         price: parseFloat(price),
