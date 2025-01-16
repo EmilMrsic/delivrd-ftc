@@ -250,8 +250,8 @@ const TeamDashboardTable = ({
                 </DropdownMenu>
               </TableCell>
               <TableCell className="text-center">
-                {deal.negotiations_Onboarding_Complete &&
-                deal.negotiations_Onboarding_Complete.toLowerCase() ===
+                {deal?.negotiations_Onboarding_Complete &&
+                deal?.negotiations_Onboarding_Complete?.toLowerCase() ===
                   "yes" ? (
                   <Check className="text-green-500" />
                 ) : (
