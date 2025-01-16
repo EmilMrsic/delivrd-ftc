@@ -199,7 +199,8 @@ export default function DealList() {
           (deal.negotiations_deal_coordinator ?? "");
       const onboardingStatus =
         deal.hasOwnProperty("negotiations_Onboarding_Complete") &&
-        deal.negotiations_Onboarding_Complete.toLocaleLowerCase() === "yes"
+        deal?.negotiations_Onboarding_Complete &&
+        deal?.negotiations_Onboarding_Complete?.toLowerCase() === "yes"
           ? "yes"
           : "no";
       const matchesOnboarding =
