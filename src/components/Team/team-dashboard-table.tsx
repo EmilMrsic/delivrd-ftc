@@ -210,24 +210,22 @@ const TeamDashboardTable = ({
                       variant="outline"
                       className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
                     >
-                      <p>
-                        {allDealNegotiator.some(
-                          (negotiator) =>
-                            negotiator.id === deal.negotiations_deal_coordinator
-                        ) ? (
-                          <p>
-                            {
-                              allDealNegotiator.find(
-                                (negotiator) =>
-                                  negotiator.id ===
-                                  deal.negotiations_deal_coordinator
-                              )?.name
-                            }
-                          </p>
-                        ) : (
-                          <p>Not Assigned</p>
-                        )}
-                      </p>
+                      {allDealNegotiator.some(
+                        (negotiator) =>
+                          negotiator.id === deal.negotiations_deal_coordinator
+                      ) ? (
+                        <p>
+                          {
+                            allDealNegotiator.find(
+                              (negotiator) =>
+                                negotiator.id ===
+                                deal.negotiations_deal_coordinator
+                            )?.name
+                          }
+                        </p>
+                      ) : (
+                        <p>Not Assigned</p>
+                      )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56 h-56 overflow-scroll">

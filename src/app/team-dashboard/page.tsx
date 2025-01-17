@@ -118,7 +118,6 @@ export default function DealList() {
           setLoading(true);
           fetchActiveDeals(id)
             .then((deals) => {
-              console.log({ deals });
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
@@ -135,7 +134,6 @@ export default function DealList() {
           setLoading(true);
           fetchActiveDeals(value)
             .then((deals) => {
-              console.log({ deals });
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
@@ -156,7 +154,6 @@ export default function DealList() {
         } else {
           updatedFilters[filterType] = [...updatedFilters[filterType], value];
         }
-
         applyFilters(updatedFilters);
       }
 
@@ -183,9 +180,10 @@ export default function DealList() {
             )
           : currentFilters.stages.includes("Processing")
           ? otherStages.includes(deal.negotiations_Status?.trim() ?? "")
-          : currentFilters.stages.includes("Paid/Unassigned")
-          ? deal.negotiations_Status?.trim() === "Paid" &&
-            !deal.negotiations_deal_coordinator
+          : (currentFilters.stages.includes("Paid/Unassigned") &&
+              !deal.negotiations_deal_coordinator) ||
+            deal.negotiations_deal_coordinator === ""
+          ? deal.negotiations_Status?.trim() === "Paid/Unassigned"
           : currentFilters.stages.includes(
               deal.negotiations_Status?.trim() ?? ""
             );

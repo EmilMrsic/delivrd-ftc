@@ -4,16 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Plus, ThumbsUp, ThumbsDown, BellIcon } from "lucide-react";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import { FileText, Plus, BellIcon } from "lucide-react";
+import { addDoc, collection } from "firebase/firestore";
 import { db, messaging } from "@/firebase/config";
 import { ActivityLog, BidComments } from "@/types";
 import { formatDate, getCurrentTimestamp } from "@/lib/utils";
