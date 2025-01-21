@@ -7,7 +7,7 @@ import {
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { fetchActiveDeals } from "@/lib/utils";
+import { fetchActiveDeals, fetchAllPaidNegotiations } from "@/lib/utils";
 import { BellIcon, Search } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
@@ -64,7 +64,7 @@ export default function DealList() {
   };
 
   const [filters, setFilters] = useState({
-    stages: [] as string[],
+    stages: "" as string,
     makes: [] as string[],
     models: [] as string[],
     dealCoordinators: "" as string,
@@ -96,28 +96,31 @@ export default function DealList() {
     filterType: keyof typeof filters,
     value: string
   ) => {
+    const userData = localStorage.getItem("user");
+    const parseUserData = JSON.parse(userData ?? "");
+    const id = Array.isArray(parseUserData.deal_coordinator_id)
+      ? parseUserData.deal_coordinator_id[0]
+      : parseUserData.deal_coordinator_id;
+
+    if (!id || typeof id !== "string") {
+      console.error(
+        "Invalid deal_coordinator_id:",
+        parseUserData.deal_coordinator_id
+      );
+    }
     setFilters((prevFilters) => {
       const updatedFilters = { ...prevFilters };
 
       if (filterType === "dealCoordinators") {
-        updatedFilters.stages = [];
-        const userData = localStorage.getItem("user");
-        const parseUserData = JSON.parse(userData ?? "");
-        const id = Array.isArray(parseUserData.deal_coordinator_id)
-          ? parseUserData.deal_coordinator_id[0]
-          : parseUserData.deal_coordinator_id;
+        updatedFilters.stages = "";
 
-        if (!id || typeof id !== "string") {
-          console.error(
-            "Invalid deal_coordinator_id:",
-            parseUserData.deal_coordinator_id
-          );
-        }
         if (updatedFilters.dealCoordinators === value) {
           updatedFilters.dealCoordinators = "";
           setLoading(true);
           fetchActiveDeals(id)
             .then((deals) => {
+              console.log("remove deaks", { deals });
+
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
@@ -134,6 +137,7 @@ export default function DealList() {
           setLoading(true);
           fetchActiveDeals(value)
             .then((deals) => {
+              console.log("deal", { deals });
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
@@ -146,10 +150,65 @@ export default function DealList() {
             })
             .catch((error) => console.error("Error applying filter:", error));
         }
+      } else if (filterType === "stages") {
+        if (updatedFilters.stages === value) {
+          updatedFilters.stages = "";
+          setLoading(true);
+
+          fetchActiveDeals(
+            updatedFilters.dealCoordinators.length
+              ? updatedFilters.dealCoordinators
+              : id
+          )
+            .then((deals) => {
+              console.log("hiyyyaa", { deals });
+              setOriginalDeals(deals as NegotiationData[]);
+              const defaultFilteredDeals = deals?.filter(
+                (deal: NegotiationData) =>
+                  ["Actively Negotiating", "Deal Started", "Paid"].includes(
+                    deal.negotiations_Status ?? ""
+                  )
+              );
+              setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
+              setLoading(false);
+            })
+            .catch((error) => console.error("Error applying filter:", error));
+        } else {
+          updatedFilters.stages = value;
+          setLoading(true);
+
+          if (value === "Paid/Unassigned") {
+            fetchAllPaidNegotiations().then((res) => {
+              setOriginalDeals(res);
+              setFilteredDeals(res);
+              setLoading(false);
+            });
+          } else {
+            if (value === "Processing") {
+              console.log("hi", value, originalDeals);
+              const deals = originalDeals.filter(
+                (deal) =>
+                  deal.negotiations_Status === "Actively Negotiating" ||
+                  deal.negotiations_Status === "Deal Started" ||
+                  deal.negotiations_Status === "Paid"
+              );
+              setFilteredDeals(deals);
+              setLoading(false);
+            } else {
+              console.log("heeloo", value);
+
+              const deals = originalDeals.filter(
+                (deal) => deal.negotiations_Status === value
+              );
+              setFilteredDeals(deals);
+              setLoading(false);
+            }
+          }
+        }
       } else {
         if (updatedFilters[filterType].includes(value)) {
           updatedFilters[filterType] = updatedFilters[filterType].filter(
-            (item) => item !== value
+            (item: string) => item !== value
           );
         } else {
           updatedFilters[filterType] = [...updatedFilters[filterType], value];
@@ -180,10 +239,6 @@ export default function DealList() {
             )
           : currentFilters.stages.includes("Processing")
           ? otherStages.includes(deal.negotiations_Status?.trim() ?? "")
-          : (currentFilters.stages.includes("Paid/Unassigned") &&
-              !deal.negotiations_deal_coordinator) ||
-            deal.negotiations_deal_coordinator === ""
-          ? deal.negotiations_Status?.trim() === "Paid/Unassigned"
           : currentFilters.stages.includes(
               deal.negotiations_Status?.trim() ?? ""
             );
@@ -214,7 +269,7 @@ export default function DealList() {
 
   const clearFilters = () => {
     const resetFilters = {
-      stages: [],
+      stages: "",
       models: [],
       dealCoordinators: "",
       makes: [],
