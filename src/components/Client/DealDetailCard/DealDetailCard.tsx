@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { Car, DollarSign, Share2, X } from "lucide-react";
+import { Calendar, Car, DollarSign, Share2, X } from "lucide-react";
 import { Separator } from "@radix-ui/react-separator";
 import { Button } from "../../ui/button";
 import { IUser, NegotiationData } from "@/types";
 import { toast } from "@/hooks/use-toast";
+import { useSearchParams } from "next/navigation";
 
 const DealDetailCard = ({
   userData,
@@ -20,10 +21,14 @@ const DealDetailCard = ({
 }) => {
   const dealDetailsRef = useRef(null);
   let lastScrollY = useRef(0);
+  const params = useSearchParams();
+  const shared = params.get("shared");
 
   const shareProgress = () => {
     if (typeof window !== "undefined" && navigator) {
-      window.navigator.clipboard.writeText(`${window.location.href}`);
+      window.navigator.clipboard.writeText(
+        `${window.location.href}?shared=true`
+      );
     }
     toast({
       title: "Link copied to clipboard",
@@ -59,7 +64,7 @@ const DealDetailCard = ({
 
   return (
     <div
-      className={`${
+      className={`flex flex-col ${
         responsive ? "md:sticky md:flex hidden md:top-4" : "md:hidden"
       } `}
     >
@@ -215,6 +220,22 @@ const DealDetailCard = ({
           </Button>
         </CardContent>
       </Card>
+      {shared && (
+        <div className="bg-white p-6 rounded-2xl shadow-md ">
+          <div className="text-center space-y-4">
+            <p className="text-lg font-semibold text-gray-800">
+              Buy your next car through{" "}
+              <span className="bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
+                Delivrd
+              </span>
+            </p>
+            <Button className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600 rounded-lg py-2 shadow-lg">
+              <Calendar className="mr-2 h-5 w-5" />
+              Schedule Free Consult
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

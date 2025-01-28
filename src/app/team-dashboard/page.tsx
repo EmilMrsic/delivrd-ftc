@@ -43,6 +43,7 @@ export default function DealList() {
     currentDeals,
     currentPage,
     setCurrentPage,
+    setCurrentDeals,
   } = useTeamDashboard();
 
   const { notification } = useAppSelector((state) => state.notification);
@@ -449,6 +450,7 @@ export default function DealList() {
           </div>
 
           <TeamDashboardTable
+            setCurrentDeals={setCurrentDeals}
             loading={loading}
             setStopPropagation={setStopPropagation}
             stopPropagation={stopPropagation}
