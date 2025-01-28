@@ -28,6 +28,7 @@ type TeamDashboardTableProps = {
   setStopPropagation: (item: boolean) => void;
   stopPropagation: boolean;
   currentDeals: NegotiationData[];
+  setCurrentDeals: (item: NegotiationData[]) => void;
   handleStageChange: (id: string, newStage: string) => void;
   allInternalNotes: Record<string, InternalNotes[]>;
   allDealNegotiator: DealNegotiator[];
@@ -46,15 +47,22 @@ const TeamDashboardTable = ({
   updateDealNegotiator,
   negotiatorData,
   loading,
+  setCurrentDeals,
 }: TeamDashboardTableProps) => {
   const router = useRouter();
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const [openNoteState, setOpenNoteStates] = useState<Record<string, boolean>>(
     {}
   );
+
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
     Record<string, boolean>
   >({});
+
+  const [sortConfig, setSortConfig] = useState({
+    key: "submittedDate", // default sorting by Submitted Date
+    direction: "ascending", // default direction
+  });
 
   const toggleDropdown = (id: string, isOpen: boolean) => {
     setOpenStates((prev) => ({
@@ -76,6 +84,24 @@ const TeamDashboardTable = ({
       [id]: isOpen,
     }));
   };
+
+  const sortData = (key: string, direction: string) => {
+    const sortedDeals = [...currentDeals].sort((a: any, b: any) => {
+      const aValue = a[key];
+      const bValue = b[key];
+
+      if (aValue < bValue) {
+        return direction === "ascending" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return direction === "ascending" ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setCurrentDeals(sortedDeals);
+  };
+
   return (
     <Table className="overflow-visible">
       <TableHeader>
@@ -87,9 +113,78 @@ const TeamDashboardTable = ({
           <TableHead>State</TableHead>
           <TableHead>Deal Negotiator</TableHead>
           <TableHead>Onboarding Complete</TableHead>
-          <TableHead>Submitted Date</TableHead>
-          <TableHead>Last Update</TableHead>
-          <TableHead>Start Date</TableHead>
+          <TableHead>
+            Submitted Date
+            <button
+              onClick={() => {
+                const direction =
+                  sortConfig.key === "submittedDate" &&
+                  sortConfig.direction === "ascending"
+                    ? "descending"
+                    : "ascending";
+                setSortConfig({ key: "submittedDate", direction });
+                sortData("negotiations_Created", direction);
+              }}
+            >
+              {sortConfig.key === "submittedDate" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>{" "}
+          <TableHead>
+            Last Update
+            <button
+              onClick={() => {
+                const direction =
+                  sortConfig.key === "lastUpdate" &&
+                  sortConfig.direction === "ascending"
+                    ? "descending"
+                    : "ascending";
+                setSortConfig({ key: "lastUpdate", direction });
+                sortData("negotiations_Status_Updated", direction);
+              }}
+            >
+              {sortConfig.key === "lastUpdate" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>{" "}
+          <TableHead>
+            Start Date
+            <button
+              onClick={() => {
+                const direction =
+                  sortConfig.key === "startDate" &&
+                  sortConfig.direction === "ascending"
+                    ? "descending"
+                    : "ascending";
+                setSortConfig({ key: "startDate", direction });
+                sortData("negotiations_Deal_Start_Date", direction);
+              }}
+            >
+              {sortConfig.key === "startDate" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>{" "}
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
