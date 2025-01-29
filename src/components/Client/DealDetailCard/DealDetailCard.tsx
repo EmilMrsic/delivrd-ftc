@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { Calendar, Car, DollarSign, Share2, X } from "lucide-react";
+import { Car, DollarSign, Share2, X } from "lucide-react";
 import { Separator } from "@radix-ui/react-separator";
 import { Button } from "../../ui/button";
 import { IUser, NegotiationData } from "@/types";
@@ -211,27 +211,33 @@ const DealDetailCard = ({
             </div>
           </div>
           <Separator className="my-4" />
-          <Button
-            onClick={shareProgress}
-            className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
-          >
-            <Share2 className="mr-2 h-4 w-4" />
-            Share Your Deal Progress
-          </Button>
+          {!shared && (
+            <Button
+              onClick={shareProgress}
+              className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
+            >
+              <Share2 className="mr-2 h-4 w-4" />
+              Share Your Deal Progress
+            </Button>
+          )}
         </CardContent>
       </Card>
       {shared && (
         <div className="bg-white p-6 rounded-2xl shadow-md ">
-          <div className="text-center space-y-4">
-            <p className="text-lg font-semibold text-gray-800">
-              Buy your next car through{" "}
-              <span className="bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-                Delivrd
-              </span>
+          <div className="text-center space-y-4 flex flex-col items-center">
+            <p className="text-lg font-semibold text-gray-800 w-[250px]">
+              Discover Why Delivrd is The Ultimate Car Buying Experience
             </p>
-            <Button className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600 rounded-lg py-2 shadow-lg">
-              <Calendar className="mr-2 h-5 w-5" />
-              Schedule Free Consult
+            <Button
+              onClick={() =>
+                window.open(
+                  "https://delivrdto.me?utm_source=shared_profile_page",
+                  "_blank"
+                )
+              }
+              className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600 rounded-lg py-2 shadow-lg"
+            >
+              Learn More
             </Button>
           </div>
         </div>

@@ -19,7 +19,7 @@ const LoginCard = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const router = useRouter();
+  const [notification, setNotification] = useState<string | null>(null);
 
   const sendEmail = async (email: string) => {
     try {
@@ -27,14 +27,13 @@ const LoginCard = () => {
         to: email,
       };
       await axios.post(`/api/email`, emailData);
-      toast({
-        title: `Email sent to ${email}`,
-      });
+
+      setNotification(`Email sent to ${email}`);
+      setTimeout(() => setNotification(null), 6000);
     } catch (error) {
       console.error("Error sending email:", error);
-      toast({
-        title: `Something went wrong`,
-      });
+      setNotification("Something went wrong");
+      setTimeout(() => setNotification(null), 6000);
     }
   };
 
@@ -44,14 +43,12 @@ const LoginCard = () => {
         to: email,
       };
       await axios.post(`/api/login`, emailData);
-      toast({
-        title: `Login email sent to ${email}`,
-      });
+      setNotification(`Login email sent to ${email}`);
+      setTimeout(() => setNotification(null), 6000);
     } catch (error) {
       console.error("Error sending email:", error);
-      toast({
-        title: `Something went wrong`,
-      });
+      setNotification("Something went wrong");
+      setTimeout(() => setNotification(null), 6000);
     }
   };
 
@@ -93,27 +90,34 @@ const LoginCard = () => {
   };
 
   return (
-    <div className="bg-white max-w-[400px] lg:w-[400px]  flex flex-col rounded-xl p-5 gap-5">
-      <h1 className="text-3xl font-bold text-center mb-2">
-        Putting Dreams in Driveways
-      </h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <Input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <Button
-          type="submit"
-          className="bg-blue-500 flex gap-5 hover:bg-blue-600"
-        >
-          <Lock className="w-4" stroke="#2B5CAD" />
-          Send Delivrd Magic Link To Your Inbox
-        </Button>
-      </form>
-    </div>
+    <>
+      <div className="bg-white max-w-[400px] lg:w-[400px]  flex flex-col rounded-xl p-5 gap-5">
+        <h1 className="text-3xl font-bold text-center mb-2">
+          Putting Dreams in Driveways
+        </h1>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <Button
+            type="submit"
+            className="bg-blue-500 flex gap-5 hover:bg-blue-600"
+          >
+            <Lock className="w-4" stroke="#2B5CAD" />
+            Send Delivrd Magic Link To Your Inbox
+          </Button>
+        </form>
+      </div>
+      {notification && (
+        <div className="mt-3 bg-blue-100 text-blue-900 p-3 rounded shadow-md">
+          {notification}
+        </div>
+      )}
+    </>
   );
 };
 
