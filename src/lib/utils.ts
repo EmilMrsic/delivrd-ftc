@@ -168,6 +168,7 @@ export const dealStageOptions = [
   "Insta-Pay",
   "Paid Holding",
   "Deal Started",
+  "Deal Completed Long Term Order",
   "Actively Negotiating",
   "Delivery Scheduled",
   "Long Term Order",
