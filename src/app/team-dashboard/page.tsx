@@ -192,7 +192,9 @@ export default function DealList() {
               setLoading(false);
             } else {
               const deals = originalDeals.filter(
-                (deal) => deal.negotiations_Status === value
+                (deal) =>
+                  deal.negotiations_Status &&
+                  deal.negotiations_Status.trim() === value.trim()
               );
               setFilteredDeals(deals);
               setLoading(false);

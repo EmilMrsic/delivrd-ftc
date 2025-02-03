@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { ChevronDown, Filter } from "lucide-react";
 import {
@@ -28,6 +28,9 @@ const FilterPopup = ({
   const [searchStages, setSearchStages] = useState("");
   const [searchMakes, setSearchMakes] = useState("");
   const [searchCoordinators, setSearchCoordinators] = useState("");
+  const searchStageInputRef = useRef<HTMLInputElement>(null);
+  const searchCoordinatorInputRef = useRef<HTMLInputElement>(null);
+  const searchMakeInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="flex gap-4">
@@ -41,12 +44,12 @@ const FilterPopup = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
             <input
+              ref={searchStageInputRef}
               type="text"
               placeholder="Search stages..."
               className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
-              onChange={
-                (e) => setSearchStages(e.target.value.toLowerCase()) // Update search state
-              }
+              onChange={(e) => setSearchStages(e.target.value.toLowerCase())}
+              autoFocus
             />
             <div className="h-56 overflow-scroll">
               {dealStageOptions
@@ -55,7 +58,9 @@ const FilterPopup = ({
                 )
                 .map((stage, index) => (
                   <DropdownMenuCheckboxItem
-                    key={index}
+                    key={"stage" + index}
+                    tabIndex={-1}
+                    onFocus={() => searchStageInputRef.current?.focus()}
                     checked={filters.stages.includes(stage)}
                     onCheckedChange={() => handleFilterChange("stages", stage)}
                   >
@@ -76,7 +81,10 @@ const FilterPopup = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
             <input
+              ref={searchMakeInputRef}
+              autoFocus
               type="text"
+              onFocus={() => searchMakeInputRef.current?.focus()}
               placeholder="Search makes..."
               className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
               onChange={
@@ -113,6 +121,8 @@ const FilterPopup = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
             <input
+              ref={searchCoordinatorInputRef}
+              autoFocus
               type="text"
               placeholder="Search coordinators..."
               className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
@@ -130,6 +140,7 @@ const FilterPopup = ({
                 .map((coordinator, index) => (
                   <DropdownMenuCheckboxItem
                     key={index}
+                    onFocus={() => searchCoordinatorInputRef.current?.focus()}
                     checked={filters.dealCoordinators.includes(coordinator.id)}
                     onCheckedChange={() =>
                       handleFilterChange("dealCoordinators", coordinator.id)
