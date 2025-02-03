@@ -173,10 +173,10 @@ function ProjectProfile() {
     });
   };
 
-  onMessage(messaging, (data: any) => {
-    const newData = { ...data.notification, ...data.data };
-    if (newData) dispatch(setAllNotifications(newData));
-  });
+  // onMessage(messaging, (data: any) => {
+  //   const newData = { ...data.notification, ...data.data };
+  //   if (newData) dispatch(setAllNotifications(newData));
+  // });
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
