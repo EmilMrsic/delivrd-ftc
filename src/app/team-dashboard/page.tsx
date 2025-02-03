@@ -120,8 +120,6 @@ export default function DealList() {
           setLoading(true);
           fetchActiveDeals(id)
             .then((deals) => {
-              console.log("remove deaks", { deals });
-
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
@@ -138,7 +136,6 @@ export default function DealList() {
           setLoading(true);
           fetchActiveDeals(value)
             .then((deals) => {
-              console.log("deal", { deals });
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
@@ -162,7 +159,6 @@ export default function DealList() {
               : id
           )
             .then((deals) => {
-              console.log("hiyyyaa", { deals });
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
@@ -186,18 +182,15 @@ export default function DealList() {
             });
           } else {
             if (value === "Processing") {
-              console.log("hi", value, originalDeals);
               const deals = originalDeals.filter(
                 (deal) =>
-                  deal.negotiations_Status === "Actively Negotiating" ||
-                  deal.negotiations_Status === "Deal Started" ||
-                  deal.negotiations_Status === "Paid"
+                  deal.negotiations_Status !== "Actively Negotiating" &&
+                  deal.negotiations_Status !== "Deal Started" &&
+                  deal.negotiations_Status !== "Paid"
               );
               setFilteredDeals(deals);
               setLoading(false);
             } else {
-              console.log("heeloo", value);
-
               const deals = originalDeals.filter(
                 (deal) => deal.negotiations_Status === value
               );
