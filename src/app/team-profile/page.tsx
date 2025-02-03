@@ -270,209 +270,214 @@ function ProjectProfile() {
               <div className="space-y-8">
                 {incomingBids.length ? (
                   incomingBids
-                    ?.slice()
+                    ?.filter((bid) => bid?.timestamp)
                     .sort((a, b) => {
-                      const dateA = new Date(a.timestamp).getTime() || 0;
-                      const dateB = new Date(b.timestamp).getTime() || 0;
-                      return dateB - dateA;
+                      const dateA = new Date(a?.timestamp || 0).getTime();
+                      const dateB = new Date(b?.timestamp || 0).getTime();
+                      return dateB - dateA; // Newest bids first
                     })
-                    .map((bidDetails, index) => (
-                      <div
-                        key={index}
-                        className={`border-l-4 pl-4 pb-6 pt-2 pr-2 ${
-                          bidDetails.vote && bidDetails.vote === "like"
-                            ? "bg-green-100 border-green-600 "
-                            : bidDetails.vote === "dislike"
-                            ? "bg-orange-100 border-orange-600"
-                            : "bg-white border-blue-600"
-                        }`}
-                      >
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-lg font-semibold text-[#202125]">
-                            {dealers[index]?.Dealership
-                              ? dealers[index]?.Dealership + " Offer"
-                              : "No Dealership"}
-                          </h3>
+                    .map((bidDetails, index) => {
+                      const matchingDealer = dealers.find(
+                        (dealer) => dealer.id === bidDetails.dealerId
+                      );
+                      return (
+                        <div
+                          key={index}
+                          className={`border-l-4 pl-4 pb-6 pt-2 pr-2 ${
+                            bidDetails.vote && bidDetails.vote === "like"
+                              ? "bg-green-100 border-green-600 "
+                              : bidDetails.vote === "dislike"
+                              ? "bg-orange-100 border-orange-600"
+                              : "bg-white border-blue-600"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-lg font-semibold text-[#202125]">
+                              {matchingDealer?.Dealership
+                                ? `${matchingDealer.Dealership} Offer`
+                                : "No Dealership"}
+                            </h3>
 
-                          <VoteSection
-                            bidDetails={bidDetails}
-                            setIncomingBids={setIncomingBids}
-                          />
-                        </div>
-                        <time className="block mb-2 text-sm text-[#202125]">
-                          {formatDate(bidDetails?.timestamp)}
-                        </time>
-                        <p className="text-[#202125] mb-4">
-                          Price: $
-                          {bidDetails?.price
-                            ? bidDetails?.price
-                            : "No price available"}
-                        </p>
-                        <div className="flex space-x-2 mb-4">
-                          <Dialog
-                            open={openDialog === bidDetails.bid_id}
-                            onOpenChange={(isOpen) =>
-                              setOpenDialog(
-                                isOpen ? bidDetails.bid_id ?? "" : null
-                              )
-                            }
-                          >
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <FileText className="mr-2 h-4 w-4" />
-                                View Offer
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent style={{ background: "white" }}>
-                              <div className="text-[#202125] space-y-4">
-                                <p className="text-2xl font-bold">
-                                  {dealers[index]?.Dealership} Detail
-                                </p>
-                                <div className="flex space-x-4">
-                                  {bidDetails.files.map((file, index) => {
-                                    const isImage = [
-                                      "jpg",
-                                      "jpeg",
-                                      "png",
-                                      "gif",
-                                      "bmp",
-                                      "webp",
-                                    ].some((ext) =>
-                                      file.toLowerCase().includes(ext)
-                                    );
-                                    return (
-                                      <div
-                                        key={index}
-                                        onClick={() =>
-                                          window.open(file, "_blank")
-                                        }
-                                        className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
-                                      >
-                                        {isImage ? (
-                                          <img
-                                            src={file}
-                                            alt="Uploaded file"
-                                            className="object-cover w-full h-full"
-                                          />
-                                        ) : (
-                                          <embed
-                                            type="application/pdf"
-                                            width="100%"
-                                            height="100%"
-                                            src={file}
-                                            style={{ zIndex: -1 }}
-                                          />
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-
-                                <div className="space-y-1">
-                                  <p className="font-semibold text-lg">
-                                    {dealers[index]?.SalesPersonName}
-                                  </p>
-                                  <p>
-                                    {dealers[index]?.City}
-                                    <br /> {dealers[index]?.State}
-                                  </p>
-                                  <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
-                                    {bidDetails?.inventoryStatus}
-                                  </span>
-                                </div>
-
-                                <div className="flex justify-between mt-4 border-t pt-4">
-                                  <div>
-                                    <p className="text-gray-500">
-                                      Date Submitted
-                                    </p>
-                                    <p>{formatDate(bidDetails.timestamp)}</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-gray-500">Price</p>
-                                    <p className="text-2xl font-semibold">
-                                      ${bidDetails.price}
-                                    </p>
-                                    <p className="text-gray-500">
-                                      Total Discount: $
-                                      {bidDetails.discountPrice}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="border-t pt-4">
-                                  <p className="font-semibold mb-2">
-                                    Additional Comments
-                                  </p>
-                                  <p>{parseComment(bidDetails.comments)}</p>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setCommentingBidId(
-                                commentingBidId === bidDetails.bid_id
-                                  ? null
-                                  : bidDetails.bid_id
-                              )
-                            }
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Comment
-                          </Button>
-                        </div>
-                        {commentingBidId === bidDetails.bid_id && (
-                          <div className="mb-4">
-                            <Textarea
-                              placeholder="Add a comment..."
-                              value={newComment[bidDetails.bid_id] || ""}
-                              onChange={(e) =>
-                                setNewComment((prev) => ({
-                                  ...prev,
-                                  [bidDetails.bid_id]: e.target.value,
-                                }))
-                              }
-                              className="mb-2"
+                            <VoteSection
+                              bidDetails={bidDetails}
+                              setIncomingBids={setIncomingBids}
                             />
-                            <Button
-                              onClick={() => addComment(bidDetails.bid_id)}
+                          </div>
+                          <time className="block mb-2 text-sm text-[#202125]">
+                            {formatDate(bidDetails?.timestamp)}
+                          </time>
+                          <p className="text-[#202125] mb-4">
+                            Price: $
+                            {bidDetails?.price
+                              ? bidDetails?.price
+                              : "No price available"}
+                          </p>
+                          <div className="flex space-x-2 mb-4">
+                            <Dialog
+                              open={openDialog === bidDetails.bid_id}
+                              onOpenChange={(isOpen) =>
+                                setOpenDialog(
+                                  isOpen ? bidDetails.bid_id ?? "" : null
+                                )
+                              }
                             >
-                              Submit Comment
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  View Offer
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent style={{ background: "white" }}>
+                                <div className="text-[#202125] space-y-4">
+                                  <p className="text-2xl font-bold">
+                                    {dealers[index]?.Dealership} Detail
+                                  </p>
+                                  <div className="flex space-x-4">
+                                    {bidDetails.files.map((file, index) => {
+                                      const isImage = [
+                                        "jpg",
+                                        "jpeg",
+                                        "png",
+                                        "gif",
+                                        "bmp",
+                                        "webp",
+                                      ].some((ext) =>
+                                        file.toLowerCase().includes(ext)
+                                      );
+                                      return (
+                                        <div
+                                          key={index}
+                                          onClick={() =>
+                                            window.open(file, "_blank")
+                                          }
+                                          className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
+                                        >
+                                          {isImage ? (
+                                            <img
+                                              src={file}
+                                              alt="Uploaded file"
+                                              className="object-cover w-full h-full"
+                                            />
+                                          ) : (
+                                            <embed
+                                              type="application/pdf"
+                                              width="100%"
+                                              height="100%"
+                                              src={file}
+                                              style={{ zIndex: -1 }}
+                                            />
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+
+                                  <div className="space-y-1">
+                                    <p className="font-semibold text-lg">
+                                      {dealers[index]?.SalesPersonName}
+                                    </p>
+                                    <p>
+                                      {dealers[index]?.City}
+                                      <br /> {dealers[index]?.State}
+                                    </p>
+                                    <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
+                                      {bidDetails?.inventoryStatus}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex justify-between mt-4 border-t pt-4">
+                                    <div>
+                                      <p className="text-gray-500">
+                                        Date Submitted
+                                      </p>
+                                      <p>{formatDate(bidDetails.timestamp)}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-gray-500">Price</p>
+                                      <p className="text-2xl font-semibold">
+                                        ${bidDetails.price}
+                                      </p>
+                                      <p className="text-gray-500">
+                                        Total Discount: $
+                                        {bidDetails.discountPrice}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="border-t pt-4">
+                                    <p className="font-semibold mb-2">
+                                      Additional Comments
+                                    </p>
+                                    <p>{parseComment(bidDetails.comments)}</p>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setCommentingBidId(
+                                  commentingBidId === bidDetails.bid_id
+                                    ? null
+                                    : bidDetails.bid_id
+                                )
+                              }
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add Comment
                             </Button>
                           </div>
-                        )}
-
-                        {bidCommentsByBidId[bidDetails.bid_id] &&
-                        bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
-                          bidCommentsByBidId[bidDetails.bid_id].map(
-                            (comment, index) => (
-                              <div
-                                key={index}
-                                className="p-2 bg-gray-100 rounded mt-1"
+                          {commentingBidId === bidDetails.bid_id && (
+                            <div className="mb-4">
+                              <Textarea
+                                placeholder="Add a comment..."
+                                value={newComment[bidDetails.bid_id] || ""}
+                                onChange={(e) =>
+                                  setNewComment((prev) => ({
+                                    ...prev,
+                                    [bidDetails.bid_id]: e.target.value,
+                                  }))
+                                }
+                                className="mb-2"
+                              />
+                              <Button
+                                onClick={() => addComment(bidDetails.bid_id)}
                               >
-                                <p>
-                                  <strong>
-                                    {comment.deal_coordinator_name}:
-                                  </strong>{" "}
-                                  {comment.comment}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  {comment.time}
-                                </p>
-                              </div>
+                                Submit Comment
+                              </Button>
+                            </div>
+                          )}
+
+                          {bidCommentsByBidId[bidDetails.bid_id] &&
+                          bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
+                            bidCommentsByBidId[bidDetails.bid_id].map(
+                              (comment, index) => (
+                                <div
+                                  key={index}
+                                  className="p-2 bg-gray-100 rounded mt-1"
+                                >
+                                  <p>
+                                    <strong>
+                                      {comment.deal_coordinator_name}:
+                                    </strong>{" "}
+                                    {comment.comment}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {comment.time}
+                                  </p>
+                                </div>
+                              )
                             )
-                          )
-                        ) : (
-                          <p className="text-sm text-gray-500">
-                            No comments available for this bid.
-                          </p>
-                        )}
-                      </div>
-                    ))
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              No comments available for this bid.
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })
                 ) : (
                   <p>No incoming bids available</p>
                 )}
