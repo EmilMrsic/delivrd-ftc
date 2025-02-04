@@ -113,6 +113,7 @@ export interface NegotiationData {
   negotiations_Color_Options: any[]; // Array of any type as the content is not specified
   negotiations_Created: string; // ISO date string
   negotiations_Deal_Start_Date: string | null; // null if not provided
+  review?: string;
   negotiations_Drivetrain: string | null;
   negotiations_Email: string;
   negotiations_First_Name: string;

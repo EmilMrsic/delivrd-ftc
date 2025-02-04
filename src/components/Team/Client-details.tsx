@@ -57,13 +57,36 @@ const ClientDetails = ({
               <User className="h-5 w-5 text-[#0989E5]" />
               <span>
                 <EditableInput
-                  label="Name"
-                  value={negotiation?.clientInfo?.negotiations_Client ?? ""}
+                  label="First Name"
+                  value={negotiation?.clientInfo?.negotiations_First_Name ?? ""}
                   userField="name"
-                  field="negotiations_Client"
+                  field="negotiations_First_Name"
                   negotiationId={negotiationId ?? ""}
                   onChange={(newValue) =>
-                    handleChange("clientInfo", "negotiations_Client", newValue)
+                    handleChange(
+                      "clientInfo",
+                      "negotiations_First_Name",
+                      newValue
+                    )
+                  }
+                />
+              </span>
+            </div>
+            <div className="flex items-center space-x-2 text-[#202125]">
+              <User className="h-5 w-5 text-[#0989E5]" />
+              <span>
+                <EditableInput
+                  label="Last Name"
+                  value={negotiation?.clientInfo?.negotiations_Last_Name ?? ""}
+                  userField="name"
+                  field="negotiations_Last_Name"
+                  negotiationId={negotiationId ?? ""}
+                  onChange={(newValue) =>
+                    handleChange(
+                      "clientInfo",
+                      "negotiations_Last_Name",
+                      newValue
+                    )
                   }
                 />
               </span>

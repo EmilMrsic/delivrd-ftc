@@ -185,6 +185,7 @@ function ProjectProfile() {
 
     return () => clearTimeout(timeoutId);
   }, [dispatch]);
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -236,7 +237,9 @@ function ProjectProfile() {
             </DropdownMenuContent>
           </DropdownMenu>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-            {negotiation?.clientInfo?.negotiations_Client}
+            {negotiation?.clientInfo?.negotiations_First_Name +
+              " " +
+              negotiation?.clientInfo?.negotiations_Last_Name}
           </h1>
         </div>
       </div>
