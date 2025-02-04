@@ -21,6 +21,9 @@ import DealNegotiatorDialog from "./deal-negotiator-dialog";
 import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
 import { useRouter } from "next/navigation";
 import { Loader } from "../base/loader";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { toast } from "@/hooks/use-toast";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -101,6 +104,36 @@ const TeamDashboardTable = ({
 
     setCurrentDeals(sortedDeals);
   };
+
+  async function handleAskForReview(id: string) {
+    if (!id) return;
+    console.log(id);
+    try {
+      const negotiationRef = doc(db, "negotiations", id);
+      const docSnap = await getDoc(negotiationRef);
+
+      if (docSnap.exists()) {
+        console.log("here");
+        await updateDoc(negotiationRef, { review: "Review Request Sent" });
+      } else {
+        await setDoc(
+          negotiationRef,
+          { review: "Review Request Sent" },
+          { merge: true }
+        );
+      }
+
+      toast({ title: "Review Request Sent" });
+      setCurrentDeals(
+        currentDeals.map((deal) =>
+          deal.id === id ? { ...deal, review: "Review Request Sent" } : deal
+        )
+      );
+    } catch (error) {
+      console.error("Error updating review status:", error);
+      toast({ title: "Failed to send review request" });
+    }
+  }
 
   return (
     <Table className="overflow-visible">
@@ -387,6 +420,20 @@ const TeamDashboardTable = ({
                       dealNegotiator={negotiatorData}
                       formatDate={dateFormat}
                     />
+                    <p
+                      onClick={(e) => {
+                        if (!deal.review) {
+                          e.stopPropagation();
+                          handleAskForReview(deal.id);
+                        } else {
+                          e.stopPropagation();
+                          toast({ title: "Already Review Request Send" });
+                        }
+                      }}
+                      className="text-sm pl-4 pr-1 py-1 cursor-pointer"
+                    >
+                      Ask For Review
+                    </p>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

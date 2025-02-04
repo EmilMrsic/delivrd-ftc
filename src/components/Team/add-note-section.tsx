@@ -126,6 +126,7 @@ const AddNoteSection = ({
       const teamMembers = await getUsersWithTeamPrivilege();
       if (negotiation && dealNegotiator) {
         let newNote = {
+          sender: user,
           mentioned_user: mentionedUsers,
           bid_id: incomingBids[0]?.bid_id ?? "default_bid_id",
           client:
