@@ -1,5 +1,5 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -173,11 +173,18 @@ function ProjectProfile() {
     });
   };
 
-  // onMessage(messaging, (data: any) => {
-  //   const newData = { ...data.notification, ...data.data };
-  //   if (newData) dispatch(setAllNotifications(newData));
-  // });
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onMessage(messaging, (data: any) => {
+        const newData = { ...data.notification, ...data.data };
+        if (newData) dispatch(setAllNotifications(newData));
+      });
 
+      console.log("Notification listener initialized");
+    }, 3000);
+
+    return () => clearTimeout(timeoutId);
+  }, [dispatch]);
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -330,7 +337,7 @@ function ProjectProfile() {
                               <DialogContent style={{ background: "white" }}>
                                 <div className="text-[#202125] space-y-4">
                                   <p className="text-2xl font-bold">
-                                    {dealers[index]?.Dealership} Detail
+                                    {matchingDealer?.Dealership} Detail
                                   </p>
                                   <div className="flex space-x-4">
                                     {bidDetails.files.map((file, index) => {
@@ -374,11 +381,11 @@ function ProjectProfile() {
 
                                   <div className="space-y-1">
                                     <p className="font-semibold text-lg">
-                                      {dealers[index]?.SalesPersonName}
+                                      {matchingDealer?.SalesPersonName}
                                     </p>
                                     <p>
-                                      {dealers[index]?.City}
-                                      <br /> {dealers[index]?.State}
+                                      {matchingDealer?.City}
+                                      <br /> {matchingDealer?.State}
                                     </p>
                                     <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
                                       {bidDetails?.inventoryStatus}

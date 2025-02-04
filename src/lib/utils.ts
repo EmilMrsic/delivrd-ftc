@@ -159,6 +159,7 @@ export const dealStageOptions = [
   "Processing",
   "Paid/Unassigned",
   "Contacted",
+  "Closed",
   "Scheduled",
   "Proposal Sent",
   "Unqualified",
