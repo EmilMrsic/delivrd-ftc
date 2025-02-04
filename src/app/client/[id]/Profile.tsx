@@ -244,64 +244,190 @@ function ProjectProfile() {
             >
               <div className="space-y-8">
                 {incomingBids
-                  .slice()
+                  ?.filter((bid) => bid?.timestamp)
                   .sort((a, b) => {
-                    const dateA = new Date(a.timestamp).getTime() || 0;
-                    const dateB = new Date(b.timestamp).getTime() || 0;
-                    return dateB - dateA;
+                    const dateA = new Date(a?.timestamp || 0).getTime();
+                    const dateB = new Date(b?.timestamp || 0).getTime();
+                    return dateB - dateA; // Newest bids first
                   })
-                  .map((item, index) => (
-                    <div
-                      key={index}
-                      className={`pr-2 pt-2 border-l-4 pl-4 pb-6 ${
-                        item.vote && item.vote === "like"
-                          ? "bg-green-100 border-green-600 "
-                          : item.vote === "dislike"
-                          ? "bg-orange-100 border-orange-600"
-                          : "bg-white border-blue-600"
-                      }`}
-                    >
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-lg font-semibold text-[#202125]">
-                          {dealerData
-                            ? dealerData[index]?.Dealership ?? ""
-                            : ""}
-                        </h3>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={
-                              item.vote === "like"
-                                ? "bg-green-500 text-white"
-                                : ""
-                            }
-                          >
-                            <ThumbsUp className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={
-                              item.vote === "dislike"
-                                ? "bg-yellow-500 text-white"
-                                : ""
-                            }
-                          >
-                            <ThumbsDown className="h-4 w-4" />
-                          </Button>
+                  .map((item, index) => {
+                    const matchingDealer = dealerData.find(
+                      (dealer) => dealer.id === item.dealerId
+                    );
+                    return (
+                      <div
+                        key={index}
+                        className={`pr-2 pt-2 border-l-4 pl-4 pb-6 ${
+                          item.vote && item.vote === "like"
+                            ? "bg-green-100 border-green-600 "
+                            : item.vote === "dislike"
+                            ? "bg-orange-100 border-orange-600"
+                            : "bg-white border-blue-600"
+                        }`}
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <h3 className="text-lg font-semibold text-[#202125]">
+                            {matchingDealer
+                              ? matchingDealer?.Dealership ?? ""
+                              : ""}
+                          </h3>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={
+                                item.vote === "like"
+                                  ? "bg-green-500 text-white"
+                                  : ""
+                              }
+                            >
+                              <ThumbsUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={
+                                item.vote === "dislike"
+                                  ? "bg-yellow-500 text-white"
+                                  : ""
+                              }
+                            >
+                              <ThumbsDown className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
+                        <time className="block mb-2 text-sm text-[#202125]">
+                          {formatDate(item?.timestamp)}
+                        </time>
+                        <p className="text-[#202125] mb-4 text-sm">
+                          Price: $
+                          {item?.price ? item?.price : "No price available"}
+                        </p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="flex space-x-2 mb-4">
+                              <Button key={index} variant="outline" size="sm">
+                                View Offer
+                              </Button>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="p-6 bg-white rounded-md shadow-lg max-w-2xl w-full">
+                            <div className="text-[#202125] space-y-4">
+                              <p className="text-2xl font-bold">
+                                {dealerData
+                                  ? dealerData[index]?.Dealership ?? ""
+                                  : ""}{" "}
+                                Detail
+                              </p>
+
+                              <div className="flex space-x-4">
+                                {item.files.map((file, index) => {
+                                  const isImage = [
+                                    "jpg",
+                                    "jpeg",
+                                    "png",
+                                    "gif",
+                                    "bmp",
+                                    "webp",
+                                  ].some((ext) =>
+                                    file.toLowerCase().includes(ext)
+                                  );
+                                  return (
+                                    <div
+                                      key={index}
+                                      onClick={() =>
+                                        window.open(file, "_blank")
+                                      }
+                                      className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
+                                    >
+                                      {isImage ? (
+                                        <img
+                                          src={file}
+                                          alt="Uploaded file"
+                                          className="object-cover w-full h-full"
+                                        />
+                                      ) : (
+                                        <embed
+                                          type="application/pdf"
+                                          width="100%"
+                                          height="100%"
+                                          src={file}
+                                          style={{ zIndex: -1 }}
+                                        />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              <div className="space-y-1">
+                                <p className="font-semibold text-lg">
+                                  {dealNegotiatorData?.name}
+                                </p>
+                                <p>
+                                  {dealerData[index]?.City},{" "}
+                                  {dealerData[index]?.State}
+                                </p>
+                                <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
+                                  {item?.inventoryStatus}
+                                </span>
+                              </div>
+
+                              <div className="flex justify-between mt-4 border-t pt-4">
+                                <div>
+                                  <p className="text-gray-500">
+                                    Date Submitted
+                                  </p>
+                                  <p>{formatDate(item.timestamp)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">Price</p>
+                                  <p className="text-2xl font-semibold">
+                                    ${item.price}
+                                  </p>
+                                  <p className="text-gray-500">
+                                    Total Discount: ${item.discountPrice}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="border-t pt-4">
+                                <p className="font-semibold mb-2">
+                                  Additional Comments
+                                </p>
+                                <p>{parseComment(item.comments)}</p>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        {bidCommentsByBidId[item?.bid_id] &&
+                        bidCommentsByBidId[item?.bid_id].length > 0 ? (
+                          bidCommentsByBidId[item?.bid_id].map(
+                            (comment, index) => (
+                              <div
+                                key={index}
+                                className="p-2 bg-gray-100 rounded mt-1"
+                              >
+                                <p>
+                                  <strong>
+                                    {comment.deal_coordinator_name}:
+                                  </strong>{" "}
+                                  {comment.comment}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {comment.time}
+                                </p>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <p className="text-sm text-gray-500">
+                            No comments available for this bid.
+                          </p>
+                        )}{" "}
                       </div>
-                      <time className="block mb-2 text-sm text-[#202125]">
-                        {formatDate(item?.timestamp)}
-                      </time>
-                      <p className="text-[#202125] mb-4 text-sm">
-                        Price: $
-                        {item?.price ? item?.price : "No price available"}
-                      </p>
-                      {/* Dialog and other content components here */}
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
             </IncomingBidsCard>
           </div>
