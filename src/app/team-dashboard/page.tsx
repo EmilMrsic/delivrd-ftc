@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -378,6 +378,19 @@ export default function DealList() {
       console.error("Error updating negotiator: ", error);
     }
   };
+
+  useEffect(() => {
+    const handlePopState = (event: any) => {
+      event.preventDefault();
+      clearFilters();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
