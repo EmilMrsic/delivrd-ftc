@@ -244,7 +244,7 @@ function ProjectProfile() {
             >
               <div className="space-y-8">
                 {incomingBids
-                  ?.filter((bid) => bid?.timestamp && bid.vote === "like")
+                  ?.filter((bid) => bid?.timestamp)
                   .sort((a, b) => {
                     const dateA = new Date(a?.timestamp || 0).getTime();
                     const dateB = new Date(b?.timestamp || 0).getTime();
@@ -272,28 +272,23 @@ function ProjectProfile() {
                               : ""}
                           </h3>
                           <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={
-                                item.vote === "like"
-                                  ? "bg-green-500 text-white"
-                                  : ""
-                              }
-                            >
-                              <ThumbsUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={
-                                item.vote === "dislike"
-                                  ? "bg-yellow-500 text-white"
-                                  : ""
-                              }
-                            >
-                              <ThumbsDown className="h-4 w-4" />
-                            </Button>
+                            {item.vote === "like" ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className={"bg-green-500 text-white"}
+                              >
+                                <ThumbsUp className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className={"bg-yellow-500 text-white"}
+                              >
+                                <ThumbsDown className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </div>
                         <time className="block mb-2 text-sm text-[#202125]">
