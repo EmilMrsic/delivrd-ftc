@@ -244,7 +244,7 @@ function ProjectProfile() {
             >
               <div className="space-y-8">
                 {incomingBids
-                  ?.filter((bid) => bid?.timestamp)
+                  ?.filter((bid) => bid?.timestamp && bid.vote === "like")
                   .sort((a, b) => {
                     const dateA = new Date(a?.timestamp || 0).getTime();
                     const dateB = new Date(b?.timestamp || 0).getTime();
