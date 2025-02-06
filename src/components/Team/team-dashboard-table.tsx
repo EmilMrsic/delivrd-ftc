@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -14,6 +14,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+
+import "react-datepicker/dist/react-datepicker.css";
 import { Check, MoreHorizontal, StickyNoteIcon, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { dateFormat, dealStageOptions, getElapsedTime } from "@/lib/utils";
@@ -24,6 +26,7 @@ import { Loader } from "../base/loader";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
+import DatePickerCell from "./datepicker-cell";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -105,6 +108,42 @@ const TeamDashboardTable = ({
     setCurrentDeals(sortedDeals);
   };
 
+  const handleDateChange = async (
+    date: string,
+    dealId: string,
+    dateType: string
+  ) => {
+    const id = dealId;
+
+    // Update the deal in the local state first
+    const updatedDeals = currentDeals.map((deal) =>
+      deal.id === dealId ? { ...deal, [dateType]: date } : deal
+    );
+
+    const negotiationRef = doc(db, "negotiations", id);
+    const docSnap = await getDoc(negotiationRef);
+    if (docSnap.exists()) {
+      await updateDoc(negotiationRef, {
+        [dateType]: date,
+      });
+
+      if (dateType === "close_date") {
+        await updateDoc(negotiationRef, {
+          negotiations_Status: "Closed",
+        });
+
+        const updatedDealsWithStatus = updatedDeals.map((deal) =>
+          deal.id === dealId ? { ...deal, negotiations_Status: "Closed" } : deal
+        );
+        setCurrentDeals(updatedDealsWithStatus);
+      } else {
+        setCurrentDeals(updatedDeals);
+      }
+    }
+
+    toast({ title: "Negotiation Updated" });
+  };
+
   async function handleAskForReview(id: string) {
     if (!id) return;
     console.log(id);
@@ -113,7 +152,6 @@ const TeamDashboardTable = ({
       const docSnap = await getDoc(negotiationRef);
 
       if (docSnap.exists()) {
-        console.log("here");
         await updateDoc(negotiationRef, { review: "Review Request Sent" });
       } else {
         await setDoc(
@@ -136,8 +174,8 @@ const TeamDashboardTable = ({
   }
 
   return (
-    <Table className="overflow-visible">
-      <TableHeader>
+    <Table>
+      <TableHeader className="max-w-[1000px] overflow-scroll">
         <TableRow>
           <TableHead>Client</TableHead>
           <TableHead>Make</TableHead>
@@ -147,19 +185,19 @@ const TeamDashboardTable = ({
           <TableHead>Deal Negotiator</TableHead>
           <TableHead>Onboarding Complete</TableHead>
           <TableHead>
-            Submitted Date
+            Date Paid
             <button
               onClick={() => {
                 const direction =
-                  sortConfig.key === "submittedDate" &&
+                  sortConfig.key === "datePaid" &&
                   sortConfig.direction === "ascending"
                     ? "descending"
                     : "ascending";
-                setSortConfig({ key: "submittedDate", direction });
+                setSortConfig({ key: "datePaid", direction });
                 sortData("negotiations_Created", direction);
               }}
             >
-              {sortConfig.key === "submittedDate" ? (
+              {sortConfig.key === "datePaid" ? (
                 sortConfig.direction === "ascending" ? (
                   <span>↑</span>
                 ) : (
@@ -171,19 +209,19 @@ const TeamDashboardTable = ({
             </button>
           </TableHead>{" "}
           <TableHead>
-            Last Update
+            Arrival To Dealer
             <button
               onClick={() => {
                 const direction =
-                  sortConfig.key === "lastUpdate" &&
+                  sortConfig.key === "arriveToDealer" &&
                   sortConfig.direction === "ascending"
                     ? "descending"
                     : "ascending";
-                setSortConfig({ key: "lastUpdate", direction });
-                sortData("negotiations_Status_Updated", direction);
+                setSortConfig({ key: "arriveToDealer", direction });
+                sortData("arrival_to_dealer", direction);
               }}
             >
-              {sortConfig.key === "lastUpdate" ? (
+              {sortConfig.key === "arriveToDealer" ? (
                 sortConfig.direction === "ascending" ? (
                   <span>↑</span>
                 ) : (
@@ -217,14 +255,62 @@ const TeamDashboardTable = ({
                 <span>↕</span>
               )}
             </button>
-          </TableHead>{" "}
+          </TableHead>
+          <TableHead>
+            Arrival To Client
+            <button
+              onClick={() => {
+                const direction =
+                  sortConfig.key === "arriveToClient" &&
+                  sortConfig.direction === "ascending"
+                    ? "descending"
+                    : "ascending";
+                setSortConfig({ key: "arriveToClient", direction });
+                sortData("arrival_to_client", direction);
+              }}
+            >
+              {sortConfig.key === "arriveToClient" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>
+          <TableHead>
+            Close Date
+            <button
+              onClick={() => {
+                const direction =
+                  sortConfig.key === "closeDate" &&
+                  sortConfig.direction === "ascending"
+                    ? "descending"
+                    : "ascending";
+                setSortConfig({ key: "closeDate", direction });
+                sortData("close_date", direction);
+              }}
+            >
+              {sortConfig.key === "closeDate" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       {loading ? (
         <TableBody>
           <TableRow>
-            <TableCell colSpan={11} className="text-center py-4">
+            <TableCell colSpan={13} className="text-center py-4">
               <Loader />
             </TableCell>
           </TableRow>
@@ -385,23 +471,59 @@ const TeamDashboardTable = ({
                 )}
               </TableCell>
               <TableCell>
-                <div>{dateFormat(deal.negotiations_Created ?? "")}</div>
+                <div>{dateFormat(deal.date_paid ?? "")}</div>
                 <div className="text-xs text-[#0989E5]">
-                  {getElapsedTime(deal.negotiations_Created ?? "", NOW)}
+                  {getElapsedTime(deal.date_paid ?? "", NOW)}
                 </div>
               </TableCell>
 
               <TableCell>
-                <div>{dateFormat(deal.negotiations_Status_Updated ?? "")}</div>
-                <div className="text-xs text-[#0989E5]">
-                  {getElapsedTime(deal.negotiations_Status_Updated ?? "", NOW)}
-                </div>
+                <DatePickerCell
+                  initialDate={deal.arrival_to_dealer}
+                  onDateChange={(date) =>
+                    handleDateChange(date ?? "", deal.id, "arrival_to_dealer")
+                  }
+                />
+                {/* <div className="text-xs text-[#0989E5]">
+                  {getElapsedTime(deal.arrival_to_dealer ?? "", NOW)}
+                </div> */}
               </TableCell>
               <TableCell>
-                <div>{dateFormat(deal.negotiations_Deal_Start_Date ?? "")}</div>
-                <div className="text-xs text-[#0989E5]">
+                <DatePickerCell
+                  initialDate={deal.negotiations_Deal_Start_Date ?? ""}
+                  onDateChange={(date) =>
+                    handleDateChange(
+                      date ?? "",
+                      deal.id,
+                      "negotiations_Deal_Start_Date"
+                    )
+                  }
+                />
+                {/* <div className="text-xs text-[#0989E5]">
                   {getElapsedTime(deal.negotiations_Deal_Start_Date ?? "", NOW)}
-                </div>
+                </div> */}
+              </TableCell>
+              <TableCell>
+                <DatePickerCell
+                  initialDate={deal.arrival_to_client ?? ""}
+                  onDateChange={(date) =>
+                    handleDateChange(date ?? "", deal.id, "arrival_to_client")
+                  }
+                />{" "}
+                {/* <div className="text-xs text-[#0989E5]">
+                  {getElapsedTime(deal.arrival_to_client ?? "", NOW)}
+                </div> */}
+              </TableCell>
+              <TableCell>
+                <DatePickerCell
+                  initialDate={deal.close_date ?? ""}
+                  onDateChange={(date) =>
+                    handleDateChange(date ?? "", deal.id, "close_date")
+                  }
+                />{" "}
+                {/* <div className="text-xs text-[#0989E5]">
+                  {getElapsedTime(deal.close_date ?? "", NOW)}
+                </div> */}
               </TableCell>
 
               <TableCell>

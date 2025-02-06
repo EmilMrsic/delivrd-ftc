@@ -222,6 +222,33 @@ const FeatureDetails = ({
             }
           />
         </div>
+        <div className="space-x-2 flex items-center">
+          <h3 className="font-semibold text-lg">Date Paid:</h3>
+          <p>{negotiation?.clientInfo.date_paid ?? "No Date Available"}</p>
+        </div>
+        <div className="space-x-2 flex items-center">
+          <h3 className="font-semibold text-lg">Start Date:</h3>
+          <p>
+            {negotiation?.dealInfo.negotiations_Deal_Start_Date ??
+              "No Date Available"}
+          </p>
+        </div>
+        <div className="space-x-2 flex items-center">
+          <h3 className="font-semibold text-lg">Arrival To Dealer:</h3>
+          <p>
+            {negotiation?.clientInfo.arrival_to_dealer ?? "No Date Available"}
+          </p>
+        </div>
+        <div className="space-x-2 flex items-center">
+          <h3 className="font-semibold text-lg">Arrival To Client:</h3>
+          <p>
+            {negotiation?.clientInfo.arrival_to_client ?? "No Date Available"}
+          </p>
+        </div>
+        <div className="space-x-2 flex items-center">
+          <h3 className="font-semibold text-lg">Close Date:</h3>
+          <p>{negotiation?.clientInfo.close_date ?? "No Date Available"}</p>
+        </div>
         <Separator className="my-4" />
         <div className="space-y-4">
           <h3 className="font-semibold text-lg">Colors</h3>
@@ -229,7 +256,7 @@ const FeatureDetails = ({
             <ThumbsUp className="h-5 w-5 text-[#0989E5]" />
             <EditableInput
               negotiations={negotiation}
-              label="Desired Exterior"
+              label="Internal Colors Desired"
               value={
                 negotiation?.otherData?.negotiations_Color_Options[0]
                   ?.preferred ?? "No preference"
@@ -249,7 +276,7 @@ const FeatureDetails = ({
             <ThumbsUp className="h-5 w-5 text-[#0989E5]" />
             <EditableInput
               negotiations={negotiation}
-              label="Desired Interior"
+              label="External Colors Desired"
               value={
                 negotiation?.otherData?.negotiations_Color_Options[1]
                   ?.preferred ?? "No preference"
@@ -269,7 +296,7 @@ const FeatureDetails = ({
             <X className="h-5 w-5 text-red-500" />
             <EditableInput
               negotiations={negotiation}
-              label="Exterior Deal Breaker"
+              label="External Colors Not Wanted"
               value={
                 negotiation?.otherData?.negotiations_Color_Options[0]
                   ?.not_preferred ?? "No preference"
@@ -290,7 +317,7 @@ const FeatureDetails = ({
             <X className="h-5 w-5 text-red-500" />
             <EditableInput
               negotiations={negotiation}
-              label="Interior Deal Breaker"
+              label="Internal Colors Not Wanted"
               value={
                 negotiation?.otherData?.negotiations_Color_Options[1]
                   ?.not_preferred ?? "No preference"
