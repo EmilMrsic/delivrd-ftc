@@ -61,7 +61,7 @@ const FilterPopup = ({
                     key={"stage" + index}
                     tabIndex={-1}
                     onFocus={() => searchStageInputRef.current?.focus()}
-                    checked={filters.stages.includes(stage)}
+                    checked={filters.stages === stage}
                     onCheckedChange={() => handleFilterChange("stages", stage)}
                   >
                     {stage}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Plus, BellIcon } from "lucide-react";
+import { FileText, Plus, BellIcon, Car } from "lucide-react";
 import { addDoc, collection } from "firebase/firestore";
 import { db, messaging } from "@/firebase/config";
 import { ActivityLog, BidComments } from "@/types";
@@ -513,6 +513,19 @@ function ProjectProfile() {
               negotiationId={negotiationId}
               handleChange={handleChange}
             />
+            <Card className="bg-white shadow-lg mb-5">
+              <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
+                <CardTitle className="flex items-center">
+                  <Car className="mr-2" /> Shipping Info
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center mt-2">
+                <p>
+                  {negotiation?.dealInfo.shipping_info ??
+                    "No Shipping Information at the moment"}
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

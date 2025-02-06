@@ -7,7 +7,11 @@ import {
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { fetchActiveDeals, fetchAllPaidNegotiations } from "@/lib/utils";
+import {
+  fetchActiveDeals,
+  fetchAllNotClosedNegotiations,
+  fetchAllPaidNegotiations,
+} from "@/lib/utils";
 import { BellIcon, Search } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
@@ -180,13 +184,16 @@ export default function DealList() {
               setFilteredDeals(res);
               setLoading(false);
             });
+          } else if (value === "Not Closed ALL") {
+            fetchAllNotClosedNegotiations().then((res) => {
+              setOriginalDeals(res);
+              setFilteredDeals(res);
+              setLoading(false);
+            });
           } else {
-            if (value === "Processing") {
+            if (value === "Not Closed") {
               const deals = originalDeals.filter(
-                (deal) =>
-                  deal.negotiations_Status !== "Actively Negotiating" &&
-                  deal.negotiations_Status !== "Deal Started" &&
-                  deal.negotiations_Status !== "Paid"
+                (deal) => deal.negotiations_Status !== "Closed"
               );
               setFilteredDeals(deals);
               setLoading(false);
@@ -233,7 +240,7 @@ export default function DealList() {
           ? ["Actively Negotiating", "Deal Started", "Paid"].includes(
               deal.negotiations_Status ?? ""
             )
-          : currentFilters.stages.includes("Processing")
+          : currentFilters.stages.includes("Not Closed")
           ? otherStages.includes(deal.negotiations_Status?.trim() ?? "")
           : currentFilters.stages.includes(
               deal.negotiations_Status?.trim() ?? ""
@@ -309,16 +316,32 @@ export default function DealList() {
         negotiations_Status: newStage,
       });
 
-      setFilteredDeals((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
-        )
-      );
-      setOriginalDeals((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
-        )
-      );
+      if (newStage !== "Closed") {
+        console.log("here", newStage);
+        await updateDoc(doc(db, "negotiations", id ?? ""), {
+          close_date: "",
+        });
+
+        setCurrentDeals((prevDeals) =>
+          prevDeals?.map((deal) =>
+            deal.id === id
+              ? { ...deal, close_date: "", negotiations_Status: newStage }
+              : deal
+          )
+        );
+      } else {
+        setFilteredDeals((prevDeals) =>
+          prevDeals?.map((deal) =>
+            deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
+          )
+        );
+        setOriginalDeals((prevDeals) =>
+          prevDeals?.map((deal) =>
+            deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
+          )
+        );
+      }
+
       toast({ title: "Status updated" });
     } catch (error) {
       console.error("Error updating stage:", error);

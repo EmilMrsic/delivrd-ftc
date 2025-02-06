@@ -119,6 +119,10 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
       negotiations_city: data.negotiations_city || null,
       negotiations_state: data.negotiations_state || null,
       negotiations_deal_coordinator: data.negotiations_deal_coordinator,
+      arrival_to_client: data.arrival_to_client ?? "",
+      arrival_to_dealer: data.arrival_to_dealer ?? "",
+      date_paid: data.date_paid ?? "",
+      close_date: data.close_date ?? "",
     },
     dealInfo: {
       negotiations_Brand: data.negotiations_Brand || null,
@@ -145,6 +149,7 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
       negotiations_Trim: data.negotiations_Trim || null,
       negotiations_Trim_Package_Options:
         data.negotiations_Trim_Package_Options || null,
+      shipping_info: data.shipping_info ?? "",
     },
     otherData: {
       deals: data.deals || [],
@@ -156,7 +161,8 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
 };
 
 export const dealStageOptions = [
-  "Processing",
+  "Not Closed",
+  "Not Closed ALL",
   "Paid/Unassigned",
   "Contacted",
   "Closed",
@@ -278,6 +284,17 @@ export function getCurrentTimestamp() {
   return `${month}/${day}/${year}`;
 }
 
+export const getCurrentDateTime = (): string => {
+  const now = new Date();
+  const date = now.toLocaleDateString("en-US"); // Format like 2/4/2025
+  const time = now.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${date}, ${time}`;
+};
+
 export async function getUsersWithTeamPrivilege() {
   try {
     const usersRef = collection(db, "users");
@@ -350,6 +367,57 @@ export const fetchAllPaidNegotiations = async () => {
     const negotiationsQuery = query(
       collection(db, "negotiations"),
       where("negotiations_Status", "==", "Paid")
+    );
+
+    const negotiationsSnapshot = await getDocs(negotiationsQuery);
+    const paidNegotiationIds = negotiationsSnapshot.docs.map((doc) => doc.id);
+
+    if (paidNegotiationIds.length === 0) {
+      console.log("No negotiations with status PAID found.");
+      return [];
+    }
+
+    const chunk = (array: string[], size: number) => {
+      const result = [];
+      for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+      }
+      return result;
+    };
+
+    const chunkedIds = chunk(paidNegotiationIds, 30);
+    let allFilteredNegotiations: any[] = [];
+
+    for (const chunk of chunkedIds) {
+      const batchQuery = query(
+        collection(db, "negotiations"),
+        where("__name__", "in", chunk)
+      );
+
+      const batchSnapshot = await getDocs(batchQuery);
+      const filteredData = batchSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((doc) => !doc.hasOwnProperty("negotiations_deal_coordinator"));
+
+      allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
+    }
+
+    console.log("Filtered Negotiations:", allFilteredNegotiations);
+    return allFilteredNegotiations;
+  } catch (error) {
+    console.error("Error fetching negotiations in batches:", error);
+    return [];
+  }
+};
+
+export const fetchAllNotClosedNegotiations = async () => {
+  try {
+    const negotiationsQuery = query(
+      collection(db, "negotiations"),
+      where("negotiations_Status", ">", "Closed")
     );
 
     const negotiationsSnapshot = await getDocs(negotiationsQuery);

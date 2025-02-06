@@ -13,6 +13,7 @@ import {
   InternalNotes,
 } from "@/types";
 import {
+  getCurrentDateTime,
   getCurrentTimestamp,
   getUsersWithTeamPrivilege,
   sendNotification,
@@ -128,14 +129,13 @@ const AddNoteSection = ({
         let newNote = {
           sender: user,
           mentioned_user: mentionedUsers,
-          bid_id: incomingBids[0]?.bid_id ?? "default_bid_id",
           client:
             negotiation?.clientInfo?.negotiations_Client ?? "Unknown Client",
           deal_coordinator: dealNegotiator?.id ?? "Unknown ID",
           deal_coordinator_name: dealNegotiator?.name ?? "Unknown Name",
           negotiation_id: negotiationId ?? "Unknown Negotiation ID",
           note: newInternalNote,
-          time: getCurrentTimestamp() ?? "Unknown Time",
+          time: getCurrentDateTime() ?? "Unknown Time",
         };
         setAllInternalNotes((prevNotes: InternalNotes[]) => [
           ...prevNotes,
@@ -190,9 +190,7 @@ const AddNoteSection = ({
               >
                 <div className="flex justify-between items-center mb-1">
                   <p className="font-semibold">{user.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(note.time).toLocaleString()}
-                  </p>
+                  <p className="text-xs text-gray-500">{note.time}</p>
                 </div>
                 <p>{note.note}</p>
               </div>

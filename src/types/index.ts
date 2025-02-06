@@ -105,6 +105,10 @@ export type DealerData = {
 export interface NegotiationData {
   deals: string[]; // Array of strings, where [0: ""]
   id: string;
+  arrival_to_client: string;
+  arrival_to_dealer: string;
+  close_date: string;
+  date_paid: string;
   incoming_bids: any[]; // Array of any type as the content is not specified
   negotiations_Address: string | null;
   negotiations_Brand: string | null;
@@ -153,6 +157,10 @@ export interface EditNegotiationData {
     negotiations_city: string | null;
     negotiations_state: string | null;
     negotiations_deal_coordinator: string;
+    arrival_to_client: string;
+    arrival_to_dealer: string;
+    close_date: string;
+    date_paid: string;
   };
   dealInfo: {
     negotiations_Brand: string | null;
@@ -175,6 +183,7 @@ export interface EditNegotiationData {
     negotiations_Travel_Limit: string | null;
     negotiations_Trim: string | null;
     negotiations_Trim_Package_Options: string | null;
+    shipping_info: string | null;
   };
   otherData: {
     deals: string[];
@@ -214,7 +223,6 @@ export interface notificationType {
 }
 
 export interface InternalNotes {
-  bid_id: string;
   client: string;
   note: string;
   deal_coordinator: string;
