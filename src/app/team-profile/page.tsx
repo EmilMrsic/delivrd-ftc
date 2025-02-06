@@ -30,9 +30,11 @@ import ActivityLogSection from "@/components/Team/activity-log";
 import AddNoteSection from "@/components/Team/add-note-section";
 import useTeamProfile from "@/hooks/useTeamProfile";
 import VoteSection from "@/components/Team/vote-section";
+import { useRouter } from "next/navigation";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
+  const router = useRouter();
 
   const {
     dealNegotiator,
@@ -189,7 +191,10 @@ function ProjectProfile() {
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
-        <div className="flex flex-col items-start">
+        <div
+          onClick={() => router.push("/team-dashboard")}
+          className="flex flex-col items-start cursor-pointer"
+        >
           <img
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
             alt="DELIVRD Logo"
@@ -472,7 +477,7 @@ function ProjectProfile() {
                                     <strong>
                                       {comment.deal_coordinator_name}:
                                     </strong>{" "}
-                                    {comment.comment}
+                                    {parseComment(comment.comment)}
                                   </p>
                                   <p className="text-sm text-gray-500">
                                     {comment.time}
