@@ -525,10 +525,7 @@ function ProjectProfile() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex items-center mt-2">
-                <p>
-                  {negotiation?.dealInfo.shipping_info ??
-                    "No Shipping Information at the moment"}
-                </p>
+                <p>{negotiation?.dealInfo.shipping_info}</p>
               </CardContent>
             </Card>
           </div>

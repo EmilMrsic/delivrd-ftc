@@ -59,7 +59,9 @@ const ClientDetails = ({
                 <EditableInput
                   label="First Name"
                   value={negotiation?.clientInfo?.negotiations_First_Name ?? ""}
-                  userField="name"
+                  userField="firstName"
+                  firstName={negotiation?.clientInfo?.negotiations_First_Name}
+                  lastName={negotiation?.clientInfo?.negotiations_Last_Name}
                   field="negotiations_First_Name"
                   negotiationId={negotiationId ?? ""}
                   onChange={(newValue) =>
@@ -77,8 +79,10 @@ const ClientDetails = ({
               <span>
                 <EditableInput
                   label="Last Name"
+                  firstName={negotiation?.clientInfo?.negotiations_Last_Name}
+                  lastName={negotiation?.clientInfo?.negotiations_Last_Name}
                   value={negotiation?.clientInfo?.negotiations_Last_Name ?? ""}
-                  userField="name"
+                  userField="lastName"
                   field="negotiations_Last_Name"
                   negotiationId={negotiationId ?? ""}
                   onChange={(newValue) =>

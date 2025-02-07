@@ -19,6 +19,8 @@ interface EditableInputProps {
   field: string;
   userField?: string;
   negotiations?: EditNegotiationData | null;
+  firstName?: string;
+  lastName?: string;
 }
 
 const EditableInput: React.FC<EditableInputProps> = ({
@@ -29,6 +31,8 @@ const EditableInput: React.FC<EditableInputProps> = ({
   field,
   userField,
   negotiations,
+  firstName,
+  lastName,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -65,8 +69,14 @@ const EditableInput: React.FC<EditableInputProps> = ({
         const userDocRef = doc(db, "users", userDoc.id);
 
         if (userField) {
+          let newValue = "";
+
+          if (userField === "firstName" || userField === "lastName") {
+            newValue = firstName + " " + lastName;
+          }
+
           await updateDoc(userDocRef, {
-            [userField]: value,
+            name: newValue,
           });
         }
 
