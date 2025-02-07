@@ -149,7 +149,8 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
       negotiations_Trim: data.negotiations_Trim || null,
       negotiations_Trim_Package_Options:
         data.negotiations_Trim_Package_Options || null,
-      shipping_info: data.shipping_info ?? "",
+      shipping_info:
+        data.shipping_info ?? "No Shipping Info available at the moment",
     },
     otherData: {
       deals: data.deals || [],
