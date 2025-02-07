@@ -177,25 +177,32 @@ const AddNoteSection = ({
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
-          {allInternalNotes.map((note, index) => (
-            <div key={index} className="flex items-start space-x-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user[0]} alt={user.name[0]} />
-                <AvatarFallback>{user.name[0]}</AvatarFallback>
-              </Avatar>
-              <div
-                className={`p-3 rounded-lg flex-grow ${
-                  note.client === user.name ? "bg-blue-100" : "bg-gray-100"
-                }`}
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <p className="font-semibold">{user.name}</p>
-                  <p className="text-xs text-gray-500">{note.time}</p>
+          {allInternalNotes
+            .sort((a, b) => {
+              const dateA = Date.parse(a.time);
+              const dateB = Date.parse(b.time);
+              return dateB - dateA; // Newest to oldest
+            })
+
+            .map((note, index) => (
+              <div key={index} className="flex items-start space-x-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={user[0]} alt={user.name[0]} />
+                  <AvatarFallback>{user.name[0]}</AvatarFallback>
+                </Avatar>
+                <div
+                  className={`p-3 rounded-lg flex-grow ${
+                    note.client === user.name ? "bg-blue-100" : "bg-gray-100"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="font-semibold">{user.name}</p>
+                    <p className="text-xs text-gray-500">{note.time}</p>
+                  </div>
+                  <p>{note.note}</p>
                 </div>
-                <p>{note.note}</p>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
         <div className="flex space-x-2">
           <Textarea
