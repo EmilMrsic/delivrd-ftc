@@ -26,6 +26,7 @@ import Link from "next/link";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import TeamDashboardTable from "@/components/Team/team-dashboard-table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
+import SearchAll from "@/components/Team/search-all";
 
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -478,6 +479,7 @@ export default function DealList() {
             >
               <p>Clear filters</p>
             </Button>
+            <SearchAll setCurrentDeals={setCurrentDeals} />
           </div>
 
           <TeamDashboardTable
