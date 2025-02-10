@@ -27,6 +27,7 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import DatePickerCell from "./datepicker-cell";
+import ShippingInfoDialog from "./shipping-info-dialog";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -484,9 +485,6 @@ const TeamDashboardTable = ({
                     handleDateChange(date ?? "", deal.id, "arrival_to_dealer")
                   }
                 />
-                {/* <div className="text-xs text-[#0989E5]">
-                  {getElapsedTime(deal.arrival_to_dealer ?? "", NOW)}
-                </div> */}
               </TableCell>
               <TableCell>
                 <DatePickerCell
@@ -499,9 +497,6 @@ const TeamDashboardTable = ({
                     )
                   }
                 />
-                {/* <div className="text-xs text-[#0989E5]">
-                  {getElapsedTime(deal.negotiations_Deal_Start_Date ?? "", NOW)}
-                </div> */}
               </TableCell>
               <TableCell>
                 <DatePickerCell
@@ -510,9 +505,6 @@ const TeamDashboardTable = ({
                     handleDateChange(date ?? "", deal.id, "arrival_to_client")
                   }
                 />{" "}
-                {/* <div className="text-xs text-[#0989E5]">
-                  {getElapsedTime(deal.arrival_to_client ?? "", NOW)}
-                </div> */}
               </TableCell>
               <TableCell>
                 <DatePickerCell
@@ -521,9 +513,6 @@ const TeamDashboardTable = ({
                     handleDateChange(date ?? "", deal.id, "close_date")
                   }
                 />{" "}
-                {/* <div className="text-xs text-[#0989E5]">
-                  {getElapsedTime(deal.close_date ?? "", NOW)}
-                </div> */}
               </TableCell>
 
               <TableCell>
@@ -536,26 +525,34 @@ const TeamDashboardTable = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DealNegotiatorDialog
-                      setStopPropogation={setStopPropagation}
-                      deal={deal}
-                      dealNegotiator={negotiatorData}
-                      formatDate={dateFormat}
-                    />
-                    <p
-                      onClick={(e) => {
-                        if (!deal.review) {
-                          e.stopPropagation();
-                          handleAskForReview(deal.id);
-                        } else {
-                          e.stopPropagation();
-                          toast({ title: "Already Review Request Send" });
-                        }
-                      }}
-                      className="text-sm pl-4 pr-1 py-1 cursor-pointer"
-                    >
-                      Ask For Review
-                    </p>
+                    <div className="flex flex-col items-start">
+                      <DealNegotiatorDialog
+                        setStopPropogation={setStopPropagation}
+                        deal={deal}
+                        dealNegotiator={negotiatorData}
+                        formatDate={dateFormat}
+                      />
+                      <ShippingInfoDialog
+                        setCurrentDeals={setCurrentDeals}
+                        currentDeals={currentDeals}
+                        deal={deal}
+                        setStopPropogation={setStopPropagation}
+                      />
+                      <p
+                        onClick={(e) => {
+                          if (!deal.review) {
+                            e.stopPropagation();
+                            handleAskForReview(deal.id);
+                          } else {
+                            e.stopPropagation();
+                            toast({ title: "Already Review Request Send" });
+                          }
+                        }}
+                        className="text-sm pl-4 pr-1 py-1 cursor-pointer"
+                      >
+                        Ask For Review
+                      </p>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -565,7 +562,7 @@ const TeamDashboardTable = ({
       ) : (
         <TableBody>
           <TableRow>
-            <TableCell colSpan={11} className="text-center py-4">
+            <TableCell colSpan={13} className="text-center py-4">
               <p>No Data Found</p>
             </TableCell>
           </TableRow>

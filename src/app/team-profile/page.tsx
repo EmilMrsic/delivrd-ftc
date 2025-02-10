@@ -31,6 +31,7 @@ import AddNoteSection from "@/components/Team/add-note-section";
 import useTeamProfile from "@/hooks/useTeamProfile";
 import VoteSection from "@/components/Team/vote-section";
 import { useRouter } from "next/navigation";
+import EditableTextArea from "@/components/base/editable-textarea";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -525,7 +526,17 @@ function ProjectProfile() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex items-center mt-2">
-                <p>{negotiation?.dealInfo.shipping_info}</p>
+                <EditableTextArea
+                  value={
+                    negotiation?.dealInfo.shipping_info ??
+                    "No shipping info at the moment"
+                  }
+                  negotiationId={negotiationId ?? ""}
+                  field="shipping_info"
+                  onChange={(newValue) =>
+                    handleChange("dealInfo", "shipping_info", newValue)
+                  }
+                />
               </CardContent>
             </Card>
           </div>
