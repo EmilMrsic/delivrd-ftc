@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { dealStageOptions, vehicleOfInterest } from "@/lib/utils";
 
 import { Button } from "../ui/button";
+import { NegotiationData } from "@/types";
 
 type TeamTablePaginationProps = {
   totalPages: number;
@@ -11,6 +12,8 @@ type TeamTablePaginationProps = {
   handleItemsPerPageChange: (
     item: React.ChangeEvent<HTMLSelectElement>
   ) => void;
+  filteredDeal: NegotiationData[];
+  setCurrentDeal: (item: NegotiationData[]) => void;
 };
 
 const TeamTablePagination = ({
@@ -19,6 +22,8 @@ const TeamTablePagination = ({
   setCurrentPage,
   itemsPerPage,
   handleItemsPerPageChange,
+  filteredDeal,
+  setCurrentDeal,
 }: TeamTablePaginationProps) => {
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
@@ -26,6 +31,13 @@ const TeamTablePagination = ({
     }
   };
   const itemsPerPageOptions = [25, 50, 75, 100];
+
+  useEffect(() => {
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = currentPage * itemsPerPage;
+    const currentDeals = filteredDeal.slice(startIdx, endIdx);
+    setCurrentDeal(currentDeals);
+  }, [currentPage, itemsPerPage, filteredDeal]);
 
   return (
     <div className="flex justify-between items-center mt-4">

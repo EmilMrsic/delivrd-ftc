@@ -495,6 +495,8 @@ export default function DealList() {
             updateDealNegotiator={updateDealNegotiator}
           />
           <TeamTablePagination
+            setCurrentDeal={setCurrentDeals}
+            filteredDeal={filteredDeals}
             totalPages={totalPages}
             setCurrentPage={setCurrentPage}
             handleItemsPerPageChange={handleItemsPerPageChange}
