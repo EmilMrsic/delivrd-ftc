@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Car, DollarSign, ThumbsUp, X } from "lucide-react";
 import EditableDropdown from "../base/editable-dropdown";
@@ -7,6 +7,11 @@ import { Separator } from "@radix-ui/react-separator";
 import EditableTextArea from "../base/editable-textarea";
 import { EditNegotiationData } from "@/types";
 import { vehicleOfInterest } from "@/lib/utils";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { toast } from "@/hooks/use-toast";
 
 type FeatureDetailsProps = {
   negotiation: EditNegotiationData | null;
@@ -22,7 +27,10 @@ const FeatureDetails = ({
   setShowStickyHeader,
 }: FeatureDetailsProps) => {
   const dealDetailsRef = useRef(null);
-
+  const [dealStartDate, setDealStartDate] = useState<Date | null>();
+  const [arrivalToDealer, setArrivalToDealer] = useState<Date | null>();
+  const [arrivalToClient, setArrivalToClient] = useState<Date | null>();
+  const [closeDate, setCloseDate] = useState<Date | null>();
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -41,6 +49,54 @@ const FeatureDetails = ({
       }
     };
   }, []);
+
+  const formatDateToLocal = (date: Date | null) => {
+    if (date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed
+      const day = String(date.getDate()).padStart(2, "0");
+
+      return `${month}-${day}-${year}`; // Format as yyyy-MM-dd
+    }
+  };
+
+  const handleDateChange = async (date: Date | null, fieldPath: string) => {
+    const id = negotiation?.id;
+    try {
+      const docRef = doc(db, "negotiations", id ?? "");
+      await updateDoc(docRef, {
+        [fieldPath]: formatDateToLocal(date),
+      });
+      console.log(`${fieldPath} updated successfully.`);
+      toast({ title: "Date update successfully" });
+    } catch (error) {
+      console.error(`Error updating ${fieldPath}:`, error);
+    }
+  };
+
+  useEffect(() => {
+    setDealStartDate(
+      negotiation?.dealInfo?.negotiations_Deal_Start_Date
+        ? new Date(negotiation.dealInfo?.negotiations_Deal_Start_Date)
+        : null
+    );
+    setArrivalToDealer(
+      negotiation?.clientInfo?.arrival_to_dealer
+        ? new Date(negotiation?.clientInfo?.arrival_to_dealer)
+        : null
+    );
+    setArrivalToClient(
+      negotiation?.clientInfo?.arrival_to_client
+        ? new Date(negotiation?.clientInfo?.arrival_to_client)
+        : null
+    );
+    setCloseDate(
+      negotiation?.clientInfo?.close_date
+        ? new Date(negotiation?.clientInfo?.close_date)
+        : null
+    );
+  }, [negotiation]);
+
   return (
     <Card className="bg-white shadow-lg mb-5" ref={dealDetailsRef}>
       <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
@@ -228,27 +284,58 @@ const FeatureDetails = ({
         </div>
         <div className="space-x-2 flex items-center">
           <h3 className="font-semibold text-lg">Start Date:</h3>
-          <p>
-            {negotiation?.dealInfo.negotiations_Deal_Start_Date ??
-              "No Date Available"}
-          </p>
+          <DatePicker
+            selected={dealStartDate}
+            onChange={(date) => {
+              setDealStartDate(date);
+              handleDateChange(date, "negotiations_Deal_Start_Date");
+            }}
+            dateFormat="dd-yyyy-MM"
+            placeholderText="Select a date"
+            className="border border-gray-300 rounded-md px-2 py-1"
+          />
         </div>
+
         <div className="space-x-2 flex items-center">
           <h3 className="font-semibold text-lg">Arrival To Dealer:</h3>
-          <p>
-            {negotiation?.clientInfo.arrival_to_dealer ?? "No Date Available"}
-          </p>
+          <DatePicker
+            selected={arrivalToDealer}
+            onChange={(date) => {
+              setArrivalToDealer(date);
+              handleDateChange(date, "arrival_to_dealer");
+            }}
+            dateFormat="dd-yyyy-MM"
+            placeholderText="Select a date"
+            className="border border-gray-300 rounded-md px-2 py-1"
+          />
         </div>
         <div className="space-x-2 flex items-center">
           <h3 className="font-semibold text-lg">Arrival To Client:</h3>
-          <p>
-            {negotiation?.clientInfo.arrival_to_client ?? "No Date Available"}
-          </p>
+          <DatePicker
+            selected={arrivalToClient}
+            onChange={(date) => {
+              setArrivalToClient(date);
+              handleDateChange(date, "arrival_to_client");
+            }}
+            dateFormat="dd-yyyy-MM"
+            placeholderText="Select a date"
+            className="border border-gray-300 rounded-md px-2 py-1"
+          />
         </div>
         <div className="space-x-2 flex items-center">
           <h3 className="font-semibold text-lg">Close Date:</h3>
-          <p>{negotiation?.clientInfo.close_date ?? "No Date Available"}</p>
+          <DatePicker
+            selected={closeDate}
+            onChange={(date) => {
+              setCloseDate(date);
+              handleDateChange(date, "close_date");
+            }}
+            dateFormat="dd-yyyy-MM"
+            placeholderText="Select a date"
+            className="border border-gray-300 rounded-md px-2 py-1"
+          />
         </div>
+
         <Separator className="my-4" />
         <div className="space-y-4">
           <h3 className="font-semibold text-lg">Colors</h3>
