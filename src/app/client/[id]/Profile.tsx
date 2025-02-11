@@ -407,7 +407,7 @@ function ProjectProfile() {
                                   <strong>
                                     {comment.deal_coordinator_name}:
                                   </strong>{" "}
-                                  {comment.comment}
+                                  {parseComment(comment.comment)}
                                 </p>
                                 <p className="text-sm text-gray-500">
                                   {comment.time}
