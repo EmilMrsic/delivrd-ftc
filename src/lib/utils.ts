@@ -418,8 +418,8 @@ export const fetchAllNotClosedNegotiations = async () => {
   try {
     const negotiationsQuery = query(
       collection(db, "negotiations"),
-      where("negotiations_Status", "!=", "Closed"),
-      where("negotiations_deal_coordinator", "!=", "")
+      where("negotiations_Status", ">", "Closed"),
+      where("negotiations_deal_coordinator", "<", "")
     );
 
     const negotiationsSnapshot = await getDocs(negotiationsQuery);
