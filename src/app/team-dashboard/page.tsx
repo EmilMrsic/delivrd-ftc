@@ -295,6 +295,7 @@ export default function DealList() {
 
     setFilters(resetFilters);
     setFilteredDeals(originalDeals);
+    setCurrentPage(1);
     setLoading(true);
     fetchActiveDeals(id)
       .then((deals) => {
