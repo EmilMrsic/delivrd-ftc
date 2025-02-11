@@ -182,7 +182,7 @@ const TeamDashboardTable = ({
           <TableHead>Make</TableHead>
           <TableHead>Model</TableHead>
           <TableHead>Stage</TableHead>
-          <TableHead>State</TableHead>
+          <TableHead>Zip Code</TableHead>
           <TableHead>Deal Negotiator</TableHead>
           <TableHead>Onboarding Complete</TableHead>
           <TableHead>
@@ -411,7 +411,7 @@ const TeamDashboardTable = ({
                 </DropdownMenu>
               </TableCell>
 
-              <TableCell>{deal.negotiations_state}</TableCell>
+              <TableCell>{deal.negotiations_Zip_Code}</TableCell>
 
               <TableCell>
                 <DropdownMenu
