@@ -418,19 +418,19 @@ export const fetchAllNotClosedNegotiations = async () => {
   try {
     const negotiationsQuery = query(
       collection(db, "negotiations"),
-      where("negotiations_Status", ">", "Closed"),
-      where("negotiations_deal_coordinator", "<", "")
+      where("negotiations_deal_coordinator", "!=", "")
     );
 
     const negotiationsSnapshot = await getDocs(negotiationsQuery);
-    const paidNegotiationIds = negotiationsSnapshot.docs.map((doc) => doc.id);
+    const negotiationIds = negotiationsSnapshot.docs.map((doc) => doc.id);
 
-    if (paidNegotiationIds.length === 0) {
-      console.log("No negotiations with status PAID found.");
+    if (negotiationIds.length === 0) {
+      console.log("No active negotiations found.");
       return [];
     }
 
-    const chunk = (array: string[], size: number) => {
+    // Function to split an array into chunks
+    const chunkArray = (array: string[], size: number) => {
       const result = [];
       for (let i = 0; i < array.length; i += size) {
         result.push(array.slice(i, i + size));
@@ -438,7 +438,7 @@ export const fetchAllNotClosedNegotiations = async () => {
       return result;
     };
 
-    const chunkedIds = chunk(paidNegotiationIds, 30);
+    const chunkedIds = chunkArray(negotiationIds, 30);
     let allFilteredNegotiations: any[] = [];
 
     for (const chunk of chunkedIds) {
@@ -453,7 +453,7 @@ export const fetchAllNotClosedNegotiations = async () => {
           id: doc.id,
           ...doc.data(),
         }))
-        .filter((doc) => !doc.hasOwnProperty("negotiations_deal_coordinator"));
+        .filter((item: any) => item.negotiations_Status !== "Closed");
 
       allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
     }
