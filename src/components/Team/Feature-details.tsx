@@ -216,11 +216,11 @@ const FeatureDetails = ({
         <div className="flex items-center space-x-2 text-[#202125]">
           <DollarSign className="h-5 w-5 text-[#0989E5]" />
           <EditableDropdown
-            options={["Lease", "Cash", "Finance"]}
+            options={["Lease", "Cash", "Finance", "Need to Discuss"]}
             label="Finance Type"
             value={
               negotiation?.dealInfo?.negotiations_How_To_Pay ??
-              "No finance type"
+              "Need to Discuss"
             }
             negotiationId={negotiationId ?? ""}
             field="negotiations_How_To_Pay"

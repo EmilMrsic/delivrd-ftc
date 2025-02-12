@@ -11,22 +11,30 @@ import {
   NegotiationData,
 } from "@/types";
 import {
+  arrayUnion,
   collection,
   doc,
   getDoc,
   getDocs,
   query,
+  setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { formatDate } from "@/lib/utils";
+import { formatDate, uploadFile } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import DealDetailCard from "@/components/Client/DealDetailCard";
 import ClientOverviewCard from "@/components/Client/ClientOverviewCard";
 import IncomingBidsCard from "@/components/Client/IncomingBidsCard/IncomingBidsCard";
 import ClientStickyHeader from "@/components/Client/ClientStickyHeader";
 import { Loader } from "@/components/base/loader";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { Car, ThumbsDown, ThumbsUp } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import EditableTextArea from "@/components/base/editable-textarea";
+import EditableInput from "@/components/base/input-field";
+import { Input } from "@/components/ui/input";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -38,12 +46,25 @@ function ProjectProfile() {
   const [negotiationData, setNegotiationData] = useState<NegotiationData[]>([]);
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
+  const [acceptedBidId, setAcceptedBidId] = useState<string | null>(null);
   const [dealerData, setDealerData] = useState<DealerData[]>([]);
   const [dealNegotiatorData, setDealNegotiatorData] =
     useState<DealNegotiator>();
   const pathname = usePathname();
   const id = pathname.split("/")[2];
   const [userData, setUserData] = useState<IUser>();
+  const [tradeInInfo, setTradeInInfo] = useState(
+    negotiationData[0]?.trade_in_info ?? "No trade in info at the moment"
+  );
+  const [tradeInVin, setTradeInVin] = useState(
+    negotiationData[0]?.trade_in_vin ?? ""
+  );
+  const [tradeInMileage, setTradeInMileage] = useState(
+    negotiationData[0]?.trade_in_mileage ?? ""
+  );
+  const [tradeInComments, setTradeInComments] = useState(
+    negotiationData[0]?.trade_in_comments ?? ""
+  );
 
   const parseComment = (comment: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -147,6 +168,30 @@ function ProjectProfile() {
     }
   };
 
+  const acceptOffer = async (bid_id: string) => {
+    // Update the selected bid
+    const bidRef = doc(db, "Incoming Bids", bid_id);
+
+    // Update Firestore
+    await updateDoc(bidRef, {
+      client_offer: "accepted",
+    });
+    const updatedBids = incomingBids.map((bid) =>
+      bid.bid_id === bid_id ? { ...bid, client_offer: "accepted" } : bid
+    );
+
+    // Move the accepted bid to the top
+    const acceptedBid: any = updatedBids.find((bid) => bid.bid_id === bid_id);
+    const otherBids = updatedBids.filter((bid) => bid.bid_id !== bid_id);
+
+    setIncomingBids([acceptedBid, ...otherBids]);
+    setAcceptedBidId(bid_id);
+    toast({
+      title:
+        "Your deal has been sent to your deal coordinator, who will contact you shortly.",
+    });
+  };
+
   useEffect(() => {
     if (!id) {
       const user = localStorage.getItem("user");
@@ -194,6 +239,93 @@ function ProjectProfile() {
     fetchDealersData(incomingBids);
     fetchBidComments();
   }, [incomingBids]);
+
+  const handleTradeInInfoChange = (e: any) => {
+    setTradeInInfo(e.target.value);
+  };
+
+  const handleTradeInVinChange = (e: any) => {
+    setTradeInVin(e.target.value);
+  };
+
+  const handleTradeInMileageChange = (e: any) => {
+    setTradeInMileage(e.target.value);
+  };
+
+  const handleTradeInCommentsChange = (e: any) => {
+    setTradeInComments(e.target.value);
+  };
+
+  const saveToFirebase = async (field: string, value: string) => {
+    try {
+      const negotiationId = negotiationData[0]?.id;
+      await setDoc(
+        doc(db, "negotiations", negotiationId),
+        {
+          [field]: value,
+        },
+        { merge: true }
+      );
+      console.log(`${field} saved successfully.`);
+      toast({ title: `${field} saved successfully.` });
+    } catch (error) {
+      console.error("Error saving data to Firebase:", error);
+    }
+  };
+
+  const handleTradeInInfoBlur = () => {
+    saveToFirebase("trade_in_info", tradeInInfo);
+  };
+
+  const handleTradeInVinBlur = () => {
+    saveToFirebase("trade_in_vin", tradeInVin);
+  };
+
+  const handleTradeInMileageBlur = () => {
+    saveToFirebase("trade_in_mileage", tradeInMileage);
+  };
+
+  const handleTradeInCommentsBlur = () => {
+    saveToFirebase("trade_in_comments", tradeInComments);
+  };
+
+  const handleFileUpload = async (files: FileList | null, bidId: string) => {
+    const id = bidId;
+    if (!files || !bidId) return;
+
+    let fileUrls: string[] = [];
+
+    if (files.length > 0) {
+      const fileArray = Array.from(files);
+      const uploadPromises = fileArray.map((file) => uploadFile(file));
+      fileUrls = (await Promise.all(uploadPromises)).filter(
+        Boolean
+      ) as string[];
+    }
+
+    if (fileUrls.length > 0) {
+      const bidRef = doc(db, "negotiations", id);
+      await updateDoc(bidRef, {
+        trade_in_files: arrayUnion(...fileUrls),
+      });
+    }
+    const updatedNegotiationData = [...negotiationData];
+    updatedNegotiationData[0].trade_in_files = [
+      ...(updatedNegotiationData[0].trade_in_files ?? []),
+      ...fileUrls,
+    ];
+    setNegotiationData(updatedNegotiationData); // Assuming you have a state setter for negotiationData
+    toast({ title: "Files uploaded" });
+  };
+
+  useEffect(() => {
+    setTradeInInfo(
+      negotiationData[0]?.trade_in_info ?? "No trade in info at the moment"
+    );
+    setTradeInVin(negotiationData[0]?.trade_in_vin ?? "");
+    setTradeInMileage(negotiationData[0]?.trade_in_mileage ?? "");
+    setTradeInComments(negotiationData[0]?.trade_in_comments ?? "");
+  }, [negotiationData]);
 
   return userData &&
     incomingBids &&
@@ -246,6 +378,8 @@ function ProjectProfile() {
                 {incomingBids
                   ?.filter((bid) => bid?.timestamp)
                   .sort((a, b) => {
+                    if (a.client_offer === "accepted") return -1;
+                    if (b.client_offer === "accepted") return 1;
                     const dateA = new Date(a?.timestamp || 0).getTime();
                     const dateB = new Date(b?.timestamp || 0).getTime();
                     return dateB - dateA; // Newest bids first
@@ -254,10 +388,17 @@ function ProjectProfile() {
                     const matchingDealer = dealerData.find(
                       (dealer) => dealer.id === item.dealerId
                     );
+                    const hasAcceptedOffer = incomingBids.find(
+                      (bid) => bid.client_offer === "accepted"
+                    );
                     return (
                       <div
                         key={index}
                         className={`pr-2 pt-2 border-l-4 pl-4 pb-6 ${
+                          hasAcceptedOffer && item.client_offer !== "accepted"
+                            ? "opacity-45 pointer-events-none"
+                            : ""
+                        } ${
                           item.vote && item.vote === "like"
                             ? "bg-green-100 border-green-600 "
                             : item.vote === "dislike"
@@ -280,7 +421,7 @@ function ProjectProfile() {
                               >
                                 <ThumbsUp className="h-4 w-4" />
                               </Button>
-                            ) : (
+                            ) : item.vote === "dislike" ? (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -288,6 +429,8 @@ function ProjectProfile() {
                               >
                                 <ThumbsDown className="h-4 w-4" />
                               </Button>
+                            ) : (
+                              <></>
                             )}
                           </div>
                         </div>
@@ -298,103 +441,116 @@ function ProjectProfile() {
                           Price: $
                           {item?.price ? item?.price : "No price available"}
                         </p>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <div className="flex space-x-2 mb-4">
-                              <Button key={index} variant="outline" size="sm">
-                                View Offer
-                              </Button>
-                            </div>
-                          </DialogTrigger>
-                          <DialogContent className="p-6 bg-white rounded-md shadow-lg max-w-2xl w-full">
-                            <div className="text-[#202125] space-y-4">
-                              <p className="text-2xl font-bold">
-                                {dealerData
-                                  ? dealerData[index]?.Dealership ?? ""
-                                  : ""}{" "}
-                                Detail
-                              </p>
-
-                              <div className="flex space-x-4">
-                                {item.files.map((file, index) => {
-                                  const isImage = [
-                                    "jpg",
-                                    "jpeg",
-                                    "png",
-                                    "gif",
-                                    "bmp",
-                                    "webp",
-                                  ].some((ext) =>
-                                    file.toLowerCase().includes(ext)
-                                  );
-                                  return (
-                                    <div
-                                      key={index}
-                                      onClick={() =>
-                                        window.open(file, "_blank")
-                                      }
-                                      className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
-                                    >
-                                      {isImage ? (
-                                        <img
-                                          src={file}
-                                          alt="Uploaded file"
-                                          className="object-cover w-full h-full"
-                                        />
-                                      ) : (
-                                        <embed
-                                          type="application/pdf"
-                                          width="100%"
-                                          height="100%"
-                                          src={file}
-                                          style={{ zIndex: -1 }}
-                                        />
-                                      )}
-                                    </div>
-                                  );
-                                })}
+                        <div className="flex gap-3">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <div className="flex space-x-2 mb-4">
+                                <Button key={index} variant="outline" size="sm">
+                                  View Offer
+                                </Button>
                               </div>
-
-                              <div className="space-y-1">
-                                <p className="font-semibold text-lg">
-                                  {dealNegotiatorData?.name}
+                            </DialogTrigger>
+                            <DialogContent className="p-6 bg-white rounded-md shadow-lg max-w-2xl w-full">
+                              <div className="text-[#202125] space-y-4">
+                                <p className="text-2xl font-bold">
+                                  {dealerData
+                                    ? dealerData[index]?.Dealership ?? ""
+                                    : ""}{" "}
+                                  Detail
                                 </p>
-                                <p>
-                                  {dealerData[index]?.City},{" "}
-                                  {dealerData[index]?.State}
-                                </p>
-                                <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
-                                  {item?.inventoryStatus}
-                                </span>
-                              </div>
 
-                              <div className="flex justify-between mt-4 border-t pt-4">
-                                <div>
-                                  <p className="text-gray-500">
-                                    Date Submitted
-                                  </p>
-                                  <p>{formatDate(item.timestamp)}</p>
+                                <div className="flex space-x-4">
+                                  {item.files.map((file, index) => {
+                                    const isImage = [
+                                      "jpg",
+                                      "jpeg",
+                                      "png",
+                                      "gif",
+                                      "bmp",
+                                      "webp",
+                                    ].some((ext) =>
+                                      file.toLowerCase().includes(ext)
+                                    );
+                                    return (
+                                      <div
+                                        key={index}
+                                        onClick={() =>
+                                          window.open(file, "_blank")
+                                        }
+                                        className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
+                                      >
+                                        {isImage ? (
+                                          <img
+                                            src={file}
+                                            alt="Uploaded file"
+                                            className="object-cover w-full h-full"
+                                          />
+                                        ) : (
+                                          <embed
+                                            type="application/pdf"
+                                            width="100%"
+                                            height="100%"
+                                            src={file}
+                                            style={{ zIndex: -1 }}
+                                          />
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                                <div>
-                                  <p className="text-gray-500">Price</p>
-                                  <p className="text-2xl font-semibold">
-                                    ${item.price}
+
+                                <div className="space-y-1">
+                                  <p className="font-semibold text-lg">
+                                    {dealNegotiatorData?.name}
                                   </p>
-                                  <p className="text-gray-500">
-                                    Total Discount: ${item.discountPrice}
+                                  <p>
+                                    {dealerData[index]?.City},{" "}
+                                    {dealerData[index]?.State}
                                   </p>
+                                  <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
+                                    {item?.inventoryStatus}
+                                  </span>
+                                </div>
+
+                                <div className="flex justify-between mt-4 border-t pt-4">
+                                  <div>
+                                    <p className="text-gray-500">
+                                      Date Submitted
+                                    </p>
+                                    <p>{formatDate(item.timestamp)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-500">Price</p>
+                                    <p className="text-2xl font-semibold">
+                                      ${item.price}
+                                    </p>
+                                    <p className="text-gray-500">
+                                      Total Discount: ${item.discountPrice}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="border-t pt-4">
+                                  <p className="font-semibold mb-2">
+                                    Additional Comments
+                                  </p>
+                                  <p>{parseComment(item.comments)}</p>
                                 </div>
                               </div>
-
-                              <div className="border-t pt-4">
-                                <p className="font-semibold mb-2">
-                                  Additional Comments
-                                </p>
-                                <p>{parseComment(item.comments)}</p>
-                              </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                            </DialogContent>
+                          </Dialog>
+                          <Button
+                            onClick={() => acceptOffer(item.bid_id)}
+                            key={"accept" + index}
+                            variant="outline"
+                            size="sm"
+                            disabled={item.client_offer === "accepted"}
+                          >
+                            {item.client_offer === "accepted"
+                              ? "Offer Accepted"
+                              : "Accept Offer"}
+                          </Button>
+                        </div>
                         {bidCommentsByBidId[item?.bid_id] &&
                         bidCommentsByBidId[item?.bid_id].length > 0 ? (
                           bidCommentsByBidId[item?.bid_id].map(
@@ -435,6 +591,108 @@ function ProjectProfile() {
               responsive={true}
             />
           </div>
+          <div></div>
+          <div></div>
+          <Card className="bg-white shadow-lg mb-5">
+            <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
+              <CardTitle className="flex items-center">
+                <Car className="mr-2" /> Trade In Info
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4 mt-2">
+              <textarea
+                className="border rounded-md p-2"
+                value={tradeInInfo}
+                onChange={handleTradeInInfoChange}
+                onBlur={handleTradeInInfoBlur}
+              />
+              <div className="flex items-center gap-2">
+                <label className="font-bold" htmlFor="tradeInVin">
+                  Trade-In VIN:
+                </label>
+                <Input
+                  id="tradeInVin"
+                  value={tradeInVin}
+                  onChange={handleTradeInVinChange}
+                  onBlur={handleTradeInVinBlur}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="font-bold" htmlFor="tradeInMileage">
+                  Trade-In Mileage:
+                </label>
+                <Input
+                  id="tradeInMileage"
+                  value={tradeInMileage}
+                  onChange={handleTradeInMileageChange}
+                  onBlur={handleTradeInMileageBlur}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="font-bold" htmlFor="tradeInComments">
+                  Trade-In Comments:
+                </label>
+                <Input
+                  id="tradeInComments"
+                  value={tradeInComments}
+                  onChange={handleTradeInCommentsChange}
+                  onBlur={handleTradeInCommentsBlur}
+                />
+              </div>
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700">
+                  Upload Files
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+                  onChange={(e) =>
+                    handleFileUpload(
+                      e.target.files,
+                      negotiationData[0].id ?? ""
+                    )
+                  }
+                />
+              </div>
+
+              {/* Display Uploaded Files */}
+              <div className="flex space-x-4 mt-2">
+                {negotiationData[0]?.trade_in_files?.map((file, index) => {
+                  const isImage = [
+                    "jpg",
+                    "jpeg",
+                    "png",
+                    "gif",
+                    "bmp",
+                    "webp",
+                  ].some((ext) => file.toLowerCase().includes(ext));
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => window.open(file, "_blank")}
+                      className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
+                    >
+                      {isImage ? (
+                        <img
+                          src={file}
+                          alt="Uploaded file"
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <embed
+                          type="application/pdf"
+                          width="100%"
+                          height="100%"
+                          src={file}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </>
