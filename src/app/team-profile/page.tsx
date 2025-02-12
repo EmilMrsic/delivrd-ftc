@@ -4,11 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Plus, BellIcon, Car } from "lucide-react";
-import { addDoc, collection } from "firebase/firestore";
+import { FileText, Plus, BellIcon, Car, Save, Pencil } from "lucide-react";
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { db, messaging } from "@/firebase/config";
 import { ActivityLog, BidComments } from "@/types";
-import { formatDate, getCurrentTimestamp } from "@/lib/utils";
+import {
+  formatDate,
+  getCurrentTimestamp,
+  updateBidInFirebase,
+  uploadFile,
+} from "@/lib/utils";
 import FeatureDetails from "@/components/Team/Feature-details";
 import StickyHeader from "@/components/Team/Sticky-header";
 import ClientDetails from "@/components/Team/Client-details";
@@ -32,6 +43,8 @@ import useTeamProfile from "@/hooks/useTeamProfile";
 import VoteSection from "@/components/Team/vote-section";
 import { useRouter } from "next/navigation";
 import EditableTextArea from "@/components/base/editable-textarea";
+import { Input } from "@/components/ui/input";
+import EditableInput from "@/components/base/input-field";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -57,6 +70,13 @@ function ProjectProfile() {
 
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
   const [commentingBidId, setCommentingBidId] = useState<string | null>(null);
+  const [editingBidId, setEditingBidId] = useState<string | null>(null);
+  const [editedBid, setEditedBid] = useState({
+    price: "",
+    discountPrice: "",
+    inventoryStatus: "In stock",
+  });
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
   const [activityLog] = useState<ActivityLog>([
     {
@@ -189,6 +209,73 @@ function ProjectProfile() {
     return () => clearTimeout(timeoutId);
   }, [dispatch]);
 
+  const handleFileUpload = async (files: FileList | null, bidId: string) => {
+    const id = bidId;
+    if (!files || !bidId) return;
+
+    let fileUrls: string[] = [];
+
+    if (files.length > 0) {
+      const fileArray = Array.from(files);
+      const uploadPromises = fileArray.map((file) => uploadFile(file));
+      fileUrls = (await Promise.all(uploadPromises)).filter(
+        Boolean
+      ) as string[];
+    }
+
+    if (fileUrls.length > 0) {
+      const bidRef = doc(db, "negotiations", id);
+      await updateDoc(bidRef, {
+        trade_in_files: arrayUnion(...fileUrls),
+      });
+    }
+    if (negotiation !== null && negotiation.dealInfo) {
+      setNegotiation({
+        ...negotiation, // Spread the existing negotiation object
+        dealInfo: {
+          ...negotiation.dealInfo, // Spread the existing dealInfo object
+          trade_in_files: [
+            ...(negotiation.dealInfo.trade_in_files ?? []), // Ensure trade_in_files is an array, defaulting to an empty array if it's null or undefined
+            ...fileUrls, // Add the new file URLs
+          ],
+        },
+      });
+      toast({ title: "Files uploaded" });
+    }
+  };
+
+  const handleEdit = (bid: any) => {
+    setEditingBidId(bid.bid_id);
+    setEditedBid({
+      price: bid.price.toString(),
+      discountPrice: bid.discountPrice.toString(),
+      inventoryStatus: bid.inventoryStatus,
+    });
+  };
+
+  const handleSave = (bidId: string) => {
+    setIncomingBids(
+      incomingBids.map((bid) =>
+        bid.bid_id === bidId
+          ? {
+              ...bid,
+              ...editedBid,
+              price: Number(editedBid.price),
+              discountPrice: String(editedBid.discountPrice),
+            }
+          : bid
+      )
+    );
+    updateBidInFirebase(bidId, {
+      discountPrice: editedBid.discountPrice,
+      inventoryStatus: editedBid.inventoryStatus,
+      price: Number(editedBid.price),
+    });
+    setOpenDialog(null);
+    setEditingBidId(null);
+    toast({ title: "Bid Updated successfully" });
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -288,6 +375,8 @@ function ProjectProfile() {
                   incomingBids
                     ?.filter((bid) => bid?.timestamp)
                     .sort((a, b) => {
+                      if (a.client_offer === "accepted") return -1;
+                      if (b.client_offer === "accepted") return 1;
                       const dateA = new Date(a?.timestamp || 0).getTime();
                       const dateB = new Date(b?.timestamp || 0).getTime();
                       return dateB - dateA; // Newest bids first
@@ -296,10 +385,19 @@ function ProjectProfile() {
                       const matchingDealer = dealers.find(
                         (dealer) => dealer.id === bidDetails.dealerId
                       );
+                      const hasAcceptedOffer = incomingBids.find(
+                        (bid) => bid.client_offer === "accepted"
+                      );
                       return (
                         <div
                           key={index}
-                          className={`border-l-4 pl-4 pb-6 pt-2 pr-2 ${
+                          className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
+                            ${
+                              hasAcceptedOffer &&
+                              bidDetails.client_offer !== "accepted"
+                                ? "opacity-45"
+                                : ""
+                            } ${
                             bidDetails.vote && bidDetails.vote === "like"
                               ? "bg-green-100 border-green-600 "
                               : bidDetails.vote === "dislike"
@@ -331,11 +429,14 @@ function ProjectProfile() {
                           <div className="flex space-x-2 mb-4">
                             <Dialog
                               open={openDialog === bidDetails.bid_id}
-                              onOpenChange={(isOpen) =>
+                              onOpenChange={(isOpen) => {
+                                if (!isOpen) {
+                                  setEditingBidId(null); // Reset editedBid when closing
+                                }
                                 setOpenDialog(
                                   isOpen ? bidDetails.bid_id ?? "" : null
-                                )
-                              }
+                                );
+                              }}
                             >
                               <DialogTrigger asChild>
                                 <Button variant="outline" size="sm">
@@ -345,9 +446,29 @@ function ProjectProfile() {
                               </DialogTrigger>
                               <DialogContent style={{ background: "white" }}>
                                 <div className="text-[#202125] space-y-4">
-                                  <p className="text-2xl font-bold">
-                                    {matchingDealer?.Dealership} Detail
-                                  </p>
+                                  <div className="flex items-center gap-3">
+                                    <p className="text-2xl font-bold">
+                                      {matchingDealer?.Dealership} Detail
+                                    </p>
+                                    {editingBidId === bidDetails.bid_id ? (
+                                      <Button
+                                        size="sm"
+                                        onClick={() =>
+                                          handleSave(bidDetails.bid_id)
+                                        }
+                                      >
+                                        <Save className="h-4 w-4 mr-2" /> Save
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleEdit(bidDetails)}
+                                      >
+                                        <Pencil className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
                                   <div className="flex space-x-4">
                                     {bidDetails.files.map((file, index) => {
                                       const isImage = [
@@ -394,10 +515,64 @@ function ProjectProfile() {
                                     </p>
                                     <p>
                                       {matchingDealer?.City}
-                                      <br /> {matchingDealer?.State}
+                                      <br />
+                                      {matchingDealer?.State}
                                     </p>
-                                    <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
-                                      {bidDetails?.inventoryStatus}
+                                    <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700  rounded-full">
+                                      {editingBidId === bidDetails.bid_id ? (
+                                        <div className="space-x-2 flex">
+                                          <label className="flex p-2 rounded-full bg-green-100 items-center space-x-2">
+                                            <input
+                                              type="radio"
+                                              name="inventoryStatus"
+                                              value="In Stock"
+                                              checked={
+                                                editedBid.inventoryStatus ===
+                                                "In Stock"
+                                              }
+                                              onChange={() =>
+                                                setEditedBid({
+                                                  ...editedBid,
+                                                  inventoryStatus: "In Stock",
+                                                })
+                                              }
+                                              className="w-4 h-4"
+                                            />
+                                            <span>In Stock</span>
+                                          </label>
+
+                                          <label className="flex p-2 rounded-full bg-yellow-100 items-center space-x-2">
+                                            <input
+                                              type="radio"
+                                              name="inventoryStatus"
+                                              value="In Transit"
+                                              checked={
+                                                editedBid.inventoryStatus ===
+                                                "In Transit"
+                                              }
+                                              onChange={() =>
+                                                setEditedBid({
+                                                  ...editedBid,
+                                                  inventoryStatus: "In Transit",
+                                                })
+                                              }
+                                              className="w-4 h-4"
+                                            />
+                                            <span>In Transit</span>
+                                          </label>
+                                        </div>
+                                      ) : (
+                                        <p
+                                          className={`p-2 rounded-full ${
+                                            bidDetails.inventoryStatus ===
+                                            "In Stock"
+                                              ? "bg-green-100"
+                                              : "bg-yellow-100"
+                                          }`}
+                                        >
+                                          {bidDetails?.inventoryStatus}
+                                        </p>
+                                      )}
                                     </span>
                                   </div>
 
@@ -410,21 +585,46 @@ function ProjectProfile() {
                                     </div>
                                     <div>
                                       <p className="text-gray-500">Price</p>
-                                      <p className="text-2xl font-semibold">
-                                        ${bidDetails.price}
-                                      </p>
+                                      {editingBidId === bidDetails.bid_id ? (
+                                        <Input
+                                          type="number"
+                                          value={editedBid.price}
+                                          onChange={(e) =>
+                                            setEditedBid({
+                                              ...editedBid,
+                                              price: e.target.value,
+                                            })
+                                          }
+                                        />
+                                      ) : (
+                                        <p className="text-2xl font-semibold">
+                                          ${bidDetails.price}
+                                        </p>
+                                      )}
                                       <p className="text-gray-500">
                                         Total Discount: $
-                                        {bidDetails.discountPrice}
+                                        {editingBidId === bidDetails.bid_id ? (
+                                          <Input
+                                            type="number"
+                                            value={editedBid.discountPrice}
+                                            onChange={(e) =>
+                                              setEditedBid({
+                                                ...editedBid,
+                                                discountPrice: e.target.value,
+                                              })
+                                            }
+                                          />
+                                        ) : (
+                                          bidDetails.discountPrice
+                                        )}
                                       </p>
                                     </div>
                                   </div>
 
-                                  <div className="border-t pt-4">
-                                    <p className="font-semibold mb-2">
+                                  <div className="border-t pt-4 flex justify-between">
+                                    <p className="font-semibold">
                                       Additional Comments
                                     </p>
-                                    <p>{parseComment(bidDetails.comments)}</p>
                                   </div>
                                 </div>
                               </DialogContent>
@@ -519,6 +719,102 @@ function ProjectProfile() {
               negotiationId={negotiationId}
               handleChange={handleChange}
             />
+            <Card className="bg-white shadow-lg mb-5">
+              <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
+                <CardTitle className="flex items-center">
+                  <Car className="mr-2" /> Trade In Info
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4 mt-2">
+                <EditableTextArea
+                  value={
+                    negotiation?.dealInfo.trade_in_info ??
+                    "No trade in info at the moment"
+                  }
+                  negotiationId={negotiationId ?? ""}
+                  field="trade_in_info"
+                  onChange={(newValue) =>
+                    handleChange("dealInfo", "trade_in_info", newValue)
+                  }
+                />
+                <EditableInput
+                  field="trade_in_vin"
+                  negotiationId={negotiationId ?? ""}
+                  label="Vin"
+                  value={negotiation?.dealInfo?.trade_in_vin ?? ""}
+                  onChange={(newValue) =>
+                    handleChange("dealInfo", "trade_in_vin", newValue)
+                  }
+                />
+                <EditableInput
+                  field="trade_in_mileage"
+                  negotiationId={negotiationId ?? ""}
+                  label="Mileage"
+                  value={negotiation?.dealInfo?.trade_in_mileage ?? ""}
+                  onChange={(newValue) =>
+                    handleChange("dealInfo", "trade_in_mileage", newValue)
+                  }
+                />
+                <EditableInput
+                  field="trade_in_comments"
+                  negotiationId={negotiationId ?? ""}
+                  label="Comments"
+                  value={negotiation?.dealInfo?.trade_in_comments ?? ""}
+                  onChange={(newValue) =>
+                    handleChange("dealInfo", "trade_in_comments", newValue)
+                  }
+                />
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Upload Files
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+                    onChange={(e) =>
+                      handleFileUpload(e.target.files, negotiationId ?? "")
+                    }
+                  />
+                </div>
+
+                {/* Display Uploaded Files */}
+                <div className="flex space-x-4 mt-2">
+                  {negotiation?.dealInfo?.trade_in_files?.map((file, index) => {
+                    const isImage = [
+                      "jpg",
+                      "jpeg",
+                      "png",
+                      "gif",
+                      "bmp",
+                      "webp",
+                    ].some((ext) => file.toLowerCase().includes(ext));
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => window.open(file, "_blank")}
+                        className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
+                      >
+                        {isImage ? (
+                          <img
+                            src={file}
+                            alt="Uploaded file"
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <embed
+                            type="application/pdf"
+                            width="100%"
+                            height="100%"
+                            src={file}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
             <Card className="bg-white shadow-lg mb-5">
               <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
                 <CardTitle className="flex items-center">

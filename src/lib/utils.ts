@@ -1,5 +1,10 @@
-import { db } from "@/firebase/config";
-import { Color, EditNegotiationData, NegotiationData } from "@/types";
+import { db, storage } from "@/firebase/config";
+import {
+  Color,
+  EditNegotiationData,
+  IncomingBid,
+  NegotiationData,
+} from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import {
   collection,
@@ -9,8 +14,10 @@ import {
   limit,
   query,
   startAfter,
+  updateDoc,
   where,
 } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -151,6 +158,10 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
         data.negotiations_Trim_Package_Options || null,
       shipping_info:
         data.shipping_info ?? "No Shipping Info available at the moment",
+      trade_in_comments: data.trade_in_comments,
+      trade_in_files: data.trade_in_files,
+      trade_in_vin: data.trade_in_vin,
+      trade_in_mileage: data.trade_in_mileage,
     },
     otherData: {
       deals: data.deals || [],
@@ -446,6 +457,17 @@ export const fetchAllNotClosedNegotiations = async () => {
         collection(db, "negotiations"),
         where("__name__", "in", chunk)
       );
+      const allowedStatuses = [
+        "Deal Started",
+        "Actively Negotiating",
+        "Delivery Scheduled",
+        "Deal Complete Long Term",
+        "Long Term Order",
+        "Shipping",
+        "Needs Review",
+        "Follow-up",
+        "Follow-up Issue",
+      ];
 
       const batchSnapshot = await getDocs(batchQuery);
       const filteredData = batchSnapshot.docs
@@ -453,7 +475,9 @@ export const fetchAllNotClosedNegotiations = async () => {
           id: doc.id,
           ...doc.data(),
         }))
-        .filter((item: any) => item.negotiations_Status !== "Closed");
+        .filter((item: any) =>
+          allowedStatuses.includes(item.negotiations_Status.trim())
+        );
 
       allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
     }
@@ -478,3 +502,33 @@ export function generateRandomId(prefix = "rec", length = 16) {
 
   return prefix + randomPart;
 }
+
+export const updateBidInFirebase = async (
+  bidId: string,
+  updatedFields: Partial<IncomingBid>
+) => {
+  if (!bidId) return;
+
+  try {
+    const bid_id = bidId;
+    const bidRef = doc(db, "Incoming Bids", bid_id);
+    await updateDoc(bidRef, updatedFields);
+    console.log("Bid updated successfully!");
+  } catch (error) {
+    console.error("Error updating bid:", error);
+  }
+};
+
+export const uploadFile = async (file: File): Promise<string | null> => {
+  try {
+    const timestamp = Date.now();
+    const storageRef = ref(storage, `uploads/${timestamp}_${file.name}`);
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+    console.log("File available at:", downloadURL);
+    return downloadURL;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    return null;
+  }
+};

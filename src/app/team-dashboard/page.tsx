@@ -193,8 +193,19 @@ export default function DealList() {
             });
           } else {
             if (value === "Not Closed") {
-              const deals = originalDeals.filter(
-                (deal) => deal.negotiations_Status !== "Closed"
+              const allowedStatuses = [
+                "Deal Started",
+                "Actively Negotiating",
+                "Delivery Scheduled",
+                "Deal Complete Long Term",
+                "Long Term Order",
+                "Shipping",
+                "Needs Review",
+                "Follow-up",
+                "Follow-up Issue",
+              ];
+              const deals = originalDeals.filter((deal) =>
+                allowedStatuses.includes(deal.negotiations_Status ?? "")
               );
               setFilteredDeals(deals);
               setLoading(false);

@@ -144,6 +144,11 @@ export interface NegotiationData {
   negotiations_state: string | null;
   negotiations_deal_coordinator: string | null;
   shipping_info: string | null;
+  trade_in_info?: string;
+  trade_in_vin?: string;
+  trade_in_mileage?: string;
+  trade_in_comments?: string;
+  trade_in_files?: string[];
 }
 
 export interface EditNegotiationData {
@@ -185,6 +190,11 @@ export interface EditNegotiationData {
     negotiations_Trim: string | null;
     negotiations_Trim_Package_Options: string | null;
     shipping_info: string | null;
+    trade_in_info?: string;
+    trade_in_vin?: string;
+    trade_in_mileage?: string;
+    trade_in_comments?: string;
+    trade_in_files?: string[];
   };
   otherData: {
     deals: string[];
@@ -242,6 +252,7 @@ export interface IncomingBid {
   inventoryStatus: string;
   price: number;
   timestamp: string;
+  client_offer: string;
   vote?: "like" | "dislike" | "neutral";
 }
 
