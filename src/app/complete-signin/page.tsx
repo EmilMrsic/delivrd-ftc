@@ -81,20 +81,6 @@ const SignInContent = ({
       setMessage("Failed to sign in. Please try again.");
     }
   };
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedEmail = localStorage.getItem("emailForSignIn");
-    const currentEmail = localStorage.getItem("currentEmail");
-    if (storedUser && storedEmail === currentEmail) {
-      const parsedUser = JSON.parse(storedUser);
-      if (parsedUser.privilege === "Dealer") {
-        router.push("/bid");
-      } else if (parsedUser.privilege === "Client") {
-        router.push(`/client/${parsedUser.id}`);
-      } else if (parsedUser.privilege === "Team") {
-        router.push("/team-dashboard");
-      }
-    }
-  }, [router]);
+
   return <div>{/* rest of your code */}</div>;
 };
