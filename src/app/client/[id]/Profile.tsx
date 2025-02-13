@@ -11,6 +11,8 @@ import {
   NegotiationData,
 } from "@/types";
 import {
+  addDoc,
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
@@ -22,19 +24,20 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { formatDate, uploadFile } from "@/lib/utils";
+import { formatDate, getCurrentTimestamp, uploadFile } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import DealDetailCard from "@/components/Client/DealDetailCard";
 import ClientOverviewCard from "@/components/Client/ClientOverviewCard";
 import IncomingBidsCard from "@/components/Client/IncomingBidsCard/IncomingBidsCard";
 import ClientStickyHeader from "@/components/Client/ClientStickyHeader";
 import { Loader } from "@/components/base/loader";
-import { Car, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Car, Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import EditableTextArea from "@/components/base/editable-textarea";
 import EditableInput from "@/components/base/input-field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -44,6 +47,9 @@ function ProjectProfile() {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [negotiationData, setNegotiationData] = useState<NegotiationData[]>([]);
+  const [commentingBidId, setCommentingBidId] = useState<string | null>(null);
+  const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
+
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
   const [acceptedBidId, setAcceptedBidId] = useState<string | null>(null);
@@ -318,6 +324,37 @@ function ProjectProfile() {
     toast({ title: "Files uploaded" });
   };
 
+  const handleRemoveFile = async (fileUrl: string) => {
+    if (!negotiationData[0]) return;
+
+    const bidRef = doc(db, "negotiations", negotiationData[0].id); // Assuming negotiation has an `id`
+
+    try {
+      // Remove file from Firebase Firestore
+      await updateDoc(bidRef, {
+        trade_in_files: arrayRemove(fileUrl),
+      });
+
+      if (negotiationData[0] !== null) {
+        setNegotiationData((prevData) => {
+          const updatedNegotiation = {
+            ...prevData[0],
+            trade_in_files: prevData[0].trade_in_files?.filter(
+              (file) => file !== fileUrl
+            ),
+          };
+
+          return [updatedNegotiation, ...prevData.slice(1)];
+        });
+      }
+
+      toast({ title: "File removed" }); // Show a success message
+    } catch (error) {
+      console.error("Error removing file:", error);
+      toast({ title: "Failed to remove file" });
+    }
+  };
+
   useEffect(() => {
     setTradeInInfo(
       negotiationData[0]?.trade_in_info ?? "No trade in info at the moment"
@@ -326,6 +363,35 @@ function ProjectProfile() {
     setTradeInMileage(negotiationData[0]?.trade_in_mileage ?? "");
     setTradeInComments(negotiationData[0]?.trade_in_comments ?? "");
   }, [negotiationData]);
+
+  const addComment = async (bid_id: string) => {
+    if (!newComment[bid_id]?.trim()) return;
+
+    const newCommentData: BidComments = {
+      client_phone_number: negotiationData[0].negotiations_Phone ?? "",
+      bid_id,
+      client: negotiationData[0].negotiations_Client ?? "",
+      comment: newComment[bid_id],
+      deal_coordinator: userData?.id ?? "",
+      deal_coordinator_name: "Client",
+      link_status: "Active",
+      negotiation_id: negotiationData[0].id,
+      time: getCurrentTimestamp(),
+    };
+
+    setBidCommentsByBidId((prev) => ({
+      ...prev,
+      [bid_id]: [...(prev[bid_id] || []), newCommentData],
+    }));
+
+    setNewComment((prev) => ({
+      ...prev,
+      [bid_id]: "",
+    }));
+    const commentRef = collection(db, "bid comment");
+    await addDoc(commentRef, newCommentData);
+    toast({ title: "Comment added successfully" });
+  };
 
   return userData &&
     incomingBids &&
@@ -550,7 +616,39 @@ function ProjectProfile() {
                               ? "Offer Accepted"
                               : "Accept Offer"}
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setCommentingBidId(
+                                commentingBidId === item.bid_id
+                                  ? null
+                                  : item.bid_id
+                              )
+                            }
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Comment
+                          </Button>
                         </div>
+                        {commentingBidId === item.bid_id && (
+                          <div className="mb-4">
+                            <Textarea
+                              placeholder="Add a comment..."
+                              value={newComment[item.bid_id] || ""}
+                              onChange={(e) =>
+                                setNewComment((prev) => ({
+                                  ...prev,
+                                  [item.bid_id]: e.target.value,
+                                }))
+                              }
+                              className="mb-2"
+                            />
+                            <Button onClick={() => addComment(item.bid_id)}>
+                              Submit Comment
+                            </Button>
+                          </div>
+                        )}
                         {bidCommentsByBidId[item?.bid_id] &&
                         bidCommentsByBidId[item?.bid_id].length > 0 ? (
                           bidCommentsByBidId[item?.bid_id].map(
@@ -668,25 +766,35 @@ function ProjectProfile() {
                     "webp",
                   ].some((ext) => file.toLowerCase().includes(ext));
                   return (
-                    <div
-                      key={index}
-                      onClick={() => window.open(file, "_blank")}
-                      className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
-                    >
-                      {isImage ? (
-                        <img
-                          src={file}
-                          alt="Uploaded file"
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <embed
-                          type="application/pdf"
-                          width="100%"
-                          height="100%"
-                          src={file}
-                        />
-                      )}
+                    <div key={index} className="relative w-20 h-20">
+                      <div
+                        onClick={() => window.open(file, "_blank")}
+                        className="bg-transparent cursor-pointer w-20 h-20 flex items-center justify-center rounded-md relative overflow-hidden"
+                      >
+                        {isImage ? (
+                          <img
+                            src={file}
+                            alt="Uploaded file"
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <embed
+                            type="application/pdf"
+                            width="100%"
+                            height="100%"
+                            src={file}
+                          />
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent opening file when clicking the cross
+                          handleRemoveFile(file);
+                        }}
+                        className="absolute top-[-10px] right-[-10px] bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
+                      >
+                        <X size={16} />
+                      </button>
                     </div>
                   );
                 })}

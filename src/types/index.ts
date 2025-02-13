@@ -84,9 +84,12 @@ export interface DealNegotiator {
 }
 
 export type ActivityLog = {
-  timestamp: string;
-  action: string;
+  id: string;
+  day: string;
+  time: string;
+  description: string;
   user: string;
+  negotiationId: string | null;
 }[];
 
 export type DealerData = {
@@ -254,6 +257,7 @@ export interface IncomingBid {
   timestamp: string;
   client_offer: string;
   vote?: "like" | "dislike" | "neutral";
+  delete: boolean;
 }
 
 export type Color = {
