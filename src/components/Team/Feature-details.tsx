@@ -6,7 +6,7 @@ import EditableInput from "../base/input-field";
 import { Separator } from "@radix-ui/react-separator";
 import EditableTextArea from "../base/editable-textarea";
 import { EditNegotiationData } from "@/types";
-import { vehicleOfInterest } from "@/lib/utils";
+import { dateFormat, vehicleOfInterest } from "@/lib/utils";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { doc, updateDoc } from "firebase/firestore";
@@ -280,7 +280,7 @@ const FeatureDetails = ({
         </div>
         <div className="space-x-2 flex items-center">
           <h3 className="font-semibold text-lg">Date Paid:</h3>
-          <p>{negotiation?.clientInfo.date_paid ?? "No Date Available"}</p>
+          <p>{dateFormat(negotiation?.clientInfo.date_paid ?? "")}</p>
         </div>
         <div className="space-x-2 flex items-center">
           <h3 className="font-semibold text-lg">Start Date:</h3>
