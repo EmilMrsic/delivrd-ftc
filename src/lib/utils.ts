@@ -532,3 +532,21 @@ export const uploadFile = async (file: File): Promise<string | null> => {
     return null;
   }
 };
+
+export const getStatusColor = (status: string) => {
+  const statusColors: Record<string, string> = {
+    "Actively Negotiating": "#9AE095",
+    "Deal Started": "#E0DAFD",
+    Paid: "#CFF5D1",
+    "Delivery Scheduled": "#068A16",
+    "Deal Complete- Long Distance": "#02640D",
+    "Long Term Order": "#FFD4E0",
+    Shipping: "#FFA6C1",
+    "Needs To Review": "#FAD2FC",
+    "Ask for Review": "#C4ECFE",
+    "Follow Up Issue": "#04DDD5",
+    "Follow Up": "#C1F5F0",
+  };
+
+  return statusColors[status] || "#E5E7EB"; // Default gray if status not found
+};
