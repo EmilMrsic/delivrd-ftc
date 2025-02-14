@@ -18,7 +18,12 @@ import {
 import "react-datepicker/dist/react-datepicker.css";
 import { Check, MoreHorizontal, StickyNoteIcon, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { dateFormat, dealStageOptions, getElapsedTime } from "@/lib/utils";
+import {
+  dateFormat,
+  dealStageOptions,
+  getElapsedTime,
+  getStatusColor,
+} from "@/lib/utils";
 import DealNegotiatorDialog from "./deal-negotiator-dialog";
 import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
 import { useRouter } from "next/navigation";
@@ -388,7 +393,12 @@ const TeamDashboardTable = ({
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
+                      // style={{
+                      //   backgroundColor: getStatusColor(
+                      //     deal.negotiations_Status
+                      //   ),
+                      // }}
+                      className={`cursor-pointer p-1 w-fit h-fit text-xs  text-gray-800 border-gray-300`}
                     >
                       <p>{deal.negotiations_Status}</p>
                     </Button>

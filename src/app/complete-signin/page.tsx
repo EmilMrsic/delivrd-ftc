@@ -62,6 +62,8 @@ const SignInContent = ({
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
         console.log({ userData });
+        localStorage.removeItem("user"); // Clear first
+
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("emailForSignIn", userData.email);
         toast({ title: "Logged in" });
