@@ -152,6 +152,8 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
       source: "firebase",
     };
 
+    console.log({ bidData });
+
     try {
       const bidRef = collection(db, "manual bids");
       await addDoc(bidRef, bidData);

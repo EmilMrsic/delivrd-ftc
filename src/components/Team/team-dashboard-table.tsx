@@ -393,11 +393,11 @@ const TeamDashboardTable = ({
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      // style={{
-                      //   backgroundColor: getStatusColor(
-                      //     deal.negotiations_Status
-                      //   ),
-                      // }}
+                      style={{
+                        backgroundColor: getStatusColor(
+                          deal?.negotiations_Status ?? ""
+                        ),
+                      }}
                       className={`cursor-pointer p-1 w-fit h-fit text-xs  text-gray-800 border-gray-300`}
                     >
                       <p>{deal.negotiations_Status}</p>
