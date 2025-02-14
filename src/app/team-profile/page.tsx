@@ -823,10 +823,11 @@ function ProjectProfile() {
                                     </div>
                                   </div>
 
-                                  <div className="border-t pt-4 flex justify-between">
+                                  <div className="border-t pt-4 flex flex-col ">
                                     <p className="font-semibold">
                                       Additional Comments
                                     </p>
+                                    {parseComment(bidDetails.comments)}
                                   </div>
                                 </div>
                               </DialogContent>

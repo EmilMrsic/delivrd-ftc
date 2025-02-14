@@ -452,7 +452,7 @@ function ProjectProfile() {
                   })
                   .map((item, index) => {
                     const matchingDealer = dealerData.find(
-                      (dealer) => dealer.id === item.dealerId
+                      (dealer) => dealer?.id === item.dealerId
                     );
                     const hasAcceptedOffer = incomingBids.find(
                       (bid) => bid.client_offer === "accepted"
