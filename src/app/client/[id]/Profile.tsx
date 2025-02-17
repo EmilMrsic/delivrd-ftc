@@ -214,7 +214,8 @@ function ProjectProfile() {
   }, [pathname]);
 
   useEffect(() => {
-    handleSetDealNegotiatorData(userData?.deal_negotiator[0] ?? "");
+    if (userData && userData?.deal_negotiator)
+      handleSetDealNegotiatorData(userData?.deal_negotiator[0] ?? "");
   }, [userData]);
 
   useEffect(() => {
@@ -370,13 +371,16 @@ function ProjectProfile() {
     const newCommentData: BidComments = {
       client_phone_number: negotiationData[0].negotiations_Phone ?? "",
       bid_id,
-      client: negotiationData[0].negotiations_Client ?? "",
+      client: userData?.name ?? "",
+      client_name: userData?.name ?? "",
+      comment_source: "Client",
       comment: newComment[bid_id],
       deal_coordinator: userData?.id ?? "",
-      deal_coordinator_name: "Client",
+      deal_coordinator_name: "N/A",
       link_status: "Active",
       negotiation_id: negotiationData[0].id,
       time: getCurrentTimestamp(),
+      client_id: userData?.id ?? "",
     };
 
     setBidCommentsByBidId((prev) => ({
@@ -393,11 +397,7 @@ function ProjectProfile() {
     toast({ title: "Comment added successfully" });
   };
 
-  return userData &&
-    incomingBids &&
-    dealNegotiatorData &&
-    dealerData &&
-    negotiationData ? (
+  return userData && incomingBids && dealerData && negotiationData ? (
     <>
       <div className=" justify-items-center	 mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
         <div className="flex container justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -659,7 +659,10 @@ function ProjectProfile() {
                               >
                                 <p>
                                   <strong>
-                                    {comment.deal_coordinator_name}:
+                                    {comment.deal_coordinator_name === "N/A"
+                                      ? comment.client_name
+                                      : comment.deal_coordinator_name}
+                                    :
                                   </strong>{" "}
                                   {parseComment(comment.comment)}
                                 </p>

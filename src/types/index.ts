@@ -203,24 +203,19 @@ export interface EditNegotiationData {
     deals: string[];
     incoming_bids: string[];
     negotiations_Address: string | null;
-    negotiations_Color_Options: [
-      {
-        not_preferred: string;
-        preferred: string;
-        type: "Exterior";
-      },
-      {
-        not_preferred: string;
-        preferred: string;
-        type: "Interior";
-      }
-    ];
+    negotiations_Color_Options: {
+      interior_preferred: string;
+      exterior_preferred: string;
+      interior_deal_breaker: string;
+      exterior_deal_breakers: string;
+    };
   };
 }
 
 export interface BidComments {
   client_phone_number: string;
   bid_id: string;
+  client_name: string;
   client: string;
   comment: string;
   deal_coordinator: string;
@@ -228,6 +223,8 @@ export interface BidComments {
   link_status: string;
   negotiation_id: string;
   time: string;
+  client_id: string;
+  comment_source: string;
 }
 
 export interface notificationType {

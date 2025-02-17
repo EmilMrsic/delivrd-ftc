@@ -86,14 +86,12 @@ const EditableInput: React.FC<EditableInputProps> = ({
           negotiations?.otherData?.negotiations_Color_Options;
 
         if (field.includes("negotiations_Color_Options") && colorOptions) {
-          const index = parseInt(field.split("[")[1].split("]")[0]);
-          const property = field.split(".")[1];
+          const property = field.split(".")[1]; // Get the property name (e.g., 'interior_preferred')
 
-          if (index >= 0 && index < colorOptions.length) {
-            const updatedColorOptions = [...colorOptions];
-            updatedColorOptions[index] = {
-              ...updatedColorOptions[index],
-              [property]: value,
+          if (colorOptions.hasOwnProperty(property)) {
+            const updatedColorOptions = {
+              ...colorOptions,
+              [property]: value, // Update the specific property in the object
             };
 
             await updateDoc(negotiationDocRef, {
@@ -104,7 +102,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
             });
           } else {
             console.error(
-              "Index out of bounds for negotiations_Color_Options array"
+              `Property ${property} not found in negotiations_Color_Options object`
             );
           }
         } else {

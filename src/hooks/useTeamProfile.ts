@@ -140,7 +140,6 @@ const useTeamProfile = () => {
   useEffect(() => {
     const getBidsByIds = async (bidIds: string[]) => {
       if (!bidIds || bidIds.length === 0) {
-        console.log("No bids to fetch.");
         return;
       }
 
@@ -158,13 +157,11 @@ const useTeamProfile = () => {
           if (!querySnapshot.empty) {
             return querySnapshot.docs[0].data();
           } else {
-            console.log(`No bid found for bid_id: ${bidId}`);
             return null;
           }
         });
 
         const bidsData = await Promise.all(bidsPromises);
-        console.log({ bidsData });
 
         const validBids: IncomingBid[] = bidsData.filter(
           (bid) => bid !== null
