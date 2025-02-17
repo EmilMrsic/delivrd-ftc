@@ -27,6 +27,7 @@ import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import TeamDashboardTable from "@/components/Team/team-dashboard-table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
 import SearchAll from "@/components/Team/search-all";
+import { useRouter } from "next/navigation";
 
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,6 +55,7 @@ export default function DealList() {
   const { notification } = useAppSelector((state) => state.notification);
   const { notificationCount } = useAppSelector((state) => state.notification);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const totalPages = Math.ceil(filteredDeals?.length / itemsPerPage);
 
@@ -478,6 +480,13 @@ export default function DealList() {
                 className="pl-8"
               />
             </div>
+            <Button
+              onClick={() => router.push("/manager")}
+              variant="outline"
+              className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
+            >
+              <p>Manager View</p>
+            </Button>
 
             <FilterPopup
               dealCoordinators={allDealNegotiator}

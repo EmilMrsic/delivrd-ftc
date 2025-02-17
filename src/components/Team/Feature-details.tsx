@@ -345,15 +345,15 @@ const FeatureDetails = ({
               negotiations={negotiation}
               label="Internal Colors Desired"
               value={
-                negotiation?.otherData?.negotiations_Color_Options[0]
-                  ?.preferred ?? "No preference"
+                negotiation?.otherData?.negotiations_Color_Options
+                  .interior_preferred ?? "No preference"
               }
               negotiationId={negotiationId ?? ""}
-              field="negotiations_Color_Options[0].preferred"
+              field="negotiations_Color_Options.interior_preferred"
               onChange={(newValue) =>
                 handleChange(
                   "otherData",
-                  "negotiations_Color_Options[0].preferred",
+                  "negotiations_Color_Options.interior_preferred",
                   newValue
                 )
               }
@@ -365,15 +365,15 @@ const FeatureDetails = ({
               negotiations={negotiation}
               label="External Colors Desired"
               value={
-                negotiation?.otherData?.negotiations_Color_Options[1]
-                  ?.preferred ?? "No preference"
+                negotiation?.otherData?.negotiations_Color_Options
+                  .exterior_preferred ?? "No preference"
               }
               negotiationId={negotiationId ?? ""}
-              field="negotiations_Color_Options[1].preferred"
+              field="negotiations_Color_Options.exterior_preferred"
               onChange={(newValue) =>
                 handleChange(
                   "otherData",
-                  "negotiations_Color_Options[1].preferred",
+                  "negotiations_Color_Options.exterior_preferred",
                   newValue
                 )
               }
@@ -385,16 +385,16 @@ const FeatureDetails = ({
               negotiations={negotiation}
               label="External Colors Not Wanted"
               value={
-                negotiation?.otherData?.negotiations_Color_Options[0]
-                  ?.not_preferred ?? "No preference"
+                negotiation?.otherData?.negotiations_Color_Options
+                  .exterior_deal_breakers ?? "No preference"
               }
               negotiationId={negotiationId ?? ""}
-              field="negotiations_Color_Options[0]
-                  .not_preferred"
+              field="negotiations_Color_Options
+                  .exterior_deal_breakers"
               onChange={(newValue) =>
                 handleChange(
                   "otherData",
-                  "negotiations_Color_Options[0].not_preferred",
+                  "negotiations_Color_Options.exterior_deal_breakers",
                   newValue
                 )
               }
@@ -406,16 +406,16 @@ const FeatureDetails = ({
               negotiations={negotiation}
               label="Internal Colors Not Wanted"
               value={
-                negotiation?.otherData?.negotiations_Color_Options[1]
-                  ?.not_preferred ?? "No preference"
+                negotiation?.otherData?.negotiations_Color_Options
+                  ?.interior_deal_breaker ?? "No preference"
               }
               negotiationId={negotiationId ?? ""}
-              field="negotiations_Color_Options[1]
-                  .not_preferred"
+              field="negotiations_Color_Options
+                  .interior_deal_breaker"
               onChange={(newValue) =>
                 handleChange(
                   "otherData",
-                  "negotiations_Color_Options[1].not_preferred",
+                  "negotiations_Color_Options.interior_deal_breaker",
                   newValue
                 )
               }

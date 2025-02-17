@@ -183,6 +183,7 @@ const TeamDashboardTable = ({
     <Table>
       <TableHeader className="max-w-[1000px] overflow-scroll">
         <TableRow>
+          <TableHead></TableHead>
           <TableHead>Client</TableHead>
           <TableHead>Make</TableHead>
           <TableHead>Model</TableHead>
@@ -316,7 +317,7 @@ const TeamDashboardTable = ({
       {loading ? (
         <TableBody>
           <TableRow>
-            <TableCell colSpan={13} className="text-center py-4">
+            <TableCell colSpan={14} className="text-center py-4">
               <Loader />
             </TableCell>
           </TableRow>
@@ -341,6 +342,7 @@ const TeamDashboardTable = ({
                 }
               }}
             >
+              <TableCell>{index + 1}</TableCell>
               <TableCell className="font-medium max-w-[220px]">
                 <span>{deal.negotiations_Client}</span>
                 {allInternalNotes[deal?.id]?.length > 0 && (

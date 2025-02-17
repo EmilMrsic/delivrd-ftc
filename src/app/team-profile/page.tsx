@@ -104,6 +104,7 @@ function ProjectProfile() {
     const newCommentData: BidComments = {
       client_phone_number: negotiation?.clientInfo.negotiations_Phone ?? "",
       bid_id,
+      client_name: negotiation?.clientInfo.negotiations_Client ?? "",
       client: negotiation?.clientInfo.negotiations_Client ?? "",
       comment: newComment[bid_id],
       deal_coordinator: dealNegotiator?.id ?? "",
@@ -111,6 +112,8 @@ function ProjectProfile() {
       link_status: "Active",
       negotiation_id: negotiationId ?? "",
       time: getCurrentTimestamp(),
+      client_id: "N/A",
+      comment_source: "Team",
     };
 
     setBidCommentsByBidId((prev) => ({
@@ -140,22 +143,13 @@ function ProjectProfile() {
         childKey.startsWith("negotiations_Color_Options")
       ) {
         updatedParent = { ...prevState[parentKey] };
-        const regex = /negotiations_Color_Options\[(\d+)\]\.(\w+)/;
-        const match = childKey.match(regex);
+        const field = childKey.split(".")[1]; // get the field name (e.g., 'interior_preferred')
 
-        if (match) {
-          const index = parseInt(match[1]);
-          const field = match[2];
-
-          if (
-            Array.isArray(updatedParent.negotiations_Color_Options) &&
-            updatedParent.negotiations_Color_Options[index]
-          ) {
-            updatedParent.negotiations_Color_Options[index] = {
-              ...updatedParent.negotiations_Color_Options[index],
-              [field]: newValue,
-            };
-          }
+        if (updatedParent.negotiations_Color_Options) {
+          updatedParent.negotiations_Color_Options = {
+            ...updatedParent.negotiations_Color_Options,
+            [field]: newValue,
+          };
         }
       } else {
         updatedParent = {
@@ -879,7 +873,10 @@ function ProjectProfile() {
                                 >
                                   <p>
                                     <strong>
-                                      {comment.deal_coordinator_name}:
+                                      {comment.deal_coordinator_name === "N/A"
+                                        ? comment.client_name
+                                        : comment.deal_coordinator_name}
+                                      :
                                     </strong>{" "}
                                     {parseComment(comment.comment)}
                                   </p>
