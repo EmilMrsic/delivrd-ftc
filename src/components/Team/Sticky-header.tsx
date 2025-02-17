@@ -27,12 +27,12 @@ const StickyHeader = ({
             {negotiation?.otherData?.negotiations_Color_Options ? (
               <span>
                 Preferred Exterior{" "}
-                {negotiation?.otherData?.negotiations_Color_Options[0]
-                  ?.preferred ?? ""}
+                {negotiation?.otherData?.negotiations_Color_Options
+                  ?.exterior_preferred ?? ""}
                 <br />
                 Deal Breaker Exterior{" "}
-                {negotiation?.otherData?.negotiations_Color_Options[0]
-                  ?.not_preferred ?? ""}
+                {negotiation?.otherData?.negotiations_Color_Options
+                  ?.exterior_deal_breakers ?? ""}
               </span>
             ) : (
               "No color options available"
@@ -44,12 +44,12 @@ const StickyHeader = ({
             {negotiation?.otherData?.negotiations_Color_Options ? (
               <span>
                 Preferred Interior{" "}
-                {negotiation?.otherData?.negotiations_Color_Options[1]
-                  ?.preferred ?? ""}
+                {negotiation?.otherData?.negotiations_Color_Options
+                  ?.interior_preferred ?? ""}
                 <br />
                 Deal Breaker Interior{" "}
-                {negotiation?.otherData?.negotiations_Color_Options[1]
-                  ?.not_preferred ?? ""}
+                {negotiation?.otherData?.negotiations_Color_Options
+                  ?.interior_deal_breaker ?? ""}
               </span>
             ) : (
               "No color options available"

@@ -117,7 +117,12 @@ export interface NegotiationData {
   negotiations_Brand: string | null;
   negotiations_Budget: string | null;
   negotiations_Client: string;
-  negotiations_Color_Options: any[]; // Array of any type as the content is not specified
+  negotiations_Color_Options: {
+    interior_preferred: string;
+    exterior_preferred: string;
+    interior_deal_breaker: string;
+    exterior_deal_breakers: string;
+  };
   negotiations_Created: string; // ISO date string
   negotiations_Deal_Start_Date: string | null; // null if not provided
   review?: string;

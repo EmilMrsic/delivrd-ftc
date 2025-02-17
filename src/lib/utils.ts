@@ -167,7 +167,7 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
       deals: data.deals || [],
       incoming_bids: data.incoming_bids,
       negotiations_Address: data.negotiations_Address || null,
-      negotiations_Color_Options: data.negotiations_Color_Options || [],
+      negotiations_Color_Options: data.negotiations_Color_Options,
     },
   };
 };
