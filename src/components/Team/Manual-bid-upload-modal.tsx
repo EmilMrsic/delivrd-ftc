@@ -39,7 +39,12 @@ interface Errors {
   discountAmount?: string;
 }
 
-const ManualBidUpload = ({ id }: { id: string | null }) => {
+type ManualBidUploadType = {
+  id: string | null;
+  setStopPropagation?: (item: boolean) => void;
+};
+
+const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
   const [formData, setFormData] = useState<FormData>({
     dealerName: "",
     dealerNumber: "",
@@ -182,11 +187,26 @@ const ManualBidUpload = ({ id }: { id: string | null }) => {
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
       <>
-        <DialogTrigger className="bg-white text-black rounded-lg flex items-center p-2">
-          <UploadIcon className="mr-2 h-4 w-4" />
-          <p className="font-normal text-sm"> Manual Bids Upload</p>
+        <DialogTrigger
+          onClick={(e) => {
+            e.stopPropagation();
+            e.stopPropagation();
+          }}
+          className="bg-white text-black rounded-lg flex items-center p-2"
+        >
+          <button
+            className="flex items-center"
+            onClick={(e) => {
+              e.stopPropagation();
+              setStopPropagation && setStopPropagation(true);
+              setIsDialogOpen(true);
+            }}
+          >
+            <UploadIcon className="mr-2 h-4 w-4" />
+            <p className="font-normal text-sm"> Manual Bids Upload</p>
+          </button>
         </DialogTrigger>
 
         <DialogContent className="p-8 bg-white rounded-lg max-w-[700px] mx-auto shadow-xl h-[95%] overflow-scroll">

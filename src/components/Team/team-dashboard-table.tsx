@@ -33,6 +33,7 @@ import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import DatePickerCell from "./datepicker-cell";
 import ShippingInfoDialog from "./shipping-info-dialog";
+import ManualBidUpload from "./Manual-bid-upload-modal";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -564,6 +565,10 @@ const TeamDashboardTable = ({
                       >
                         Ask For Review
                       </p>
+                      <ManualBidUpload
+                        setStopPropagation={setStopPropagation}
+                        id={deal?.id}
+                      />
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>

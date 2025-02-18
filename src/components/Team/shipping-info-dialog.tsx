@@ -60,7 +60,6 @@ const ShippingInfoDialog = ({
           className="bg-white text-black border-none hover:bg-transparent shadow-none"
           onClick={(e) => {
             e.stopPropagation();
-            e.stopPropagation();
             setStopPropogation(true);
             setOpen(true);
           }}
@@ -73,7 +72,7 @@ const ShippingInfoDialog = ({
           e.preventDefault();
           e.stopPropagation();
         }}
-        className="max-w-2xl"
+        className="max-w-2xl bg-white"
       >
         <div className="flex flex-col gap-3 items-start">
           <p className="text-4xl font-bold">Shipping Info</p>
