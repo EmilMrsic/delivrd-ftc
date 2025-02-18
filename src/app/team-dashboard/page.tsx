@@ -13,7 +13,7 @@ import {
   fetchAllPaidNegotiations,
 } from "@/lib/utils";
 import { BellIcon, Search } from "lucide-react";
-import { doc, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { NegotiationData } from "@/types";
 import { toast } from "@/hooks/use-toast";
@@ -371,6 +371,12 @@ export default function DealList() {
         negotiations_deal_coordinator: newNegotiatorId ?? "",
       });
 
+      const negotiatorRef = doc(db, "team delivrd", newNegotiatorId);
+
+      await updateDoc(negotiatorRef, {
+        active_deals: arrayUnion(id),
+      });
+
       setFilteredDeals((prevDeals) =>
         prevDeals?.map((deal) =>
           deal.id === id
@@ -406,6 +412,12 @@ export default function DealList() {
       window.removeEventListener("popstate", handlePopState);
     };
   }, []);
+
+  useEffect(() => {
+    if (notificationCount > 0) {
+      alert("You have unread notifications");
+    }
+  });
 
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
@@ -470,7 +482,7 @@ export default function DealList() {
       <Card className="bg-white shadow-lg">
         <CardContent>
           <div className="flex gap-3 items-center mb-4 mt-4">
-            <div className="relative w-64">
+            <div className="relative ">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 type="text"

@@ -533,6 +533,30 @@ export const uploadFile = async (file: File): Promise<string | null> => {
   }
 };
 
+export const getDealsWithoutCoordinator = async () => {
+  const dealsQuery = query(
+    collection(db, "negotiations"),
+    where("negotiations_Status", "in", [
+      "Actively Negotiating",
+      "Paid",
+      "Deal Started",
+    ])
+  );
+
+  try {
+    const querySnapshot = await getDocs(dealsQuery);
+    const deals: any = querySnapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((deal: any) => !deal.negotiations_deal_coordinator); // Filter null or empty values manually
+
+    console.log(deals);
+    return deals;
+  } catch (error) {
+    console.error("Error fetching deals:", error);
+    return [];
+  }
+};
+
 export const getStatusColor = (status: string) => {
   const statusColors: Record<string, string> = {
     "Actively Negotiating": "#9AE095",

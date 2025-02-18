@@ -33,16 +33,16 @@ const FilterPopup = ({
   const searchMakeInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-wrap gap-4 items-start w-full">
       <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
+            <Button variant="outline" className="w-full flex justify-between">
               Select Stages
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
+          <DropdownMenuContent className=" w-auto">
             <input
               ref={searchStageInputRef}
               type="text"
@@ -79,7 +79,7 @@ const FilterPopup = ({
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
+          <DropdownMenuContent className="w-auto">
             <input
               ref={searchMakeInputRef}
               autoFocus
@@ -119,7 +119,7 @@ const FilterPopup = ({
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
+          <DropdownMenuContent className="w-auto">
             <input
               ref={searchCoordinatorInputRef}
               autoFocus
@@ -161,7 +161,7 @@ const FilterPopup = ({
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
+          <DropdownMenuContent className="w-auto">
             <div className="overflow-scroll">
               {["Yes", "No"].map((status, index) => (
                 <DropdownMenuCheckboxItem

@@ -664,12 +664,18 @@ function ProjectProfile() {
                                           </div>
                                           {isImage ? (
                                             <img
+                                              onClick={() =>
+                                                window.open(file, "_blank")
+                                              }
                                               src={file}
                                               alt="Uploaded file"
                                               className="object-cover w-full h-full"
                                             />
                                           ) : (
                                             <embed
+                                              onClick={() =>
+                                                window.open(file, "_blank")
+                                              }
                                               type="application/pdf"
                                               width="100%"
                                               height="100%"
