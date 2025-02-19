@@ -21,11 +21,11 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { DealNegotiator, NegotiationData } from "@/types";
+import { DealNegotiator, IUser, NegotiationData } from "@/types";
 import {
   dateFormat,
   getDealsWithoutCoordinator,
-  getStatusColor,
+  getStatusStyles,
 } from "@/lib/utils";
 import { Loader } from "@/components/base/loader";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
@@ -36,7 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -54,6 +54,7 @@ function Manager() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [teamData, setTeamData] = useState<TeamDataType[]>([]);
   const router = useRouter();
+  const [userData, setUserData] = useState<IUser>();
 
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
     Record<string, boolean>
@@ -128,10 +129,29 @@ function Manager() {
     }
   };
 
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    setUserData(JSON.parse(user ?? ""));
+    const fetchUserData = async () => {
+      const q = query(
+        collection(db, "users"),
+        where("id", "==", userData?.id ?? "")
+      );
+      const querySnapshot = await getDocs(q);
+      const userInfo = querySnapshot.docs[0]?.data();
+      setUserData(userInfo as IUser);
+    };
+    fetchUserData();
+  }, []);
+
   const updateDealNegotiator = async (id: string, newNegotiatorId: string) => {
     try {
       const dealRef = doc(db, "negotiations", id);
       const negotiatorRef = doc(db, "team delivrd", newNegotiatorId);
+
+      const movedDeal = dealsWithoutCoordinator?.find((deal) => deal.id === id);
+      if (!movedDeal)
+        return console.error("Deal not found in unassigned deals");
 
       await updateDoc(dealRef, {
         negotiations_deal_coordinator: newNegotiatorId ?? "",
@@ -149,11 +169,19 @@ function Manager() {
         )
       );
       setDealsWithoutCoordinator((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id
-            ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-            : deal
-        )
+        prevDeals?.filter((deal) => deal.id !== id)
+      );
+
+      setTeamData((prevTeams) =>
+        prevTeams.map((team) => {
+          if (team.id === newNegotiatorId) {
+            return {
+              ...team,
+              negotiations: [...(team.negotiations || []), movedDeal],
+            };
+          }
+          return team;
+        })
       );
 
       setOriginalDeals((prevDeals) =>
@@ -228,278 +256,317 @@ function Manager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* Mapping Team Deals */}
-                {teamData.map((team) => (
-                  <React.Fragment key={team.id}>
-                    <TableRow>
-                      <TableCell className="w-[50px]">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleRow(team.id)}
-                        >
-                          {expandedRows.has(team.id) ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </TableCell>
-                      <TableCell>{team.name}</TableCell>
-                      <TableCell>{team.negotiations.length}</TableCell>
-                    </TableRow>
-                    {expandedRows.has(team.id) && (
-                      <TableRow>
-                        <TableCell colSpan={2} className="p-0">
-                          <div className="w-full px-5 overflow-x-auto">
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Client</TableHead>
-                                  <TableHead>Make</TableHead>
-                                  <TableHead>Model</TableHead>
-                                  <TableHead>Stage</TableHead>
-                                  <TableHead>Zip Code</TableHead>
-                                  <TableHead>Deal Negotiator</TableHead>
-                                  <TableHead>Onboarding Complete</TableHead>
-                                  <TableHead>Date Paid</TableHead>
-                                </TableRow>
-                              </TableHeader>
-
-                              <TableBody>
-                                {team.negotiations.map((deal, index) => (
-                                  <TableRow
-                                    key={deal.id}
-                                    className={`cursor-pointer ${
-                                      index % 2 === 0
-                                        ? "bg-white hover:bg-gray-100"
-                                        : "bg-gray-50 hover:bg-gray-200"
-                                    }`}
-                                  >
-                                    <TableCell className="font-medium max-w-[220px]">
-                                      <span>{deal.negotiations_Client}</span>
-                                    </TableCell>
-                                    <TableCell className="max-w-[180px]">
-                                      {deal.negotiations_Brand}
-                                    </TableCell>
-                                    <TableCell>
-                                      {deal.negotiations_Model}
-                                    </TableCell>
-                                    <TableCell>
-                                      <Button
-                                        variant="outline"
-                                        style={{
-                                          backgroundColor: getStatusColor(
-                                            deal?.negotiations_Status ?? ""
-                                          ),
-                                        }}
-                                        className={`cursor-pointer p-1 w-fit h-fit text-xs  text-gray-800 border-gray-300`}
-                                      >
-                                        <p>{deal.negotiations_Status}</p>
-                                      </Button>
-                                    </TableCell>
-                                    <TableCell>
-                                      {deal.negotiations_Zip_Code}
-                                    </TableCell>
-                                    <TableCell>
-                                      {allDealNegotiator.some(
-                                        (negotiator) =>
-                                          negotiator.id ===
-                                          deal.negotiations_deal_coordinator
-                                      ) ? (
-                                        <p>
-                                          {
-                                            allDealNegotiator.find(
-                                              (negotiator) =>
-                                                negotiator.id ===
-                                                deal.negotiations_deal_coordinator
-                                            )?.name
-                                          }
-                                        </p>
-                                      ) : (
-                                        <p>Not Assigned</p>
-                                      )}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                      {deal.negotiations_Onboarding_Complete?.toLowerCase() ===
-                                      "yes" ? (
-                                        <Check className="text-green-500" />
-                                      ) : (
-                                        <X className="text-red-500" />
-                                      )}
-                                    </TableCell>
-                                    <TableCell>
-                                      <div>{dateFormat(deal.date_paid)}</div>
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </React.Fragment>
-                ))}
-
-                {/* Row for Unassigned Deals */}
                 {dealsWithoutCoordinator.length > 0 && (
                   <React.Fragment>
                     <TableRow>
                       <TableCell className="w-[50px]">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleRow("unassigned")}
-                        >
-                          {expandedRows.has("unassigned") ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
+                        <Button variant="ghost" size="sm">
+                          <ChevronDown className="h-4 w-4" />
                         </Button>
                       </TableCell>
-                      <TableCell>Unassigned Deals</TableCell>
-                      <TableCell>{dealsWithoutCoordinator.length}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <p>Unassigned Deals</p>
+                          <p className="text-xs">
+                            No of Deals: {dealsWithoutCoordinator.length}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell></TableCell>
                     </TableRow>
-                    {expandedRows.has("unassigned") && (
-                      <TableRow>
-                        <TableCell colSpan={2} className="p-0">
-                          <div className="w-full px-5 overflow-x-auto">
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Client</TableHead>
-                                  <TableHead>Make</TableHead>
-                                  <TableHead>Model</TableHead>
-                                  <TableHead>Stage</TableHead>
-                                  <TableHead>Zip Code</TableHead>
-                                  <TableHead>Deal Negotiator</TableHead>
-                                  <TableHead>Onboarding Complete</TableHead>
-                                  <TableHead>Date Paid</TableHead>
-                                </TableRow>
-                              </TableHeader>
 
-                              <TableBody>
-                                {dealsWithoutCoordinator.map((deal, index) => (
-                                  <TableRow
-                                    key={deal.id}
-                                    className={`cursor-pointer ${
-                                      index % 2 === 0
-                                        ? "bg-white hover:bg-gray-100"
-                                        : "bg-gray-50 hover:bg-gray-200"
-                                    }`}
-                                  >
-                                    <TableCell className="font-medium max-w-[220px]">
-                                      <span>{deal.negotiations_Client}</span>
-                                    </TableCell>
-                                    <TableCell className="max-w-[180px]">
-                                      {deal.negotiations_Brand}
-                                    </TableCell>
-                                    <TableCell>
-                                      {deal.negotiations_Model}
-                                    </TableCell>
-                                    <TableCell>
-                                      <Button
-                                        variant="outline"
-                                        style={{
-                                          backgroundColor: getStatusColor(
-                                            deal?.negotiations_Status ?? ""
-                                          ),
-                                        }}
-                                        className={`cursor-pointer p-1 w-fit h-fit text-xs  text-gray-800 border-gray-300`}
-                                      >
-                                        <p>{deal.negotiations_Status}</p>
-                                      </Button>
-                                    </TableCell>
-                                    <TableCell>
-                                      {deal.negotiations_Zip_Code}
-                                    </TableCell>
-                                    <TableCell>
-                                      <DropdownMenu
-                                        open={
-                                          openNegotiatorState[deal.id] || false
-                                        }
-                                        onOpenChange={(isOpen) =>
-                                          toggleNegotiatorDropdown(
-                                            deal.id,
-                                            isOpen
-                                          )
-                                        }
-                                      >
-                                        <DropdownMenuTrigger asChild>
-                                          <Button
-                                            variant="outline"
-                                            className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-                                          >
-                                            {allDealNegotiator.some(
-                                              (negotiator) =>
-                                                negotiator.id ===
-                                                deal.negotiations_deal_coordinator
-                                            ) ? (
-                                              <p>
-                                                {
-                                                  allDealNegotiator.find(
-                                                    (negotiator) =>
-                                                      negotiator.id ===
-                                                      deal.negotiations_deal_coordinator
-                                                  )?.name
-                                                }
-                                              </p>
-                                            ) : (
-                                              <p>Not Assigned</p>
-                                            )}
-                                          </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                                          {allDealNegotiator.map(
-                                            (
-                                              negotiator: DealNegotiator,
-                                              index
-                                            ) => (
-                                              <DropdownMenuItem
-                                                key={index}
-                                                onClick={(e) => {
-                                                  e.preventDefault();
-                                                  e.stopPropagation();
-                                                  updateDealNegotiator(
-                                                    deal.id,
-                                                    negotiator.id
-                                                  );
-                                                  toggleNegotiatorDropdown(
-                                                    deal.id,
-                                                    false
-                                                  );
-                                                }}
-                                              >
-                                                {negotiator.name}
-                                              </DropdownMenuItem>
-                                            )
+                    <TableRow>
+                      <TableCell colSpan={2} className="p-0">
+                        <div className="w-full px-5 overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Client</TableHead>
+                                <TableHead>Make</TableHead>
+                                <TableHead>Model</TableHead>
+                                <TableHead>Stage</TableHead>
+                                <TableHead>Zip Code</TableHead>
+                                <TableHead>Deal Negotiator</TableHead>
+                                <TableHead>Onboarding Complete</TableHead>
+                                <TableHead>Date Paid</TableHead>
+                              </TableRow>
+                            </TableHeader>
+
+                            <TableBody>
+                              {dealsWithoutCoordinator.map((deal, index) => (
+                                <TableRow
+                                  key={deal.id}
+                                  className={`cursor-pointer ${
+                                    index % 2 === 0
+                                      ? "bg-white hover:bg-gray-100"
+                                      : "bg-gray-50 hover:bg-gray-200"
+                                  }`}
+                                >
+                                  <TableCell className="font-medium max-w-[220px]">
+                                    <span>{deal.negotiations_Client}</span>
+                                  </TableCell>
+                                  <TableCell className="max-w-[180px]">
+                                    {deal.negotiations_Brand}
+                                  </TableCell>
+                                  <TableCell>
+                                    {deal.negotiations_Model}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="outline"
+                                      style={{
+                                        backgroundColor: getStatusStyles(
+                                          deal?.negotiations_Status ?? ""
+                                        ).backgroundColor,
+                                        color: getStatusStyles(
+                                          deal?.negotiations_Status ?? ""
+                                        ).textColor, // Set dynamic text color
+                                      }}
+                                      className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
+                                    >
+                                      <p>{deal.negotiations_Status}</p>
+                                    </Button>
+                                  </TableCell>
+                                  <TableCell>
+                                    {deal.negotiations_Zip_Code}
+                                  </TableCell>
+                                  <TableCell>
+                                    <DropdownMenu
+                                      open={
+                                        openNegotiatorState[deal.id] || false
+                                      }
+                                      onOpenChange={(isOpen) =>
+                                        toggleNegotiatorDropdown(
+                                          deal.id,
+                                          isOpen
+                                        )
+                                      }
+                                    >
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
+                                        >
+                                          {allDealNegotiator.some(
+                                            (negotiator) =>
+                                              negotiator.id ===
+                                              deal.negotiations_deal_coordinator
+                                          ) ? (
+                                            <p>
+                                              {
+                                                allDealNegotiator.find(
+                                                  (negotiator) =>
+                                                    negotiator.id ===
+                                                    deal.negotiations_deal_coordinator
+                                                )?.name
+                                              }
+                                            </p>
+                                          ) : (
+                                            <p>Not Assigned</p>
                                           )}
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    </TableCell>{" "}
-                                    <TableCell className="text-center">
-                                      {deal.negotiations_Onboarding_Complete?.toLowerCase() ===
-                                      "yes" ? (
-                                        <Check className="text-green-500" />
-                                      ) : (
-                                        <X className="text-red-500" />
-                                      )}
-                                    </TableCell>
-                                    <TableCell>
-                                      <div>{dateFormat(deal.date_paid)}</div>
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                                        {allDealNegotiator.map(
+                                          (
+                                            negotiator: DealNegotiator,
+                                            index
+                                          ) => (
+                                            <DropdownMenuItem
+                                              key={index}
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                updateDealNegotiator(
+                                                  deal.id,
+                                                  negotiator.id
+                                                );
+                                                toggleNegotiatorDropdown(
+                                                  deal.id,
+                                                  false
+                                                );
+                                              }}
+                                            >
+                                              {negotiator.name}
+                                            </DropdownMenuItem>
+                                          )
+                                        )}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </TableCell>{" "}
+                                  <TableCell className="text-center">
+                                    {deal.negotiations_Onboarding_Complete?.toLowerCase() ===
+                                    "yes" ? (
+                                      <Check className="text-green-500" />
+                                    ) : (
+                                      <X className="text-red-500" />
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <div>{dateFormat(deal.date_paid)}</div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                )}
+                {/* Mapping Team Deals */}
+                {teamData
+                  .filter(
+                    (item) =>
+                      item.name !== "Tabarak Sohail" &&
+                      item.name.trim() !== "Emil Mrsic Negotiator" &&
+                      item.name !== "Crystal Watts" &&
+                      item.name !== "Schalaschly Marrero"
+                  )
+                  .map((team) => (
+                    <React.Fragment key={team.id}>
+                      <TableRow>
+                        <TableCell className="w-[50px]">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleRow(team.id)}
+                          >
+                            {expandedRows.has(team.id) ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <p>{team.name}</p>
+                            <p className="text-xs">
+                              No of Deals:{" "}
+                              {
+                                team.negotiations.filter(
+                                  (item) =>
+                                    item.negotiations_Status ===
+                                      "Deal Started" ||
+                                    item.negotiations_Status ===
+                                      "Actively Negotiating" ||
+                                    item.negotiations_Status === "Paid"
+                                ).length
+                              }
+                            </p>
                           </div>
                         </TableCell>
                       </TableRow>
-                    )}
-                  </React.Fragment>
-                )}
+                      {expandedRows.has(team.id) && (
+                        <TableRow>
+                          <TableCell colSpan={2} className="p-0">
+                            <div className="w-full px-5 overflow-x-auto">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Client</TableHead>
+                                    <TableHead>Make</TableHead>
+                                    <TableHead>Model</TableHead>
+                                    <TableHead>Stage</TableHead>
+                                    <TableHead>Zip Code</TableHead>
+                                    <TableHead>Deal Negotiator</TableHead>
+                                    <TableHead>Onboarding Complete</TableHead>
+                                    <TableHead>Date Paid</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+
+                                <TableBody>
+                                  {team.negotiations
+                                    .filter(
+                                      (item) =>
+                                        item.negotiations_Status ===
+                                          "Deal Started" ||
+                                        item.negotiations_Status ===
+                                          "Actively Negotiating" ||
+                                        item.negotiations_Status === "Paid"
+                                    )
+                                    .map((deal, index) => (
+                                      <TableRow
+                                        key={deal.id}
+                                        className={`cursor-pointer ${
+                                          index % 2 === 0
+                                            ? "bg-white hover:bg-gray-100"
+                                            : "bg-gray-50 hover:bg-gray-200"
+                                        }`}
+                                      >
+                                        <TableCell className="font-medium max-w-[220px]">
+                                          <span>
+                                            {deal.negotiations_Client}
+                                          </span>
+                                        </TableCell>
+                                        <TableCell className="max-w-[180px]">
+                                          {deal.negotiations_Brand}
+                                        </TableCell>
+                                        <TableCell>
+                                          {deal.negotiations_Model}
+                                        </TableCell>
+                                        <TableCell>
+                                          <Button
+                                            variant="outline"
+                                            style={{
+                                              backgroundColor: getStatusStyles(
+                                                deal?.negotiations_Status ?? ""
+                                              ).backgroundColor,
+                                              color: getStatusStyles(
+                                                deal?.negotiations_Status ?? ""
+                                              ).textColor, // Set dynamic text color
+                                            }}
+                                            className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
+                                          >
+                                            <p>{deal.negotiations_Status}</p>
+                                          </Button>
+                                        </TableCell>
+                                        <TableCell>
+                                          {deal.negotiations_Zip_Code}
+                                        </TableCell>
+                                        <TableCell>
+                                          {allDealNegotiator.some(
+                                            (negotiator) =>
+                                              negotiator.id ===
+                                              deal.negotiations_deal_coordinator
+                                          ) ? (
+                                            <p>
+                                              {
+                                                allDealNegotiator.find(
+                                                  (negotiator) =>
+                                                    negotiator.id ===
+                                                    deal.negotiations_deal_coordinator
+                                                )?.name
+                                              }
+                                            </p>
+                                          ) : (
+                                            <p>Not Assigned</p>
+                                          )}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                          {deal.negotiations_Onboarding_Complete?.toLowerCase() ===
+                                          "yes" ? (
+                                            <Check className="text-green-500" />
+                                          ) : (
+                                            <X className="text-red-500" />
+                                          )}
+                                        </TableCell>
+                                        <TableCell>
+                                          <div>
+                                            {dateFormat(deal.date_paid)}
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  ))}
               </TableBody>
             </>
           ) : (

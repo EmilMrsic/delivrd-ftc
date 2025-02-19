@@ -130,6 +130,7 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
       arrival_to_dealer: data.arrival_to_dealer ?? "",
       date_paid: data.date_paid ?? "",
       close_date: data.close_date ?? "",
+      prefix: data.prefix ?? "",
     },
     dealInfo: {
       negotiations_Brand: data.negotiations_Brand || null,
@@ -557,7 +558,7 @@ export const getDealsWithoutCoordinator = async () => {
   }
 };
 
-export const getStatusColor = (status: string) => {
+export const getStatusStyles = (status: string) => {
   const statusColors: Record<string, string> = {
     "Actively Negotiating": "#9AE095",
     "Deal Started": "#E0DAFD",
@@ -572,5 +573,21 @@ export const getStatusColor = (status: string) => {
     "Follow Up": "#C1F5F0",
   };
 
-  return statusColors[status] || "#E5E7EB"; // Default gray if status not found
+  const backgroundColor = statusColors[status] || "#E5E7EB"; // Default gray
+  const isDark = isDarkColor(backgroundColor);
+  const textColor = isDark ? "#FFFFFF" : "#000000"; // White for dark, black for light
+
+  return { backgroundColor, textColor };
+};
+
+// Function to check if a color is dark
+export const isDarkColor = (hex: string) => {
+  // Convert hex to RGB
+  const r = parseInt(hex.substring(1, 3), 16);
+  const g = parseInt(hex.substring(3, 5), 16);
+  const b = parseInt(hex.substring(5, 7), 16);
+
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.5; // Dark if luminance is low
 };
