@@ -130,6 +130,7 @@ export const mapNegotiationData = (data: any): EditNegotiationData => {
       arrival_to_dealer: data.arrival_to_dealer ?? "",
       date_paid: data.date_paid ?? "",
       close_date: data.close_date ?? "",
+      prefix: data.prefix ?? "",
     },
     dealInfo: {
       negotiations_Brand: data.negotiations_Brand || null,

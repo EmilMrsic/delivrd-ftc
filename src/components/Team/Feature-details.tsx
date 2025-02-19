@@ -75,26 +75,23 @@ const FeatureDetails = ({
   };
 
   useEffect(() => {
+    const fixDateOffset = (date: any) => {
+      if (!date) return null; // Ensure we don't modify null values
+      const d = new Date(date);
+      d.setMinutes(d.getMinutes() + d.getTimezoneOffset()); // Correct timezone offset
+      return d;
+    };
+
     setDealStartDate(
-      negotiation?.dealInfo?.negotiations_Deal_Start_Date
-        ? new Date(negotiation.dealInfo?.negotiations_Deal_Start_Date)
-        : null
+      fixDateOffset(negotiation?.dealInfo?.negotiations_Deal_Start_Date)
     );
     setArrivalToDealer(
-      negotiation?.clientInfo?.arrival_to_dealer
-        ? new Date(negotiation?.clientInfo?.arrival_to_dealer)
-        : null
+      fixDateOffset(negotiation?.clientInfo?.arrival_to_dealer)
     );
     setArrivalToClient(
-      negotiation?.clientInfo?.arrival_to_client
-        ? new Date(negotiation?.clientInfo?.arrival_to_client)
-        : null
+      fixDateOffset(negotiation?.clientInfo?.arrival_to_client)
     );
-    setCloseDate(
-      negotiation?.clientInfo?.close_date
-        ? new Date(negotiation?.clientInfo?.close_date)
-        : null
-    );
+    setCloseDate(fixDateOffset(negotiation?.clientInfo?.close_date));
   }, [negotiation]);
 
   return (
@@ -290,7 +287,7 @@ const FeatureDetails = ({
               setDealStartDate(date);
               handleDateChange(date, "negotiations_Deal_Start_Date");
             }}
-            dateFormat="dd-yyyy-MM"
+            dateFormat="MM-dd-yyyy"
             placeholderText="Select a date"
             className="border border-gray-300 rounded-md px-2 py-1"
           />
@@ -304,7 +301,7 @@ const FeatureDetails = ({
               setArrivalToDealer(date);
               handleDateChange(date, "arrival_to_dealer");
             }}
-            dateFormat="dd-yyyy-MM"
+            dateFormat="MM-dd-yyyy"
             placeholderText="Select a date"
             className="border border-gray-300 rounded-md px-2 py-1"
           />
@@ -317,7 +314,7 @@ const FeatureDetails = ({
               setArrivalToClient(date);
               handleDateChange(date, "arrival_to_client");
             }}
-            dateFormat="dd-yyyy-MM"
+            dateFormat="MM-dd-yyyy"
             placeholderText="Select a date"
             className="border border-gray-300 rounded-md px-2 py-1"
           />
@@ -330,7 +327,7 @@ const FeatureDetails = ({
               setCloseDate(date);
               handleDateChange(date, "close_date");
             }}
-            dateFormat="dd-yyyy-MM"
+            dateFormat="MM-dd-yyyy"
             placeholderText="Select a date"
             className="border border-gray-300 rounded-md px-2 py-1"
           />

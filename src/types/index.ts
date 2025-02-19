@@ -174,6 +174,7 @@ export interface EditNegotiationData {
     arrival_to_client: string;
     arrival_to_dealer: string;
     close_date: string;
+    prefix: string;
     date_paid: string;
   };
   dealInfo: {
