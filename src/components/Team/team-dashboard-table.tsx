@@ -22,7 +22,7 @@ import {
   dateFormat,
   dealStageOptions,
   getElapsedTime,
-  getStatusColor,
+  getStatusStyles,
 } from "@/lib/utils";
 import DealNegotiatorDialog from "./deal-negotiator-dialog";
 import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
@@ -397,11 +397,13 @@ const TeamDashboardTable = ({
                     <Button
                       variant="outline"
                       style={{
-                        backgroundColor: getStatusColor(
+                        backgroundColor: getStatusStyles(
                           deal?.negotiations_Status ?? ""
-                        ),
+                        ).backgroundColor,
+                        color: getStatusStyles(deal?.negotiations_Status ?? "")
+                          .textColor, // Set dynamic text color
                       }}
-                      className={`cursor-pointer p-1 w-fit h-fit text-xs  text-gray-800 border-gray-300`}
+                      className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
                     >
                       <p>{deal.negotiations_Status}</p>
                     </Button>
