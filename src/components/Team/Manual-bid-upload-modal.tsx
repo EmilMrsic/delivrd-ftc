@@ -1,6 +1,8 @@
 "use client";
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import Select from "react-select";
+
 import { UploadIcon } from "lucide-react";
 import {
   addDoc,
@@ -8,6 +10,7 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   updateDoc,
 } from "firebase/firestore";
 import { db, storage } from "@/firebase/config";
@@ -64,6 +67,8 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
   const [errors, setErrors] = useState<Errors>();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dealerships, setDealerships] = useState<any[]>([]);
+  const [selectedDealership, setSelectedDealership] = useState("");
 
   const closeDialog = () => setIsDialogOpen(false);
 
@@ -186,18 +191,51 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
     }
   };
 
+  useEffect(() => {
+    const fetchDealerships = async () => {
+      const dealershipRef = collection(db, "Dealers");
+      const snapshot = await getDocs(dealershipRef);
+      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setDealerships(data);
+    };
+
+    if (isDialogOpen) {
+      fetchDealerships();
+    } else {
+      setSelectedDealership("");
+      setFormData({
+        dealerName: "",
+        dealerNumber: "",
+        salesPersonName: "",
+        salesPersonEmail: "",
+        city: "",
+        state: "",
+        priceExcludingTax: "",
+        discountAmount: "",
+        inventoryStatus: "In Stock",
+        additionalComments: "",
+        files: null,
+      });
+    }
+  }, [isDialogOpen]);
+
+  const dealershipOptions = dealerships.map((dealership) => ({
+    value: dealership.Dealership,
+    label: dealership.Dealership,
+    data: dealership, // To access full dealership data on selection
+  }));
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
       <>
         <DialogTrigger
           onClick={(e) => {
             e.stopPropagation();
-            e.stopPropagation();
+            setIsDialogOpen(true);
           }}
-          className="bg-white text-black rounded-lg flex items-center p-2"
         >
           <button
-            className="flex items-center"
+            className="flex items-center bg-white text-black rounded-lg p-2"
             onClick={(e) => {
               e.stopPropagation();
               setStopPropagation && setStopPropagation(true);
@@ -216,6 +254,36 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                 Manual Bid Upload
               </p>
             </DialogTitle>
+            <div className="w-[310px]">
+              <label className="block text-sm font-medium">
+                Select Dealership
+              </label>
+              <Select
+                options={dealershipOptions}
+                onChange={(selectedOption) => {
+                  const selected = selectedOption?.data;
+                  setSelectedDealership(selectedOption?.value || "");
+                  if (selected) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      dealerName: selected.Dealership || "",
+                      dealerNumber: selected.SalesPersonPhone || "",
+                      salesPersonName: selected.SalesPersonName || "",
+                      salesPersonEmail: selected.YourEmail || "",
+                      city: selected.City || "",
+                      state: selected.State || "",
+                    }));
+                  }
+                }}
+                value={dealershipOptions.find(
+                  (opt) => opt.value === selectedDealership
+                )}
+                placeholder="Search or Select Dealership"
+                className="mt-1 w-full"
+                isSearchable
+              />
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex space-x-4">
                 <div className="flex-1">
