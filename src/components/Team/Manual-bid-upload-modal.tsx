@@ -127,7 +127,16 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
       formErrors.salesPersonEmail = "Invalid email format";
     }
 
-    setErrors(formErrors);
+    if (
+      formErrors.dealerName?.length ||
+      formErrors.dealerNumber?.length ||
+      formErrors.discountAmount?.length ||
+      formErrors.priceExcludingTax?.length ||
+      formErrors.salesPersonEmail?.length
+    ) {
+      setErrors(formErrors);
+      return;
+    }
 
     setLoader(true);
 
@@ -159,12 +168,16 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
       files: fileUrls ?? [],
       manual_add: true,
       timestamps: new Date(),
-      source: "firebase",
     };
 
     try {
       const bidRef = collection(db, "manual bids");
-      await addDoc(bidRef, bidData);
+      const incomingRef = collection(db, "Incoming Bids");
+      if (selectedDealership) {
+        await addDoc(incomingRef, bidData);
+      } else {
+        await addDoc(bidRef, bidData);
+      }
       const negotiationRef = doc(db, "negotiations", id ?? "");
       await updateDoc(negotiationRef, {
         incoming_bids: arrayUnion(bid_id),
@@ -219,7 +232,11 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
     }
   }, [isDialogOpen]);
 
-  const dealershipOptions = dealerships.map((dealership) => ({
+  const uniqueDealerships = Array.from(
+    new Map(dealerships.map((d) => [d.Dealership, d])).values()
+  );
+
+  const dealershipOptions = uniqueDealerships.map((dealership) => ({
     value: dealership.Dealership,
     label: dealership.Dealership,
     data: dealership, // To access full dealership data on selection
@@ -248,19 +265,32 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
         </DialogTrigger>
 
         <DialogContent className="p-8 bg-white rounded-lg max-w-[700px] mx-auto shadow-xl h-[95%] overflow-scroll">
-          <div className="space-y-6">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setStopPropagation && setStopPropagation(true);
+            }}
+            className="space-y-6"
+          >
             <DialogTitle>
               <p className="text-2xl font-bold text-[#202125]">
                 Manual Bid Upload
               </p>
             </DialogTitle>
-            <div className="w-[310px]">
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setStopPropagation && setStopPropagation(true);
+              }}
+              className="w-[310px]"
+            >
               <label className="block text-sm font-medium">
                 Select Dealership
               </label>
               <Select
                 options={dealershipOptions}
-                onChange={(selectedOption) => {
+                onChange={(selectedOption, a) => {
                   const selected = selectedOption?.data;
                   setSelectedDealership(selectedOption?.value || "");
                   if (selected) {
@@ -281,6 +311,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                 placeholder="Search or Select Dealership"
                 className="mt-1 w-full"
                 isSearchable
+                autoFocus={false}
               />
             </div>
 
