@@ -133,19 +133,7 @@ const TeamDashboardTable = ({
       await updateDoc(negotiationRef, {
         [dateType]: date,
       });
-
-      if (dateType === "close_date") {
-        await updateDoc(negotiationRef, {
-          negotiations_Status: "Closed",
-        });
-
-        const updatedDealsWithStatus = updatedDeals.map((deal) =>
-          deal.id === dealId ? { ...deal, negotiations_Status: "Closed" } : deal
-        );
-        setCurrentDeals(updatedDealsWithStatus);
-      } else {
-        setCurrentDeals(updatedDeals);
-      }
+      setCurrentDeals(updatedDeals);
     }
 
     toast({ title: "Negotiation Updated" });

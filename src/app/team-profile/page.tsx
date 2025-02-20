@@ -627,7 +627,7 @@ function ProjectProfile() {
                                   </div>
 
                                   {/* Files Section */}
-                                  <div className="flex flex-wrap overflow-auto gap-4 mt-4">
+                                  <div className="flex flex-wrap h-[150px] overflow-y-scroll gap-4 mt-4">
                                     {bidDetails.files.map((file, index) => {
                                       const isImage = [
                                         "jpg",
@@ -643,7 +643,10 @@ function ProjectProfile() {
                                       return (
                                         <div
                                           key={index}
-                                          className="relative w-20 h-20 flex items-center justify-center rounded-md "
+                                          onClick={() =>
+                                            window.open(file, "_blank")
+                                          }
+                                          className="relative cursor-pointer w-20 h-20 flex items-center justify-center rounded-md "
                                         >
                                           <div className="absolute top-0 right-0 z-[99]">
                                             {editingBidId ===
@@ -701,7 +704,7 @@ function ProjectProfile() {
                                                 bidDetails.bid_id
                                               )
                                             }
-                                            className="hidden"
+                                            className="hidden cursor-pointer"
                                             multiple
                                           />
                                           <Upload className="w-8 h-8 text-gray-600" />
