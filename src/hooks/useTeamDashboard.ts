@@ -90,9 +90,17 @@ const useTeamDashboard = () => {
 
       setOriginalDeals(negotiationsData as NegotiationData[]);
       const defaultFilteredDeals = negotiationsData.filter((deal) =>
-        ["Actively Negotiating", "Deal Started", "Paid"].includes(
-          deal.negotiations_Status ?? ""
-        )
+        [
+          "Deal Started",
+          "Actively Negotiating",
+          "Delivery Scheduled",
+          "Deal Complete Long Term",
+          "Long Term Order",
+          "Shipping",
+          "Needs Review",
+          "Follow-up",
+          "Follow-up Issue",
+        ].includes(deal.negotiations_Status ?? "")
       );
       setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
     } catch (error) {

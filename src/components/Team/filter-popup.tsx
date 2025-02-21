@@ -9,6 +9,7 @@ import {
 } from "../ui/dropdown-menu";
 import { dealStageOptions, vehicleOfInterest } from "@/lib/utils";
 import { DealNegotiator } from "@/types";
+import Link from "next/link";
 
 type FilterPopupProps = {
   filters: any;
@@ -19,6 +20,8 @@ type FilterPopupProps = {
 
   dealCoordinators: DealNegotiator[];
 };
+
+const statuses = ["Paid Holding", "Old Deals"];
 
 const FilterPopup = ({
   filters,
@@ -157,22 +160,20 @@ const FilterPopup = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-full justify-between">
-              Select Onboarding Status
+              Select View
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-auto">
-            <div className="overflow-scroll">
-              {["Yes", "No"].map((status, index) => (
-                <DropdownMenuCheckboxItem
+            <div className="flex flex-col w-fit">
+              {statuses.map((status, index) => (
+                <Link
                   key={index}
-                  checked={filters.onboarding.includes(status.toLowerCase())}
-                  onCheckedChange={() =>
-                    handleFilterChange("onboarding", status.toLowerCase())
-                  }
+                  className="p-2 text-sm hover:underline cursor-pointer"
+                  href={`/${status.toLowerCase().replace(/\s+/g, "-")}`}
                 >
                   {status}
-                </DropdownMenuCheckboxItem>
+                </Link>
               ))}
             </div>
           </DropdownMenuContent>

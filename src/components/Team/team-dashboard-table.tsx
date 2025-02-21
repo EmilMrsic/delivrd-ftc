@@ -100,15 +100,14 @@ const TeamDashboardTable = ({
 
   const sortData = (key: string, direction: string) => {
     const sortedDeals = [...currentDeals].sort((a: any, b: any) => {
-      const aValue = a[key];
-      const bValue = b[key];
+      let aValue = a[key];
+      let bValue = b[key];
 
-      if (aValue < bValue) {
-        return direction === "ascending" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return direction === "ascending" ? 1 : -1;
-      }
+      if (typeof aValue === "string") aValue = aValue.toLowerCase();
+      if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+      if (aValue < bValue) return direction === "ascending" ? -1 : 1;
+      if (aValue > bValue) return direction === "ascending" ? 1 : -1;
       return 0;
     });
 
@@ -173,26 +172,142 @@ const TeamDashboardTable = ({
       <TableHeader className="max-w-[1000px] overflow-scroll">
         <TableRow>
           <TableHead></TableHead>
-          <TableHead>Client</TableHead>
-          <TableHead>Make</TableHead>
-          <TableHead>Model</TableHead>
-          <TableHead>Stage</TableHead>
-          <TableHead>Zip Code</TableHead>
+          <TableHead
+            onClick={() => {
+              const direction =
+                sortConfig.key === "negotiations_Client" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "negotiations_Client", direction });
+              sortData("negotiations_Client", direction);
+            }}
+          >
+            Client
+            <button>
+              {sortConfig.key === "negotiations_Client" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>
+          <TableHead
+            onClick={() => {
+              const direction =
+                sortConfig.key === "negotiations_Brand" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "negotiations_Brand", direction });
+              sortData("negotiations_Brand", direction);
+            }}
+          >
+            Make
+            <button>
+              {sortConfig.key === "negotiations_Brand" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>
+          <TableHead
+            onClick={() => {
+              const direction =
+                sortConfig.key === "negotiations_Model" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "negotiations_Model", direction });
+              sortData("negotiations_Model", direction);
+            }}
+          >
+            Model
+            <button>
+              {sortConfig.key === "negotiations_Model" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>
+          <TableHead
+            onClick={() => {
+              const direction =
+                sortConfig.key === "negotiations_Status" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "negotiations_Status", direction });
+              sortData("negotiations_Status", direction);
+            }}
+          >
+            Stage
+            <button>
+              {sortConfig.key === "negotiations_Status" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>
+          <TableHead
+            onClick={() => {
+              const direction =
+                sortConfig.key === "negotiations_Zip_Code" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "negotiations_Zip_Code", direction });
+              sortData("negotiations_Zip_Code", direction);
+            }}
+          >
+            Zip Code
+            <button>
+              {sortConfig.key === "negotiations_Zip_Code" ? (
+                sortConfig.direction === "ascending" ? (
+                  <span>↑</span>
+                ) : (
+                  <span>↓</span>
+                )
+              ) : (
+                <span>↕</span>
+              )}
+            </button>
+          </TableHead>
           <TableHead>Deal Negotiator</TableHead>
           <TableHead>Onboarding Complete</TableHead>
-          <TableHead>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => {
+              const direction =
+                sortConfig.key === "datePaid" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "datePaid", direction });
+              sortData("negotiations_Created", direction);
+            }}
+          >
             Date Paid
-            <button
-              onClick={() => {
-                const direction =
-                  sortConfig.key === "datePaid" &&
-                  sortConfig.direction === "ascending"
-                    ? "descending"
-                    : "ascending";
-                setSortConfig({ key: "datePaid", direction });
-                sortData("negotiations_Created", direction);
-              }}
-            >
+            <button>
               {sortConfig.key === "datePaid" ? (
                 sortConfig.direction === "ascending" ? (
                   <span>↑</span>
@@ -204,19 +319,20 @@ const TeamDashboardTable = ({
               )}
             </button>
           </TableHead>{" "}
-          <TableHead>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => {
+              const direction =
+                sortConfig.key === "arriveToDealer" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "arriveToDealer", direction });
+              sortData("arrival_to_dealer", direction);
+            }}
+          >
             Arrival To Dealer
-            <button
-              onClick={() => {
-                const direction =
-                  sortConfig.key === "arriveToDealer" &&
-                  sortConfig.direction === "ascending"
-                    ? "descending"
-                    : "ascending";
-                setSortConfig({ key: "arriveToDealer", direction });
-                sortData("arrival_to_dealer", direction);
-              }}
-            >
+            <button>
               {sortConfig.key === "arriveToDealer" ? (
                 sortConfig.direction === "ascending" ? (
                   <span>↑</span>
@@ -228,19 +344,20 @@ const TeamDashboardTable = ({
               )}
             </button>
           </TableHead>{" "}
-          <TableHead>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => {
+              const direction =
+                sortConfig.key === "startDate" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "startDate", direction });
+              sortData("negotiations_Deal_Start_Date", direction);
+            }}
+          >
             Start Date
-            <button
-              onClick={() => {
-                const direction =
-                  sortConfig.key === "startDate" &&
-                  sortConfig.direction === "ascending"
-                    ? "descending"
-                    : "ascending";
-                setSortConfig({ key: "startDate", direction });
-                sortData("negotiations_Deal_Start_Date", direction);
-              }}
-            >
+            <button>
               {sortConfig.key === "startDate" ? (
                 sortConfig.direction === "ascending" ? (
                   <span>↑</span>
@@ -252,19 +369,20 @@ const TeamDashboardTable = ({
               )}
             </button>
           </TableHead>
-          <TableHead>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => {
+              const direction =
+                sortConfig.key === "arriveToClient" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "arriveToClient", direction });
+              sortData("arrival_to_client", direction);
+            }}
+          >
             Arrival To Client
-            <button
-              onClick={() => {
-                const direction =
-                  sortConfig.key === "arriveToClient" &&
-                  sortConfig.direction === "ascending"
-                    ? "descending"
-                    : "ascending";
-                setSortConfig({ key: "arriveToClient", direction });
-                sortData("arrival_to_client", direction);
-              }}
-            >
+            <button>
               {sortConfig.key === "arriveToClient" ? (
                 sortConfig.direction === "ascending" ? (
                   <span>↑</span>
@@ -276,19 +394,20 @@ const TeamDashboardTable = ({
               )}
             </button>
           </TableHead>
-          <TableHead>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => {
+              const direction =
+                sortConfig.key === "closeDate" &&
+                sortConfig.direction === "ascending"
+                  ? "descending"
+                  : "ascending";
+              setSortConfig({ key: "closeDate", direction });
+              sortData("close_date", direction);
+            }}
+          >
             Close Date
-            <button
-              onClick={() => {
-                const direction =
-                  sortConfig.key === "closeDate" &&
-                  sortConfig.direction === "ascending"
-                    ? "descending"
-                    : "ascending";
-                setSortConfig({ key: "closeDate", direction });
-                sortData("close_date", direction);
-              }}
-            >
+            <button>
               {sortConfig.key === "closeDate" ? (
                 sortConfig.direction === "ascending" ? (
                   <span>↑</span>
