@@ -12,6 +12,8 @@ import { X } from "lucide-react";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { NegotiationData } from "@/types";
+import { dealStageOptions } from "@/lib/utils";
+import useTeamDashboard from "@/hooks/useTeamDashboard";
 
 type FieldConfig = {
   label: string;
@@ -36,6 +38,7 @@ export default function ClientDetailsPopup({
   setNegotiations,
 }: ClientDetailsPopupProps) {
   const [formData, setFormData] = useState(deal);
+  const { allDealNegotiator } = useTeamDashboard();
 
   const handleInputChange = (field: keyof NegotiationData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -89,7 +92,6 @@ export default function ClientDetailsPopup({
           )
         );
       }
-      toast({ title: "Field Updated" });
     } catch (error) {
       console.error("Error updating document: ", error);
     }
@@ -97,7 +99,7 @@ export default function ClientDetailsPopup({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-[1200px] h-[600px] bg-white overflow-y-auto">
+      <DialogContent className="w-[350px] sm:w-full h-[600px] bg-white overflow-y-auto">
         <DialogHeader className="flex justify-between items-start">
           <p>Client</p>
           <DialogTitle className="text-2xl font-semibold">
@@ -111,11 +113,42 @@ export default function ClientDetailsPopup({
               <label className="w-40 text-sm font-medium flex items-center gap-1">
                 {icon} {label}
               </label>
-              {type === "input" ? (
+              {field === "negotiations_deal_coordinator" ||
+              field === "negotiations_Status" ? (
+                <select
+                  className="w-full border rounded p-2"
+                  value={formData[field] || ""}
+                  onChange={async (e) => {
+                    await handleInputChange(field, e.target.value);
+                    e.target.blur();
+                  }}
+                  onBlur={() => handleBlur(field)}
+                >
+                  <option value="">
+                    Select{" "}
+                    {field === "negotiations_Status"
+                      ? "Stage"
+                      : "Deal Coordinator"}
+                  </option>
+
+                  {field === "negotiations_deal_coordinator"
+                    ? allDealNegotiator.map((negotiator) => (
+                        <option key={negotiator.id} value={negotiator.id}>
+                          {negotiator.name}
+                        </option>
+                      ))
+                    : dealStageOptions.map((stage) => (
+                        <option key={stage} value={stage}>
+                          {stage}
+                        </option>
+                      ))}
+                </select>
+              ) : type === "input" ? (
                 <Input
                   value={(formData[field] as string) || ""}
                   onChange={(e) => handleInputChange(field, e.target.value)}
                   onBlur={() => handleBlur(field)}
+                  autoFocus={false}
                 />
               ) : (
                 <Textarea
@@ -123,6 +156,7 @@ export default function ClientDetailsPopup({
                   value={(formData[field] as string) || ""}
                   onChange={(e) => handleInputChange(field, e.target.value)}
                   onBlur={() => handleBlur(field)}
+                  autoFocus={false}
                 />
               )}
             </div>
