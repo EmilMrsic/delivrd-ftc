@@ -1,5 +1,6 @@
 "use client";
 import { Loader } from "@/components/base/loader";
+import ClientDetailsPopup from "@/components/Team/team-detail-popup";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,14 +13,56 @@ import {
 import useTeamDashboard from "@/hooks/useTeamDashboard";
 import { fetchAllPaidHoldingNegotiations, getStatusStyles } from "@/lib/utils";
 import { DealNegotiator, NegotiationData } from "@/types";
+import { Car, Expand, MapPin, StickyNote, User, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
+const fields = [
+  {
+    label: "First Name",
+    field: "negotiations_First_Name",
+    icon: <User size={14} />,
+  },
+  {
+    label: "Last Name",
+    field: "negotiations_Last_Name",
+    icon: <User size={14} />,
+  },
+  {
+    label: "Zip Code",
+    field: "negotiations_Zip_Code",
+    icon: <MapPin size={14} />,
+  },
+  { label: "Status", field: "negotiations_Status" },
+  { label: "Brand", field: "negotiations_Brand" },
+  {
+    label: "Client Consult Notes",
+    field: "consult_notes",
+    icon: <StickyNote size={14} />,
+    type: "textarea",
+  },
+  {
+    label: "Vehicle of Interest",
+    field: "vehicle_of_interest",
+    icon: <Car size={14} />,
+  },
+  { label: "Model", field: "model_of_interest", icon: <Car size={14} /> },
+];
 const PaidHolding = () => {
   const router = useRouter();
   const { negotiatorData, allDealNegotiator } = useTeamDashboard();
   const [loading, setLoading] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [negotiations, setNegotiations] = useState<NegotiationData[]>([]);
+  const [hoveredCell, setHoveredCell] = useState<string | null>(null);
+  const [expandedNote, setExpandedNote] = useState<{
+    id: string;
+    note: string;
+  } | null>(null);
+  const [selectedDeal, setSelectedDeal] = useState<NegotiationData | null>(
+    null
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -33,6 +76,12 @@ const PaidHolding = () => {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedDeal(null);
+    }
+  }, [isOpen]);
 
   return (
     <>
@@ -60,53 +109,77 @@ const PaidHolding = () => {
         </div>
       </div>
       <div className="m-5">
-        <Table>
-          <TableHeader className="max-w-[1000px] overflow-scroll">
+        <Table className="min-w-full border-collapse">
+          <TableHeader className="sticky top-0 bg-gray-100 z-10 border-b border-gray-300">
             <TableRow>
-              <TableHead></TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Make</TableHead>
-              <TableHead>Model</TableHead>
-              <TableHead>Stage</TableHead>
-              <TableHead>Zip Code</TableHead>
-              <TableHead>Deal Negotiator</TableHead>
-              <TableHead>Consult Notes</TableHead>
-              <TableHead>Vehicle of Interest</TableHead>
+              <TableHead className="text-left px-4 py-2 border-r">#</TableHead>
+              <TableHead className="text-left px-4 py-2 border-r">
+                Client
+              </TableHead>
+              <TableHead className="text-left px-4 py-2 border-r">
+                Make
+              </TableHead>
+              <TableHead className="text-left px-4 py-2 border-r">
+                Model
+              </TableHead>
+              <TableHead className="text-left  px-4 py-2 border-r">
+                Stage
+              </TableHead>
+              <TableHead className="text-left px-4 py-2 border-r">
+                Zip Code
+              </TableHead>
+              <TableHead className="text-left px-4 py-2 border-r">
+                Deal Negotiator
+              </TableHead>
+              <TableHead className="text-left px-4 py-2 border-r">
+                Consult Notes
+              </TableHead>
+              <TableHead className="text-left px-4 py-2 border-r">
+                Vehicle of Interest
+              </TableHead>
+              <TableHead className="text-left px-4 py-2">New or Used</TableHead>
             </TableRow>
           </TableHeader>
+
           {loading ? (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={14} className="text-center py-4">
+                <TableCell colSpan={9} className="text-center py-4">
                   <Loader />
                 </TableCell>
               </TableRow>
             </TableBody>
           ) : negotiations?.length ? (
             <TableBody>
-              {negotiations?.map((deal, index) => (
-                <TableRow
-                  className={`cursor-pointer ${
-                    index % 2 === 0
-                      ? "bg-white hover:bg-gray-100"
-                      : "bg-gray-50 hover:bg-gray-200"
-                  }`}
-                  key={deal.id}
-                >
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell className="font-medium max-w-[220px]">
-                    <span>{deal.negotiations_Client}</span>
+              {negotiations.map((deal, index) => (
+                <TableRow key={deal.id} className="hover:bg-gray-50 transition">
+                  <TableCell className="px-4 py-2 border-r">
+                    <Link href={`/team-profile?id=${deal.id}`}>
+                      {index + 1}
+                    </Link>
                   </TableCell>
 
-                  <TableCell className="max-w-[180px]">
+                  <TableCell className="px-4 relative py-2 border-r">
+                    {deal.negotiations_Client}
+                    <Expand
+                      size={16}
+                      className="text-gray-500 absolute top-[5px] right-[10px] hover:text-gray-700 cursor-pointer"
+                      onClick={() => {
+                        setSelectedDeal(deal);
+                        setIsOpen(true);
+                      }}
+                    />
+                  </TableCell>
+
+                  <TableCell className="px-4 py-2 border-r">
                     {deal.negotiations_Brand}
                   </TableCell>
 
-                  <TableCell className="max-w-[120px]">
+                  <TableCell className="px-4 py-2 border-r">
                     {deal.model_of_interest}
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="px-4 py-2 border-r">
                     <Button
                       variant="outline"
                       style={{
@@ -116,37 +189,56 @@ const PaidHolding = () => {
                         color: getStatusStyles(deal?.negotiations_Status ?? "")
                           .textColor, // Set dynamic text color
                       }}
-                      className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
+                      className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
                     >
                       <p>{deal.negotiations_Status}</p>
                     </Button>
                   </TableCell>
 
-                  <TableCell>{deal.negotiations_Zip_Code}</TableCell>
+                  <TableCell className="px-4 py-2 border-r">
+                    {deal.negotiations_Zip_Code}
+                  </TableCell>
 
-                  <TableCell>
-                    {allDealNegotiator.some(
+                  <TableCell className="px-4 py-2 border-r">
+                    {allDealNegotiator.find(
                       (negotiator) =>
                         negotiator.id === deal.negotiations_deal_coordinator
-                    ) ? (
-                      <p>
-                        {
-                          allDealNegotiator.find(
-                            (negotiator) =>
-                              negotiator.id ===
-                              deal.negotiations_deal_coordinator
-                          )?.name
-                        }
-                      </p>
-                    ) : (
-                      <p>Not Assigned</p>
-                    )}
+                    )?.name || "Not Assigned"}
                   </TableCell>
-                  <TableCell className="max-w-[120px]">
-                    {deal.consult_notes}
+
+                  <TableCell
+                    className={`px-4 relative py-2 border-r truncate max-w-[150px]  ${
+                      hoveredCell === deal.id ? "bg-gray-100" : ""
+                    }`}
+                    onMouseEnter={() => setHoveredCell(deal?.id ?? "")}
+                    onMouseLeave={() => setHoveredCell(null)}
+                    title={deal.consult_notes}
+                  >
+                    {deal?.consult_notes?.length > 50
+                      ? `${deal?.consult_notes?.substring(0, 50)}...`
+                      : deal.consult_notes}
+                    <button
+                      onClick={() =>
+                        setExpandedNote({
+                          id: deal.id,
+                          note: deal.consult_notes,
+                        })
+                      }
+                      className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
+                      title="Expand"
+                    >
+                      <Expand
+                        size={16}
+                        className="text-gray-500 hover:text-gray-700"
+                      />
+                    </button>
                   </TableCell>
-                  <TableCell className="max-w-[120px]">
-                    {deal.vehicle_of_interest}
+
+                  <TableCell className="px-4 py-2 border-r ">
+                    {deal?.vehicle_of_interest ?? ""}
+                  </TableCell>
+                  <TableCell className="px-4 py-2 w-[100px]">
+                    {deal?.negotiations_New_or_Used ?? ""}
                   </TableCell>
                 </TableRow>
               ))}
@@ -154,13 +246,40 @@ const PaidHolding = () => {
           ) : (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={13} className="text-center py-4">
-                  <p>No Data Found</p>
+                <TableCell colSpan={9} className="text-center py-4">
+                  No Data Found
                 </TableCell>
               </TableRow>
             </TableBody>
           )}
         </Table>
+        {expandedNote && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-4">
+              <h2 className="text-lg font-semibold mb-2">Consult Note</h2>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                {expandedNote.note}
+              </p>
+              <div className="text-right mt-4">
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  onClick={() => setExpandedNote(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {selectedDeal && (
+          <ClientDetailsPopup
+            setNegotiations={setNegotiations}
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+            deal={selectedDeal}
+            fields={fields as any}
+          />
+        )}
       </div>
     </>
   );
