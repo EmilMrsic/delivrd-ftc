@@ -35,6 +35,7 @@ const fields = [
     icon: <MapPin size={14} />,
   },
   { label: "Status", field: "negotiations_Status" },
+  { label: "Deal Coordinator", field: "negotiations_deal_coordinator" },
   { label: "Brand", field: "negotiations_Brand" },
   {
     label: "Client Consult Notes",
@@ -238,7 +239,18 @@ const PaidHolding = () => {
                     {deal?.vehicle_of_interest ?? ""}
                   </TableCell>
                   <TableCell className="px-4 py-2 w-[100px]">
-                    {deal?.negotiations_New_or_Used ?? ""}
+                    {deal?.negotiations_New_or_Used && (
+                      <Button
+                        variant="outline"
+                        className={`cursor-pointer p-1 w-fit h-fit text-xs rounded-full ${
+                          deal?.negotiations_New_or_Used === "New"
+                            ? "bg-[#d1e2ff]"
+                            : "bg-[#c4ecff]"
+                        }`}
+                      >
+                        <p> {deal?.negotiations_New_or_Used ?? ""}</p>
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -246,7 +258,7 @@ const PaidHolding = () => {
           ) : (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-4">
+                <TableCell colSpan={12} className="text-center py-4">
                   No Data Found
                 </TableCell>
               </TableRow>
