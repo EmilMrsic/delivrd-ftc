@@ -110,6 +110,9 @@ export interface NegotiationData {
   id: string;
   arrival_to_client: string;
   arrival_to_dealer: string;
+  model_of_interest: string;
+  vehicle_of_interest: string;
+  consult_notes: string;
   close_date: string;
   date_paid: string;
   incoming_bids: any[]; // Array of any type as the content is not specified
