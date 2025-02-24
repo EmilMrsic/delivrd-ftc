@@ -10,6 +10,7 @@ import {
 import { chunk } from "lodash";
 import { db } from "@/firebase/config";
 import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
+import { allowedStatuses } from "@/lib/utils";
 
 const useTeamDashboard = () => {
   const [filteredDeals, setFilteredDeals] = useState<NegotiationData[]>([]);
@@ -22,7 +23,7 @@ const useTeamDashboard = () => {
     []
   );
 
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [itemsPerPage, setItemsPerPage] = useState(100);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -52,36 +53,51 @@ const useTeamDashboard = () => {
         return;
       }
 
-      // Directly query negotiations with filtered statuses
+      const teamDocRef = doc(db, "team delivrd", id);
+      const teamSnapshot = await getDoc(teamDocRef);
+
+      if (!teamSnapshot.exists()) {
+        console.log("Team document not found");
+        return;
+      }
+
+      const teamData = teamSnapshot.data();
+      setNegotiatorData(teamData as DealNegotiator);
+
+      const activeDeals = teamData.active_deals;
+      if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
+        console.log("No active deals found");
+        setOriginalDeals([]);
+        setFilteredDeals([]);
+        return;
+      }
+
       const negotiationsCollectionRef = collection(db, "negotiations");
-      const filteredStatuses = [
-        "Deal Started",
-        "Actively Negotiating",
-        "Delivery Scheduled",
-        "Deal Complete Long Term",
-        "Long Term Order",
-        "Shipping",
-        "Needs Review",
-        "Follow-up",
-        "Follow-up Issue",
-      ];
+      const chunkedIds = chunk(activeDeals, 10);
+      const negotiationsData: NegotiationData[] = [];
 
-      const negotiationsQuery = query(
-        negotiationsCollectionRef,
-        where("negotiations_Status", "in", filteredStatuses)
+      for (const idChunk of chunkedIds) {
+        const negotiationsQuery = query(
+          negotiationsCollectionRef,
+          where("__name__", "in", idChunk)
+        );
+        const negotiationsSnapshot = await getDocs(negotiationsQuery);
+
+        negotiationsSnapshot.forEach((doc) => {
+          const data = doc.data();
+          negotiationsData.push(data as NegotiationData);
+        });
+      }
+
+      setOriginalDeals(negotiationsData as NegotiationData[]);
+      const defaultFilteredDeals = negotiationsData.filter((deal) =>
+        allowedStatuses.includes(deal.negotiations_Status ?? "")
       );
-
-      const negotiationsSnapshot = await getDocs(negotiationsQuery);
-      const negotiationsData: NegotiationData[] = negotiationsSnapshot.docs.map(
-        (doc) => doc.data() as NegotiationData
-      );
-
-      setOriginalDeals(negotiationsData);
-      setFilteredDeals(negotiationsData);
+      setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
     } catch (error) {
       console.error("Error fetching negotiations:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading
     }
   };
 
@@ -209,7 +225,6 @@ const useTeamDashboard = () => {
     itemsPerPage,
     currentPage,
     setCurrentPage,
-    fetchAllNegotiation,
   };
 };
 
