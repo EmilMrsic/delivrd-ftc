@@ -427,6 +427,18 @@ export const fetchAllPaidNegotiations = async () => {
   }
 };
 
+export const allowedStatuses = [
+  "Deal Started",
+  "Actively Negotiating",
+  "Delivery Scheduled",
+  "Deal Complete- Long Distance",
+  "Long Term Order",
+  "Shipping",
+  "Needs To Review",
+  "Follow Up",
+  "Follow Up Issue",
+];
+
 export const fetchAllActiveNegotiations = async () => {
   try {
     const negotiationsQuery = query(

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
+  allowedStatuses,
   fetchActiveDeals,
   fetchAllNotClosedNegotiations,
   fetchAllPaidNegotiations,
@@ -56,7 +57,6 @@ export default function DealList() {
     currentPage,
     setCurrentPage,
     setCurrentDeals,
-    fetchAllNegotiation,
   } = useTeamDashboard();
 
   const { notification } = useAppSelector((state) => state.notification);
@@ -137,9 +137,7 @@ export default function DealList() {
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
-                  ["Actively Negotiating", "Deal Started", "Paid"].includes(
-                    deal.negotiations_Status ?? ""
-                  )
+                  allowedStatuses.includes(deal.negotiations_Status ?? "")
               );
               setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
               setLoading(false);
@@ -153,9 +151,7 @@ export default function DealList() {
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
-                  ["Actively Negotiating", "Deal Started", "Paid"].includes(
-                    deal.negotiations_Status ?? ""
-                  )
+                  allowedStatuses.includes(deal.negotiations_Status ?? "")
               );
               setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
               setLoading(false);
@@ -176,9 +172,7 @@ export default function DealList() {
               setOriginalDeals(deals as NegotiationData[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
-                  ["Actively Negotiating", "Deal Started", "Paid"].includes(
-                    deal.negotiations_Status ?? ""
-                  )
+                  allowedStatuses.includes(deal.negotiations_Status ?? "")
               );
               setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
               setLoading(false);
@@ -258,9 +252,7 @@ export default function DealList() {
     const filtered = originalDeals?.filter((deal) => {
       const matchesStage =
         currentFilters.stages.length === 0
-          ? ["Actively Negotiating", "Deal Started", "Paid"].includes(
-              deal.negotiations_Status ?? ""
-            )
+          ? allowedStatuses.includes(deal.negotiations_Status ?? "")
           : currentFilters.stages.includes("Not Closed")
           ? otherStages.includes(deal.negotiations_Status?.trim() ?? "")
           : currentFilters.stages.includes(
@@ -317,20 +309,17 @@ export default function DealList() {
     setFilteredDeals(originalDeals);
     setCurrentPage(1);
     setLoading(true);
-    fetchAllNegotiation();
-    // fetchActiveDeals(id)
-    //   .then((deals) => {
-    //     setOriginalDeals(deals as NegotiationData[]);
+    fetchActiveDeals(id)
+      .then((deals) => {
+        setOriginalDeals(deals as NegotiationData[]);
 
-    //     const defaultFilteredDeals = deals?.filter((deal: NegotiationData) =>
-    //       ["Actively Negotiating", "Deal Started", "Paid"].includes(
-    //         deal.negotiations_Status ?? ""
-    //       )
-    //     );
-    //     setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
-    //     setLoading(false);
-    //   })
-    //   .catch((error) => console.error("Error applying filter:", error));
+        const defaultFilteredDeals = deals?.filter((deal: NegotiationData) =>
+          allowedStatuses.includes(deal.negotiations_Status ?? "")
+        );
+        setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
+        setLoading(false);
+      })
+      .catch((error) => console.error("Error applying filter:", error));
   };
 
   const handleStageChange = async (id: string, newStage: string) => {

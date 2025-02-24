@@ -25,6 +25,7 @@ import {
 import { db } from "@/firebase/config";
 import { DealNegotiator, IUser, NegotiationData } from "@/types";
 import {
+  allowedStatuses,
   dateFormat,
   getDealsWithoutCoordinator,
   getStatusStyles,
@@ -492,13 +493,10 @@ function Manager() {
 
                                 <TableBody>
                                   {team.negotiations
-                                    .filter(
-                                      (item) =>
-                                        item.negotiations_Status ===
-                                          "Deal Started" ||
-                                        item.negotiations_Status ===
-                                          "Actively Negotiating" ||
-                                        item.negotiations_Status === "Paid"
+                                    .filter((item) =>
+                                      allowedStatuses.includes(
+                                        item?.negotiations_Status ?? ""
+                                      )
                                     )
                                     .map((deal, index) => (
                                       <TableRow
