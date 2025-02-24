@@ -121,17 +121,12 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
       formErrors.priceExcludingTax = "Price is required";
     if (!formData.discountAmount)
       formErrors.discountAmount = "Discount Amount is required";
-    if (!formData.salesPersonEmail.length) {
-      formErrors.salesPersonEmail = "Salesperson Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.salesPersonEmail)) {
-      formErrors.salesPersonEmail = "Invalid email format";
-    }
+
     if (
       formErrors.dealerName?.length ||
       formErrors.dealerNumber?.length ||
       formErrors.discountAmount?.length ||
-      formErrors.priceExcludingTax?.length ||
-      formErrors.salesPersonEmail?.length
+      formErrors.priceExcludingTax?.length
     ) {
       setErrors(formErrors);
       return;
@@ -377,11 +372,6 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                     onChange={handleChange}
                     className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />
-                  {errors?.salesPersonEmail && (
-                    <span className="text-red-500 text-sm">
-                      {errors.salesPersonEmail}
-                    </span>
-                  )}
                 </div>
 
                 <div className="flex-1">
