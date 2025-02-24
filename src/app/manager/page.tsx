@@ -12,9 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, ChevronDown, ChevronRight, X } from "lucide-react";
 import {
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   updateDoc,
@@ -148,6 +150,12 @@ function Manager() {
     try {
       const dealRef = doc(db, "negotiations", id);
       const negotiatorRef = doc(db, "team delivrd", newNegotiatorId);
+      const dealSnap = await getDoc(dealRef);
+      if (!dealSnap.exists()) {
+        throw new Error("Deal not found");
+      }
+
+      const oldNegotiatorId = dealSnap.data().negotiations_deal_coordinator;
 
       const movedDeal = dealsWithoutCoordinator?.find((deal) => deal.id === id);
       if (!movedDeal)
@@ -160,6 +168,12 @@ function Manager() {
       await updateDoc(negotiatorRef, {
         active_deals: arrayUnion(id),
       });
+      if (oldNegotiatorId) {
+        const oldNegotiatorRef = doc(db, "team delivrd", oldNegotiatorId);
+        await updateDoc(oldNegotiatorRef, {
+          active_deals: arrayRemove(id),
+        });
+      }
 
       setFilteredDeals((prevDeals) =>
         prevDeals?.map((deal) =>

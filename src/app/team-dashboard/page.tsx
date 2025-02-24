@@ -13,7 +13,13 @@ import {
   fetchAllPaidNegotiations,
 } from "@/lib/utils";
 import { BellIcon, Search } from "lucide-react";
-import { arrayUnion, doc, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { NegotiationData } from "@/types";
 import { toast } from "@/hooks/use-toast";
@@ -367,6 +373,13 @@ export default function DealList() {
     try {
       const dealRef = doc(db, "negotiations", id);
 
+      const dealSnap = await getDoc(dealRef);
+      if (!dealSnap.exists()) {
+        throw new Error("Deal not found");
+      }
+
+      const oldNegotiatorId = dealSnap.data().negotiations_deal_coordinator;
+
       await updateDoc(dealRef, {
         negotiations_deal_coordinator: newNegotiatorId ?? "",
       });
@@ -376,6 +389,13 @@ export default function DealList() {
       await updateDoc(negotiatorRef, {
         active_deals: arrayUnion(id),
       });
+
+      if (oldNegotiatorId) {
+        const oldNegotiatorRef = doc(db, "team delivrd", oldNegotiatorId);
+        await updateDoc(oldNegotiatorRef, {
+          active_deals: arrayRemove(id),
+        });
+      }
 
       setFilteredDeals((prevDeals) =>
         prevDeals?.map((deal) =>

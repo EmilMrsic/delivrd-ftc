@@ -207,6 +207,7 @@ export const dealStageOptions = [
   "Ready & Confirmed",
   "Paid Need to finalize",
   "Manually Added",
+  "Needs To Review",
   "Applicant",
 ];
 
@@ -425,6 +426,60 @@ export const fetchAllPaidNegotiations = async () => {
     return [];
   }
 };
+
+export const fetchAllActiveNegotiations = async () => {
+  try {
+    const negotiationsQuery = query(
+      collection(db, "negotiations"),
+      where("negotiations_Status", "in", [
+        "Actively Negotiating",
+        "Deal Started",
+        "Paid",
+      ])
+    );
+
+    const negotiationsSnapshot = await getDocs(negotiationsQuery);
+    const paidNegotiationIds = negotiationsSnapshot.docs.map((doc) => doc.id);
+
+    if (paidNegotiationIds.length === 0) {
+      console.log("No negotiations with status PAID found.");
+      return [];
+    }
+
+    const chunk = (array: string[], size: number) => {
+      const result = [];
+      for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+      }
+      return result;
+    };
+
+    const chunkedIds = chunk(paidNegotiationIds, 30);
+    let allFilteredNegotiations: any[] = [];
+
+    for (const chunk of chunkedIds) {
+      const batchQuery = query(
+        collection(db, "negotiations"),
+        where("__name__", "in", chunk)
+      );
+
+      const batchSnapshot = await getDocs(batchQuery);
+      const filteredData = batchSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
+    }
+
+    console.log("Filtered Negotiations:", allFilteredNegotiations);
+    return allFilteredNegotiations;
+  } catch (error) {
+    console.error("Error fetching negotiations in batches:", error);
+    return [];
+  }
+};
+
 export const fetchAllPaidHoldingNegotiations = async () => {
   try {
     const negotiationsQuery = query(
@@ -642,6 +697,26 @@ export const getDealsWithoutCoordinator = async () => {
       "Paid",
       "Deal Started",
     ])
+  );
+
+  try {
+    const querySnapshot = await getDocs(dealsQuery);
+    const deals: any = querySnapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((deal: any) => !deal.negotiations_deal_coordinator); // Filter null or empty values manually
+
+    console.log(deals);
+    return deals;
+  } catch (error) {
+    console.error("Error fetching deals:", error);
+    return [];
+  }
+};
+
+export const getReviewDealsWithoutCoordinator = async () => {
+  const dealsQuery = query(
+    collection(db, "negotiations"),
+    where("negotiations_Status", "==", "Needs To Review")
   );
 
   try {

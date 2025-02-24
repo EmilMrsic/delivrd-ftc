@@ -21,7 +21,12 @@ type FilterPopupProps = {
   dealCoordinators: DealNegotiator[];
 };
 
-const statuses = ["Paid Holding", "Old Deals"];
+export const statuses = [
+  "Paid Holding",
+  "Old Deals",
+  "Need To Review",
+  "View By Brand",
+];
 
 const FilterPopup = ({
   filters,

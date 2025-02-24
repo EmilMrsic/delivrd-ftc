@@ -1,7 +1,13 @@
 "use client";
 import { Loader } from "@/components/base/loader";
+import { statuses } from "@/components/Team/filter-popup";
 import ClientDetailsPopup from "@/components/Team/team-detail-popup";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -13,7 +19,15 @@ import {
 import useTeamDashboard from "@/hooks/useTeamDashboard";
 import { fetchAllPaidHoldingNegotiations, getStatusStyles } from "@/lib/utils";
 import { DealNegotiator, NegotiationData } from "@/types";
-import { Car, Expand, MapPin, StickyNote, User, X } from "lucide-react";
+import {
+  Car,
+  ChevronDown,
+  Expand,
+  MapPin,
+  StickyNote,
+  User,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -108,6 +122,29 @@ const PaidHolding = () => {
             </h1>
           </div>
         </div>
+      </div>
+      <div className="space-y-2 ml-10 w-[150px]">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              Select View
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-auto">
+            <div className="flex flex-col w-fit">
+              {statuses.map((status, index) => (
+                <Link
+                  key={index}
+                  className="p-2 text-sm hover:underline cursor-pointer"
+                  href={`/${status.toLowerCase().replace(/\s+/g, "-")}`}
+                >
+                  {status}
+                </Link>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="m-5">
         <Table className="min-w-full border-collapse">
