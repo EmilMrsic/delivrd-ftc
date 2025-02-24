@@ -52,61 +52,36 @@ const useTeamDashboard = () => {
         return;
       }
 
-      const teamDocRef = doc(db, "team delivrd", id);
-      const teamSnapshot = await getDoc(teamDocRef);
-
-      if (!teamSnapshot.exists()) {
-        console.log("Team document not found");
-        return;
-      }
-
-      const teamData = teamSnapshot.data();
-      setNegotiatorData(teamData as DealNegotiator);
-
-      const activeDeals = teamData.active_deals;
-      if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
-        console.log("No active deals found");
-        setOriginalDeals([]);
-        setFilteredDeals([]);
-        return;
-      }
-
+      // Directly query negotiations with filtered statuses
       const negotiationsCollectionRef = collection(db, "negotiations");
-      const chunkedIds = chunk(activeDeals, 10);
-      const negotiationsData: NegotiationData[] = [];
+      const filteredStatuses = [
+        "Deal Started",
+        "Actively Negotiating",
+        "Delivery Scheduled",
+        "Deal Complete Long Term",
+        "Long Term Order",
+        "Shipping",
+        "Needs Review",
+        "Follow-up",
+        "Follow-up Issue",
+      ];
 
-      for (const idChunk of chunkedIds) {
-        const negotiationsQuery = query(
-          negotiationsCollectionRef,
-          where("__name__", "in", idChunk)
-        );
-        const negotiationsSnapshot = await getDocs(negotiationsQuery);
-
-        negotiationsSnapshot.forEach((doc) => {
-          const data = doc.data();
-          negotiationsData.push(data as NegotiationData);
-        });
-      }
-
-      setOriginalDeals(negotiationsData as NegotiationData[]);
-      const defaultFilteredDeals = negotiationsData.filter((deal) =>
-        [
-          "Deal Started",
-          "Actively Negotiating",
-          "Delivery Scheduled",
-          "Deal Complete Long Term",
-          "Long Term Order",
-          "Shipping",
-          "Needs Review",
-          "Follow-up",
-          "Follow-up Issue",
-        ].includes(deal.negotiations_Status ?? "")
+      const negotiationsQuery = query(
+        negotiationsCollectionRef,
+        where("negotiations_Status", "in", filteredStatuses)
       );
-      setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
+
+      const negotiationsSnapshot = await getDocs(negotiationsQuery);
+      const negotiationsData: NegotiationData[] = negotiationsSnapshot.docs.map(
+        (doc) => doc.data() as NegotiationData
+      );
+
+      setOriginalDeals(negotiationsData);
+      setFilteredDeals(negotiationsData);
     } catch (error) {
       console.error("Error fetching negotiations:", error);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -234,6 +209,7 @@ const useTeamDashboard = () => {
     itemsPerPage,
     currentPage,
     setCurrentPage,
+    fetchAllNegotiation,
   };
 };
 
