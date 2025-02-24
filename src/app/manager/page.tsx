@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, ChevronDown, ChevronRight, X } from "lucide-react";
 import {
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
