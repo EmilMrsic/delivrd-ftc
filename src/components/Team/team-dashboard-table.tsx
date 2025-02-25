@@ -667,7 +667,7 @@ const TeamDashboardTable = ({
                             handleAskForReview(deal.id);
                           } else {
                             e.stopPropagation();
-                            toast({ title: "Already Review Request Send" });
+                            toast({ title: "Review Request Already Sent" });
                           }
                         }}
                         className="text-sm pl-4 pr-1 py-1 cursor-pointer"
