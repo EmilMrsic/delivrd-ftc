@@ -268,7 +268,7 @@ const ViewByBrand = () => {
               <TableHead className="text-left px-4 py-2 border-r">
                 Model
               </TableHead>
-              <TableHead className="text-left px-4 py-2 border-r">
+              <TableHead className="text-left min-w-[150px] px-4 py-2 border-r">
                 Phone Number
               </TableHead>
               <TableHead className="text-left px-4 py-2 border-r">
@@ -375,7 +375,7 @@ const ViewByBrand = () => {
                   </TableCell>
 
                   <TableCell className="px-4 py-2 w-[100px] border-r">
-                    {deal?.negotiations_New_or_Used && (
+                    {deal?.negotiations_New_or_Used ? (
                       <Button
                         variant="outline"
                         className={`cursor-pointer p-1 w-fit h-fit text-xs rounded-full ${
@@ -384,8 +384,10 @@ const ViewByBrand = () => {
                             : "bg-[#c4ecff]"
                         }`}
                       >
-                        <p> {deal?.negotiations_New_or_Used ?? ""}</p>
+                        <p> {deal?.negotiations_New_or_Used}</p>
                       </Button>
+                    ) : (
+                      <></>
                     )}
                   </TableCell>
                   <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
