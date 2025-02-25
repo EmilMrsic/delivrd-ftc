@@ -8,9 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { updateDoc, doc } from "firebase/firestore";
-import { X } from "lucide-react";
 import { db } from "@/firebase/config";
-import { toast } from "@/hooks/use-toast";
 import { NegotiationData } from "@/types";
 import { dealStageOptions } from "@/lib/utils";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
@@ -165,7 +163,7 @@ export default function ClientDetailsPopup({
 
         <button
           onClick={onClose}
-          className="mt-6 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+          className="mt-6 w-full bg-blue-500 text-white h-fit py-3 rounded hover:bg-blue-600"
         >
           Close
         </button>

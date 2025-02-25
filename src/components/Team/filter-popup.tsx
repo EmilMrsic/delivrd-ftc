@@ -26,6 +26,8 @@ export const statuses = [
   "Old Deals",
   "Need To Review",
   "View By Brand",
+  "Reminder Status",
+  "Should Have Received a Car",
 ];
 
 const FilterPopup = ({

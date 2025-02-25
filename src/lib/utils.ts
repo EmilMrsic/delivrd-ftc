@@ -185,10 +185,10 @@ export const dealStageOptions = [
   "Lost",
   "No Show",
   "Paid",
-  "Insta-Pay",
+  "Insta Pay",
   "Paid Holding",
   "Deal Started",
-  "Deal Completed Long Term Order",
+  "Deal Complete- Long Distance",
   "Actively Negotiating",
   "Delivery Scheduled",
   "Long Term Order",
@@ -309,6 +309,17 @@ export const getCurrentDateTime = (): string => {
   return `${date}, ${time}`;
 };
 
+const statusArray = [
+  "Sent",
+  "24hr Reminder",
+  "48hr Reminder",
+  "72hr Reminder",
+  "6 Day Reminder",
+  "PAID",
+  "Unpaid/No Response",
+  "Unpaid-Pending",
+];
+
 export async function getUsersWithTeamPrivilege() {
   try {
     const usersRef = collection(db, "users");
@@ -415,6 +426,61 @@ export const fetchAllPaidNegotiations = async () => {
           ...doc.data(),
         }))
         .filter((doc) => !doc.hasOwnProperty("negotiations_deal_coordinator"));
+
+      allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
+    }
+
+    console.log("Filtered Negotiations:", allFilteredNegotiations);
+    return allFilteredNegotiations;
+  } catch (error) {
+    console.error("Error fetching negotiations in batches:", error);
+    return [];
+  }
+};
+
+export const fetchAllProposalSendNegotiations = async () => {
+  try {
+    const negotiationsQuery = query(
+      collection(db, "negotiations"),
+      where("negotiations_Status", "==", "Proposal Sent")
+    );
+
+    const negotiationsSnapshot = await getDocs(negotiationsQuery);
+    const paidNegotiationIds = negotiationsSnapshot.docs.map((doc) => doc.id);
+
+    if (paidNegotiationIds.length === 0) {
+      console.log("No negotiations with status PAID found.");
+      return [];
+    }
+
+    const chunk = (array: string[], size: number) => {
+      const result = [];
+      for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+      }
+      return result;
+    };
+
+    const chunkedIds = chunk(paidNegotiationIds, 30);
+    let allFilteredNegotiations: any[] = [];
+
+    for (const chunk of chunkedIds) {
+      const batchQuery = query(
+        collection(db, "negotiations"),
+        where("__name__", "in", chunk)
+      );
+
+      const batchSnapshot = await getDocs(batchQuery);
+      const filteredData = batchSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter(
+          (doc: any) =>
+            doc.negotiations_Invoice_Status !== null &&
+            statusArray.includes(doc.negotiations_Invoice_Status.trim())
+        );
 
       allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
     }
@@ -625,17 +691,6 @@ export const fetchAllNotClosedNegotiations = async () => {
         collection(db, "negotiations"),
         where("__name__", "in", chunk)
       );
-      const allowedStatuses = [
-        "Deal Started",
-        "Actively Negotiating",
-        "Delivery Scheduled",
-        "Deal Complete Long Term",
-        "Long Term Order",
-        "Shipping",
-        "Needs Review",
-        "Follow-up",
-        "Follow-up Issue",
-      ];
 
       const batchSnapshot = await getDocs(batchQuery);
       const filteredData = batchSnapshot.docs

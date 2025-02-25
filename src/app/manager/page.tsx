@@ -58,6 +58,10 @@ function Manager() {
   const [teamData, setTeamData] = useState<TeamDataType[]>([]);
   const router = useRouter();
   const [userData, setUserData] = useState<IUser>();
+  const [sortConfig, setSortConfig] = useState({
+    key: "submittedDate", // default sorting by Submitted Date
+    direction: "ascending", // default direction
+  });
 
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
     Record<string, boolean>
@@ -227,6 +231,82 @@ function Manager() {
     );
   }, []);
 
+  const sortData = (key: string) => {
+    setSortConfig((prevConfig) => {
+      const newDirection =
+        prevConfig.key === key && prevConfig.direction === "ascending"
+          ? "descending"
+          : "ascending";
+
+      const sortedTeams = [...teamData].map((team) => {
+        const sortedNegotiations = [...team.negotiations].sort(
+          (a: any, b: any) => {
+            let aValue = a[key];
+            let bValue = b[key];
+
+            if (typeof aValue === "string") aValue = aValue.toLowerCase();
+            if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+            if (aValue == null) return newDirection === "ascending" ? 1 : -1;
+            if (bValue == null) return newDirection === "ascending" ? -1 : 1;
+
+            if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
+              return newDirection === "ascending"
+                ? Number(aValue) - Number(bValue)
+                : Number(bValue) - Number(aValue);
+            }
+
+            if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
+            if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
+            return 0;
+          }
+        );
+
+        return { ...team, negotiations: sortedNegotiations };
+      });
+
+      setTeamData(sortedTeams);
+
+      return { key, direction: newDirection };
+    });
+  };
+
+  const sortWithoutCoordinatorData = (key: string) => {
+    setSortConfig((prevConfig) => {
+      const newDirection =
+        prevConfig.key === key && prevConfig.direction === "ascending"
+          ? "descending"
+          : "ascending";
+
+      const sortedNegotiations = [...dealsWithoutCoordinator].sort(
+        (a: any, b: any) => {
+          let aValue = a[key];
+          let bValue = b[key];
+
+          if (typeof aValue === "string") aValue = aValue.toLowerCase();
+          if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+          if (aValue == null) return newDirection === "ascending" ? 1 : -1;
+          if (bValue == null) return newDirection === "ascending" ? -1 : 1;
+
+          if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
+            return newDirection === "ascending"
+              ? Number(aValue) - Number(bValue)
+              : Number(bValue) - Number(aValue);
+          }
+
+          if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
+          if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
+          return 0;
+        }
+      );
+
+      setDealsWithoutCoordinator(sortedNegotiations);
+
+      return { key, direction: newDirection };
+    });
+  };
+
   return (
     <>
       <div className="flex justify-between items-center bg-[#202125] p-6 mb-5 shadow-lg">
@@ -296,14 +376,55 @@ function Manager() {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Make</TableHead>
-                                <TableHead>Model</TableHead>
+                                <TableHead
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    sortWithoutCoordinatorData(
+                                      "negotiations_Client"
+                                    )
+                                  }
+                                >
+                                  Client
+                                </TableHead>
+                                <TableHead
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    sortWithoutCoordinatorData(
+                                      "negotiations_Brand"
+                                    )
+                                  }
+                                >
+                                  Make
+                                </TableHead>
+                                <TableHead
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    sortWithoutCoordinatorData(
+                                      "negotiations_Model"
+                                    )
+                                  }
+                                >
+                                  Model
+                                </TableHead>
                                 <TableHead>Stage</TableHead>
-                                <TableHead>Zip Code</TableHead>
+                                <TableHead
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    sortWithoutCoordinatorData("date_paid")
+                                  }
+                                >
+                                  Zip Code
+                                </TableHead>
                                 <TableHead>Deal Negotiator</TableHead>
                                 <TableHead>Onboarding Complete</TableHead>
-                                <TableHead>Date Paid</TableHead>
+                                <TableHead
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    sortWithoutCoordinatorData("submittedDate")
+                                  }
+                                >
+                                  Date Paid
+                                </TableHead>
                               </TableRow>
                             </TableHeader>
 
@@ -480,14 +601,47 @@ function Manager() {
                               <Table>
                                 <TableHeader>
                                   <TableRow>
-                                    <TableHead>Client</TableHead>
-                                    <TableHead>Make</TableHead>
-                                    <TableHead>Model</TableHead>
+                                    <TableHead
+                                      className="cursor-pointer"
+                                      onClick={() =>
+                                        sortData("negotiations_Client")
+                                      }
+                                    >
+                                      Client
+                                    </TableHead>
+                                    <TableHead
+                                      className="cursor-pointer"
+                                      onClick={() =>
+                                        sortData("negotiations_Brand")
+                                      }
+                                    >
+                                      Make
+                                    </TableHead>
+                                    <TableHead
+                                      className="cursor-pointer"
+                                      onClick={() =>
+                                        sortData("negotiations_Model")
+                                      }
+                                    >
+                                      Model
+                                    </TableHead>
                                     <TableHead>Stage</TableHead>
-                                    <TableHead>Zip Code</TableHead>
+                                    <TableHead
+                                      className="cursor-pointer"
+                                      onClick={() =>
+                                        sortData("negotiations_Zip_Code")
+                                      }
+                                    >
+                                      Zip Code
+                                    </TableHead>
                                     <TableHead>Deal Negotiator</TableHead>
                                     <TableHead>Onboarding Complete</TableHead>
-                                    <TableHead>Date Paid</TableHead>
+                                    <TableHead
+                                      className="cursor-pointer"
+                                      onClick={() => sortData("date_paid")}
+                                    >
+                                      Date Paid
+                                    </TableHead>
                                   </TableRow>
                                 </TableHeader>
 
