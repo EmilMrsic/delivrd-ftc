@@ -72,14 +72,12 @@ function ReceivedCar() {
     id: string;
     note: string;
   } | null>(null);
-  const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate", // default sorting by Submitted Date
-    direction: "ascending", // default direction
-  });
 
-  const [openNegotiatorState, setOpenNegotiatorState] = useState<
-    Record<string, boolean>
-  >({});
+  const [tradeInfo, setExpandedTradeInfo] = useState<{
+    id: string;
+    note: string;
+  } | null>(null);
+
   const [dealsWithoutCoordinator, setDealsWithoutCoordinator] = useState<
     NegotiationData[]
   >([]);
@@ -465,8 +463,33 @@ function ReceivedCar() {
                                       <TableCell className="border-t border-gray-200">
                                         {deal.arrival_to_dealer}
                                       </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.negotiations_Trade_Details}
+                                      <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-t border-gray-200">
+                                        {deal?.negotiations_Trade_Details &&
+                                        deal?.negotiations_Trade_Details
+                                          ?.length > 50
+                                          ? `${deal?.negotiations_Trade_Details?.substring(
+                                              0,
+                                              50
+                                            )}...`
+                                          : deal.negotiations_Trade_Details ??
+                                            "No Trade Details available"}
+                                        <button
+                                          onClick={() =>
+                                            setExpandedTradeInfo({
+                                              id: deal.id,
+                                              note:
+                                                deal.negotiations_Trade_Details ??
+                                                "",
+                                            })
+                                          }
+                                          className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
+                                          title="Expand"
+                                        >
+                                          <Expand
+                                            size={16}
+                                            className="text-gray-500 hover:text-gray-700"
+                                          />
+                                        </button>
                                       </TableCell>
                                       <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-t border-gray-200">
                                         {deal?.negotiations_Travel_Limit &&
@@ -587,6 +610,25 @@ function ReceivedCar() {
                 <button
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                   onClick={() => setExpandedShippingInfo(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tradeInfo && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-4">
+              <h2 className="text-lg font-semibold mb-2">Trade Info</h2>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                {tradeInfo.note}
+              </p>
+              <div className="text-right mt-4">
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  onClick={() => setExpandedTradeInfo(null)}
                 >
                   Close
                 </button>
