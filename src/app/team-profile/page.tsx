@@ -393,13 +393,23 @@ function ProjectProfile() {
 
   const handleSendComment = async (data: BidComments) => {
     try {
-      await axios.post(
-        "https://hooks.airtable.com/workflows/v1/genericWebhook/appRoMnigxRbVdjCO/wfl9PmlOjUJ4yMkQP/wtrvNE5UXDQgtQ97q",
-        data
+      const response = await fetch(
+        "https://us-central1-delivrd-first-to-call-bids.cloudfunctions.net/handleBidComment",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
       );
-      toast({ title: "Comment sent to client" });
+
+      const result = await response.json();
+      if (result.success) {
+        toast({ title: "Comment sent to client" });
+      } else {
+        console.error("Failed to send comment:", result.error);
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Error:", error);
     }
   };
 
