@@ -135,13 +135,36 @@ function ProjectProfile() {
     setBidCommentsByBidId(groupedBidComments);
   };
   const fetchNegotiationsAndBids = async () => {
-    if (!userData?.negotiation_id?.length) return;
-
-    const allIncomingBids: IncomingBid[] = [];
-    const negotiation: NegotiationData[] = [];
+    let userNegotiationIds: string[] = [];
 
     try {
-      for (const negotiationId of userData.negotiation_id) {
+      // If userData doesn't exist, fetch user from Firestore
+      if (!userData) {
+        if (!id) {
+          console.error("User ID is missing.");
+          return;
+        }
+
+        const userRef = doc(db, "users", id);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          console.error("User not found.");
+          return;
+        }
+
+        const user = userSnap.data();
+        userNegotiationIds = user.negotiation_id || [];
+      } else {
+        userNegotiationIds = userData.negotiation_id || [];
+      }
+
+      if (!userNegotiationIds.length) return;
+
+      const allIncomingBids: IncomingBid[] = [];
+      const negotiation: NegotiationData[] = [];
+
+      for (const negotiationId of userNegotiationIds) {
         const negotiationRef = doc(db, "negotiations", negotiationId);
         const negotiationSnap = await getDoc(negotiationRef);
 

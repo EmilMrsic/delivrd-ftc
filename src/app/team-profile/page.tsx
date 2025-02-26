@@ -60,6 +60,7 @@ import { useRouter } from "next/navigation";
 import EditableTextArea from "@/components/base/editable-textarea";
 import { Input } from "@/components/ui/input";
 import EditableInput from "@/components/base/input-field";
+import axios from "axios";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -388,6 +389,18 @@ function ProjectProfile() {
         return bid;
       });
     });
+  };
+
+  const handleSendComment = async (data: BidComments) => {
+    try {
+      await axios.post(
+        "https://hooks.airtable.com/workflows/v1/genericWebhook/appRoMnigxRbVdjCO/wfl9PmlOjUJ4yMkQP/wtrvNE5UXDQgtQ97q",
+        data
+      );
+      toast({ title: "Comment sent to client" });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -876,22 +889,31 @@ function ProjectProfile() {
                           bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
                             bidCommentsByBidId[bidDetails.bid_id].map(
                               (comment, index) => (
-                                <div
-                                  key={index}
-                                  className="p-2 bg-gray-100 rounded mt-1"
-                                >
-                                  <p>
-                                    <strong>
-                                      {comment.deal_coordinator_name === "N/A"
-                                        ? comment.client_name
-                                        : comment.deal_coordinator_name}
-                                      :
-                                    </strong>{" "}
-                                    {parseComment(comment.comment)}
-                                  </p>
-                                  <p className="text-sm text-gray-500">
-                                    {comment.time}
-                                  </p>
+                                <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
+                                  <div
+                                    key={index}
+                                    className="p-2 flex flex-col  mt-1"
+                                  >
+                                    <p>
+                                      <strong>
+                                        {comment.deal_coordinator_name === "N/A"
+                                          ? comment.client_name
+                                          : comment.deal_coordinator_name}
+                                        :
+                                      </strong>{" "}
+                                      {parseComment(comment.comment)}
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                      {comment.time}
+                                    </p>
+                                  </div>
+                                  <Button
+                                    variant="outline"
+                                    className="border-black"
+                                    onClick={() => handleSendComment(comment)}
+                                  >
+                                    Send To Client
+                                  </Button>
                                 </div>
                               )
                             )
