@@ -176,8 +176,9 @@ const DealDetailCard = ({
               </svg>
               <span>
                 <strong>Desired Exterior:</strong>{" "}
-                {userData?.color_options &&
-                  userData?.color_options.exterior.preferred}
+                {negotiationData[0] &&
+                  negotiationData[0]?.negotiations_Color_Options
+                    .exterior_preferred}
               </span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
@@ -195,16 +196,18 @@ const DealDetailCard = ({
               </svg>
               <span>
                 <strong>Desired Interior:</strong>{" "}
-                {userData?.color_options &&
-                  userData?.color_options.interior.preferred}
+                {negotiationData[0] &&
+                  negotiationData[0]?.negotiations_Color_Options
+                    .interior_preferred}
               </span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
               <X className="h-5 w-5 text-red-500" />
               <span>
                 <strong>Exterior Deal Breakers:</strong>{" "}
-                {userData?.color_options &&
-                  userData?.color_options.exterior.not_preferred}
+                {negotiationData[0] &&
+                  negotiationData[0]?.negotiations_Color_Options
+                    .exterior_deal_breakers}
               </span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
@@ -212,7 +215,8 @@ const DealDetailCard = ({
               <span>
                 <strong>Interior Deal Breakers:</strong>{" "}
                 {userData?.color_options &&
-                  userData?.color_options.interior.not_preferred}
+                  negotiationData[0]?.negotiations_Color_Options
+                    .interior_deal_breaker}
               </span>
             </div>
           </div>
