@@ -14,7 +14,7 @@ const ClientStickyHeader = ({
       <div className="flex justify-between items-center">
         <span className="font-semibold flex items-center">
           <Car className="mr-2 h-4 w-4" />
-          {userData?.brand} {userData?.model[0]}
+          {userData?.brand} {(userData?.model && userData?.model[0]) ?? ""}
         </span>
         <span>
           <DollarSign className="inline mr-1 h-4 w-4" />
@@ -35,7 +35,8 @@ const ClientStickyHeader = ({
               clipRule="evenodd"
             />
           </svg>
-          {userData?.color_options.exterior.preferred}
+          {userData?.color_options &&
+            userData?.color_options.exterior.preferred}
         </span>
         <span>
           <DollarSign className="inline mr-1 h-4 w-4" />
@@ -56,7 +57,7 @@ const ClientStickyHeader = ({
         </span>
         <span>
           <DollarSign className="inline mr-1 h-4 w-4" />
-          {userData?.deals[0].payment_type}
+          {userData?.deals && userData?.deals[0].payment_type}
         </span>
       </div>
       <div className="flex justify-between items-center text-sm">

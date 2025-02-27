@@ -90,7 +90,8 @@ const DealDetailCard = ({
           <div className="flex items-center space-x-2 text-[#202125]">
             <Car className="h-5 w-5 text-[#0989E5]" />
             <span>
-              <strong>Model:</strong> {userData?.model[0]}
+              <strong>Model:</strong>{" "}
+              {(userData?.model && userData?.model[0]) ?? ""}
             </span>
           </div>
           <div className="flex items-center space-x-2 text-[#202125]">
@@ -132,7 +133,8 @@ const DealDetailCard = ({
           <div className="flex items-center space-x-2 text-[#202125]">
             <DollarSign className="h-5 w-5 text-[#0989E5]" />
             <span>
-              <strong>Finance Type:</strong> {userData?.deals[0]?.payment_type}
+              <strong>Finance Type:</strong>{" "}
+              {userData?.deals && userData?.deals[0]?.payment_type}
             </span>
           </div>
           <div className="flex items-center space-x-2 text-[#202125]">
@@ -174,7 +176,8 @@ const DealDetailCard = ({
               </svg>
               <span>
                 <strong>Desired Exterior:</strong>{" "}
-                {userData?.color_options.exterior.preferred}
+                {userData?.color_options &&
+                  userData?.color_options.exterior.preferred}
               </span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
@@ -192,21 +195,24 @@ const DealDetailCard = ({
               </svg>
               <span>
                 <strong>Desired Interior:</strong>{" "}
-                {userData?.color_options.interior.preferred}
+                {userData?.color_options &&
+                  userData?.color_options.interior.preferred}
               </span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
               <X className="h-5 w-5 text-red-500" />
               <span>
                 <strong>Exterior Deal Breakers:</strong>{" "}
-                {userData?.color_options.exterior.not_preferred}
+                {userData?.color_options &&
+                  userData?.color_options.exterior.not_preferred}
               </span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
               <X className="h-5 w-5 text-red-500" />
               <span>
                 <strong>Interior Deal Breakers:</strong>{" "}
-                {userData?.color_options.interior.not_preferred}
+                {userData?.color_options &&
+                  userData?.color_options.interior.not_preferred}
               </span>
             </div>
           </div>

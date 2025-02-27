@@ -25,9 +25,12 @@ export async function POST(req: Request) {
   <body>
   <p>Hey 👋,</p>
   <p>
-    Use <a href="${link}">this</a> link to Log in.
+    Use <a href="${link}">this</a> link to log in.
   </p>
-  <p>Do not reply to this email, it is an automated system that does not receive emails.</p>
+  <p>
+    This link is **one-time use only**. If you've already used it and need to log in again, please go back to <a href="https://delivrdfor.me">Delivrd</a> and request a new link.
+  </p>
+  <p>Do not reply to this email; it is an automated system that does not receive emails.</p>
   </body>
   </html>`;
 
