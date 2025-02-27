@@ -394,7 +394,7 @@ function ProjectProfile() {
   const handleSendComment = async (data: BidComments) => {
     try {
       const response = await fetch(
-        "https://us-central1-delivrd-first-to-call-bids.cloudfunctions.net/handleBidComment",
+        process.env.NEXT_PUBLIC_COMMENT_FUNC_URL ?? "",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

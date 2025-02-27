@@ -41,7 +41,7 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
       try {
         const usersQuery = query(
           collection(db, "users"),
-          where("negotiations", "array-contains", negotiationId)
+          where("negotiations_id", "array-contains", negotiationId)
         );
 
         const userSnapshot = await getDocs(usersQuery);
