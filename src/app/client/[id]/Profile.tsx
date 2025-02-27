@@ -455,6 +455,7 @@ function ProjectProfile() {
             />
 
             <ClientOverviewCard
+              negotiationData={negotiationData}
               negotiationStatus={negotiationData[0]?.negotiations_Status ?? ""}
               userData={userData}
               dealNegotiatorData={dealNegotiatorData}

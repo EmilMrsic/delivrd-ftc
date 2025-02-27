@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DealNegotiator, IUser } from "@/types";
+import { DealNegotiator, IUser, NegotiationData } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
 import { Separator } from "@radix-ui/react-separator";
@@ -10,10 +10,12 @@ const ClientOverviewCard = ({
   userData,
   dealNegotiatorData,
   negotiationStatus,
+  negotiationData,
 }: {
   userData?: IUser;
   dealNegotiatorData?: DealNegotiator;
   negotiationStatus: string;
+  negotiationData: NegotiationData[];
 }) => {
   const isVimeoLink = (url: string): boolean => {
     return url.includes("vimeo.com");
@@ -73,7 +75,7 @@ const ClientOverviewCard = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span>City: {userData?.city}</span>
+              <span>City: {negotiationData[0].negotiations_city ?? ""}</span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
               <svg
@@ -88,7 +90,7 @@ const ClientOverviewCard = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span>State: {userData?.state}</span>
+              <span>State: {negotiationData[0].negotiations_state}</span>
             </div>
           </div>
         </div>
