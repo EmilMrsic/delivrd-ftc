@@ -917,13 +917,17 @@ function ProjectProfile() {
                                       {comment.time}
                                     </p>
                                   </div>
-                                  <Button
-                                    variant="outline"
-                                    className="border-black"
-                                    onClick={() => handleSendComment(comment)}
-                                  >
-                                    Send To Client
-                                  </Button>
+                                  {comment.deal_coordinator_name === "N/A" ? (
+                                    <p className="pr-2">From Client</p>
+                                  ) : (
+                                    <Button
+                                      variant="outline"
+                                      className="border-black"
+                                      onClick={() => handleSendComment(comment)}
+                                    >
+                                      Send To Client
+                                    </Button>
+                                  )}
                                 </div>
                               )
                             )

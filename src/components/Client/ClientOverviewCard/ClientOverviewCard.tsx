@@ -52,7 +52,7 @@ const ClientOverviewCard = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span>Zip: {userData?.deals[0].zip_code}</span>
+              <span>Zip: {userData?.deals && userData?.deals[0].zip_code}</span>
             </div>
           </div>
           <div className="space-y-2">
