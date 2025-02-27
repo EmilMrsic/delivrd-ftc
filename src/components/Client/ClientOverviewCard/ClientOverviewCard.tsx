@@ -75,7 +75,11 @@ const ClientOverviewCard = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span>City: {negotiationData[0].negotiations_city ?? ""}</span>
+              <span>
+                City:{" "}
+                {(negotiationData[0] && negotiationData[0].negotiations_city) ??
+                  ""}
+              </span>
             </div>
             <div className="flex items-center space-x-2 text-[#202125]">
               <svg
@@ -90,7 +94,10 @@ const ClientOverviewCard = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span>State: {negotiationData[0].negotiations_state}</span>
+              <span>
+                State:{" "}
+                {negotiationData[0] && negotiationData[0].negotiations_state}
+              </span>
             </div>
           </div>
         </div>
