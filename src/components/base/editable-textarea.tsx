@@ -42,7 +42,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
       try {
         const usersQuery = query(
           collection(db, "users"),
-          where("negotiations", "array-contains", negotiationId)
+          where("negotiations_id", "array-contains", negotiationId)
         );
 
         const userSnapshot = await getDocs(usersQuery);
