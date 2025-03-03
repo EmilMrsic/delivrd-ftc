@@ -103,6 +103,45 @@ const ViewByBrand = () => {
     null
   );
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "submittedDate",
+    direction: "ascending",
+  });
+
+  const sortWithoutCoordinatorData = (key: string) => {
+    setSortConfig((prevConfig) => {
+      const newDirection =
+        prevConfig.key === key && prevConfig.direction === "ascending"
+          ? "descending"
+          : "ascending";
+
+      const sortedNegotiations = [...negotiations].sort((a: any, b: any) => {
+        let aValue = a[key];
+        let bValue = b[key];
+
+        if (typeof aValue === "string") aValue = aValue.toLowerCase();
+        if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+        if (aValue == null) return newDirection === "ascending" ? 1 : -1;
+        if (bValue == null) return newDirection === "ascending" ? -1 : 1;
+
+        if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
+          return newDirection === "ascending"
+            ? Number(aValue) - Number(bValue)
+            : Number(bValue) - Number(aValue);
+        }
+
+        if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
+        if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
+        return 0;
+      });
+
+      setNegotiations(sortedNegotiations);
+
+      return { key, direction: newDirection };
+    });
+  };
+
   useEffect(() => {
     setLoading(true);
     fetchAllActiveNegotiations()
@@ -259,25 +298,47 @@ const ViewByBrand = () => {
           <TableHeader className="sticky top-0 bg-gray-100 z-10 border-b border-gray-300">
             <TableRow>
               <TableHead className="text-left px-4 py-2 border-r">#</TableHead>
-              <TableHead className="text-left px-4 py-2 border-r">
+              <TableHead
+                onClick={() =>
+                  sortWithoutCoordinatorData("negotiations_Client")
+                }
+                className="text-left px-4 py-2 border-r"
+              >
                 Client
               </TableHead>
-              <TableHead className="text-left px-4 py-2 border-r">
+              <TableHead
+                onClick={() => sortWithoutCoordinatorData("negotiations_Brand")}
+                className="text-left px-4 py-2 border-r"
+              >
                 Make
               </TableHead>
-              <TableHead className="text-left px-4 py-2 border-r">
+              <TableHead
+                onClick={() => sortWithoutCoordinatorData("model_of_interests")}
+                className="text-left px-4 py-2 border-r"
+              >
                 Model
               </TableHead>
-              <TableHead className="text-left min-w-[150px] px-4 py-2 border-r">
+              <TableHead
+                onClick={() => sortWithoutCoordinatorData("negotiations_Phone")}
+                className="text-left min-w-[150px] px-4 py-2 border-r"
+              >
                 Phone Number
               </TableHead>
-              <TableHead className="text-left px-4 py-2 border-r">
+              <TableHead
+                onClick={() => sortWithoutCoordinatorData("negotiations_Email")}
+                className="text-left px-4 py-2 border-r"
+              >
                 Email
               </TableHead>
               <TableHead className="text-left  px-4 py-2 border-r">
                 Stage
               </TableHead>
-              <TableHead className="text-left px-4 py-2 border-r">
+              <TableHead
+                onClick={() =>
+                  sortWithoutCoordinatorData("negotiations_Zip_Code")
+                }
+                className="text-left px-4 py-2 border-r"
+              >
                 Zip Code
               </TableHead>
 
@@ -306,7 +367,12 @@ const ViewByBrand = () => {
               <TableHead className="text-left px-4 py-2 border-r">
                 Interior Preffered
               </TableHead>
-              <TableHead className="text-left px-4 py-2">Date Paid</TableHead>
+              <TableHead
+                onClick={() => sortWithoutCoordinatorData("date_paid")}
+                className="text-left px-4 py-2"
+              >
+                Date Paid
+              </TableHead>
             </TableRow>
           </TableHeader>
 

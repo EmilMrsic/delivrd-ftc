@@ -662,13 +662,8 @@ const TeamDashboardTable = ({
                       />
                       <p
                         onClick={(e) => {
-                          if (!deal.review) {
-                            e.stopPropagation();
-                            handleAskForReview(deal.id);
-                          } else {
-                            e.stopPropagation();
-                            toast({ title: "Review Request Already Sent" });
-                          }
+                          e.stopPropagation();
+                          handleAskForReview(deal.id);
                         }}
                         className="text-sm pl-4 pr-1 py-1 cursor-pointer"
                       >

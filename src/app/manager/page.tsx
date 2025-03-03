@@ -410,7 +410,9 @@ function Manager() {
                                 <TableHead
                                   className="cursor-pointer"
                                   onClick={() =>
-                                    sortWithoutCoordinatorData("date_paid")
+                                    sortWithoutCoordinatorData(
+                                      "negotiations_Zip_Code"
+                                    )
                                   }
                                 >
                                   Zip Code

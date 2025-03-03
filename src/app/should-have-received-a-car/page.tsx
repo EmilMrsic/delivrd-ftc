@@ -93,6 +93,11 @@ function ReceivedCar() {
     [key: string]: boolean;
   }>({});
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "submittedDate",
+    direction: "ascending",
+  });
+
   const toggleRow = (id: string) => {
     setExpandedRows((prev) => {
       const newSet = new Set(prev);
@@ -175,6 +180,59 @@ function ReceivedCar() {
     }
   };
 
+  const sortData = (key: string) => {
+    setSortConfig((prevConfig) => {
+      const newDirection =
+        prevConfig.key === key && prevConfig.direction === "ascending"
+          ? "descending"
+          : "ascending";
+
+      const sortedTeams = teamData.map((team) => {
+        const sortedNegotiationsGrouped: NegotiationsGroupedType =
+          Object.fromEntries(
+            Object.entries(team.negotiationsGrouped).map(
+              ([groupKey, negotiations]) => {
+                const sortedNegotiations = [...negotiations].sort(
+                  (a: any, b: any) => {
+                    let aValue = a[key];
+                    let bValue = b[key];
+
+                    if (typeof aValue === "string")
+                      aValue = aValue.toLowerCase();
+                    if (typeof bValue === "string")
+                      bValue = bValue.toLowerCase();
+
+                    if (aValue == null)
+                      return newDirection === "ascending" ? 1 : -1;
+                    if (bValue == null)
+                      return newDirection === "ascending" ? -1 : 1;
+
+                    if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
+                      return newDirection === "ascending"
+                        ? Number(aValue) - Number(bValue)
+                        : Number(bValue) - Number(aValue);
+                    }
+
+                    return newDirection === "ascending"
+                      ? aValue.localeCompare(bValue)
+                      : bValue.localeCompare(aValue);
+                  }
+                );
+
+                return [groupKey, sortedNegotiations];
+              }
+            )
+          );
+
+        return { ...team, negotiationsGrouped: sortedNegotiationsGrouped };
+      });
+
+      setTeamData(sortedTeams);
+
+      return { key, direction: newDirection };
+    });
+  };
+
   useEffect(() => {
     const user = localStorage.getItem("user");
     setUserData(JSON.parse(user ?? ""));
@@ -196,8 +254,6 @@ function ReceivedCar() {
       setDealsWithoutCoordinator(res as NegotiationData[])
     );
   }, []);
-
-  console.log({ teamData });
 
   return (
     <>
@@ -338,34 +394,74 @@ function ReceivedCar() {
                                   <TableHead className="pl-16 py-2 text-xs font-semibold">
                                     No.
                                   </TableHead>
-                                  <TableHead className="min-w-[130px] py-2 text-xs font-semibold">
+                                  <TableHead
+                                    onClick={() =>
+                                      sortData("negotiations_Client")
+                                    }
+                                    className="min-w-[130px] py-2 text-xs font-semibold"
+                                  >
                                     Client
                                   </TableHead>
-                                  <TableHead className="min-w-[120px] py-2 text-xs font-semibold">
+                                  <TableHead
+                                    onClick={() =>
+                                      sortData("negotiations_Phone")
+                                    }
+                                    className="min-w-[120px] py-2 text-xs font-semibold"
+                                  >
                                     Phone
                                   </TableHead>
-                                  <TableHead className="min-w-[100px] py-2 text-xs font-semibold">
+                                  <TableHead
+                                    onClick={() =>
+                                      sortData("negotiations_Zip_Code")
+                                    }
+                                    className="min-w-[100px] py-2 text-xs font-semibold"
+                                  >
                                     Zip Code
                                   </TableHead>
-                                  <TableHead className="py-2 text-xs font-semibold">
+                                  <TableHead
+                                    onClick={() =>
+                                      sortData("negotiations_Brand")
+                                    }
+                                    className="py-2 text-xs font-semibold"
+                                  >
                                     Brand
                                   </TableHead>
                                   <TableHead className="min-w-[120px] py-2 text-xs font-semibold">
                                     Deal Negotiator
                                   </TableHead>
-                                  <TableHead className="min-w-[100px] py-2 text-xs font-semibold">
+                                  <TableHead
+                                    onClick={() =>
+                                      sortData("negotiations_Model")
+                                    }
+                                    className="min-w-[100px] py-2 text-xs font-semibold"
+                                  >
                                     Model
                                   </TableHead>
                                   <TableHead className="min-w-[120px] py-2 text-xs font-semibold">
                                     Status
                                   </TableHead>
-                                  <TableHead className="min-w-[90px] py-2 text-xs font-semibold">
+                                  <TableHead
+                                    onClick={() =>
+                                      sortData("negotiations_Deal_Start_Date")
+                                    }
+                                    className="min-w-[90px] py-2 text-xs font-semibold"
+                                  >
                                     Deal Start Date
                                   </TableHead>
-                                  <TableHead className="min-w-[90px] py-2 text-xs font-semibold">
+                                  <TableHead
+                                    onClick={() =>
+                                      sortData("arrival_to_client")
+                                    }
+                                    className="min-w-[90px] py-2 text-xs font-semibold"
+                                  >
                                     Arrival to Client
                                   </TableHead>
-                                  <TableHead className="min-w-[90px] py-2 text-xs font-semibold">
+                                  <TableHead
+                                    onClick={() =>
+                                      sortData("arrival_to_dealer")
+                                    }
+                                    className="min-w-[90px] py-2 text-xs font-semibold"
+                                  >
                                     Arrival to Dealer
                                   </TableHead>
                                   <TableHead className="py-2 text-xs font-semibold">
