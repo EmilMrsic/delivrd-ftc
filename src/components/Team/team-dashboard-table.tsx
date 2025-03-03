@@ -140,30 +140,39 @@ const TeamDashboardTable = ({
 
   async function handleAskForReview(id: string) {
     if (!id) return;
-    console.log(id);
+
     try {
-      const negotiationRef = doc(db, "negotiations", id);
-      const docSnap = await getDoc(negotiationRef);
+      const dealData = currentDeals.find((item) => item.id === id);
 
-      if (docSnap.exists()) {
-        await updateDoc(negotiationRef, { review: "Review Request Sent" });
-      } else {
-        await setDoc(
-          negotiationRef,
-          { review: "Review Request Sent" },
-          { merge: true }
-        );
-      }
+      const updatedDeal = {
+        ...dealData,
+        review: "Review Request Sent",
+      };
 
-      toast({ title: "Review Request Sent" });
-      setCurrentDeals(
-        currentDeals.map((deal) =>
-          deal.id === id ? { ...deal, review: "Review Request Sent" } : deal
-        )
+      // Send the updated deal to the Cloud Function
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_REVIEW_FUNC_URL ?? "",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedDeal),
+        }
       );
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({ title: "Review Request Sent" });
+      } else {
+        console.error("Failed to send review request:", result.error);
+        toast({
+          title: "Failed to send review request",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
-      console.error("Error updating review status:", error);
-      toast({ title: "Failed to send review request" });
+      console.error("Error requesting review:", error);
+      toast({ title: "Failed to send review request", variant: "destructive" });
     }
   }
 
