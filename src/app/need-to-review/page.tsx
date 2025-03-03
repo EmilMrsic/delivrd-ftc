@@ -142,6 +142,51 @@ function NeedToReview() {
     negotiatorData,
   } = useTeamDashboard();
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "submittedDate", // default sorting by Submitted Date
+    direction: "ascending", // default direction
+  });
+
+  const sortData = (key: string) => {
+    setSortConfig((prevConfig) => {
+      const newDirection =
+        prevConfig.key === key && prevConfig.direction === "ascending"
+          ? "descending"
+          : "ascending";
+
+      const sortedTeams = [...teamData].map((team) => {
+        const sortedNegotiations = [...team.negotiations].sort(
+          (a: any, b: any) => {
+            let aValue = a[key];
+            let bValue = b[key];
+
+            if (typeof aValue === "string") aValue = aValue.toLowerCase();
+            if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+            if (aValue == null) return newDirection === "ascending" ? 1 : -1;
+            if (bValue == null) return newDirection === "ascending" ? -1 : 1;
+
+            if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
+              return newDirection === "ascending"
+                ? Number(aValue) - Number(bValue)
+                : Number(bValue) - Number(aValue);
+            }
+
+            if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
+            if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
+            return 0;
+          }
+        );
+
+        return { ...team, negotiations: sortedNegotiations };
+      });
+
+      setTeamData(sortedTeams);
+
+      return { key, direction: newDirection };
+    });
+  };
+
   const toggleRow = (teamId: string) => {
     setExpandedRows((prevExpandedRows) => {
       const newExpandedRows = new Set(prevExpandedRows);
@@ -717,13 +762,28 @@ function NeedToReview() {
                                     <TableHead className="text-left px-4 py-2 border-r">
                                       #
                                     </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
+                                    <TableHead
+                                      onClick={() =>
+                                        sortData("negotiations_Client")
+                                      }
+                                      className="text-left px-4 py-2 border-r"
+                                    >
                                       Client
                                     </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
+                                    <TableHead
+                                      onClick={() =>
+                                        sortData("negotiations_Brand")
+                                      }
+                                      className="text-left px-4 py-2 border-r"
+                                    >
                                       Make
                                     </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
+                                    <TableHead
+                                      onClick={() =>
+                                        sortData("negotiations_Model")
+                                      }
+                                      className="text-left px-4 py-2 border-r"
+                                    >
                                       Model
                                     </TableHead>
                                     <TableHead className="text-left px-4 py-2 border-r">
@@ -733,13 +793,28 @@ function NeedToReview() {
                                     <TableHead className="text-left px-4 py-2 border-r">
                                       Stage
                                     </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
+                                    <TableHead
+                                      onClick={() =>
+                                        sortData("negotiations_Phone")
+                                      }
+                                      className="text-left px-4 py-2 border-r"
+                                    >
                                       Phone Number
                                     </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
+                                    <TableHead
+                                      onClick={() =>
+                                        sortData("negotiations_Email")
+                                      }
+                                      className="text-left px-4 py-2 border-r"
+                                    >
                                       Email
                                     </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
+                                    <TableHead
+                                      onClick={() =>
+                                        sortData("negotiations_Zip_Code")
+                                      }
+                                      className="text-left px-4 py-2 border-r"
+                                    >
                                       Zip Code
                                     </TableHead>
                                     <TableHead className="text-left px-4 py-2 border-r">
@@ -763,7 +838,10 @@ function NeedToReview() {
                                     <TableHead className="text-left px-4 py-2 border-r">
                                       Interior Preffered
                                     </TableHead>
-                                    <TableHead className="text-left px-4 py-2">
+                                    <TableHead
+                                      onClick={() => sortData("date_paid")}
+                                      className="text-left px-4 py-2"
+                                    >
                                       Date Paid
                                     </TableHead>
                                   </TableRow>
