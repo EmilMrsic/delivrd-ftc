@@ -236,7 +236,7 @@ const PaidHolding = () => {
           {loading ? (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-4">
+                <TableCell colSpan={12} className="text-center py-4">
                   <Loader />
                 </TableCell>
               </TableRow>

@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 import FcmTokenProvider from "@/components/FcmTokenProvider";
 import { ReduxProvider } from "./redux/provider";
+import Script from "next/script";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,6 +30,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          strategy="lazyOnload"
+          src="https://tools.luckyorange.com/core/lo.js?site-id=f5c07028"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
