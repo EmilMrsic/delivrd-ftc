@@ -40,6 +40,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { usePathname, useRouter } from "next/navigation";
+import { statuses } from "@/components/Team/filter-popup";
+import Link from "next/link";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -92,47 +94,53 @@ function Manager() {
   const fetchTeamAndDeals = async () => {
     try {
       setLoading(true);
-      const teamQuery = collection(db, "team delivrd");
-      const teamSnapshot = await getDocs(teamQuery);
 
-      let teamsWithDeals = [];
+      // Fetch all team members
+      const teamSnapshot = await getDocs(collection(db, "team delivrd"));
 
-      for (const teamDoc of teamSnapshot.docs) {
-        const teamMember: any = { id: teamDoc.id, ...teamDoc.data() };
-        const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
+      // Map teams and fetch negotiations in parallel
+      const teamsWithDeals = await Promise.all(
+        teamSnapshot.docs.map(async (teamDoc) => {
+          const teamMember = { id: teamDoc.id, ...teamDoc.data() } as any;
+          const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
 
-        let negotiations = [];
-
-        if (activeDeals.length > 0) {
-          const chunkedDeals = [];
-          for (let i = 0; i < activeDeals.length; i += 30) {
-            const chunk = activeDeals.slice(i, i + 30).filter(Boolean);
-            if (chunk.length > 0) chunkedDeals.push(chunk);
+          if (activeDeals.length === 0) {
+            return { ...teamMember, negotiations: [] };
           }
 
-          for (const chunk of chunkedDeals) {
-            const negotiationsQuery = query(
-              collection(db, "negotiations"),
-              where("__name__", "in", chunk)
-            );
-            const negotiationsSnapshot = await getDocs(negotiationsQuery);
-            negotiations.push(
-              ...negotiationsSnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-              }))
-            );
-          }
-        }
+          // Chunk the activeDeals array to avoid Firestore query limit issues
+          const chunkedDeals = Array.from(
+            { length: Math.ceil(activeDeals.length / 30) },
+            (_, i) => activeDeals.slice(i * 30, i * 30 + 30)
+          );
 
-        teamMember.negotiations = negotiations;
-        teamsWithDeals.push(teamMember);
-      }
-      setLoading(false);
+          // Fetch negotiations for each chunk in parallel
+          const negotiations = (
+            await Promise.all(
+              chunkedDeals.map(async (chunk) => {
+                const negotiationsSnapshot = await getDocs(
+                  query(
+                    collection(db, "negotiations"),
+                    where("__name__", "in", chunk)
+                  )
+                );
+                return negotiationsSnapshot.docs.map((doc) => ({
+                  id: doc.id,
+                  ...doc.data(),
+                }));
+              })
+            )
+          ).flat(); // Flatten the results
+
+          return { ...teamMember, negotiations };
+        })
+      );
+
       setTeamData(teamsWithDeals);
     } catch (error) {
-      setLoading(false);
       console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -331,6 +339,29 @@ function Manager() {
             </h1>
           </div>
         </div>
+      </div>
+      <div className="space-y-2 ml-10 w-[150px]">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              Select View
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-auto">
+            <div className="flex flex-col w-fit">
+              {statuses.map((status, index) => (
+                <Link
+                  key={index}
+                  className="p-2 text-sm hover:underline cursor-pointer"
+                  href={`/${status.toLowerCase().replace(/\s+/g, "-")}`}
+                >
+                  {status}
+                </Link>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="w-full overflow-x-auto">
         <Table>

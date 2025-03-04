@@ -757,23 +757,25 @@ export const uploadFile = async (file: File): Promise<string | null> => {
 };
 
 export const getDealsWithoutCoordinator = async () => {
-  const dealsQuery = query(
-    collection(db, "negotiations"),
-    where("negotiations_Status", "in", [
-      "Actively Negotiating",
-      "Paid",
-      "Deal Started",
-    ])
-  );
-
   try {
-    const querySnapshot = await getDocs(dealsQuery);
-    const deals: any = querySnapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() }))
-      .filter((deal: any) => !deal.negotiations_deal_coordinator); // Filter null or empty values manually
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, "negotiations"),
+        where("negotiations_Status", "in", [
+          "Actively Negotiating",
+          "Paid",
+          "Deal Started",
+        ])
+      )
+    );
 
-    console.log(deals);
-    return deals;
+    return querySnapshot.docs.reduce((deals: any[], doc) => {
+      const data = doc.data();
+      if (!data.negotiations_deal_coordinator) {
+        deals.push({ id: doc.id, ...data });
+      }
+      return deals;
+    }, []);
   } catch (error) {
     console.error("Error fetching deals:", error);
     return [];

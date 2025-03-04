@@ -61,6 +61,8 @@ import EditableTextArea from "@/components/base/editable-textarea";
 import { Input } from "@/components/ui/input";
 import EditableInput from "@/components/base/input-field";
 import axios from "axios";
+import TradeCard from "@/components/Team/trade-card";
+import DeleteBidSection from "@/components/Team/delete-bid-section";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -204,41 +206,6 @@ function ProjectProfile() {
     return () => clearTimeout(timeoutId);
   }, [dispatch]);
 
-  const handleFileUpload = async (files: FileList | null, bidId: string) => {
-    const id = bidId;
-    if (!files || !bidId) return;
-
-    let fileUrls: string[] = [];
-
-    if (files.length > 0) {
-      const fileArray = Array.from(files);
-      const uploadPromises = fileArray.map((file) => uploadFile(file));
-      fileUrls = (await Promise.all(uploadPromises)).filter(
-        Boolean
-      ) as string[];
-    }
-
-    if (fileUrls.length > 0) {
-      const bidRef = doc(db, "negotiations", id);
-      await updateDoc(bidRef, {
-        trade_in_files: arrayUnion(...fileUrls),
-      });
-    }
-    if (negotiation !== null && negotiation.dealInfo) {
-      setNegotiation({
-        ...negotiation, // Spread the existing negotiation object
-        dealInfo: {
-          ...negotiation.dealInfo, // Spread the existing dealInfo object
-          trade_in_files: [
-            ...(negotiation.dealInfo.trade_in_files ?? []), // Ensure trade_in_files is an array, defaulting to an empty array if it's null or undefined
-            ...fileUrls, // Add the new file URLs
-          ],
-        },
-      });
-      toast({ title: "Files uploaded" });
-    }
-  };
-
   const handleEdit = (bid: any) => {
     setEditingBidId(bid.bid_id);
     setEditedBid({
@@ -271,36 +238,6 @@ function ProjectProfile() {
     setOpenDialog(null);
     setEditingBidId(null);
     toast({ title: "Bid Updated successfully" });
-  };
-
-  const handleRemoveFile = async (fileUrl: string) => {
-    if (!negotiation || !negotiation.dealInfo) return;
-
-    const bidRef = doc(db, "negotiations", negotiation.id); // Assuming negotiation has an `id`
-
-    try {
-      // Remove file from Firebase Firestore
-      await updateDoc(bidRef, {
-        trade_in_files: arrayRemove(fileUrl),
-      });
-
-      if (negotiation !== null && negotiation.dealInfo) {
-        setNegotiation({
-          ...negotiation,
-          dealInfo: {
-            ...negotiation.dealInfo,
-            trade_in_files: negotiation.dealInfo.trade_in_files?.filter(
-              (file) => file !== fileUrl
-            ),
-          },
-        });
-      }
-
-      toast({ title: "File removed" }); // Show a success message
-    } catch (error) {
-      console.error("Error removing file:", error);
-      toast({ title: "Failed to remove file" });
-    }
   };
 
   const handleDeleteBid = async (bidId: string) => {
@@ -960,372 +897,25 @@ function ProjectProfile() {
             </button>
           </div>
           {showDeletedBids && (
-            <Card className="bg-white shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <FileText className="mr-2" />
-                    Deleted Incoming Bids
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-8">
-                  {incomingBids.length ? (
-                    incomingBids
-                      ?.filter((bid) => bid?.delete)
-
-                      .map((bidDetails, index) => {
-                        const matchingDealer = dealers.find(
-                          (dealer) => dealer.id === bidDetails.dealerId
-                        );
-
-                        return (
-                          <div
-                            key={index}
-                            className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
-                             ${
-                               bidDetails.vote && bidDetails.vote === "like"
-                                 ? "bg-green-100 border-green-600 "
-                                 : bidDetails.vote === "dislike"
-                                 ? "bg-orange-100 border-orange-600"
-                                 : "bg-white border-blue-600"
-                             }`}
-                          >
-                            <div className="flex justify-between items-center mb-2">
-                              <h3 className="text-lg font-semibold text-[#202125]">
-                                {matchingDealer?.Dealership
-                                  ? `${matchingDealer.Dealership} Offer`
-                                  : "No Dealership"}
-                              </h3>
-                            </div>
-                            <time className="block mb-2 text-sm text-[#202125]">
-                              {formatDate(bidDetails?.timestamp)}
-                            </time>
-                            <p className="text-[#202125] mb-4">
-                              Price: $
-                              {bidDetails?.price
-                                ? bidDetails?.price
-                                : "No price available"}
-                            </p>
-                            <div className="flex space-x-2 mb-4">
-                              <Dialog
-                                open={openDialog === bidDetails.bid_id}
-                                onOpenChange={(isOpen) => {
-                                  if (!isOpen) {
-                                    setEditingBidId(null); // Reset editedBid when closing
-                                  }
-                                  setOpenDialog(
-                                    isOpen ? bidDetails.bid_id ?? "" : null
-                                  );
-                                }}
-                              >
-                                <DialogTrigger asChild>
-                                  <Button variant="outline" size="sm">
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    View Offer
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent style={{ background: "white" }}>
-                                  <div className="text-[#202125] space-y-4">
-                                    <div className="flex items-center gap-3">
-                                      <p className="text-2xl font-bold">
-                                        {matchingDealer?.Dealership} Detail
-                                      </p>
-                                      {editingBidId === bidDetails.bid_id ? (
-                                        <Button
-                                          size="sm"
-                                          onClick={() =>
-                                            handleSave(bidDetails.bid_id)
-                                          }
-                                        >
-                                          <Save className="h-4 w-4 mr-2" /> Save
-                                        </Button>
-                                      ) : (
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => handleEdit(bidDetails)}
-                                        >
-                                          <Pencil className="h-4 w-4" />
-                                        </Button>
-                                      )}
-                                    </div>
-
-                                    {/* Files Section */}
-                                    <div className="flex flex-wrap overflow-auto gap-4 mt-4">
-                                      {bidDetails.files.map((file, index) => {
-                                        const isImage = [
-                                          "jpg",
-                                          "jpeg",
-                                          "png",
-                                          "gif",
-                                          "bmp",
-                                          "webp",
-                                        ].some((ext) =>
-                                          file.toLowerCase().includes(ext)
-                                        );
-
-                                        return (
-                                          <div
-                                            key={index}
-                                            className="relative w-20 h-20 flex items-center justify-center rounded-md "
-                                          >
-                                            <div className="absolute top-0 right-0 z-[99]">
-                                              {editingBidId ===
-                                                bidDetails.bid_id && (
-                                                <button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation(); // Prevent opening file when clicking the cross
-                                                    handleDeleteFile(
-                                                      file,
-                                                      bidDetails.bid_id
-                                                    );
-                                                  }}
-                                                  className="absolute top-0 right-0 bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
-                                                >
-                                                  <X size={16} />
-                                                </button>
-                                              )}
-                                            </div>
-                                            {isImage ? (
-                                              <img
-                                                src={file}
-                                                alt="Uploaded file"
-                                                className="object-cover w-full h-full"
-                                              />
-                                            ) : (
-                                              <embed
-                                                type="application/pdf"
-                                                width="100%"
-                                                height="100%"
-                                                src={file}
-                                                style={{ zIndex: -1 }}
-                                              />
-                                            )}
-                                          </div>
-                                        );
-                                      })}
-                                      {editingBidId === bidDetails.bid_id && (
-                                        <div className="flex items-center justify-center w-20 h-20 bg-gray-200 rounded-md cursor-pointer">
-                                          <label
-                                            htmlFor="file-upload"
-                                            className="text-center flex flex-col items-center text-gray-600"
-                                          >
-                                            <input
-                                              type="file"
-                                              id="file-upload"
-                                              onChange={(e) =>
-                                                handleBidFileUpload(
-                                                  e.target.files,
-                                                  bidDetails.bid_id
-                                                )
-                                              }
-                                              className="hidden"
-                                              multiple
-                                            />
-                                            <Upload className="w-8 h-8 text-gray-600" />
-                                            <p>Upload</p>
-                                          </label>
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    <div className="space-y-1 mt-4">
-                                      <p className="font-semibold text-lg">
-                                        {matchingDealer?.SalesPersonName}
-                                      </p>
-                                      <p>
-                                        {matchingDealer?.City}
-                                        <br />
-                                        {matchingDealer?.State}
-                                      </p>
-                                      <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 rounded-full">
-                                        {editingBidId === bidDetails.bid_id ? (
-                                          <div className="space-x-2 flex">
-                                            <label className="flex p-2 rounded-full bg-green-100 items-center space-x-2">
-                                              <input
-                                                type="radio"
-                                                name="inventoryStatus"
-                                                value="In Stock"
-                                                checked={
-                                                  editedBid.inventoryStatus ===
-                                                  "In Stock"
-                                                }
-                                                onChange={() =>
-                                                  setEditedBid({
-                                                    ...editedBid,
-                                                    inventoryStatus: "In Stock",
-                                                  })
-                                                }
-                                                className="w-4 h-4"
-                                              />
-                                              <span>In Stock</span>
-                                            </label>
-
-                                            <label className="flex p-2 rounded-full bg-yellow-100 items-center space-x-2">
-                                              <input
-                                                type="radio"
-                                                name="inventoryStatus"
-                                                value="In Transit"
-                                                checked={
-                                                  editedBid.inventoryStatus ===
-                                                  "In Transit"
-                                                }
-                                                onChange={() =>
-                                                  setEditedBid({
-                                                    ...editedBid,
-                                                    inventoryStatus:
-                                                      "In Transit",
-                                                  })
-                                                }
-                                                className="w-4 h-4"
-                                              />
-                                              <span>In Transit</span>
-                                            </label>
-                                          </div>
-                                        ) : (
-                                          <p
-                                            className={`p-2 rounded-full ${
-                                              bidDetails.inventoryStatus ===
-                                              "In Stock"
-                                                ? "bg-green-100"
-                                                : "bg-yellow-100"
-                                            }`}
-                                          >
-                                            {bidDetails?.inventoryStatus}
-                                          </p>
-                                        )}
-                                      </span>
-                                    </div>
-
-                                    <div className="flex justify-between mt-4 border-t pt-4">
-                                      <div>
-                                        <p className="text-gray-500">
-                                          Date Submitted
-                                        </p>
-                                        <p>
-                                          {formatDate(bidDetails.timestamp)}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-gray-500">Price</p>
-                                        {editingBidId === bidDetails.bid_id ? (
-                                          <Input
-                                            type="number"
-                                            value={editedBid.price}
-                                            onChange={(e) =>
-                                              setEditedBid({
-                                                ...editedBid,
-                                                price: e.target.value,
-                                              })
-                                            }
-                                          />
-                                        ) : (
-                                          <p className="text-2xl font-semibold">
-                                            ${bidDetails.price}
-                                          </p>
-                                        )}
-                                        <p className="text-gray-500">
-                                          Total Discount: $
-                                          {editingBidId ===
-                                          bidDetails.bid_id ? (
-                                            <Input
-                                              type="number"
-                                              value={editedBid.discountPrice}
-                                              onChange={(e) =>
-                                                setEditedBid({
-                                                  ...editedBid,
-                                                  discountPrice: e.target.value,
-                                                })
-                                              }
-                                            />
-                                          ) : (
-                                            bidDetails.discountPrice
-                                          )}
-                                        </p>
-                                      </div>
-                                    </div>
-
-                                    <div className="border-t pt-4 flex justify-between">
-                                      <p className="font-semibold">
-                                        Additional Comments
-                                      </p>
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  setCommentingBidId(
-                                    commentingBidId === bidDetails.bid_id
-                                      ? null
-                                      : bidDetails.bid_id
-                                  )
-                                }
-                              >
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add Comment
-                              </Button>
-                            </div>
-                            {commentingBidId === bidDetails.bid_id && (
-                              <div className="mb-4">
-                                <Textarea
-                                  placeholder="Add a comment..."
-                                  value={newComment[bidDetails.bid_id] || ""}
-                                  onChange={(e) =>
-                                    setNewComment((prev) => ({
-                                      ...prev,
-                                      [bidDetails.bid_id]: e.target.value,
-                                    }))
-                                  }
-                                  className="mb-2"
-                                />
-                                <Button
-                                  onClick={() => addComment(bidDetails.bid_id)}
-                                >
-                                  Submit Comment
-                                </Button>
-                              </div>
-                            )}
-
-                            {bidCommentsByBidId[bidDetails.bid_id] &&
-                            bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
-                              bidCommentsByBidId[bidDetails.bid_id].map(
-                                (comment, index) => (
-                                  <div
-                                    key={index}
-                                    className="p-2 bg-gray-100 rounded mt-1"
-                                  >
-                                    <p>
-                                      <strong>
-                                        {comment.deal_coordinator_name}:
-                                      </strong>{" "}
-                                      {parseComment(comment.comment)}
-                                    </p>
-                                    <p className="text-sm text-gray-500">
-                                      {comment.time}
-                                    </p>
-                                  </div>
-                                )
-                              )
-                            ) : (
-                              <p className="text-sm text-gray-500">
-                                No comments available for this bid.
-                              </p>
-                            )}
-                          </div>
-                        );
-                      })
-                  ) : (
-                    <p>No incoming bids available</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <DeleteBidSection
+              dealers={dealers}
+              incomingBids={incomingBids}
+              setCommentingBidId={setCommentingBidId}
+              setEditedBid={setEditedBid}
+              setEditingBidId={setEditingBidId}
+              editedBid={editedBid}
+              editingBidId={editingBidId}
+              commentingBidId={commentingBidId}
+              setNewComment={setNewComment}
+              newComment={newComment}
+              addComment={addComment}
+              handleBidFileUpload={handleBidFileUpload}
+              handleDeleteFile={handleDeleteFile}
+              handleEdit={handleEdit}
+              handleSave={handleSave}
+              setOpenDialog={setOpenDialog}
+              openDialog={openDialog}
+            />
           )}
 
           <AddNoteSection
@@ -1346,115 +936,12 @@ function ProjectProfile() {
               negotiationId={negotiationId}
               handleChange={handleChange}
             />
-            <Card className="bg-white shadow-lg mb-5">
-              <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
-                <CardTitle className="flex items-center">
-                  <Car className="mr-2" /> Trade In Info
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4 mt-2">
-                <EditableTextArea
-                  value={
-                    negotiation?.dealInfo.trade_in_info ??
-                    "No trade in info at the moment"
-                  }
-                  negotiationId={negotiationId ?? ""}
-                  field="trade_in_info"
-                  onChange={(newValue) =>
-                    handleChange("dealInfo", "trade_in_info", newValue)
-                  }
-                />
-                <EditableInput
-                  field="trade_in_vin"
-                  negotiationId={negotiationId ?? ""}
-                  label="Vin"
-                  value={negotiation?.dealInfo?.trade_in_vin ?? ""}
-                  onChange={(newValue) =>
-                    handleChange("dealInfo", "trade_in_vin", newValue)
-                  }
-                />
-                <EditableInput
-                  field="trade_in_mileage"
-                  negotiationId={negotiationId ?? ""}
-                  label="Mileage"
-                  value={negotiation?.dealInfo?.trade_in_mileage ?? ""}
-                  onChange={(newValue) =>
-                    handleChange("dealInfo", "trade_in_mileage", newValue)
-                  }
-                />
-                <EditableInput
-                  field="trade_in_comments"
-                  negotiationId={negotiationId ?? ""}
-                  label="Comments"
-                  value={negotiation?.dealInfo?.trade_in_comments ?? ""}
-                  onChange={(newValue) =>
-                    handleChange("dealInfo", "trade_in_comments", newValue)
-                  }
-                />
-                <div className="w-full">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Upload Files
-                  </label>
-                  <input
-                    type="file"
-                    multiple
-                    className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                    onChange={(e) =>
-                      handleFileUpload(e.target.files, negotiationId ?? "")
-                    }
-                  />
-                </div>
+            <TradeCard
+              negotiation={negotiation}
+              negotiationId={negotiationId}
+              handleChange={handleChange}
+            />
 
-                {/* Display Uploaded Files */}
-                <div className="flex space-x-4 mt-2">
-                  {negotiation?.dealInfo?.trade_in_files?.map((file, index) => {
-                    const isImage = [
-                      "jpg",
-                      "jpeg",
-                      "png",
-                      "gif",
-                      "bmp",
-                      "webp",
-                    ].some((ext) => file.toLowerCase().includes(ext));
-
-                    return (
-                      <div key={index} className="relative w-20 h-20">
-                        <div
-                          onClick={() => window.open(file, "_blank")}
-                          className="cursor-pointer bg-transparent w-full h-full flex items-center justify-center rounded-md overflow-hidden"
-                        >
-                          {isImage ? (
-                            <img
-                              src={file}
-                              alt="Uploaded file"
-                              className="object-cover w-full h-full"
-                            />
-                          ) : (
-                            <embed
-                              type="application/pdf"
-                              width="100%"
-                              height="100%"
-                              src={file}
-                            />
-                          )}
-                        </div>
-
-                        {/* Remove button (cross icon) */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent opening file when clicking the cross
-                            handleRemoveFile(file);
-                          }}
-                          className="absolute top-[-10px] right-[-10px] bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
             <Card className="bg-white shadow-lg mb-5">
               <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
                 <CardTitle className="flex items-center">
