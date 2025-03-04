@@ -443,17 +443,17 @@ const TeamDashboardTable = ({
         <TableBody>
           {currentDeals?.map((deal, index) => (
             <TableRow
-              className={cursor-pointer ${
+              className={`cursor-pointer ${
                 index % 2 === 0
                   ? "bg-white hover:bg-gray-100"
                   : "bg-gray-50 hover:bg-gray-200"
-              }}
+              }`}
               key={deal.id}
               onClick={(e) => {
                 if (!stopPropagation) {
                   e.preventDefault();
                   e.stopPropagation();
-                  router.push(/team-profile?id=${deal.id});
+                  router.push(`/team-profile?id=${deal.id}`);
                 } else {
                   setStopPropagation(false);
                 }
@@ -554,7 +554,7 @@ const TeamDashboardTable = ({
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className={cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300}
+                      className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
                     >
                       {allDealNegotiator.some(
                         (negotiator) =>
