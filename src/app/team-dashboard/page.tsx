@@ -34,7 +34,8 @@ import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import TeamDashboardTable from "@/components/Team/team-dashboard-table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
 import SearchAll from "@/components/Team/search-all";
-import { useRouter } from "next/navigation";
+import { TeamHeader } from "@/components/base/header";
+import { TeamDashboardFilters } from "@/components/Team/team-dashboard-filters";
 
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -62,7 +63,6 @@ export default function DealList() {
   const { notification } = useAppSelector((state) => state.notification);
   const { notificationCount } = useAppSelector((state) => state.notification);
   const dispatch = useDispatch();
-  const router = useRouter();
 
   const totalPages = Math.ceil(filteredDeals?.length / itemsPerPage);
 
@@ -430,102 +430,29 @@ export default function DealList() {
     }
   });
 
+  useEffect(() => {
+    handleFilterChange("dealCoordinators", "recos5ry1A7L7rFo7");
+  }, []);
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
-      <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
-        <div className="flex flex-col items-start">
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-            alt="DELIVRD Logo"
-            className="h-8 mb-2"
-          />
-          <p className="text-white text-sm">Putting Dreams In Driveways</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <DropdownMenu onOpenChange={handleBellClick}>
-            <DropdownMenuTrigger>
-              <div className="relative">
-                <BellIcon className="w-6 h-6" color="#fff" />
-                {notificationCount > 0 && (
-                  <div className="absolute top-[-5px] right-[-5px] flex justify-center items-center w-4 h-4 bg-red-500 text-white text-xs rounded-full">
-                    {notificationCount}
-                  </div>
-                )}
-              </div>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent className="z-50 ">
-              <div
-                className={`bg-white flex flex-col ${
-                  notification.length ? "max-h-[300px]" : "h-auto"
-                }  overflow-y-scroll gap-3 p-2 z-10 rounded-xl`}
-              >
-                {notification.length ? (
-                  notification.map((item, index) => (
-                    <Link
-                      key={index}
-                      target="_blank"
-                      href={item.link ?? "/"}
-                      className="flex flex-col gap-1 p-3 rounded-[8px] items-start hover:bg-gray-200"
-                    >
-                      <p className="font-bold text-lg">{item.title}</p>
-                      <p className="font-normal text-gray-500 text-sm">
-                        {item.body}
-                      </p>
-                    </Link>
-                  ))
-                ) : (
-                  <p>No notifications available</p>
-                )}
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-              Client Deals Dashboard
-            </h1>
-            <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-              {negotiatorData?.name}
-            </h1>
-          </div>
-        </div>
-      </div>
+      <TeamHeader
+        handleBellClick={handleBellClick}
+        notificationCount={notificationCount}
+        notification={notification}
+        negotiatorData={negotiatorData}
+      />
       <Card className="bg-white shadow-lg">
         <CardContent>
-          <div className="flex gap-3 items-center mb-4 mt-4">
-            <div className="relative ">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                type="text"
-                placeholder="Search deals..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="pl-8"
-              />
-            </div>
-            <Button
-              onClick={() => router.push("/manager")}
-              variant="outline"
-              className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-            >
-              <p>Manager View</p>
-            </Button>
-
-            <FilterPopup
-              dealCoordinators={allDealNegotiator}
-              handleFilterChange={handleFilterChange}
-              filters={filters}
-            />
-            <Button
-              onClick={clearFilters}
-              variant="outline"
-              className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-            >
-              <p>Clear filters</p>
-            </Button>
-            <SearchAll setCurrentDeals={setCurrentDeals} />
-          </div>
-
+          <TeamDashboardFilters
+            allDealNegotiator={allDealNegotiator}
+            filters={filters}
+            handleFilterChange={handleFilterChange}
+            clearFilters={clearFilters}
+            setCurrentDeals={setCurrentDeals}
+            searchTerm={searchTerm}
+            handleSearch={handleSearch}
+          />
           <TeamDashboardTable
             setCurrentDeals={setCurrentDeals}
             loading={loading}

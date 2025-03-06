@@ -63,6 +63,7 @@ import EditableInput from "@/components/base/input-field";
 import axios from "axios";
 import TradeCard from "@/components/Team/trade-card";
 import DeleteBidSection from "@/components/Team/delete-bid-section";
+import { TeamHeader } from "@/components/base/header";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);

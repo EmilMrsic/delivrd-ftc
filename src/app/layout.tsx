@@ -35,6 +35,7 @@ export default function RootLayout({
           strategy="lazyOnload"
           src="https://tools.luckyorange.com/core/lo.js?site-id=f5c07028"
         />
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
