@@ -76,8 +76,8 @@ export default function SearchAll({ setCurrentDeals }: SearchAll) {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
+          newDefault={true}
           variant="outline"
-          className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
         >
           <p>Search</p>
         </Button>
@@ -94,6 +94,7 @@ export default function SearchAll({ setCurrentDeals }: SearchAll) {
           />
           <Button
             onClick={handleSearch}
+            newDefault={true}
             variant={"outline"}
             className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
           >
@@ -101,6 +102,7 @@ export default function SearchAll({ setCurrentDeals }: SearchAll) {
           </Button>
           <Button
             onClick={() => setIsOpen(false)}
+            newDefault={true}
             variant={"outline"}
             className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
           >

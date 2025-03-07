@@ -44,7 +44,8 @@ const TeamTablePagination = ({
       <Button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-4 py-2 text-white bg-black rounded disabled:opacity-50"
+        // className="px-4 py-2 text-white bg-black rounded disabled:opacity-50"
+        newDefault={true}
       >
         Previous
       </Button>
@@ -71,7 +72,8 @@ const TeamTablePagination = ({
       <Button
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 text-white bg-black rounded disabled:opacity-50"
+        // className="px-4 py-2 text-white bg-black rounded disabled:opacity-50"
+        newDefault={true}
       >
         Next
       </Button>

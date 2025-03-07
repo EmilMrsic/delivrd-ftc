@@ -17,38 +17,35 @@ export const TeamDashboardFilters = ({
   const router = useRouter();
   return (
     <>
-      <div className="flex gap-3 items-center mb-4 mt-4">
-        <div className="relative ">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+      <div className="items-center mb-4 mt-4">
+        <div>
+          <Button onClick={() => router.push("/manager")} newDefault={true}>
+            <p>Manager View</p>
+          </Button>
+        </div>
+        <div className="flex gap-3 mt-4">
+          {/* <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" /> */}
           <Input
             type="text"
             placeholder="Search deals..."
             value={searchTerm}
             onChange={handleSearch}
-            className="pl-8"
+            className="pl-8 max-w-[300px] mt-auto mb-auto"
+          />
+          <div className="w-fit mr-0 ml-auto flex gap-2">
+            <SearchAll setCurrentDeals={setCurrentDeals} />
+            <Button onClick={clearFilters} newDefault={true}>
+              <p>Clear filters</p>
+            </Button>
+          </div>
+        </div>
+        <div className="w-fit ml-auto mr-auto mt-4 flex">
+          <FilterPopup
+            dealCoordinators={allDealNegotiator}
+            handleFilterChange={handleFilterChange}
+            filters={filters}
           />
         </div>
-        <Button
-          onClick={() => router.push("/manager")}
-          variant="outline"
-          className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-        >
-          <p>Manager View</p>
-        </Button>
-
-        <FilterPopup
-          dealCoordinators={allDealNegotiator}
-          handleFilterChange={handleFilterChange}
-          filters={filters}
-        />
-        <Button
-          onClick={clearFilters}
-          variant="outline"
-          className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-        >
-          <p>Clear filters</p>
-        </Button>
-        <SearchAll setCurrentDeals={setCurrentDeals} />
       </div>
     </>
   );
