@@ -7,6 +7,7 @@ if (process.env.DEV) {
 }
 
 const nextConfig = {
+  reactStrictMode: false,
   env: env,
   images: {
     remotePatterns: [

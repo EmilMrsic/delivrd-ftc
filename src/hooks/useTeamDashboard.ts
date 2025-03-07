@@ -11,8 +11,28 @@ import { chunk } from "lodash";
 import { db } from "@/firebase/config";
 import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
 import { allowedStatuses } from "@/lib/utils";
+import { backendRequest } from "@/lib/request";
+import { getUserData } from "@/lib/user";
+
+const useNegotiations = () => {
+  useEffect(() => {
+    const id = "recos5ry1A7L7rFo7"; // getUserData().deal_coordinator_id;
+
+    if (!id || typeof id !== "string") {
+      console.error("Invalid deal_coordinator_id:", id);
+      return;
+    }
+
+    backendRequest(`negotiation/${id}`).then((res) =>
+      console.log("id: test:", res)
+    );
+  }, []);
+
+  return {};
+};
 
 const useTeamDashboard = () => {
+  const negotiations = useNegotiations();
   const [filteredDeals, setFilteredDeals] = useState<NegotiationData[]>([]);
   const [allInternalNotes, setAllInternalNotes] = useState<
     Record<string, InternalNotes[]>
@@ -176,35 +196,35 @@ const useTeamDashboard = () => {
     );
   }, [filteredDeals]);
 
-  useEffect(() => {
-    if (
-      "serviceWorker" in navigator &&
-      typeof window !== "undefined" &&
-      navigator
-    ) {
-      window.navigator.serviceWorker
-        .getRegistrations()
-        .then((registrations) => {
-          if (registrations.length === 0) {
-            window.navigator.serviceWorker
-              .register("../../../firebase-messaging-sw.js")
-              .then((registration) => {
-                console.log(
-                  "Service Worker registered successfully:",
-                  registration
-                );
-              })
-              .catch((error) => {
-                console.error("Service Worker registration failed:", error);
-              });
-          } else {
-            console.log("Service Worker is already registered");
-          }
-        });
-    } else {
-      console.log("Service Workers are not supported in this browser.");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (
+  //     "serviceWorker" in navigator &&
+  //     typeof window !== "undefined" &&
+  //     navigator
+  //   ) {
+  //     window.navigator.serviceWorker
+  //       .getRegistrations()
+  //       .then((registrations) => {
+  //         if (registrations.length === 0) {
+  //           window.navigator.serviceWorker
+  //             .register("../../../firebase-messaging-sw.js")
+  //             .then((registration) => {
+  //               console.log(
+  //                 "Service Worker registered successfully:",
+  //                 registration
+  //               );
+  //             })
+  //             .catch((error) => {
+  //               console.error("Service Worker registration failed:", error);
+  //             });
+  //         } else {
+  //           console.log("Service Worker is already registered");
+  //         }
+  //       });
+  //   } else {
+  //     console.log("Service Workers are not supported in this browser.");
+  //   }
+  // }, []);
 
   return {
     setFilteredDeals,
