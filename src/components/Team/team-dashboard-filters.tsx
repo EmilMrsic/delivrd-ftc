@@ -24,16 +24,14 @@ export const TeamDashboardFilters = ({
           </Button>
         </div>
         <div className="flex gap-3 mt-4">
-          {/* <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" /> */}
-          <Input
-            type="text"
-            placeholder="Search deals..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="pl-8 max-w-[300px] mt-auto mb-auto"
-          />
           <div className="w-fit mr-0 ml-auto flex gap-2">
-            <SearchAll setCurrentDeals={setCurrentDeals} />
+            <Input
+              type="text"
+              placeholder="Search deals..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="pl-8 max-w-[300px] mt-auto mb-auto"
+            />
             <Button onClick={clearFilters} newDefault={true}>
               <p>Clear filters</p>
             </Button>

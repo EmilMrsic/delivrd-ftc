@@ -14,10 +14,14 @@ import { allowedStatuses } from "@/lib/utils";
 import { backendRequest } from "@/lib/request";
 import { getUserData } from "@/lib/user";
 import { useQuery } from "@tanstack/react-query";
+import {
+  pruneNegotiations,
+  sortNegotiationsByStatus,
+} from "@/lib/helpers/negotiation";
 
 const useNegotiations = () => {
   const id = useMemo(() => {
-    const incomingId = "recos5ry1A7L7rFo7"; // getUserData().deal_coordinator_id;
+    const incomingId = "recos5ry1A7L7rFo7"; //getUserData().deal_coordinator_id;
 
     if (!incomingId || typeof incomingId !== "string") {
       console.error("Invalid deal_coordinator_id:", incomingId);
@@ -187,7 +191,10 @@ const useTeamDashboard = () => {
 
   useEffect(() => {
     if (negotiations.negotiations) {
-      setOriginalDeals(negotiations.negotiations);
+      const prunedDeals = pruneNegotiations(negotiations.negotiations);
+      setOriginalDeals(prunedDeals as NegotiationData[]);
+      const filteredDeals = sortNegotiationsByStatus(prunedDeals);
+      setFilteredDeals(filteredDeals as NegotiationData[]);
     }
   }, [negotiations.negotiations]);
 

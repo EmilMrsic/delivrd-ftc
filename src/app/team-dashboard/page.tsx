@@ -430,10 +430,6 @@ export default function DealList() {
     }
   });
 
-  useEffect(() => {
-    handleFilterChange("dealCoordinators", "recos5ry1A7L7rFo7");
-  }, []);
-
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <TeamHeader

@@ -38,6 +38,8 @@ import { TailwindPlusTable } from "../tailwind-plus/table";
 import { StageDropdown } from "./stage-dropdown";
 import { DealNegotiatorDropdown } from "./deal-negotiator-dropdown";
 import { DashboardTableActions } from "./dashboard-table-actions";
+import { sortNegotiationsByStatus } from "@/lib/helpers/negotiation";
+import { NegotationDataType } from "@/lib/models/team";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -103,19 +105,27 @@ const TeamDashboardTable = ({
   };
 
   const sortData = (key: string, direction: string) => {
-    const sortedDeals = [...currentDeals].sort((a: any, b: any) => {
-      let aValue = a[key];
-      let bValue = b[key];
+    if (key == "negotiations_Status") {
+      const sortedDeals = sortNegotiationsByStatus(
+        currentDeals as NegotationDataType[],
+        direction === "ascending" ? "ascending" : "descending"
+      );
+      setCurrentDeals(sortedDeals as NegotiationData[]);
+    } else {
+      const sortedDeals = [...currentDeals].sort((a: any, b: any) => {
+        let aValue = a[key];
+        let bValue = b[key];
 
-      if (typeof aValue === "string") aValue = aValue.toLowerCase();
-      if (typeof bValue === "string") bValue = bValue.toLowerCase();
+        if (typeof aValue === "string") aValue = aValue.toLowerCase();
+        if (typeof bValue === "string") bValue = bValue.toLowerCase();
 
-      if (aValue < bValue) return direction === "ascending" ? -1 : 1;
-      if (aValue > bValue) return direction === "ascending" ? 1 : -1;
-      return 0;
-    });
+        if (aValue < bValue) return direction === "ascending" ? -1 : 1;
+        if (aValue > bValue) return direction === "ascending" ? 1 : -1;
+        return 0;
+      });
 
-    setCurrentDeals(sortedDeals);
+      setCurrentDeals(sortedDeals);
+    }
   };
 
   const handleDateChange = async (
