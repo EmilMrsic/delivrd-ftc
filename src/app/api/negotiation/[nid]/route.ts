@@ -1,5 +1,10 @@
 import { db } from "@/firebase/config";
-import { DealNegotiatorModel } from "@/lib/models/team";
+import {
+  DealNegotiatorModel,
+  DealNegotiatorType,
+  NegotationDataModel,
+  NegotationDataType,
+} from "@/lib/models/team";
 import {
   collection,
   doc,
@@ -12,9 +17,14 @@ import { chunk } from "lodash";
 import { NextResponse } from "next/server";
 
 export const GET = async (
-  request: Request,
+  _request: Request,
   { params }: { params: { nid: string } }
 ) => {
+  const output: {
+    negotiations: NegotationDataType[];
+  } = {
+    negotiations: [],
+  };
   const { nid } = params;
   const teamDocRef = doc(db, "team delivrd", nid);
   const teamSnapshot = await getDoc(teamDocRef);
@@ -32,14 +42,6 @@ export const GET = async (
   } else {
     const negotiationsCollectionRef = collection(db, "negotiations");
     const chunkedIds = chunk(activeDeals, 30);
-
-    // for (const idChunk of chunkedIds) {
-    //   const negotiationsQuery = query(
-    //     negotiationsCollectionRef,
-    //     where("__name__", "in", idChunk)
-    // );
-    // const negotiationsSnapshot = await getDocs(negotiationsQuery);
-    // console.log(negotiationsSnapshot.docs[0].data());
     const negotiationData = await Promise.all(
       chunkedIds.map(async (idChunk) => {
         const negotiationsQuery = query(
@@ -47,12 +49,15 @@ export const GET = async (
           where("__name__", "in", idChunk)
         );
         const negotiationsSnapshot = await getDocs(negotiationsQuery);
-        return negotiationsSnapshot.docs.map((doc) => doc.data());
+        return negotiationsSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return NegotationDataModel.parse(data);
+        });
       })
     );
+
+    output.negotiations = negotiationData.flat();
   }
 
-  return NextResponse.json({
-    message: "hello world",
-  });
+  return NextResponse.json(output);
 };

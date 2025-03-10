@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   collection,
   doc,
@@ -13,22 +13,29 @@ import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
 import { allowedStatuses } from "@/lib/utils";
 import { backendRequest } from "@/lib/request";
 import { getUserData } from "@/lib/user";
+import { useQuery } from "@tanstack/react-query";
 
 const useNegotiations = () => {
-  useEffect(() => {
-    const id = "recos5ry1A7L7rFo7"; // getUserData().deal_coordinator_id;
+  const id = useMemo(() => {
+    const incomingId = "recos5ry1A7L7rFo7"; // getUserData().deal_coordinator_id;
 
-    if (!id || typeof id !== "string") {
-      console.error("Invalid deal_coordinator_id:", id);
+    if (!incomingId || typeof incomingId !== "string") {
+      console.error("Invalid deal_coordinator_id:", incomingId);
       return;
     }
 
-    backendRequest(`negotiation/${id}`).then((res) =>
-      console.log("id: test:", res)
-    );
+    return incomingId;
   }, []);
 
-  return {};
+  const negotiationsQuery = useQuery({
+    queryKey: ["negotiations"],
+    queryFn: () => backendRequest(`negotiation/${id}`),
+  });
+
+  return {
+    negotiations: negotiationsQuery.data?.negotiations,
+    isLoading: negotiationsQuery.isLoading,
+  };
 };
 
 const useTeamDashboard = () => {
@@ -50,76 +57,76 @@ const useTeamDashboard = () => {
   const [currentDeals, setCurrentDeals] = useState<NegotiationData[]>([]);
 
   const [loading, setLoading] = useState(true);
+  // TODO: Deprecated, use useNegotiations instead (not in use just saving in case)
+  // const fetchAllNegotiation = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const userData = localStorage.getItem("user");
+  //     if (!userData) {
+  //       console.error("No user data found in localStorage");
+  //       return;
+  //     }
 
-  const fetchAllNegotiation = async () => {
-    setLoading(true);
-    try {
-      const userData = localStorage.getItem("user");
-      if (!userData) {
-        console.error("No user data found in localStorage");
-        return;
-      }
+  //     const parseUserData = JSON.parse(userData);
+  //     const id = Array.isArray(parseUserData.deal_coordinator_id)
+  //       ? parseUserData.deal_coordinator_id[0]
+  //       : parseUserData.deal_coordinator_id;
 
-      const parseUserData = JSON.parse(userData);
-      const id = Array.isArray(parseUserData.deal_coordinator_id)
-        ? parseUserData.deal_coordinator_id[0]
-        : parseUserData.deal_coordinator_id;
+  //     if (!id || typeof id !== "string") {
+  //       console.error(
+  //         "Invalid deal_coordinator_id:",
+  //         parseUserData.deal_coordinator_id
+  //       );
+  //       return;
+  //     }
 
-      if (!id || typeof id !== "string") {
-        console.error(
-          "Invalid deal_coordinator_id:",
-          parseUserData.deal_coordinator_id
-        );
-        return;
-      }
+  //     const teamDocRef = doc(db, "team delivrd", id);
+  //     const teamSnapshot = await getDoc(teamDocRef);
 
-      const teamDocRef = doc(db, "team delivrd", id);
-      const teamSnapshot = await getDoc(teamDocRef);
+  //     if (!teamSnapshot.exists()) {
+  //       console.log("Team document not found");
+  //       return;
+  //     }
 
-      if (!teamSnapshot.exists()) {
-        console.log("Team document not found");
-        return;
-      }
+  //     const teamData = teamSnapshot.data();
+  //     setNegotiatorData(teamData as DealNegotiator);
 
-      const teamData = teamSnapshot.data();
-      setNegotiatorData(teamData as DealNegotiator);
+  //     const activeDeals = teamData.active_deals;
+  //     if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
+  //       console.log("No active deals found");
+  //       setOriginalDeals([]);
+  //       setFilteredDeals([]);
+  //       return;
+  //     }
 
-      const activeDeals = teamData.active_deals;
-      if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
-        console.log("No active deals found");
-        setOriginalDeals([]);
-        setFilteredDeals([]);
-        return;
-      }
+  //     const negotiationsCollectionRef = collection(db, "negotiations");
+  //     const chunkedIds = chunk(activeDeals, 10);
+  //     const negotiationsData: NegotiationData[] = [];
 
-      const negotiationsCollectionRef = collection(db, "negotiations");
-      const chunkedIds = chunk(activeDeals, 10);
-      const negotiationsData: NegotiationData[] = [];
+  //     for (const idChunk of chunkedIds) {
+  //       const negotiationsQuery = query(
+  //         negotiationsCollectionRef,
+  //         where("__name__", "in", idChunk)
+  //       );
+  //       const negotiationsSnapshot = await getDocs(negotiationsQuery);
 
-      for (const idChunk of chunkedIds) {
-        const negotiationsQuery = query(
-          negotiationsCollectionRef,
-          where("__name__", "in", idChunk)
-        );
-        const negotiationsSnapshot = await getDocs(negotiationsQuery);
+  //       negotiationsSnapshot.forEach((doc) => {
+  //         const data = doc.data();
+  //         negotiationsData.push(data as NegotiationData);
+  //       });
+  //     }
 
-        negotiationsSnapshot.forEach((doc) => {
-          const data = doc.data();
-          negotiationsData.push(data as NegotiationData);
-        });
-      }
-
-      setOriginalDeals(negotiationsData as NegotiationData[]);
-      const defaultFilteredDeals = negotiationsData.filter((deal) =>
-        allowedStatuses.includes(deal.negotiations_Status ?? "")
-      );
-      setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
-    } catch (error) {
-      console.error("Error fetching negotiations:", error);
-    } finally {
-      setLoading(false); // Stop loading
-    }
-  };
+  //     setOriginalDeals(negotiationsData as NegotiationData[]);
+  //     const defaultFilteredDeals = negotiationsData.filter((deal) =>
+  //       allowedStatuses.includes(deal.negotiations_Status ?? "")
+  //     );
+  //     setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
+  //   } catch (error) {
+  //     console.error("Error fetching negotiations:", error);
+  //   } finally {
+  //     setLoading(false); // Stop loading
+  //   }
+  // };
 
   const getAllDealNegotiator = async () => {
     try {
@@ -179,8 +186,10 @@ const useTeamDashboard = () => {
   };
 
   useEffect(() => {
-    fetchAllNegotiation();
-  }, []);
+    if (negotiations.negotiations) {
+      setOriginalDeals(negotiations.negotiations);
+    }
+  }, [negotiations.negotiations]);
 
   useEffect(() => {
     getAllDealNegotiator().then((res) => setAllDealNegotiator(res ?? []));
@@ -196,6 +205,7 @@ const useTeamDashboard = () => {
     );
   }, [filteredDeals]);
 
+  // TODO: remove this
   // useEffect(() => {
   //   if (
   //     "serviceWorker" in navigator &&

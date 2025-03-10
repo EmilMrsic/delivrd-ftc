@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import FcmTokenProvider from "@/components/FcmTokenProvider";
 import { ReduxProvider } from "./redux/provider";
 import Script from "next/script";
+import { ContextProviders } from "@/components/context-providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -40,11 +41,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReduxProvider>
+        <ContextProviders>
           <FcmTokenProvider />
           <Toaster />
           {children}
-        </ReduxProvider>
+        </ContextProviders>
       </body>
     </html>
   );
