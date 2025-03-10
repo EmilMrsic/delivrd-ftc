@@ -106,6 +106,7 @@ const TeamDashboardTable = ({
 
   const sortData = (key: string, direction: string) => {
     if (key == "negotiations_Status") {
+      console.log("sorting by status");
       const sortedDeals = sortNegotiationsByStatus(
         currentDeals as NegotationDataType[],
         direction === "ascending" ? "ascending" : "descending"
@@ -285,9 +286,6 @@ const TeamDashboardTable = ({
             ? currentDeals.map((deal) => [
                 {
                   text: deal.negotiations_Client,
-                  config: {
-                    maxWidth: "200px",
-                  },
                 },
                 deal.negotiations_Brand,
                 deal.negotiations_Model,
