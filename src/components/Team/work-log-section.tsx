@@ -66,31 +66,52 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   };
 
   const saveEdit = async (logId: string) => {
-    const uploadedFiles = await Promise.all(
-      editFiles.map(async (file) => {
-        try {
-          return await uploadFile(file);
-        } catch (error) {
-          console.error("File upload failed:", file.name, error);
-          return null;
-        }
-      })
-    );
+    try {
+      // Upload new files and get URLs
+      const uploadedFiles = await Promise.all(
+        editFiles.map(async (file) => {
+          try {
+            return await uploadFile(file);
+          } catch (error) {
+            console.error("File upload failed:", file.name, error);
+            return null;
+          }
+        })
+      );
 
-    const updatedAttachments = [
-      ...editAttachments,
-      ...uploadedFiles.filter(Boolean),
-    ];
+      // Remove null values and add to workLogs state immediately
+      const newFileUrls = uploadedFiles.filter(Boolean) as string[];
 
-    const logRef = doc(db, "work_log", logId);
-    await updateDoc(logRef, {
-      content: editContent,
-      attachments: updatedAttachments, // Ensure only the modified list is saved
-    });
+      // Update workLogs state instantly for a smooth UI
+      setWorkLogs((prevLogs) =>
+        prevLogs.map((log) =>
+          log.id === logId
+            ? {
+                ...log,
+                content: editContent,
+                attachments: [...log.attachments, ...newFileUrls],
+              }
+            : log
+        )
+      );
 
-    cancelEditing();
-    fetchWorkLogs();
-    toast({ title: "Work log updated successfully" });
+      // Update Firestore after state is updated
+      const logRef = doc(db, "work_log", logId);
+      await updateDoc(logRef, {
+        content: editContent,
+        attachments: [
+          ...(workLogs.find((log) => log.id === logId)?.attachments || []),
+          ...newFileUrls,
+        ],
+      });
+
+      // Reset editing state
+      cancelEditing();
+      toast({ title: "Work log updated successfully" });
+    } catch (error) {
+      console.error("Error updating work log:", error);
+      toast({ title: "Failed to update work log", variant: "destructive" });
+    }
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +174,8 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   };
 
   const removeEditAttachment = (logId: string, index: number) => {
+    setEditFiles((prev) => prev.filter((_, i) => i !== index));
+
     setWorkLogs((prevLogs) =>
       prevLogs.map((log) =>
         log.id === logId
