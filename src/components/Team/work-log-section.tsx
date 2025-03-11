@@ -16,7 +16,7 @@ import { db } from "@/firebase/config";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { toast } from "@/hooks/use-toast";
-import { uploadFile } from "@/lib/utils";
+import { generateRandomId, uploadFile } from "@/lib/utils";
 
 interface WorkLog {
   id: string;
@@ -144,7 +144,8 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
       console.log("Uploaded file URLs:", validFileUrls);
 
       const logEntry = {
-        id: user.deal_coordinator_id,
+        id: generateRandomId(),
+        deal_coordinator_id: user.deal_coordinator_id,
         user: user.name,
         content: newWorkLog,
         attachments: validFileUrls,
