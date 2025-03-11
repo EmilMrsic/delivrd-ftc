@@ -143,7 +143,8 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
       const validFileUrls = fileUrls.filter((url) => url); // Remove null values
       console.log("Uploaded file URLs:", validFileUrls);
 
-      const logEntry: Omit<WorkLog, "id"> = {
+      const logEntry = {
+        id: user.deal_coordinator_id,
         user: user.name,
         content: newWorkLog,
         attachments: validFileUrls,
