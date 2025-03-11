@@ -38,6 +38,7 @@ import EditableTextArea from "@/components/base/editable-textarea";
 import EditableInput from "@/components/base/input-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import WorkLogSection from "@/components/Client/work-log-section";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -706,6 +707,11 @@ function ProjectProfile() {
                   })}
               </div>
             </IncomingBidsCard>
+
+            <WorkLogSection
+              user={userData}
+              negotiationId={negotiationData[0].id}
+            />
           </div>
 
           <div className="md:col-span-1">

@@ -63,6 +63,7 @@ import EditableInput from "@/components/base/input-field";
 import axios from "axios";
 import TradeCard from "@/components/Team/trade-card";
 import DeleteBidSection from "@/components/Team/delete-bid-section";
+import WorkLogSection from "@/components/Team/work-log-section";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -896,6 +897,7 @@ function ProjectProfile() {
               {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
             </button>
           </div>
+          <WorkLogSection user={user} negotiationId={negotiationId} />
           {showDeletedBids && (
             <DeleteBidSection
               dealers={dealers}
