@@ -39,6 +39,7 @@ export const TailwindPlusTable = ({
       accessorKey: typeof header === "string" ? header : header.header,
     })),
     getCoreRowModel: getCoreRowModel(),
+    columnResizeMode: "onChange",
   });
 
   return (
