@@ -2,6 +2,7 @@ import { getUser } from "../../../../getUser";
 import Profile from "./Profile";
 
 export async function generateMetadata({ params }: { params: any }) {
+  console.log(params.id);
   const user: any = await getUser(params.id);
 
   const title = user?.name || "Title";

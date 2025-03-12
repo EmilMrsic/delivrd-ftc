@@ -710,7 +710,7 @@ function ProjectProfile() {
 
             <WorkLogSection
               user={userData}
-              negotiationId={negotiationData[0].id}
+              negotiationId={negotiationData[0]?.id ?? ""}
             />
           </div>
 

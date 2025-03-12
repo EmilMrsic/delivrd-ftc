@@ -227,7 +227,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
+        <div className="space-y-4 mb-4">
           {workLogs
             .sort(
               (a, b) =>
