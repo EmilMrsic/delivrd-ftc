@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { FileText, Paperclip, Edit3, Save, X } from "lucide-react";
@@ -13,7 +14,9 @@ import {
   doc,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import ReactQuill from "react-quill";
+import dynamic from "next/dynamic";
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+
 import "react-quill/dist/quill.snow.css";
 import { toast } from "@/hooks/use-toast";
 import { generateRandomId, uploadFile } from "@/lib/utils";
