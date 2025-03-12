@@ -10,40 +10,14 @@ import {
 import { chunk } from "lodash";
 import { db } from "@/firebase/config";
 import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
-import { allowedStatuses } from "@/lib/utils";
-import { backendRequest } from "@/lib/request";
-import { getUserData } from "@/lib/user";
-import { useQuery } from "@tanstack/react-query";
 import {
   pruneNegotiations,
   sortNegotiationsByStatus,
 } from "@/lib/helpers/negotiation";
+import { useNegotiations } from "./useNegotiations";
 
-const useNegotiations = () => {
-  const id = useMemo(() => {
-    const incomingId = "recos5ry1A7L7rFo7"; //getUserData().deal_coordinator_id;
-
-    if (!incomingId || typeof incomingId !== "string") {
-      console.error("Invalid deal_coordinator_id:", incomingId);
-      return;
-    }
-
-    return incomingId;
-  }, []);
-
-  const negotiationsQuery = useQuery({
-    queryKey: ["negotiations"],
-    queryFn: () => backendRequest(`negotiation/${id}`),
-  });
-
-  return {
-    negotiations: negotiationsQuery.data?.negotiations,
-    isLoading: negotiationsQuery.isLoading,
-  };
-};
-
-const useTeamDashboard = () => {
-  const negotiations = useNegotiations();
+const useTeamDashboard = (config: { all?: boolean } = {}) => {
+  const negotiations = useNegotiations(config);
   const [filteredDeals, setFilteredDeals] = useState<NegotiationData[]>([]);
   const [allInternalNotes, setAllInternalNotes] = useState<
     Record<string, InternalNotes[]>
@@ -244,6 +218,8 @@ const useTeamDashboard = () => {
   // }, []);
 
   return {
+    negotiations: negotiations.negotiations,
+    team: negotiations.team,
     setFilteredDeals,
     filteredDeals,
     setAllDealNegotiator,

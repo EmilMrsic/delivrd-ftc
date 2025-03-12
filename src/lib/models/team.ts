@@ -84,7 +84,7 @@ export const NegotationDataModel = z.object({
   incoming_bids: z.array(z.any()).default([]),
   negotiations_Address: z.string().nullable(),
   negotiations_Brand: z.string().nullable(),
-  negotiations_Budget: z.number().nullable(),
+  negotiations_Budget: z.union([z.number(), z.string()]).nullable(),
   negotiations_Client: z.string(),
   negotiations_Color_Options: z.object({
     interior_preferred: z.string(),
@@ -106,7 +106,7 @@ export const NegotationDataModel = z.object({
   negotiations_Model: z.string().nullable(),
   negotiations_New_or_Used: z.string().nullable(),
   negotiations_Onboarding_Complete: z.string().nullable(),
-  negotiations_Payment_Budget: z.number().nullable(),
+  negotiations_Payment_Budget: z.union([z.number(), z.string()]).nullable(),
   negotiations_Phone: z.string().nullable(),
   negotiations_Privilege_Level_From_Users: z.array(z.string()).default([]),
   negotiations_Project_Short_Link: z.string().nullable(),

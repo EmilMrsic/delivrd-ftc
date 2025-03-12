@@ -43,7 +43,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { statuses } from "@/components/Team/filter-popup";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
-import { DealNegotiatorType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotationDataType } from "@/lib/models/team";
 import { TeamDashboardViewHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
@@ -86,12 +86,10 @@ function ReceivedCar() {
     NegotiationData[]
   >([]);
   const [loading, setLoading] = useState(false);
-  const {
-    allDealNegotiator,
-    setFilteredDeals,
-    setOriginalDeals,
-    negotiatorData,
-  } = useTeamDashboard();
+  const { allDealNegotiator, negotiatorData, negotiations, team } =
+    useTeamDashboard({
+      all: true,
+    });
 
   const [expandedStatusRows, setExpandedStatusRows] = useState<{
     [key: string]: boolean;
@@ -118,51 +116,33 @@ function ReceivedCar() {
     }));
   };
 
-  const fetchTeamAndDeals = async () => {
-    try {
-      setLoading(true);
-      const teamQuery = collection(db, "team delivrd");
-      const teamSnapshot = await getDocs(teamQuery);
+  useEffect(() => {
+    if (negotiations) {
+      const filteredDeals = negotiations.filter(
+        (item: any) =>
+          item.negotiations_Status === "Shipping" ||
+          item.negotiations_Status === "Delivery Scheduled" ||
+          item.negotiations_Status === "Follow Up Issue"
+      );
 
-      let teamsWithDeals = [];
+      const teamIdToObject: {
+        [key: string]: NegotationDataType[];
+      } = {};
 
-      for (const teamDoc of teamSnapshot.docs) {
-        const teamMember: any = { id: teamDoc.id, ...teamDoc.data() };
-        const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
-
-        let negotiations = [];
-
-        if (activeDeals.length > 0) {
-          const chunkedDeals = [];
-          for (let i = 0; i < activeDeals.length; i += 30) {
-            const chunk = activeDeals.slice(i, i + 30).filter(Boolean);
-            if (chunk.length > 0) chunkedDeals.push(chunk);
+      filteredDeals.map((deal: NegotationDataType) => {
+        if (deal.negotiations_deal_coordinator) {
+          if (!teamIdToObject[deal.negotiations_deal_coordinator]) {
+            teamIdToObject[deal.negotiations_deal_coordinator] = [];
           }
 
-          for (const chunk of chunkedDeals) {
-            const negotiationsQuery = query(
-              collection(db, "negotiations"),
-              where("__name__", "in", chunk)
-            );
-            const negotiationsSnapshot = await getDocs(negotiationsQuery);
-            negotiations.push(
-              ...negotiationsSnapshot.docs
-                .map((doc) => ({
-                  id: doc.id,
-                  ...doc.data(),
-                }))
-                .filter(
-                  (item: any) =>
-                    item.negotiations_Status === "Shipping" ||
-                    item.negotiations_Status === "Delivery Scheduled" ||
-                    item.negotiations_Status === "Follow Up Issue"
-                )
-            );
-          }
+          teamIdToObject[deal.negotiations_deal_coordinator].push(deal);
         }
+      });
 
-        // Grouping by negotiation status
-        const groupedByStatus = negotiations.reduce(
+      for (const index in team) {
+        const member = team[index];
+        const teamMemberDeals = teamIdToObject[member.id] ?? [];
+        const groupedByStatus = teamMemberDeals.reduce(
           (acc: any, negotiation: any) => {
             const status = negotiation.negotiations_Status || "Unknown";
             if (!acc[status]) acc[status] = [];
@@ -172,12 +152,76 @@ function ReceivedCar() {
           {}
         );
 
-        teamMember.negotiationsGrouped = groupedByStatus;
-        teamsWithDeals.push(teamMember);
+        team[index].negotiationsGrouped = groupedByStatus;
       }
 
+      setTeamData(team);
       setLoading(false);
-      setTeamData(teamsWithDeals);
+    }
+  }, [negotiations]);
+
+  const fetchTeamAndDeals = async () => {
+    try {
+      setLoading(true);
+      console.log("deals:", negotiations);
+
+      // const teamQuery = collection(db, "team delivrd");
+      // const teamSnapshot = await getDocs(teamQuery);
+
+      // let teamsWithDeals = [];
+
+      // for (const teamDoc of teamSnapshot.docs) {
+      //   const teamMember: any = { id: teamDoc.id, ...teamDoc.data() };
+      //   const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
+
+      //   let negotiations = [];
+
+      //   if (activeDeals.length > 0) {
+      //     const chunkedDeals = [];
+      //     for (let i = 0; i < activeDeals.length; i += 30) {
+      //       const chunk = activeDeals.slice(i, i + 30).filter(Boolean);
+      //       if (chunk.length > 0) chunkedDeals.push(chunk);
+      //     }
+
+      //     for (const chunk of chunkedDeals) {
+      //       const negotiationsQuery = query(
+      //         collection(db, "negotiations"),
+      //         where("__name__", "in", chunk)
+      //       );
+      //       const negotiationsSnapshot = await getDocs(negotiationsQuery);
+      //       negotiations.push(
+      //         ...negotiationsSnapshot.docs
+      //           .map((doc) => ({
+      //             id: doc.id,
+      //             ...doc.data(),
+      //           }))
+      // .filter(
+      //   (item: any) =>
+      //     item.negotiations_Status === "Shipping" ||
+      //     item.negotiations_Status === "Delivery Scheduled" ||
+      //     item.negotiations_Status === "Follow Up Issue"
+      // )
+      //       );
+      //     }
+      //   }
+
+      //   // Grouping by negotiation status
+      // const groupedByStatus = negotiations.reduce(
+      //   (acc: any, negotiation: any) => {
+      //     const status = negotiation.negotiations_Status || "Unknown";
+      //     if (!acc[status]) acc[status] = [];
+      //     acc[status].push(negotiation);
+      //     return acc;
+      //   },
+      //   {}
+      // );
+
+      //   teamMember.negotiationsGrouped = groupedByStatus;
+      //   teamsWithDeals.push(teamMember);
+      // }
+
+      // setLoading(false);
+      // setTeamData(teamsWithDeals);
     } catch (error) {
       setLoading(false);
       console.error("Error fetching data:", error);

@@ -1,6 +1,9 @@
 import { NegotiationData } from "@/types";
 import { negotiationStatusOrder } from "../constants/negotiations";
-import { NegotationDataType } from "../models/team";
+import { NegotationDataModel, NegotationDataType } from "../models/team";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { chunk } from "lodash";
 
 export const sortNegotiationsByStatus = (
   negotiations: NegotationDataType[],
@@ -62,4 +65,24 @@ export const sortDataHelper = (
       setCurrentDeals(sortedDeals);
     }
   };
+};
+
+export const getActiveDealObjects = async (activeDeals: string[]) => {
+  const negotiationsCollectionRef = collection(db, "negotiations");
+  const chunkedIds = chunk(activeDeals, 30);
+  const negotiationData = await Promise.all(
+    chunkedIds.map(async (idChunk) => {
+      const negotiationsQuery = query(
+        negotiationsCollectionRef,
+        where("__name__", "in", idChunk)
+      );
+      const negotiationsSnapshot = await getDocs(negotiationsQuery);
+      return negotiationsSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return NegotationDataModel.parse(data);
+      });
+    })
+  );
+
+  return negotiationData.flat();
 };

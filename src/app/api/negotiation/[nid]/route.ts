@@ -1,4 +1,5 @@
 import { db } from "@/firebase/config";
+import { getActiveDealObjects } from "@/lib/helpers/negotiation";
 import {
   DealNegotiatorModel,
   DealNegotiatorType,
@@ -39,24 +40,9 @@ export const GET = async (
 
   if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
     console.log("No active deals found");
+    output.negotiations = [];
   } else {
-    const negotiationsCollectionRef = collection(db, "negotiations");
-    const chunkedIds = chunk(activeDeals, 30);
-    const negotiationData = await Promise.all(
-      chunkedIds.map(async (idChunk) => {
-        const negotiationsQuery = query(
-          negotiationsCollectionRef,
-          where("__name__", "in", idChunk)
-        );
-        const negotiationsSnapshot = await getDocs(negotiationsQuery);
-        return negotiationsSnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return NegotationDataModel.parse(data);
-        });
-      })
-    );
-
-    output.negotiations = negotiationData.flat();
+    output.negotiations = await getActiveDealObjects(activeDeals);
   }
 
   return NextResponse.json(output);
