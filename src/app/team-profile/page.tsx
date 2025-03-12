@@ -383,6 +383,8 @@ function ProjectProfile() {
     });
   }, [negotiationId]);
 
+  console.log({ incomingBids });
+
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -897,7 +899,6 @@ function ProjectProfile() {
               {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
             </button>
           </div>
-          <WorkLogSection user={user} negotiationId={negotiationId} />
           {showDeletedBids && (
             <DeleteBidSection
               dealers={dealers}
@@ -919,6 +920,7 @@ function ProjectProfile() {
               openDialog={openDialog}
             />
           )}
+          <WorkLogSection user={user} negotiationId={negotiationId} />
 
           <AddNoteSection
             user={user}
