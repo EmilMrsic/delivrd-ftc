@@ -54,6 +54,10 @@ import Link from "next/link";
 import ClientDetailsPopup from "@/components/Team/team-detail-popup";
 import TeamClientDetailsPopup from "@/components/Team/team-client-detail-popup";
 import { statuses } from "@/components/Team/filter-popup";
+import { TailwindPlusTable } from "@/components/tailwind-plus/table";
+import { DealNegotiatorType } from "@/lib/models/team";
+import { TeamDashboardViewHeader } from "@/components/base/header";
+import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -147,13 +151,8 @@ function NeedToReview() {
     direction: "ascending", // default direction
   });
 
-  const sortData = (key: string) => {
+  const sortData = (key: string, direction: string) => {
     setSortConfig((prevConfig) => {
-      const newDirection =
-        prevConfig.key === key && prevConfig.direction === "ascending"
-          ? "descending"
-          : "ascending";
-
       const sortedTeams = [...teamData].map((team) => {
         const sortedNegotiations = [...team.negotiations].sort(
           (a: any, b: any) => {
@@ -163,17 +162,17 @@ function NeedToReview() {
             if (typeof aValue === "string") aValue = aValue.toLowerCase();
             if (typeof bValue === "string") bValue = bValue.toLowerCase();
 
-            if (aValue == null) return newDirection === "ascending" ? 1 : -1;
-            if (bValue == null) return newDirection === "ascending" ? -1 : 1;
+            if (aValue == null) return direction === "ascending" ? 1 : -1;
+            if (bValue == null) return direction === "ascending" ? -1 : 1;
 
             if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-              return newDirection === "ascending"
+              return direction === "ascending"
                 ? Number(aValue) - Number(bValue)
                 : Number(bValue) - Number(aValue);
             }
 
-            if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
-            if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
+            if (aValue < bValue) return direction === "ascending" ? -1 : 1;
+            if (aValue > bValue) return direction === "ascending" ? 1 : -1;
             return 0;
           }
         );
@@ -183,7 +182,7 @@ function NeedToReview() {
 
       setTeamData(sortedTeams);
 
-      return { key, direction: newDirection };
+      return { key, direction };
     });
   };
 
@@ -363,53 +362,11 @@ function NeedToReview() {
 
   return (
     <>
-      <div className="flex justify-between items-center bg-[#202125] p-6 mb-5 shadow-lg">
-        <div
-          onClick={() => router.push("/team-dashboard")}
-          className="flex flex-col items-start cursor-pointer"
-        >
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-            alt="DELIVRD Logo"
-            className="h-8 mb-2"
-          />
-          <p className="text-white text-sm">Putting Dreams In Driveways</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-              Client Deals Dashboard
-            </h1>
-            <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-              {negotiatorData?.name}
-            </h1>
-          </div>
-        </div>
-      </div>
-      <div className="space-y-2 ml-10 w-[150px]">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
-              Select View
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-auto">
-            <div className="flex flex-col w-fit">
-              {statuses.map((status, index) => (
-                <Link
-                  key={index}
-                  className="p-2 text-sm hover:underline cursor-pointer"
-                  href={`/${status.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  {status}
-                </Link>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="w-full overflow-x-auto ">
+      <div className="container mx-auto p-4 space-y-6 min-h-screen">
+        <TeamDashboardViewHeader
+          negotiatorData={negotiatorData as DealNegotiatorType}
+        />
+        <TeamDashboardViewSelector />
         <Table>
           {loading ? (
             <TableBody>
@@ -449,100 +406,457 @@ function NeedToReview() {
 
                     <TableRow>
                       <TableCell colSpan={2} className="p-0">
-                        <div className="w-full px-5 overflow-x-auto">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  #
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Client
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Make
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Model
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Deal Negotiator
-                                </TableHead>
+                        {false && (
+                          <div className="w-full px-5 overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    #
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Client
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Make
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Model
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Deal Negotiator
+                                  </TableHead>
 
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Stage
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Phone Number
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Email
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Zip Code
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Trim Package
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Consult Notes
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Drivetrain
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Exterior Deal Breaker
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Exterior Preffered
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Interior Deal Breaker
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2 border-r">
-                                  Interior Preffered
-                                </TableHead>
-                                <TableHead className="text-left px-4 py-2">
-                                  Date Paid
-                                </TableHead>
-                              </TableRow>
-                            </TableHeader>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Stage
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Phone Number
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Email
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Zip Code
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Trim Package
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Consult Notes
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Drivetrain
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Exterior Deal Breaker
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Exterior Preffered
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Interior Deal Breaker
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2 border-r">
+                                    Interior Preffered
+                                  </TableHead>
+                                  <TableHead className="text-left px-4 py-2">
+                                    Date Paid
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
 
-                            <TableBody>
-                              {dealsWithoutCoordinator.map((deal, index) => (
-                                <TableRow
-                                  key={deal.id}
-                                  className={`cursor-pointer bg-white hover:bg-gray-100 `}
-                                >
-                                  <TableCell className="px-4 relative py-2 border-r">
-                                    <Link href={`/team-profile?id=${deal.id}`}>
-                                      <span>{index + 1}</span>
-                                    </Link>
-                                    <Expand
-                                      size={16}
-                                      className="text-gray-500 absolute top-[5px] right-[10px] hover:text-gray-700 cursor-pointer"
-                                      onClick={() => {
-                                        setSelectedDeal(deal);
-                                        setIsOpen(true);
-                                      }}
-                                    />
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    <span>{deal.negotiations_Client}</span>
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {deal.negotiations_Brand}
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {deal.negotiations_Model}
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
+                              <TableBody>
+                                {dealsWithoutCoordinator.map((deal, index) => (
+                                  <TableRow
+                                    key={deal.id}
+                                    className={`cursor-pointer bg-white hover:bg-gray-100 `}
+                                  >
+                                    <TableCell className="px-4 relative py-2 border-r">
+                                      <Link
+                                        href={`/team-profile?id=${deal.id}`}
+                                      >
+                                        <span>{index + 1}</span>
+                                      </Link>
+                                      <Expand
+                                        size={16}
+                                        className="text-gray-500 absolute top-[5px] right-[10px] hover:text-gray-700 cursor-pointer"
+                                        onClick={() => {
+                                          setSelectedDeal(deal);
+                                          setIsOpen(true);
+                                        }}
+                                      />
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      <span>{deal.negotiations_Client}</span>
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {deal.negotiations_Brand}
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {deal.negotiations_Model}
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      <DropdownMenu
+                                        open={
+                                          openNegotiatorState[deal.id] || false
+                                        }
+                                        onOpenChange={(isOpen) =>
+                                          toggleNegotiatorDropdown(
+                                            deal.id,
+                                            isOpen
+                                          )
+                                        }
+                                      >
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            variant="outline"
+                                            className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
+                                          >
+                                            {allDealNegotiator.some(
+                                              (negotiator) =>
+                                                negotiator.id ===
+                                                deal.negotiations_deal_coordinator
+                                            ) ? (
+                                              <p>
+                                                {
+                                                  allDealNegotiator.find(
+                                                    (negotiator) =>
+                                                      negotiator.id ===
+                                                      deal.negotiations_deal_coordinator
+                                                  )?.name
+                                                }
+                                              </p>
+                                            ) : (
+                                              <p>Not Assigned</p>
+                                            )}
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                                          {allDealNegotiator.map(
+                                            (
+                                              negotiator: DealNegotiator,
+                                              index
+                                            ) => (
+                                              <DropdownMenuItem
+                                                key={index}
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  updateDealNegotiator(
+                                                    deal.id,
+                                                    negotiator.id
+                                                  );
+                                                  toggleNegotiatorDropdown(
+                                                    deal.id,
+                                                    false
+                                                  );
+                                                }}
+                                              >
+                                                {negotiator.name}
+                                              </DropdownMenuItem>
+                                            )
+                                          )}
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      <Button
+                                        variant="outline"
+                                        style={{
+                                          backgroundColor: getStatusStyles(
+                                            deal?.negotiations_Status ?? ""
+                                          ).backgroundColor,
+                                          color: getStatusStyles(
+                                            deal?.negotiations_Status ?? ""
+                                          ).textColor, // Set dynamic text color
+                                        }}
+                                        className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
+                                      >
+                                        <p>{deal.negotiations_Status}</p>
+                                      </Button>
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {deal.negotiations_Phone}
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {deal.negotiations_Email}
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {deal.negotiations_Zip_Code}
+                                    </TableCell>
+                                    <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
+                                      {deal?.negotiations_Trim_Package_Options &&
+                                      deal?.negotiations_Trim_Package_Options
+                                        ?.length > 50
+                                        ? `${deal?.negotiations_Trim_Package_Options?.substring(
+                                            0,
+                                            50
+                                          )}...`
+                                        : deal.negotiations_Trim_Package_Options}
+                                      <button
+                                        onClick={() =>
+                                          setTrimDetails({
+                                            id: deal.id,
+                                            trim:
+                                              deal.negotiations_Trim_Package_Options ??
+                                              "",
+                                          })
+                                        }
+                                        className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
+                                        title="Expand"
+                                      >
+                                        <Expand
+                                          size={16}
+                                          className="text-gray-500 hover:text-gray-700"
+                                        />
+                                      </button>{" "}
+                                    </TableCell>
+                                    <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
+                                      {deal?.consult_notes?.length > 50
+                                        ? `${deal?.consult_notes?.substring(
+                                            0,
+                                            50
+                                          )}...`
+                                        : deal.consult_notes}
+                                      <button
+                                        onClick={() =>
+                                          setExpandedNote({
+                                            id: deal.id,
+                                            note: deal.consult_notes,
+                                          })
+                                        }
+                                        className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
+                                        title="Expand"
+                                      >
+                                        <Expand
+                                          size={16}
+                                          className="text-gray-500 hover:text-gray-700"
+                                        />
+                                      </button>{" "}
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {deal.negotiations_Drivetrain}
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {
+                                        deal.negotiations_Color_Options
+                                          .exterior_deal_breakers
+                                      }
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {
+                                        deal.negotiations_Color_Options
+                                          .exterior_preferred
+                                      }
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {
+                                        deal.negotiations_Color_Options
+                                          .interior_deal_breaker
+                                      }
+                                    </TableCell>
+                                    <TableCell className="px-4 py-2 border-r">
+                                      {
+                                        deal.negotiations_Color_Options
+                                          .interior_preferred
+                                      }
+                                    </TableCell>
+
+                                    <TableCell className="px-4 py-2 border-r">
+                                      <div>{dateFormat(deal.date_paid)}</div>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  </>
+                )}
+                {/* Mapping Team Deals */}
+                {teamData
+                  .filter(
+                    (item) =>
+                      item.name !== "Tabarak Sohail" &&
+                      item.name.trim() !== "Emil Mrsic Negotiator" &&
+                      item.name !== "Crystal Watts" &&
+                      item.name !== "Schalaschly Marrero"
+                  )
+                  .map((team) => (
+                    <>
+                      <TableRow
+                        className="border border-gray-300 rounded-lg"
+                        key={team.id}
+                      >
+                        <TableCell className="w-[50px]">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleRow(team.id)}
+                          >
+                            {expandedRows.has(team.id) ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <p>{team.name}</p>
+                            <p className="text-xs">
+                              No of Deals: {team.negotiations.length}
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {expandedRows.has(team.id) && (
+                        <TableRow>
+                          <TableCell colSpan={2} className="p-0">
+                            <TailwindPlusTable
+                              headers={[
+                                {
+                                  header: "#",
+                                },
+                                {
+                                  header: "Client",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Client",
+                                  },
+                                },
+                                {
+                                  header: "Make",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Brand",
+                                  },
+                                },
+                                {
+                                  header: "Model",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Model",
+                                  },
+                                },
+                                {
+                                  header: "Deal Negotiator",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_deal_coordinator",
+                                  },
+                                },
+                                {
+                                  header: "Stage",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Status",
+                                  },
+                                },
+                                {
+                                  header: "Phone Number",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Phone",
+                                  },
+                                },
+                                {
+                                  header: "Email",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Email",
+                                  },
+                                },
+                                {
+                                  header: "Zip Code",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Zip_Code",
+                                  },
+                                },
+                                {
+                                  header: "Trim Package",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Trim_Package_Options",
+                                  },
+                                },
+                                {
+                                  header: "Consult Notes",
+                                  config: {
+                                    sortable: true,
+                                    key: "consult_notes",
+                                  },
+                                },
+                                {
+                                  header: "Drivetrain",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Drivetrain",
+                                  },
+                                },
+                                {
+                                  header: "Exterior Deal Breaker",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Color_Options.exterior_deal_breakers",
+                                  },
+                                },
+                                {
+                                  header: "Exterior Preffered",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Color_Options.exterior_preferred",
+                                  },
+                                },
+                                {
+                                  header: "Interior Deal Breaker",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Color_Options.interior_deal_breaker",
+                                  },
+                                },
+                                {
+                                  header: "Interior Preffered",
+                                  config: {
+                                    sortable: true,
+                                    key: "negotiations_Color_Options.interior_preferred",
+                                  },
+                                },
+                                {
+                                  header: "Date Paid",
+                                  config: {
+                                    sortable: true,
+                                    key: "date_paid",
+                                  },
+                                },
+                              ]}
+                              rows={team.negotiations.map((deal, index) => [
+                                {
+                                  text: `${index + 1}`,
+                                  link: `/team-profile?id=${deal.id}`,
+                                },
+                                {
+                                  text: deal.negotiations_Client,
+                                },
+                                {
+                                  text: deal.negotiations_Brand,
+                                },
+                                {
+                                  text: deal.negotiations_Model,
+                                },
+                                {
+                                  Component: () => (
                                     <DropdownMenu
                                       open={
-                                        openNegotiatorState[deal.id] || false
+                                        openDealerNegotiatorState[deal.id] ||
+                                        false
                                       }
                                       onOpenChange={(isOpen) =>
-                                        toggleNegotiatorDropdown(
+                                        toggleDealNegotiatorDropdown(
                                           deal.id,
                                           isOpen
                                         )
@@ -599,8 +913,10 @@ function NeedToReview() {
                                         )}
                                       </DropdownMenuContent>
                                     </DropdownMenu>
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
+                                  ),
+                                },
+                                {
+                                  Component: () => (
                                     <Button
                                       variant="outline"
                                       style={{
@@ -615,445 +931,380 @@ function NeedToReview() {
                                     >
                                       <p>{deal.negotiations_Status}</p>
                                     </Button>
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {deal.negotiations_Phone}
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {deal.negotiations_Email}
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {deal.negotiations_Zip_Code}
-                                  </TableCell>
-                                  <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
-                                    {deal?.negotiations_Trim_Package_Options &&
-                                    deal?.negotiations_Trim_Package_Options
-                                      ?.length > 50
-                                      ? `${deal?.negotiations_Trim_Package_Options?.substring(
-                                          0,
-                                          50
-                                        )}...`
-                                      : deal.negotiations_Trim_Package_Options}
-                                    <button
-                                      onClick={() =>
-                                        setTrimDetails({
-                                          id: deal.id,
-                                          trim:
-                                            deal.negotiations_Trim_Package_Options ??
-                                            "",
-                                        })
-                                      }
-                                      className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
-                                      title="Expand"
-                                    >
-                                      <Expand
-                                        size={16}
-                                        className="text-gray-500 hover:text-gray-700"
-                                      />
-                                    </button>{" "}
-                                  </TableCell>
-                                  <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
-                                    {deal?.consult_notes?.length > 50
-                                      ? `${deal?.consult_notes?.substring(
-                                          0,
-                                          50
-                                        )}...`
-                                      : deal.consult_notes}
-                                    <button
-                                      onClick={() =>
-                                        setExpandedNote({
-                                          id: deal.id,
-                                          note: deal.consult_notes,
-                                        })
-                                      }
-                                      className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
-                                      title="Expand"
-                                    >
-                                      <Expand
-                                        size={16}
-                                        className="text-gray-500 hover:text-gray-700"
-                                      />
-                                    </button>{" "}
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {deal.negotiations_Drivetrain}
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {
-                                      deal.negotiations_Color_Options
-                                        .exterior_deal_breakers
-                                    }
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {
-                                      deal.negotiations_Color_Options
-                                        .exterior_preferred
-                                    }
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {
-                                      deal.negotiations_Color_Options
-                                        .interior_deal_breaker
-                                    }
-                                  </TableCell>
-                                  <TableCell className="px-4 py-2 border-r">
-                                    {
-                                      deal.negotiations_Color_Options
-                                        .interior_preferred
-                                    }
-                                  </TableCell>
-
-                                  <TableCell className="px-4 py-2 border-r">
-                                    <div>{dateFormat(deal.date_paid)}</div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  </>
-                )}
-                {/* Mapping Team Deals */}
-                {teamData
-                  .filter(
-                    (item) =>
-                      item.name !== "Tabarak Sohail" &&
-                      item.name.trim() !== "Emil Mrsic Negotiator" &&
-                      item.name !== "Crystal Watts" &&
-                      item.name !== "Schalaschly Marrero"
-                  )
-                  .map((team) => (
-                    <>
-                      <TableRow
-                        className="border border-gray-300 rounded-lg"
-                        key={team.id}
-                      >
-                        <TableCell className="w-[50px]">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleRow(team.id)}
-                          >
-                            {expandedRows.has(team.id) ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <p>{team.name}</p>
-                            <p className="text-xs">
-                              No of Deals: {team.negotiations.length}
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                      {expandedRows.has(team.id) && (
-                        <TableRow>
-                          <TableCell colSpan={2} className="p-0">
-                            <div className="w-full px-5 overflow-x-auto">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      #
-                                    </TableHead>
-                                    <TableHead
-                                      onClick={() =>
-                                        sortData("negotiations_Client")
-                                      }
-                                      className="text-left px-4 py-2 border-r"
-                                    >
-                                      Client
-                                    </TableHead>
-                                    <TableHead
-                                      onClick={() =>
-                                        sortData("negotiations_Brand")
-                                      }
-                                      className="text-left px-4 py-2 border-r"
-                                    >
-                                      Make
-                                    </TableHead>
-                                    <TableHead
-                                      onClick={() =>
-                                        sortData("negotiations_Model")
-                                      }
-                                      className="text-left px-4 py-2 border-r"
-                                    >
-                                      Model
-                                    </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Deal Negotiator
-                                    </TableHead>
-
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Stage
-                                    </TableHead>
-                                    <TableHead
-                                      onClick={() =>
-                                        sortData("negotiations_Phone")
-                                      }
-                                      className="text-left px-4 py-2 border-r"
-                                    >
-                                      Phone Number
-                                    </TableHead>
-                                    <TableHead
-                                      onClick={() =>
-                                        sortData("negotiations_Email")
-                                      }
-                                      className="text-left px-4 py-2 border-r"
-                                    >
-                                      Email
-                                    </TableHead>
-                                    <TableHead
-                                      onClick={() =>
-                                        sortData("negotiations_Zip_Code")
-                                      }
-                                      className="text-left px-4 py-2 border-r"
-                                    >
-                                      Zip Code
-                                    </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Trim Package
-                                    </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Consult Notes
-                                    </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Drivetrain
-                                    </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Exterior Deal Breaker
-                                    </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Exterior Preffered
-                                    </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Interior Deal Breaker
-                                    </TableHead>
-                                    <TableHead className="text-left px-4 py-2 border-r">
-                                      Interior Preffered
-                                    </TableHead>
-                                    <TableHead
-                                      onClick={() => sortData("date_paid")}
-                                      className="text-left px-4 py-2"
-                                    >
-                                      Date Paid
-                                    </TableHead>
-                                  </TableRow>
-                                </TableHeader>
-
-                                <TableBody>
-                                  {team.negotiations.map((deal, index) => (
-                                    <TableRow
-                                      key={deal.id}
-                                      className={`cursor-pointer bg-white hover:bg-gray-100 `}
-                                    >
-                                      <TableCell className="px-4 relative py-2 border-r">
-                                        <Link
-                                          href={`/team-profile?id=${deal.id}`}
-                                        >
-                                          <span>{index + 1}</span>
-                                        </Link>
-                                        <Expand
-                                          size={16}
-                                          className="text-gray-500 absolute top-[5px] right-[10px] hover:text-gray-700 cursor-pointer"
-                                          onClick={() => {
-                                            setSelectedDeal(deal);
-                                            setIsOpen(true);
-                                          }}
-                                        />
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        <span>{deal.negotiations_Client}</span>
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {deal.negotiations_Brand}
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {deal.negotiations_Model}
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        <DropdownMenu
-                                          open={
-                                            openDealerNegotiatorState[
-                                              deal.id
-                                            ] || false
-                                          }
-                                          onOpenChange={(isOpen) =>
-                                            toggleDealNegotiatorDropdown(
-                                              deal.id,
-                                              isOpen
-                                            )
-                                          }
-                                        >
-                                          <DropdownMenuTrigger asChild>
-                                            <Button
-                                              variant="outline"
-                                              className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-                                            >
-                                              {allDealNegotiator.some(
-                                                (negotiator) =>
-                                                  negotiator.id ===
-                                                  deal.negotiations_deal_coordinator
-                                              ) ? (
-                                                <p>
-                                                  {
-                                                    allDealNegotiator.find(
-                                                      (negotiator) =>
-                                                        negotiator.id ===
-                                                        deal.negotiations_deal_coordinator
-                                                    )?.name
-                                                  }
-                                                </p>
-                                              ) : (
-                                                <p>Not Assigned</p>
-                                              )}
-                                            </Button>
-                                          </DropdownMenuTrigger>
-                                          <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                                            {allDealNegotiator.map(
-                                              (
-                                                negotiator: DealNegotiator,
-                                                index
-                                              ) => (
-                                                <DropdownMenuItem
-                                                  key={index}
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    updateDealNegotiator(
-                                                      deal.id,
-                                                      negotiator.id
-                                                    );
-                                                    toggleNegotiatorDropdown(
-                                                      deal.id,
-                                                      false
-                                                    );
-                                                  }}
-                                                >
-                                                  {negotiator.name}
-                                                </DropdownMenuItem>
-                                              )
-                                            )}
-                                          </DropdownMenuContent>
-                                        </DropdownMenu>
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        <Button
-                                          variant="outline"
-                                          style={{
-                                            backgroundColor: getStatusStyles(
-                                              deal?.negotiations_Status ?? ""
-                                            ).backgroundColor,
-                                            color: getStatusStyles(
-                                              deal?.negotiations_Status ?? ""
-                                            ).textColor, // Set dynamic text color
-                                          }}
-                                          className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
-                                        >
-                                          <p>{deal.negotiations_Status}</p>
-                                        </Button>
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {deal.negotiations_Phone}
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {deal.negotiations_Email}
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {deal.negotiations_Zip_Code}
-                                      </TableCell>
-                                      <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
-                                        {deal?.negotiations_Trim_Package_Options &&
-                                        deal?.negotiations_Trim_Package_Options
-                                          ?.length > 50
-                                          ? `${deal?.negotiations_Trim_Package_Options?.substring(
-                                              0,
-                                              50
-                                            )}...`
-                                          : deal.negotiations_Trim_Package_Options}
-                                        <button
-                                          onClick={() =>
-                                            setTrimDetails({
-                                              id: deal.id,
-                                              trim:
-                                                deal.negotiations_Trim_Package_Options ??
-                                                "",
-                                            })
-                                          }
-                                          className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
-                                          title="Expand"
-                                        >
-                                          <Expand
-                                            size={16}
-                                            className="text-gray-500 hover:text-gray-700"
-                                          />
-                                        </button>{" "}
-                                      </TableCell>
-                                      <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
-                                        {deal?.consult_notes?.length > 50
-                                          ? `${deal?.consult_notes?.substring(
-                                              0,
-                                              50
-                                            )}...`
-                                          : deal.consult_notes}
-                                        <button
-                                          onClick={() =>
-                                            setExpandedNote({
-                                              id: deal.id,
-                                              note: deal.consult_notes,
-                                            })
-                                          }
-                                          className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
-                                          title="Expand"
-                                        >
-                                          <Expand
-                                            size={16}
-                                            className="text-gray-500 hover:text-gray-700"
-                                          />
-                                        </button>{" "}
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {deal.negotiations_Drivetrain}
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {
-                                          deal.negotiations_Color_Options
-                                            .exterior_deal_breakers
+                                  ),
+                                },
+                                {
+                                  text: deal.negotiations_Phone,
+                                },
+                                {
+                                  text: deal.negotiations_Email,
+                                },
+                                {
+                                  text: deal.negotiations_Zip_Code,
+                                },
+                                {
+                                  text:
+                                    deal.negotiations_Trim_Package_Options?.substring(
+                                      0,
+                                      50
+                                    ) || "",
+                                  config: {
+                                    expandable:
+                                      deal.negotiations_Trim_Package_Options &&
+                                      deal.negotiations_Trim_Package_Options
+                                        ?.length > 50,
+                                    expandedComponent: () => (
+                                      <p>
+                                        {deal.negotiations_Trim_Package_Options}
+                                      </p>
+                                    ),
+                                  },
+                                },
+                                {
+                                  text:
+                                    deal?.consult_notes?.substring(0, 50) || "",
+                                  config: {
+                                    expandable:
+                                      deal.consult_notes &&
+                                      deal.consult_notes.length > 50,
+                                    expandedComponent: () => (
+                                      <p>{deal.consult_notes}</p>
+                                    ),
+                                  },
+                                },
+                                {
+                                  text: deal.negotiations_Drivetrain,
+                                },
+                                {
+                                  text: deal.negotiations_Color_Options
+                                    .exterior_deal_breakers,
+                                },
+                                {
+                                  text: deal.negotiations_Color_Options
+                                    .exterior_preferred,
+                                },
+                                {
+                                  text: deal.negotiations_Color_Options
+                                    .interior_deal_breaker,
+                                },
+                                {
+                                  text: deal.negotiations_Color_Options
+                                    .interior_preferred,
+                                },
+                                {
+                                  text: dateFormat(deal.date_paid),
+                                },
+                              ])}
+                              sortConfig={sortConfig}
+                              setSortConfig={setSortConfig}
+                              sortData={sortData}
+                            />
+                            {false && (
+                              <div className="w-full px-5 overflow-x-auto">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        #
+                                      </TableHead>
+                                      <TableHead
+                                        onClick={() =>
+                                          sortData("negotiations_Client")
                                         }
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {
-                                          deal.negotiations_Color_Options
-                                            .exterior_preferred
+                                        className="text-left px-4 py-2 border-r"
+                                      >
+                                        Client
+                                      </TableHead>
+                                      <TableHead
+                                        onClick={() =>
+                                          sortData("negotiations_Brand")
                                         }
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {
-                                          deal.negotiations_Color_Options
-                                            .interior_deal_breaker
+                                        className="text-left px-4 py-2 border-r"
+                                      >
+                                        Make
+                                      </TableHead>
+                                      <TableHead
+                                        onClick={() =>
+                                          sortData("negotiations_Model")
                                         }
-                                      </TableCell>
-                                      <TableCell className="px-4 py-2 border-r">
-                                        {
-                                          deal.negotiations_Color_Options
-                                            .interior_preferred
-                                        }
-                                      </TableCell>
+                                        className="text-left px-4 py-2 border-r"
+                                      >
+                                        Model
+                                      </TableHead>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Deal Negotiator
+                                      </TableHead>
 
-                                      <TableCell className="px-4 py-2 border-r">
-                                        <div>{dateFormat(deal.date_paid)}</div>
-                                      </TableCell>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Stage
+                                      </TableHead>
+                                      <TableHead
+                                        onClick={() =>
+                                          sortData("negotiations_Phone")
+                                        }
+                                        className="text-left px-4 py-2 border-r"
+                                      >
+                                        Phone Number
+                                      </TableHead>
+                                      <TableHead
+                                        onClick={() =>
+                                          sortData("negotiations_Email")
+                                        }
+                                        className="text-left px-4 py-2 border-r"
+                                      >
+                                        Email
+                                      </TableHead>
+                                      <TableHead
+                                        onClick={() =>
+                                          sortData("negotiations_Zip_Code")
+                                        }
+                                        className="text-left px-4 py-2 border-r"
+                                      >
+                                        Zip Code
+                                      </TableHead>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Trim Package
+                                      </TableHead>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Consult Notes
+                                      </TableHead>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Drivetrain
+                                      </TableHead>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Exterior Deal Breaker
+                                      </TableHead>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Exterior Preffered
+                                      </TableHead>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Interior Deal Breaker
+                                      </TableHead>
+                                      <TableHead className="text-left px-4 py-2 border-r">
+                                        Interior Preffered
+                                      </TableHead>
+                                      <TableHead
+                                        onClick={() => sortData("date_paid")}
+                                        className="text-left px-4 py-2"
+                                      >
+                                        Date Paid
+                                      </TableHead>
                                     </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </div>
+                                  </TableHeader>
+
+                                  <TableBody>
+                                    {team.negotiations.map((deal, index) => (
+                                      <TableRow
+                                        key={deal.id}
+                                        className={`cursor-pointer bg-white hover:bg-gray-100 `}
+                                      >
+                                        <TableCell className="px-4 relative py-2 border-r">
+                                          <Link
+                                            href={`/team-profile?id=${deal.id}`}
+                                          >
+                                            <span>{index + 1}</span>
+                                          </Link>
+                                          <Expand
+                                            size={16}
+                                            className="text-gray-500 absolute top-[5px] right-[10px] hover:text-gray-700 cursor-pointer"
+                                            onClick={() => {
+                                              setSelectedDeal(deal);
+                                              setIsOpen(true);
+                                            }}
+                                          />
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          <span>
+                                            {deal.negotiations_Client}
+                                          </span>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {deal.negotiations_Brand}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {deal.negotiations_Model}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          <DropdownMenu
+                                            open={
+                                              openDealerNegotiatorState[
+                                                deal.id
+                                              ] || false
+                                            }
+                                            onOpenChange={(isOpen) =>
+                                              toggleDealNegotiatorDropdown(
+                                                deal.id,
+                                                isOpen
+                                              )
+                                            }
+                                          >
+                                            <DropdownMenuTrigger asChild>
+                                              <Button
+                                                variant="outline"
+                                                className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
+                                              >
+                                                {allDealNegotiator.some(
+                                                  (negotiator) =>
+                                                    negotiator.id ===
+                                                    deal.negotiations_deal_coordinator
+                                                ) ? (
+                                                  <p>
+                                                    {
+                                                      allDealNegotiator.find(
+                                                        (negotiator) =>
+                                                          negotiator.id ===
+                                                          deal.negotiations_deal_coordinator
+                                                      )?.name
+                                                    }
+                                                  </p>
+                                                ) : (
+                                                  <p>Not Assigned</p>
+                                                )}
+                                              </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                                              {allDealNegotiator.map(
+                                                (
+                                                  negotiator: DealNegotiator,
+                                                  index
+                                                ) => (
+                                                  <DropdownMenuItem
+                                                    key={index}
+                                                    onClick={(e) => {
+                                                      e.preventDefault();
+                                                      e.stopPropagation();
+                                                      updateDealNegotiator(
+                                                        deal.id,
+                                                        negotiator.id
+                                                      );
+                                                      toggleNegotiatorDropdown(
+                                                        deal.id,
+                                                        false
+                                                      );
+                                                    }}
+                                                  >
+                                                    {negotiator.name}
+                                                  </DropdownMenuItem>
+                                                )
+                                              )}
+                                            </DropdownMenuContent>
+                                          </DropdownMenu>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          <Button
+                                            variant="outline"
+                                            style={{
+                                              backgroundColor: getStatusStyles(
+                                                deal?.negotiations_Status ?? ""
+                                              ).backgroundColor,
+                                              color: getStatusStyles(
+                                                deal?.negotiations_Status ?? ""
+                                              ).textColor, // Set dynamic text color
+                                            }}
+                                            className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
+                                          >
+                                            <p>{deal.negotiations_Status}</p>
+                                          </Button>
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {deal.negotiations_Phone}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {deal.negotiations_Email}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {deal.negotiations_Zip_Code}
+                                        </TableCell>
+                                        <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
+                                          {deal?.negotiations_Trim_Package_Options &&
+                                          deal
+                                            ?.negotiations_Trim_Package_Options
+                                            ?.length > 50
+                                            ? `${deal?.negotiations_Trim_Package_Options?.substring(
+                                                0,
+                                                50
+                                              )}...`
+                                            : deal.negotiations_Trim_Package_Options}
+                                          <button
+                                            onClick={() =>
+                                              setTrimDetails({
+                                                id: deal.id,
+                                                trim:
+                                                  deal.negotiations_Trim_Package_Options ??
+                                                  "",
+                                              })
+                                            }
+                                            className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
+                                            title="Expand"
+                                          >
+                                            <Expand
+                                              size={16}
+                                              className="text-gray-500 hover:text-gray-700"
+                                            />
+                                          </button>{" "}
+                                        </TableCell>
+                                        <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
+                                          {deal?.consult_notes?.length > 50
+                                            ? `${deal?.consult_notes?.substring(
+                                                0,
+                                                50
+                                              )}...`
+                                            : deal.consult_notes}
+                                          <button
+                                            onClick={() =>
+                                              setExpandedNote({
+                                                id: deal.id,
+                                                note: deal.consult_notes,
+                                              })
+                                            }
+                                            className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
+                                            title="Expand"
+                                          >
+                                            <Expand
+                                              size={16}
+                                              className="text-gray-500 hover:text-gray-700"
+                                            />
+                                          </button>{" "}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {deal.negotiations_Drivetrain}
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {
+                                            deal.negotiations_Color_Options
+                                              .exterior_deal_breakers
+                                          }
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {
+                                            deal.negotiations_Color_Options
+                                              .exterior_preferred
+                                          }
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {
+                                            deal.negotiations_Color_Options
+                                              .interior_deal_breaker
+                                          }
+                                        </TableCell>
+                                        <TableCell className="px-4 py-2 border-r">
+                                          {
+                                            deal.negotiations_Color_Options
+                                              .interior_preferred
+                                          }
+                                        </TableCell>
+
+                                        <TableCell className="px-4 py-2 border-r">
+                                          <div>
+                                            {dateFormat(deal.date_paid)}
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            )}
                           </TableCell>
                         </TableRow>
                       )}

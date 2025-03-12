@@ -42,6 +42,10 @@ import { toast } from "@/hooks/use-toast";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { statuses } from "@/components/Team/filter-popup";
+import { TailwindPlusTable } from "@/components/tailwind-plus/table";
+import { DealNegotiatorType } from "@/lib/models/team";
+import { TeamDashboardViewHeader } from "@/components/base/header";
+import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
 type NegotiationsGroupedType = {
   [groupKey: string]: NegotiationData[];
@@ -180,12 +184,15 @@ function ReceivedCar() {
     }
   };
 
-  const sortData = (key: string) => {
+  const sortData = (key: string, direction: string) => {
     setSortConfig((prevConfig) => {
-      const newDirection =
-        prevConfig.key === key && prevConfig.direction === "ascending"
-          ? "descending"
-          : "ascending";
+      // console.log("prevConfig:", prevConfig);
+      // const newDirection =
+      //   prevConfig.key === key && prevConfig.direction === "ascending"
+      //     ? "descending"
+      //     : "ascending";
+
+      // console.log(key);
 
       const sortedTeams = teamData.map((team) => {
         const sortedNegotiationsGrouped: NegotiationsGroupedType =
@@ -203,17 +210,17 @@ function ReceivedCar() {
                       bValue = bValue.toLowerCase();
 
                     if (aValue == null)
-                      return newDirection === "ascending" ? 1 : -1;
+                      return direction === "ascending" ? 1 : -1;
                     if (bValue == null)
-                      return newDirection === "ascending" ? -1 : 1;
+                      return direction === "ascending" ? -1 : 1;
 
                     if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-                      return newDirection === "ascending"
+                      return direction === "ascending"
                         ? Number(aValue) - Number(bValue)
                         : Number(bValue) - Number(aValue);
                     }
 
-                    return newDirection === "ascending"
+                    return direction === "ascending"
                       ? aValue.localeCompare(bValue)
                       : bValue.localeCompare(aValue);
                   }
@@ -229,7 +236,7 @@ function ReceivedCar() {
 
       setTeamData(sortedTeams);
 
-      return { key, direction: newDirection };
+      return { key, direction };
     });
   };
 
@@ -257,53 +264,11 @@ function ReceivedCar() {
 
   return (
     <>
-      <div className="flex justify-between items-center bg-[#202125] p-6 mb-5 shadow-lg">
-        <div
-          onClick={() => router.push("/team-dashboard")}
-          className="flex flex-col items-start cursor-pointer"
-        >
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-            alt="DELIVRD Logo"
-            className="h-8 mb-2"
-          />
-          <p className="text-white text-sm">Putting Dreams In Driveways</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-              Client Deals Dashboard
-            </h1>
-            <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-              {negotiatorData?.name}
-            </h1>
-          </div>
-        </div>
-      </div>
-      <div className="space-y-2 ml-10 mb-7 w-[150px]">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
-              Select View
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-auto">
-            <div className="flex flex-col w-fit">
-              {statuses.map((status, index) => (
-                <Link
-                  key={index}
-                  className="p-2 text-sm hover:underline cursor-pointer"
-                  href={`/${status.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  {status}
-                </Link>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="w-full overflow-x-auto">
+      <div className="container mx-auto p-4 space-y-6 min-h-screen">
+        <TeamDashboardViewHeader
+          negotiatorData={negotiatorData as DealNegotiatorType}
+        />
+        <TeamDashboardViewSelector />
         <Table className="border-collapse border border-gray-200">
           {loading ? (
             <TableBody>
@@ -387,107 +352,134 @@ function ReceivedCar() {
                                 </div>
                               </TableCell>
                             </TableRow>
-
                             {expandedStatusRows[`${team.id}_${status}`] && (
-                              <>
-                                <TableRow className="bg-gray-200">
-                                  <TableHead className="pl-16 py-2 text-xs font-semibold">
-                                    No.
-                                  </TableHead>
-                                  <TableHead
-                                    onClick={() =>
-                                      sortData("negotiations_Client")
-                                    }
-                                    className="min-w-[130px] py-2 text-xs font-semibold"
-                                  >
-                                    Client
-                                  </TableHead>
-                                  <TableHead
-                                    onClick={() =>
-                                      sortData("negotiations_Phone")
-                                    }
-                                    className="min-w-[120px] py-2 text-xs font-semibold"
-                                  >
-                                    Phone
-                                  </TableHead>
-                                  <TableHead
-                                    onClick={() =>
-                                      sortData("negotiations_Zip_Code")
-                                    }
-                                    className="min-w-[100px] py-2 text-xs font-semibold"
-                                  >
-                                    Zip Code
-                                  </TableHead>
-                                  <TableHead
-                                    onClick={() =>
-                                      sortData("negotiations_Brand")
-                                    }
-                                    className="py-2 text-xs font-semibold"
-                                  >
-                                    Brand
-                                  </TableHead>
-                                  <TableHead className="min-w-[120px] py-2 text-xs font-semibold">
-                                    Deal Negotiator
-                                  </TableHead>
-                                  <TableHead
-                                    onClick={() =>
-                                      sortData("negotiations_Model")
-                                    }
-                                    className="min-w-[100px] py-2 text-xs font-semibold"
-                                  >
-                                    Model
-                                  </TableHead>
-                                  <TableHead className="min-w-[120px] py-2 text-xs font-semibold">
-                                    Status
-                                  </TableHead>
-                                  <TableHead
-                                    onClick={() =>
-                                      sortData("negotiations_Deal_Start_Date")
-                                    }
-                                    className="min-w-[90px] py-2 text-xs font-semibold"
-                                  >
-                                    Deal Start Date
-                                  </TableHead>
-                                  <TableHead
-                                    onClick={() =>
-                                      sortData("arrival_to_client")
-                                    }
-                                    className="min-w-[90px] py-2 text-xs font-semibold"
-                                  >
-                                    Arrival to Client
-                                  </TableHead>
-                                  <TableHead
-                                    onClick={() =>
-                                      sortData("arrival_to_dealer")
-                                    }
-                                    className="min-w-[90px] py-2 text-xs font-semibold"
-                                  >
-                                    Arrival to Dealer
-                                  </TableHead>
-                                  <TableHead className="py-2 text-xs font-semibold">
-                                    Trade Details
-                                  </TableHead>
-                                  <TableHead className="py-2 text-xs font-semibold">
-                                    Travel Limit
-                                  </TableHead>
-                                  <TableHead className="py-2 text-xs font-semibold">
-                                    Shipping Info
-                                  </TableHead>
-                                  <TableHead className="py-2 text-xs font-semibold">
-                                    Interior Preferred
-                                  </TableHead>
-                                  <TableHead className="py-2 text-xs font-semibold">
-                                    Interior Deal Breaker
-                                  </TableHead>
-                                  <TableHead className="py-2 text-xs font-semibold">
-                                    Exterior Preferred
-                                  </TableHead>
-                                  <TableHead className="py-2 text-xs font-semibold">
-                                    Exterior Deal Breakers
-                                  </TableHead>
-                                </TableRow>
-                                {deals
-                                  ?.filter((deal) => {
+                              <TailwindPlusTable
+                                headers={[
+                                  {
+                                    header: "No.",
+                                  },
+                                  {
+                                    header: "Client",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Client",
+                                    },
+                                  },
+                                  {
+                                    header: "Phone",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Phone",
+                                    },
+                                  },
+                                  {
+                                    header: "Zip Code",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Zip_Code",
+                                    },
+                                  },
+                                  {
+                                    header: "Brand",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Brand",
+                                    },
+                                  },
+                                  {
+                                    header: "Deal Negotiator",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_deal_coordinator",
+                                    },
+                                  },
+                                  {
+                                    header: "Model",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Model",
+                                    },
+                                  },
+                                  {
+                                    header: "Status",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Status",
+                                    },
+                                  },
+                                  {
+                                    header: "Deal Start Date",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Deal_Start_Date",
+                                    },
+                                  },
+                                  {
+                                    header: "Arrival to Client",
+                                    config: {
+                                      sortable: true,
+                                      key: "arrival_to_client",
+                                    },
+                                  },
+                                  {
+                                    header: "Arrival to Dealer",
+                                    config: {
+                                      sortable: true,
+                                      key: "arrival_to_dealer",
+                                    },
+                                  },
+                                  {
+                                    header: "Trade Details",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Trade_Details",
+                                    },
+                                  },
+                                  {
+                                    header: "Travel Limit",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Travel_Limit",
+                                    },
+                                  },
+                                  {
+                                    header: "Shipping Info",
+                                    config: {
+                                      sortable: true,
+                                      key: "shipping_info",
+                                    },
+                                  },
+                                  {
+                                    header: "Interior Preferred",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Color_Options.interior_preferred",
+                                    },
+                                  },
+                                  {
+                                    header: "Interior Deal Breaker",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Color_Options.interior_deal_breaker",
+                                    },
+                                  },
+                                  {
+                                    header: "Exterior Preferred",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Color_Options.exterior_preferred",
+                                    },
+                                  },
+                                  {
+                                    header: "Exterior Deal Breakers",
+                                    config: {
+                                      sortable: true,
+                                      key: "negotiations_Color_Options.exterior_deal_breakers",
+                                    },
+                                  },
+                                ]}
+                                rows={deals
+                                  .filter((deal) => {
                                     const today = new Date();
                                     const paidDate = new Date(
                                       deal.arrival_to_client
@@ -499,42 +491,33 @@ function ReceivedCar() {
 
                                     return diffDays >= 1;
                                   })
-                                  .map((deal, index) => (
-                                    <TableRow
-                                      key={deal.id}
-                                      className="hover:bg-gray-50 transition-colors"
-                                    >
-                                      <TableCell className="pl-16 border-t border-gray-200">
-                                        <Link
-                                          href={`/team-profile?id=${deal.id}`}
-                                          className="text-blue-600 hover:underline"
-                                        >
-                                          {index + 1}
-                                        </Link>
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.negotiations_Client}
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.negotiations_Phone}
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.negotiations_Zip_Code}
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.negotiations_Brand}
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {allDealNegotiator.find(
-                                          (negotiator) =>
-                                            negotiator.id ===
-                                            deal.negotiations_deal_coordinator
-                                        )?.name || "Not Assigned"}
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.negotiations_Model}
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
+                                  .map((deal, index) => [
+                                    {
+                                      text: `${index + 1}`,
+                                      link: `/team-profile?id=${deal.id}`,
+                                    },
+                                    {
+                                      text: deal.negotiations_Client,
+                                    },
+                                    {
+                                      text: deal.negotiations_Phone,
+                                    },
+                                    {
+                                      text: deal.negotiations_Zip_Code,
+                                    },
+                                    {
+                                      text: deal.negotiations_Brand,
+                                    },
+                                    allDealNegotiator.find(
+                                      (negotiator) =>
+                                        negotiator.id ===
+                                        deal.negotiations_deal_coordinator
+                                    )?.name || "Not Assigned",
+                                    {
+                                      text: deal.negotiations_Model,
+                                    },
+                                    {
+                                      Component: () => (
                                         <Button
                                           variant="outline"
                                           style={{
@@ -549,124 +532,86 @@ function ReceivedCar() {
                                         >
                                           <p>{deal.negotiations_Status}</p>
                                         </Button>
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.negotiations_Deal_Start_Date}
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.arrival_to_client}
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {deal.arrival_to_dealer}
-                                      </TableCell>
-                                      <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-t border-gray-200">
-                                        {deal?.negotiations_Trade_Details &&
-                                        deal?.negotiations_Trade_Details
-                                          ?.length > 50
-                                          ? `${deal?.negotiations_Trade_Details?.substring(
-                                              0,
-                                              50
-                                            )}...`
-                                          : deal.negotiations_Trade_Details ??
-                                            "No Trade Details available"}
-                                        <button
-                                          onClick={() =>
-                                            setExpandedTradeInfo({
-                                              id: deal.id,
-                                              note:
-                                                deal.negotiations_Trade_Details ??
-                                                "",
-                                            })
-                                          }
-                                          className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
-                                          title="Expand"
-                                        >
-                                          <Expand
-                                            size={16}
-                                            className="text-gray-500 hover:text-gray-700"
-                                          />
-                                        </button>
-                                      </TableCell>
-                                      <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-t border-gray-200">
-                                        {deal?.negotiations_Travel_Limit &&
-                                        deal?.negotiations_Travel_Limit
-                                          ?.length > 50
-                                          ? `${deal?.negotiations_Travel_Limit?.substring(
-                                              0,
-                                              50
-                                            )}...`
-                                          : deal.negotiations_Travel_Limit ??
-                                            "No Travel Limit Info available"}
-                                        <button
-                                          onClick={() =>
-                                            setExpandedNote({
-                                              id: deal.id,
-                                              note:
-                                                deal.negotiations_Travel_Limit ??
-                                                "",
-                                            })
-                                          }
-                                          className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
-                                          title="Expand"
-                                        >
-                                          <Expand
-                                            size={16}
-                                            className="text-gray-500 hover:text-gray-700"
-                                          />
-                                        </button>
-                                      </TableCell>
-                                      <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-t border-gray-200">
-                                        {deal?.shipping_info &&
-                                        deal?.shipping_info?.length > 50
-                                          ? `${deal?.shipping_info?.substring(
-                                              0,
-                                              50
-                                            )}...`
-                                          : deal.shipping_info ??
-                                            "No Shipping Info at the moment"}
-                                        <button
-                                          onClick={() =>
-                                            setExpandedNote({
-                                              id: deal.id,
-                                              note: deal.shipping_info ?? "",
-                                            })
-                                          }
-                                          className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
-                                          title="Expand"
-                                        >
-                                          <Expand
-                                            size={16}
-                                            className="text-gray-500 hover:text-gray-700"
-                                          />
-                                        </button>
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {
-                                          deal.negotiations_Color_Options
-                                            .interior_preferred
-                                        }
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {
-                                          deal.negotiations_Color_Options
-                                            .interior_deal_breaker
-                                        }
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {
-                                          deal.negotiations_Color_Options
-                                            .exterior_preferred
-                                        }
-                                      </TableCell>
-                                      <TableCell className="border-t border-gray-200">
-                                        {
-                                          deal.negotiations_Color_Options
-                                            .exterior_deal_breakers
-                                        }
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                              </>
+                                      ),
+                                    },
+                                    {
+                                      text: deal.negotiations_Deal_Start_Date,
+                                    },
+                                    {
+                                      text: deal.arrival_to_client,
+                                    },
+                                    {
+                                      text: deal.arrival_to_dealer,
+                                    },
+                                    {
+                                      text: deal.negotiations_Trade_Details?.substring(
+                                        0,
+                                        50
+                                      ),
+                                      config: {
+                                        expandable:
+                                          deal.negotiations_Trade_Details &&
+                                          deal.negotiations_Trade_Details
+                                            ?.length > 50,
+                                        expandedComponent: () => (
+                                          <p>
+                                            {deal.negotiations_Trade_Details}
+                                          </p>
+                                        ),
+                                      },
+                                    },
+                                    {
+                                      text: deal.negotiations_Travel_Limit?.substring(
+                                        0,
+                                        50
+                                      ),
+                                      config: {
+                                        expandable:
+                                          deal.negotiations_Travel_Limit &&
+                                          deal.negotiations_Travel_Limit
+                                            ?.length > 50,
+                                        expandedComponent: () => (
+                                          <p>
+                                            {deal.negotiations_Travel_Limit}
+                                          </p>
+                                        ),
+                                      },
+                                    },
+                                    {
+                                      text: deal.shipping_info?.substring(
+                                        0,
+                                        50
+                                      ),
+                                      config: {
+                                        expandable:
+                                          deal.shipping_info &&
+                                          deal.shipping_info?.length > 50,
+                                        expandedComponent: () => (
+                                          <p>{deal.shipping_info}</p>
+                                        ),
+                                      },
+                                    },
+                                    {
+                                      text: deal.negotiations_Color_Options
+                                        .interior_preferred,
+                                    },
+                                    {
+                                      text: deal.negotiations_Color_Options
+                                        .interior_deal_breaker,
+                                    },
+                                    {
+                                      text: deal.negotiations_Color_Options
+                                        .exterior_preferred,
+                                    },
+                                    {
+                                      text: deal.negotiations_Color_Options
+                                        .exterior_deal_breakers,
+                                    },
+                                  ])}
+                                sortConfig={sortConfig}
+                                setSortConfig={setSortConfig}
+                                sortData={sortData}
+                              />
                             )}
                           </React.Fragment>
                         )
@@ -676,62 +621,6 @@ function ReceivedCar() {
             </TableBody>
           )}
         </Table>
-        {expandedNote && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-4">
-              <h2 className="text-lg font-semibold mb-2">Travel Limit</h2>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                {expandedNote.note}
-              </p>
-              <div className="text-right mt-4">
-                <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  onClick={() => setExpandedNote(null)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {shippingInfo && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-4">
-              <h2 className="text-lg font-semibold mb-2">Shipping Info</h2>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                {shippingInfo.note}
-              </p>
-              <div className="text-right mt-4">
-                <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  onClick={() => setExpandedShippingInfo(null)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {tradeInfo && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-4">
-              <h2 className="text-lg font-semibold mb-2">Trade Info</h2>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                {tradeInfo.note}
-              </p>
-              <div className="text-right mt-4">
-                <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  onClick={() => setExpandedTradeInfo(null)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );
