@@ -1,8 +1,9 @@
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronRight, Circle } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Circle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Button } from "./button";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -178,6 +179,47 @@ const DropdownMenuShortcut = ({
   );
 };
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
+
+export const DropDownMenu = ({
+  label,
+  options,
+  checkedItem,
+  onFocus,
+  onCheckedChange,
+}: {
+  label: string;
+  options: string[];
+  checkedItem: string;
+  onFocus: () => void;
+  onCheckedChange: (checked: boolean, item: string) => void;
+}) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="w-full justify-between">
+          {label}
+          <ChevronDown className="ml-2 h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-auto">
+        <div className="h-56 overflow-scroll">
+          {options.map((item, idx) => (
+            <DropdownMenuCheckboxItem
+              key={idx}
+              checked={checkedItem === item}
+              onFocus={() => onFocus()}
+              onCheckedChange={(checked) => {
+                onCheckedChange(checked, item);
+              }}
+            >
+              {item}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export {
   DropdownMenu,

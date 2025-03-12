@@ -8,9 +8,12 @@ import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent } from "../ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { BellIcon } from "lucide-react";
+import { DealNegotiatorType } from "@/lib/models/team";
 interface IHeaderProps {
   user: IUser | null;
 }
+
+// TODO: Merge these headers into one with props for the different views
 
 const Header: FC<IHeaderProps> = ({ user }) => {
   const router = useRouter();
@@ -120,6 +123,40 @@ export const TeamHeader = ({
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
+            Client Deals Dashboard
+          </h1>
+          <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
+            {negotiatorData?.name}
+          </h1>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const TeamDashboardViewHeader = ({
+  negotiatorData,
+}: {
+  negotiatorData: DealNegotiatorType;
+}) => {
+  const router = useRouter();
+
+  return (
+    <div className="flex justify-between items-center bg-[#202125] p-6 mb-5 shadow-lg">
+      <div
+        onClick={() => router.push("/team-dashboard")}
+        className="flex flex-col items-start cursor-pointer"
+      >
+        <img
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
+          alt="DELIVRD Logo"
+          className="h-8 mb-2"
+        />
+        <p className="text-white text-sm">Putting Dreams In Driveways</p>
+      </div>
+      <div className="flex items-center gap-3">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
             Client Deals Dashboard

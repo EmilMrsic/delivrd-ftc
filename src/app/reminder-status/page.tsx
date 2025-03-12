@@ -1,8 +1,12 @@
 "use client";
+import { TeamDashboardViewHeader } from "@/components/base/header";
 import { Loader } from "@/components/base/loader";
+import { TailwindPlusTable } from "@/components/tailwind-plus/table";
+import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 import { statuses } from "@/components/Team/filter-popup";
 import ClientDetailsPopup from "@/components/Team/team-detail-popup";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +21,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
+import { sortDataHelper } from "@/lib/helpers/negotiation";
+import { DealNegotiatorType } from "@/lib/models/team";
 import { fetchAllProposalSendNegotiations, getStatusStyles } from "@/lib/utils";
 import { NegotiationData } from "@/types";
 import { Calendar, ChevronDown, Expand, StickyNote, User } from "lucide-react";
@@ -53,39 +59,41 @@ const ReminderStatus = () => {
     direction: "ascending",
   });
 
-  const sortWithoutCoordinatorData = (key: string) => {
-    setSortConfig((prevConfig) => {
-      const newDirection =
-        prevConfig.key === key && prevConfig.direction === "ascending"
-          ? "descending"
-          : "ascending";
+  // const sortWithoutCoordinatorData = (key: string) => {
+  //   setSortConfig((prevConfig) => {
+  //     const newDirection =
+  //       prevConfig.key === key && prevConfig.direction === "ascending"
+  //         ? "descending"
+  //         : "ascending";
 
-      const sortedNegotiations = [...negotiations].sort((a: any, b: any) => {
-        let aValue = a[key];
-        let bValue = b[key];
+  //     const sortedNegotiations = [...negotiations].sort((a: any, b: any) => {
+  //       let aValue = a[key];
+  //       let bValue = b[key];
 
-        if (typeof aValue === "string") aValue = aValue.toLowerCase();
-        if (typeof bValue === "string") bValue = bValue.toLowerCase();
+  //       if (typeof aValue === "string") aValue = aValue.toLowerCase();
+  //       if (typeof bValue === "string") bValue = bValue.toLowerCase();
 
-        if (aValue == null) return newDirection === "ascending" ? 1 : -1;
-        if (bValue == null) return newDirection === "ascending" ? -1 : 1;
+  //       if (aValue == null) return newDirection === "ascending" ? 1 : -1;
+  //       if (bValue == null) return newDirection === "ascending" ? -1 : 1;
 
-        if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-          return newDirection === "ascending"
-            ? Number(aValue) - Number(bValue)
-            : Number(bValue) - Number(aValue);
-        }
+  //       if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
+  //         return newDirection === "ascending"
+  //           ? Number(aValue) - Number(bValue)
+  //           : Number(bValue) - Number(aValue);
+  //       }
 
-        if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
-        if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
-        return 0;
-      });
+  //       if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
+  //       if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
+  //       return 0;
+  //     });
 
-      setNegotiations(sortedNegotiations);
+  //     setNegotiations(sortedNegotiations);
 
-      return { key, direction: newDirection };
-    });
-  };
+  //     return { key, direction: newDirection };
+  //   });
+  // };
+
+  const sortData = sortDataHelper(setNegotiations, negotiations);
 
   useEffect(() => {
     setLoading(true);
@@ -101,53 +109,65 @@ const ReminderStatus = () => {
   }, []);
 
   return (
+    <div className="container mx-auto p-4 space-y-6 min-h-screen">
+      <TeamDashboardViewHeader
+        negotiatorData={negotiatorData as DealNegotiatorType}
+      />
+      <TeamDashboardViewSelector />
+      <Card className="bg-white shadow-lg">
+        <TailwindPlusTable
+          headers={[
+            { header: "#", config: { size: 50 } },
+            {
+              header: "Client",
+              config: { sortable: true, key: "negotiations_Client" },
+            },
+            {
+              header: "Stage",
+              config: { sortable: true, key: "negotiations_Status" },
+            },
+            {
+              header: "Invoice Status",
+              config: { sortable: true, key: "negotiations_Invoice_Status" },
+            },
+          ]}
+          rows={negotiations.map((deal, idx) => [
+            {
+              text: `${idx + 1}`,
+              link: `/team-profile?id=${deal.id}`,
+            },
+            {
+              text: deal.negotiations_Client,
+              config: {
+                expandable: true,
+                expandedComponent: ({ expanded, setExpanded }: any) => (
+                  <ClientDetailsPopup
+                    setNegotiations={setNegotiations}
+                    open={expanded}
+                    onClose={() => setExpanded(false)}
+                    deal={deal}
+                    fields={trimPackageFields as any}
+                  />
+                ),
+              },
+            },
+            {
+              text: deal.negotiations_Status,
+            },
+            {
+              text: deal.negotiations_Invoice_Status,
+            },
+          ])}
+          sortConfig={sortConfig}
+          setSortConfig={setSortConfig}
+          sortData={sortData}
+        />
+      </Card>
+    </div>
+  );
+
+  return (
     <>
-      <div className="flex justify-between items-center bg-[#202125] p-6 mb-5 shadow-lg">
-        <div
-          onClick={() => router.push("/team-dashboard")}
-          className="flex flex-col items-start cursor-pointer"
-        >
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-            alt="DELIVRD Logo"
-            className="h-8 mb-2"
-          />
-          <p className="text-white text-sm">Putting Dreams In Driveways</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-              Client Deals Dashboard
-            </h1>
-            <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-              {negotiatorData?.name}
-            </h1>
-          </div>
-        </div>
-      </div>
-      <div className="space-y-2 ml-10 w-[150px]">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
-              Select View
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-auto">
-            <div className="flex flex-col w-fit">
-              {statuses.map((status, index) => (
-                <Link
-                  key={index}
-                  className="p-2 text-sm hover:underline cursor-pointer"
-                  href={`/${status.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  {status}
-                </Link>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
       <div className="m-5">
         <Table className="min-w-full border-collapse">
           <TableHeader className="sticky top-0 bg-gray-100 z-10 border-b border-gray-300">

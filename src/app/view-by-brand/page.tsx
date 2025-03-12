@@ -1,9 +1,14 @@
 "use client";
+import { TeamDashboardViewHeader } from "@/components/base/header";
 import { Loader } from "@/components/base/loader";
+import { TailwindPlusTable } from "@/components/tailwind-plus/table";
+import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 import { statuses } from "@/components/Team/filter-popup";
 import ClientDetailsPopup from "@/components/Team/team-detail-popup";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
+  DropDownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
@@ -17,6 +22,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
+import { sortDataHelper } from "@/lib/helpers/negotiation";
+import { DealNegotiatorType } from "@/lib/models/team";
 import {
   dateFormat,
   fetchAllActiveNegotiations,
@@ -180,31 +187,238 @@ const ViewByBrand = () => {
     setFilteredNegotiations(filtered);
   }, [filters, negotiations]);
 
+  const sortData = sortDataHelper(setNegotiations, negotiations);
+
+  return (
+    <div className="container mx-auto p-4 space-y-6 min-h-screen">
+      <TeamDashboardViewHeader
+        negotiatorData={negotiatorData as DealNegotiatorType}
+      />
+      <div className="flex ml-10 gap-4 items-start">
+        <div className="space-y-2">
+          <DropDownMenu
+            label="Select Makes"
+            options={vehicleOfInterest.filter((make) =>
+              make.toLowerCase().includes(searchMakes.toLowerCase())
+            )}
+            checkedItem={filters.makes}
+            onFocus={() => searchMakeInputRef.current?.focus()}
+            onCheckedChange={(checked, item) => {
+              setFilters((prev) => ({
+                ...prev,
+                makes: checked ? item : "", // Set or clear make
+              }));
+            }}
+          />
+        </div>
+        <div className="space-y-2">
+          <DropDownMenu
+            label="Select Condition"
+            options={["All", "New", "Used"]}
+            checkedItem={filters.condition}
+            onFocus={() => searchMakeInputRef.current?.focus()}
+            onCheckedChange={(checked, item) => {
+              setFilters((prev) => ({
+                ...prev,
+                condition: checked ? item : "", // Set or clear make
+              }));
+            }}
+          />
+        </div>
+        <TeamDashboardViewSelector />
+      </div>
+      <Card className="bg-white shadow-lg">
+        <TailwindPlusTable
+          headers={[
+            {
+              header: "#",
+              config: {
+                size: 50,
+              },
+            },
+            {
+              header: "Client",
+              config: {
+                sortable: true,
+                key: "negotiations_Client",
+              },
+            },
+            {
+              header: "Make",
+              config: {
+                sortable: true,
+                key: "negotiations_Brand",
+              },
+            },
+            {
+              header: "Model",
+              config: {
+                sortable: true,
+                key: "model_of_interest",
+              },
+            },
+            {
+              header: "Phone Number",
+              config: {
+                sortable: true,
+                key: "negotiations_Phone",
+              },
+            },
+            {
+              header: "Email",
+              config: {
+                sortable: true,
+                key: "negotiations_Email",
+              },
+            },
+            {
+              header: "Stage",
+              config: {
+                sortable: true,
+                key: "negotiations_Status",
+              },
+            },
+            {
+              header: "Zip Code",
+              config: {
+                sortable: true,
+                key: "negotiations_Zip_Code",
+              },
+            },
+            {
+              header: "New or Used",
+              config: {
+                sortable: true,
+                key: "negotiations_New_or_Used",
+              },
+            },
+            {
+              header: "Trim Package",
+              config: {
+                sortable: true,
+                key: "negotiations_Trim_Package_Options",
+              },
+            },
+            {
+              header: "Consult Notes",
+              config: {
+                sortable: true,
+                key: "consult_notes",
+              },
+            },
+            {
+              header: "Drivetrain",
+              config: {
+                sortable: true,
+                key: "negotiations_Drivetrain",
+              },
+            },
+            {
+              header: "Exterior Deal Breaker",
+              config: {
+                sortable: true,
+                key: "negotiations_Color_Options.exterior_deal_breakers",
+              },
+            },
+            {
+              header: "Exterior Preffered",
+              config: {
+                sortable: true,
+                key: "negotiations_Color_Options.exterior_preferred",
+              },
+            },
+            {
+              header: "Interior Deal Breaker",
+              config: {
+                sortable: true,
+                key: "negotiations_Color_Options.interior_deal_breaker",
+              },
+            },
+            {
+              header: "Interior Preffered",
+              config: {
+                sortable: true,
+                key: "negotiations_Color_Options.interior_preferred",
+              },
+            },
+            {
+              header: "Date Paid",
+              config: {
+                sortable: true,
+                key: "date_paid",
+              },
+            },
+          ]}
+          rows={filteredNegotiations.map((deal, idx) => [
+            {
+              text: `${idx + 1}`,
+              link: `/team-profile?id=${deal.id}`,
+            },
+            {
+              text: deal.negotiations_Client,
+              config: {
+                expandable: true,
+                expandedComponent: ({ expanded, setExpanded }: any) => (
+                  <ClientDetailsPopup
+                    setNegotiations={setNegotiations}
+                    open={expanded}
+                    onClose={() => setExpanded(false)}
+                    deal={deal}
+                    fields={fields as any}
+                  />
+                ),
+              },
+            },
+            deal.negotiations_Brand,
+            deal.model_of_interest,
+            deal.negotiations_Phone,
+            deal.negotiations_Email,
+            {
+              Component: () => (
+                <Button
+                  variant="outline"
+                  style={{
+                    backgroundColor: getStatusStyles(
+                      deal?.negotiations_Status ?? ""
+                    ).backgroundColor,
+                    color: getStatusStyles(deal?.negotiations_Status ?? "")
+                      .textColor, // Set dynamic text color
+                  }}
+                  className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
+                >
+                  <p>{deal.negotiations_Status}</p>
+                </Button>
+              ),
+            },
+            deal.negotiations_Zip_Code,
+            deal.negotiations_New_or_Used,
+            deal.negotiations_Trim_Package_Options,
+            {
+              text: deal?.consult_notes?.substring(0, 50),
+              config: {
+                expandable: deal?.consult_notes?.length > 50,
+                expandedComponent: ({ expanded, setExpanded }: any) => (
+                  <div>{deal.consult_notes}</div>
+                ),
+              },
+            },
+            deal.negotiations_Drivetrain,
+            deal.negotiations_Color_Options.exterior_deal_breakers,
+            deal.negotiations_Color_Options.exterior_preferred,
+            deal.negotiations_Color_Options.interior_deal_breaker,
+            deal.negotiations_Color_Options.interior_preferred,
+            deal.date_paid,
+          ])}
+          sortConfig={sortConfig}
+          setSortConfig={setSortConfig}
+          sortData={sortData}
+        />
+      </Card>
+    </div>
+  );
+
   return (
     <>
-      <div className="flex justify-between items-center bg-[#202125] p-6 mb-5 shadow-lg">
-        <div
-          onClick={() => router.push("/team-dashboard")}
-          className="flex flex-col items-start cursor-pointer"
-        >
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-            alt="DELIVRD Logo"
-            className="h-8 mb-2"
-          />
-          <p className="text-white text-sm">Putting Dreams In Driveways</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-              Client Deals Dashboard
-            </h1>
-            <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-              {negotiatorData?.name}
-            </h1>
-          </div>
-        </div>
-      </div>
       <div className="flex ml-10 gap-4 items-start">
         <div className="space-y-2">
           <DropdownMenu>
