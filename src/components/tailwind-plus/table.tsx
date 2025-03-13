@@ -23,13 +23,13 @@ interface HeaderWithConfig {
 
 interface CellConfig {
   expandable?: boolean;
-  expandedComponent?: React.ReactNode;
+  expandedComponent?: React.ComponentType<any>;
   link?: string;
 }
 
 interface Cell {
-  text?: string;
-  Component?: React.ReactNode;
+  text?: string | null | number;
+  Component?: React.ComponentType<any>;
   config?: CellConfig;
 }
 
@@ -41,7 +41,7 @@ export const TailwindPlusTable = ({
   sortData,
 }: {
   headers: (string | HeaderWithConfig)[];
-  rows: (Cell | string)[][];
+  rows: (Cell | string | undefined | null)[][];
   sortConfig: {
     key: string;
     direction: string;
@@ -144,7 +144,9 @@ export const TailwindTableExpandedPopover = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-4 max-h-[60vh] overflow-y-auto">
-        <Component setExpanded={setExpanded} expanded={expanded} />
+        {Component && (
+          <Component setExpanded={setExpanded} expanded={expanded} />
+        )}
         <div className="text-right mt-4">
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -190,7 +192,7 @@ export const TailwindTableHeader = ({
         <div
           className="inline-flex items-center cursor-pointer"
           onClick={() => {
-            if (headerConfig?.config?.sortable) {
+            if (headerConfig?.config?.sortable && headerConfig?.config?.key) {
               const direction =
                 sortConfig.key === headerConfig?.config?.key &&
                 sortConfig.direction === "ascending"
@@ -238,7 +240,7 @@ export const TailwindTableCell = ({
   cellIdx,
   setExpanded,
 }: {
-  cell: Cell | string;
+  cell: Cell | string | null | undefined;
   rowIdx: number;
   cellIdx: number;
   setExpanded: (expanded: [number, number] | null) => void;
@@ -246,12 +248,12 @@ export const TailwindTableCell = ({
   let text: string;
   if (typeof cell === "object") {
     if (cell?.text !== undefined && cell?.text !== null) {
-      text = cell?.text;
+      text = cell?.text.toString();
     } else {
       text = "";
     }
   } else {
-    text = cell;
+    text = cell ?? "";
   }
 
   const Component =
@@ -272,7 +274,7 @@ export const TailwindTableCell = ({
           </button>
         </div>
       )}
-      {typeof cell === "object" && cell?.Component ? <Component /> : text}
+      {Component ? <Component /> : text}
     </>
   );
 

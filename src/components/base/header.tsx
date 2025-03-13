@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { Button } from "../ui/button";
-import { IUser } from "@/types";
+import { IUser, notificationType } from "@/types";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -73,7 +73,12 @@ export const TeamHeader = ({
   notificationCount,
   notification,
   negotiatorData,
-}: any) => {
+}: {
+  handleBellClick: () => void;
+  notificationCount: number;
+  notification: notificationType[];
+  negotiatorData: DealNegotiatorType;
+}) => {
   return (
     <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
       <div className="flex flex-col items-start">

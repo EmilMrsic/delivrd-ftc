@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
 import { sortDataHelper } from "@/lib/helpers/negotiation";
-import { DealNegotiatorType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { fetchAllProposalSendNegotiations, getStatusStyles } from "@/lib/utils";
 import { NegotiationData } from "@/types";
 import { Calendar, ChevronDown, Expand, StickyNote, User } from "lucide-react";
@@ -47,9 +47,9 @@ const ReminderStatus = () => {
   const router = useRouter();
   const { negotiatorData, allDealNegotiator } = useTeamDashboard();
   const [loading, setLoading] = useState<boolean>(false);
-  const [negotiations, setNegotiations] = useState<NegotiationData[]>([]);
+  const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);
 
-  const [selectedDeal, setSelectedDeal] = useState<NegotiationData | null>(
+  const [selectedDeal, setSelectedDeal] = useState<NegotiationDataType | null>(
     null
   );
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -111,7 +111,7 @@ const ReminderStatus = () => {
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
       <TeamDashboardViewHeader
-        negotiatorData={negotiatorData as DealNegotiatorType}
+        negotiatorData={negotiatorData as unknown as DealNegotiatorType}
       />
       <TeamDashboardViewSelector />
       <Card className="bg-white shadow-lg">
@@ -164,116 +164,6 @@ const ReminderStatus = () => {
         />
       </Card>
     </div>
-  );
-
-  return (
-    <>
-      <div className="m-5">
-        <Table className="min-w-full border-collapse">
-          <TableHeader className="sticky top-0 bg-gray-100 z-10 border-b border-gray-300">
-            <TableRow>
-              <TableHead className="text-left px-4 py-2 border-r">#</TableHead>
-              <TableHead
-                onClick={() =>
-                  sortWithoutCoordinatorData("negotiations_Client")
-                }
-                className="text-left px-4 py-2 border-r"
-              >
-                Client
-              </TableHead>
-
-              <TableHead className="text-left px-4 py-2 border-r">
-                Stage
-              </TableHead>
-              <TableHead
-                onClick={() =>
-                  sortWithoutCoordinatorData("negotiations_Invoice_Status")
-                }
-                className="text-left px-4 py-2 border-r"
-              >
-                Invoice Status
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          {loading ? (
-            <TableBody>
-              <TableRow>
-                <TableCell colSpan={9} className="text-center py-4">
-                  <Loader />
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          ) : negotiations?.length ? (
-            <TableBody>
-              {negotiations.map((deal, index) => (
-                <TableRow key={deal.id} className="hover:bg-gray-50 transition">
-                  <TableCell className="px-4 py-2 border-r">
-                    <Link href={`/team-profile?id=${deal.id}`}>
-                      {index + 1}
-                    </Link>
-                  </TableCell>
-
-                  <TableCell className="px-4 py-2 relative border-r">
-                    {deal.negotiations_Client}
-                    <Expand
-                      size={16}
-                      className="text-gray-500 absolute top-[5px] right-[10px] hover:text-gray-700 cursor-pointer"
-                      onClick={() => {
-                        setSelectedDeal(deal);
-                        setIsOpen(true);
-                      }}
-                    />
-                  </TableCell>
-
-                  <TableCell className="px-4 py-2 border-r">
-                    <Button
-                      variant="outline"
-                      style={{
-                        backgroundColor: getStatusStyles(
-                          deal?.negotiations_Status ?? ""
-                        ).backgroundColor,
-                        color: getStatusStyles(deal?.negotiations_Status ?? "")
-                          .textColor,
-                      }}
-                      className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
-                    >
-                      <p>{deal.negotiations_Status}</p>
-                    </Button>
-                  </TableCell>
-                  <TableCell className="px-4 py-2 border-r">
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
-                    >
-                      <p>{deal.negotiations_Invoice_Status}</p>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          ) : (
-            <TableBody>
-              <TableRow>
-                <TableCell colSpan={9} className="text-center py-4">
-                  No Data Found
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          )}
-        </Table>
-
-        {selectedDeal && (
-          <ClientDetailsPopup
-            setNegotiations={setNegotiations}
-            open={isOpen}
-            onClose={() => setIsOpen(false)}
-            deal={selectedDeal}
-            fields={trimPackageFields as any}
-          />
-        )}
-      </div>
-    </>
   );
 };
 

@@ -36,6 +36,7 @@ import useTeamDashboard from "@/hooks/useTeamDashboard";
 import SearchAll from "@/components/Team/search-all";
 import { TeamHeader } from "@/components/base/header";
 import { TeamDashboardFilters } from "@/components/Team/team-dashboard-filters";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,12 +135,12 @@ export default function DealList() {
           setLoading(true);
           fetchActiveDeals(id)
             .then((deals) => {
-              setOriginalDeals(deals as NegotiationData[]);
+              setOriginalDeals(deals as NegotiationDataType[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
                   allowedStatuses.includes(deal.negotiations_Status ?? "")
               );
-              setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
+              setFilteredDeals(defaultFilteredDeals as NegotiationDataType[]);
               setLoading(false);
             })
             .catch((error) => console.error("Error applying filter:", error));
@@ -148,12 +149,12 @@ export default function DealList() {
           setLoading(true);
           fetchActiveDeals(value)
             .then((deals) => {
-              setOriginalDeals(deals as NegotiationData[]);
+              setOriginalDeals(deals as NegotiationDataType[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
                   allowedStatuses.includes(deal.negotiations_Status ?? "")
               );
-              setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
+              setFilteredDeals(defaultFilteredDeals as NegotiationDataType[]);
               setLoading(false);
             })
             .catch((error) => console.error("Error applying filter:", error));
@@ -169,12 +170,12 @@ export default function DealList() {
               : id
           )
             .then((deals) => {
-              setOriginalDeals(deals as NegotiationData[]);
+              setOriginalDeals(deals as NegotiationDataType[]);
               const defaultFilteredDeals = deals?.filter(
                 (deal: NegotiationData) =>
                   allowedStatuses.includes(deal.negotiations_Status ?? "")
               );
-              setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
+              setFilteredDeals(defaultFilteredDeals as NegotiationDataType[]);
               setLoading(false);
             })
             .catch((error) => console.error("Error applying filter:", error));
@@ -311,12 +312,12 @@ export default function DealList() {
     setLoading(true);
     fetchActiveDeals(id)
       .then((deals) => {
-        setOriginalDeals(deals as NegotiationData[]);
+        setOriginalDeals(deals as NegotiationDataType[]);
 
         const defaultFilteredDeals = deals?.filter((deal: NegotiationData) =>
           allowedStatuses.includes(deal.negotiations_Status ?? "")
         );
-        setFilteredDeals(defaultFilteredDeals as NegotiationData[]);
+        setFilteredDeals(defaultFilteredDeals as NegotiationDataType[]);
         setLoading(false);
       })
       .catch((error) => console.error("Error applying filter:", error));
@@ -436,7 +437,7 @@ export default function DealList() {
         handleBellClick={handleBellClick}
         notificationCount={notificationCount}
         notification={notification}
-        negotiatorData={negotiatorData}
+        negotiatorData={negotiatorData as unknown as DealNegotiatorType}
       />
       <Card className="bg-white shadow-lg">
         <CardContent>
@@ -454,8 +455,10 @@ export default function DealList() {
             loading={loading}
             setStopPropagation={setStopPropagation}
             stopPropagation={stopPropagation}
-            negotiatorData={negotiatorData}
-            allDealNegotiator={allDealNegotiator}
+            negotiatorData={negotiatorData as unknown as DealNegotiatorType}
+            allDealNegotiator={
+              allDealNegotiator as unknown as DealNegotiatorType[]
+            }
             allInternalNotes={allInternalNotes}
             currentDeals={currentDeals}
             handleStageChange={handleStageChange}

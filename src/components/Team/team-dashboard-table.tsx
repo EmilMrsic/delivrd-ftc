@@ -42,20 +42,20 @@ import {
   sortDataHelper,
   sortNegotiationsByStatus,
 } from "@/lib/helpers/negotiation";
-import { NegotationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
 type TeamDashboardTableProps = {
   setStopPropagation: (item: boolean) => void;
   stopPropagation: boolean;
-  currentDeals: NegotiationData[];
-  setCurrentDeals: (item: NegotiationData[]) => void;
+  currentDeals: NegotiationDataType[];
+  setCurrentDeals: (item: NegotiationDataType[]) => void;
   handleStageChange: (id: string, newStage: string) => void;
   allInternalNotes: Record<string, InternalNotes[]>;
-  allDealNegotiator: DealNegotiator[];
+  allDealNegotiator: DealNegotiatorType[];
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
-  negotiatorData?: DealNegotiator;
+  negotiatorData?: DealNegotiatorType;
   loading: boolean;
 };
 
@@ -314,18 +314,19 @@ const TeamDashboardTable = ({
                   ),
                 },
                 {
-                  Component: () => (
-                    <DatePickerCell
-                      initialDate={deal.arrival_to_dealer}
-                      onDateChange={(date) =>
-                        handleDateChange(
-                          date ?? "",
-                          deal.id,
-                          "arrival_to_dealer"
-                        )
-                      }
-                    />
-                  ),
+                  Component: () =>
+                    deal.arrival_to_dealer && (
+                      <DatePickerCell
+                        initialDate={deal.arrival_to_dealer}
+                        onDateChange={(date) =>
+                          handleDateChange(
+                            date ?? "",
+                            deal.id,
+                            "arrival_to_dealer"
+                          )
+                        }
+                      />
+                    ),
                 },
                 {
                   Component: () => (

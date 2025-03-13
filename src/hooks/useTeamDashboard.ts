@@ -15,14 +15,15 @@ import {
   sortNegotiationsByStatus,
 } from "@/lib/helpers/negotiation";
 import { useNegotiations } from "./useNegotiations";
+import { NegotiationDataType } from "@/lib/models/team";
 
 const useTeamDashboard = (config: { all?: boolean } = {}) => {
   const negotiations = useNegotiations(config);
-  const [filteredDeals, setFilteredDeals] = useState<NegotiationData[]>([]);
+  const [filteredDeals, setFilteredDeals] = useState<NegotiationDataType[]>([]);
   const [allInternalNotes, setAllInternalNotes] = useState<
     Record<string, InternalNotes[]>
   >({});
-  const [originalDeals, setOriginalDeals] = useState<NegotiationData[]>([]);
+  const [originalDeals, setOriginalDeals] = useState<NegotiationDataType[]>([]);
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiator>();
   const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
     []
@@ -32,7 +33,7 @@ const useTeamDashboard = (config: { all?: boolean } = {}) => {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [currentDeals, setCurrentDeals] = useState<NegotiationData[]>([]);
+  const [currentDeals, setCurrentDeals] = useState<NegotiationDataType[]>([]);
 
   const [loading, setLoading] = useState(true);
   // TODO: Deprecated, use useNegotiations instead (not in use just saving in case)
@@ -166,9 +167,9 @@ const useTeamDashboard = (config: { all?: boolean } = {}) => {
   useEffect(() => {
     if (negotiations.negotiations) {
       const prunedDeals = pruneNegotiations(negotiations.negotiations);
-      setOriginalDeals(prunedDeals as NegotiationData[]);
+      setOriginalDeals(prunedDeals as NegotiationDataType[]);
       const filteredDeals = sortNegotiationsByStatus(prunedDeals);
-      setFilteredDeals(filteredDeals as NegotiationData[]);
+      setFilteredDeals(filteredDeals as NegotiationDataType[]);
     }
   }, [negotiations.negotiations]);
 

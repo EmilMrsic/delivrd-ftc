@@ -3,6 +3,7 @@ import { dealStageOptions, vehicleOfInterest } from "@/lib/utils";
 
 import { Button } from "../ui/button";
 import { NegotiationData } from "@/types";
+import { NegotiationDataType } from "@/lib/models/team";
 
 type TeamTablePaginationProps = {
   totalPages: number;
@@ -12,8 +13,8 @@ type TeamTablePaginationProps = {
   handleItemsPerPageChange: (
     item: React.ChangeEvent<HTMLSelectElement>
   ) => void;
-  filteredDeal: NegotiationData[];
-  setCurrentDeal: (item: NegotiationData[]) => void;
+  filteredDeal: NegotiationDataType[];
+  setCurrentDeal: (item: NegotiationDataType[]) => void;
 };
 
 const TeamTablePagination = ({

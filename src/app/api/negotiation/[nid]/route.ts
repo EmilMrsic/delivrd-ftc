@@ -1,11 +1,6 @@
 import { db } from "@/firebase/config";
 import { getActiveDealObjects } from "@/lib/helpers/negotiation";
-import {
-  DealNegotiatorModel,
-  DealNegotiatorType,
-  NegotationDataModel,
-  NegotationDataType,
-} from "@/lib/models/team";
+import { DealNegotiatorModel, NegotiationDataType } from "@/lib/models/team";
 import {
   collection,
   doc,
@@ -22,7 +17,7 @@ export const GET = async (
   { params }: { params: { nid: string } }
 ) => {
   const output: {
-    negotiations: NegotationDataType[];
+    negotiations: NegotiationDataType[];
   } = {
     negotiations: [],
   };

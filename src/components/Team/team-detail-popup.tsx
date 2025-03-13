@@ -12,6 +12,7 @@ import { db } from "@/firebase/config";
 import { NegotiationData } from "@/types";
 import { dealStageOptions } from "@/lib/utils";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
+import { NegotiationDataType } from "@/lib/models/team";
 
 type FieldConfig = {
   label: string;
@@ -23,9 +24,9 @@ type FieldConfig = {
 type ClientDetailsPopupProps = {
   open: boolean;
   onClose: () => void;
-  deal: NegotiationData;
+  deal: NegotiationDataType;
   fields: FieldConfig[];
-  setNegotiations: React.Dispatch<React.SetStateAction<NegotiationData[]>>;
+  setNegotiations: React.Dispatch<React.SetStateAction<NegotiationDataType[]>>;
 };
 
 export default function ClientDetailsPopup({

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
 import { sortDataHelper } from "@/lib/helpers/negotiation";
-import { DealNegotiatorType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { fetchAllPaidHoldingNegotiations, getStatusStyles } from "@/lib/utils";
 import { DealNegotiator, NegotiationData } from "@/types";
 import {
@@ -73,13 +73,13 @@ const PaidHolding = () => {
   const { negotiatorData, allDealNegotiator } = useTeamDashboard();
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [negotiations, setNegotiations] = useState<NegotiationData[]>([]);
+  const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
   const [expandedNote, setExpandedNote] = useState<{
     id: string;
     note: string;
   } | null>(null);
-  const [selectedDeal, setSelectedDeal] = useState<NegotiationData | null>(
+  const [selectedDeal, setSelectedDeal] = useState<NegotiationDataType | null>(
     null
   );
   const [sortConfig, setSortConfig] = useState({
@@ -145,7 +145,7 @@ const PaidHolding = () => {
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
       <TeamDashboardViewHeader
-        negotiatorData={negotiatorData as DealNegotiatorType}
+        negotiatorData={negotiatorData as unknown as DealNegotiatorType}
       />
       <TeamDashboardViewSelector />
       <Card className="bg-white shadow-lg">
@@ -270,7 +270,9 @@ const PaidHolding = () => {
             {
               text: deal?.consult_notes?.substring(0, 50) || "",
               config: {
-                expandable: deal?.consult_notes?.length > 50,
+                expandable:
+                  typeof deal?.consult_notes?.length === "number" &&
+                  deal?.consult_notes?.length > 50,
                 expandedComponent: () => (
                   <>
                     <h2 className="text-lg font-semibold mb-2">Consult Note</h2>

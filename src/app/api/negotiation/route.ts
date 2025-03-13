@@ -1,6 +1,6 @@
 import { db } from "@/firebase/config";
 import { getActiveDealObjects } from "@/lib/helpers/negotiation";
-import { DealNegotiatorType, NegotationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { collection, getDocs } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
@@ -18,7 +18,7 @@ export const GET = async (_request: Request) => {
   });
 
   const output: {
-    negotiations: NegotationDataType[];
+    negotiations: NegotiationDataType[];
     team: DealNegotiatorType[];
   } = {
     negotiations: [],

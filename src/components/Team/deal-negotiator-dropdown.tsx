@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 
 export const DealNegotiatorDropdown = ({
   deal,
@@ -13,7 +14,13 @@ export const DealNegotiatorDropdown = ({
   openNegotiatorState,
   toggleNegotiatorDropdown,
   updateDealNegotiator,
-}: any) => {
+}: {
+  deal: NegotiationDataType;
+  allDealNegotiator: DealNegotiatorType[];
+  openNegotiatorState: { [key: string]: boolean };
+  toggleNegotiatorDropdown: (id: string, isOpen: boolean) => void;
+  updateDealNegotiator: (id: string, negotiatorId: string) => void;
+}) => {
   return (
     <DropdownMenu
       open={openNegotiatorState[deal.id] || false}
@@ -41,7 +48,7 @@ export const DealNegotiatorDropdown = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-        {allDealNegotiator.map((negotiator: DealNegotiator, index) => (
+        {allDealNegotiator.map((negotiator: DealNegotiatorType, index) => (
           <DropdownMenuItem
             key={index}
             onClick={(e) => {

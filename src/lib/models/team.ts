@@ -71,7 +71,7 @@ export const DealNegotiatorModel = z.object({
 }
  */
 
-export const NegotationDataModel = z.object({
+export const NegotiationDataModel = z.object({
   deals: z.array(z.string()).default([]),
   id: z.string(),
   arrival_to_client: z.string().nullable(),
@@ -129,4 +129,4 @@ export const NegotationDataModel = z.object({
 });
 
 export type DealNegotiatorType = z.infer<typeof DealNegotiatorModel>;
-export type NegotationDataType = z.infer<typeof NegotationDataModel>;
+export type NegotiationDataType = z.infer<typeof NegotiationDataModel>;

@@ -1,12 +1,12 @@
 import { NegotiationData } from "@/types";
 import { negotiationStatusOrder } from "../constants/negotiations";
-import { NegotationDataModel, NegotationDataType } from "../models/team";
+import { NegotiationDataModel, NegotiationDataType } from "../models/team";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { chunk } from "lodash";
 
 export const sortNegotiationsByStatus = (
-  negotiations: NegotationDataType[],
+  negotiations: NegotiationDataType[],
   direction: "ascending" | "descending" = "ascending"
 ) => {
   return negotiations.sort((a, b) => {
@@ -25,7 +25,7 @@ export const sortNegotiationsByStatus = (
   });
 };
 
-export const pruneNegotiations = (negotiations: NegotationDataType[]) => {
+export const pruneNegotiations = (negotiations: NegotiationDataType[]) => {
   return negotiations.filter((negotiation) => {
     return (
       negotiation.negotiations_Status !== "Closed" &&
@@ -37,18 +37,18 @@ export const pruneNegotiations = (negotiations: NegotationDataType[]) => {
 };
 
 export const sortDataHelper = (
-  setCurrentDeals: (deals: NegotationDataType[]) => void,
-  currentDeals: NegotationDataType[]
+  setCurrentDeals: (deals: NegotiationDataType[]) => void,
+  currentDeals: NegotiationDataType[]
 ) => {
   return (key: string, direction: string) => {
     console.log("got here:", key, direction);
     if (key == "negotiations_Status") {
       console.log("sorting by status");
       const sortedDeals = sortNegotiationsByStatus(
-        currentDeals as NegotationDataType[],
+        currentDeals as NegotiationDataType[],
         direction === "ascending" ? "ascending" : "descending"
       );
-      setCurrentDeals(sortedDeals as NegotiationData[]);
+      setCurrentDeals(sortedDeals as NegotiationDataType[]);
     } else {
       const sortedDeals = [...currentDeals].sort((a: any, b: any) => {
         let aValue = a[key];
@@ -79,7 +79,7 @@ export const getActiveDealObjects = async (activeDeals: string[]) => {
       const negotiationsSnapshot = await getDocs(negotiationsQuery);
       return negotiationsSnapshot.docs.map((doc) => {
         const data = doc.data();
-        return NegotationDataModel.parse(data);
+        return NegotiationDataModel.parse(data);
       });
     })
   );

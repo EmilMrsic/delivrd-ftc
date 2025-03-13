@@ -55,7 +55,7 @@ import ClientDetailsPopup from "@/components/Team/team-detail-popup";
 import TeamClientDetailsPopup from "@/components/Team/team-client-detail-popup";
 import { statuses } from "@/components/Team/filter-popup";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
-import { DealNegotiatorType, NegotationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TeamDashboardViewHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
@@ -257,10 +257,10 @@ function NeedToReview() {
   useEffect(() => {
     if (negotiations) {
       const teamIdToObject: {
-        [key: string]: NegotationDataType[];
+        [key: string]: NegotiationDataType[];
       } = {};
 
-      negotiations.map((deal: NegotationDataType) => {
+      negotiations.map((deal: NegotiationDataType) => {
         if (deal.negotiations_deal_coordinator) {
           if (!teamIdToObject[deal.negotiations_deal_coordinator]) {
             teamIdToObject[deal.negotiations_deal_coordinator] = [];
@@ -394,7 +394,7 @@ function NeedToReview() {
     <>
       <div className="container mx-auto p-4 space-y-6 min-h-screen">
         <TeamDashboardViewHeader
-          negotiatorData={negotiatorData as DealNegotiatorType}
+          negotiatorData={negotiatorData as unknown as DealNegotiatorType}
         />
         <TeamDashboardViewSelector />
         <Table>
@@ -980,7 +980,8 @@ function NeedToReview() {
                                     ) || "",
                                   config: {
                                     expandable:
-                                      deal.negotiations_Trim_Package_Options &&
+                                      typeof deal.negotiations_Trim_Package_Options ===
+                                        "string" &&
                                       deal.negotiations_Trim_Package_Options
                                         ?.length > 50,
                                     expandedComponent: () => (
@@ -995,7 +996,7 @@ function NeedToReview() {
                                     deal?.consult_notes?.substring(0, 50) || "",
                                   config: {
                                     expandable:
-                                      deal.consult_notes &&
+                                      typeof deal.consult_notes === "string" &&
                                       deal.consult_notes.length > 50,
                                     expandedComponent: () => (
                                       <p>{deal.consult_notes}</p>
@@ -1029,7 +1030,8 @@ function NeedToReview() {
                               setSortConfig={setSortConfig}
                               sortData={sortData}
                             />
-                            {false && (
+                            {/* TODO: Verify if this table ever gets used (currently it doesn't show up at all) */}
+                            {/* {false && (
                               <div className="w-full px-5 overflow-x-auto">
                                 <Table>
                                   <TableHeader>
@@ -1334,7 +1336,7 @@ function NeedToReview() {
                                   </TableBody>
                                 </Table>
                               </div>
-                            )}
+                            )} */}
                           </TableCell>
                         </TableRow>
                       )}

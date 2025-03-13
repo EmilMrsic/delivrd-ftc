@@ -43,7 +43,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { statuses } from "@/components/Team/filter-popup";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
-import { DealNegotiatorType, NegotationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TeamDashboardViewHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
@@ -126,10 +126,10 @@ function ReceivedCar() {
       );
 
       const teamIdToObject: {
-        [key: string]: NegotationDataType[];
+        [key: string]: NegotiationDataType[];
       } = {};
 
-      filteredDeals.map((deal: NegotationDataType) => {
+      filteredDeals.map((deal: NegotiationDataType) => {
         if (deal.negotiations_deal_coordinator) {
           if (!teamIdToObject[deal.negotiations_deal_coordinator]) {
             teamIdToObject[deal.negotiations_deal_coordinator] = [];
@@ -241,7 +241,7 @@ function ReceivedCar() {
     <>
       <div className="container mx-auto p-4 space-y-6 min-h-screen">
         <TeamDashboardViewHeader
-          negotiatorData={negotiatorData as DealNegotiatorType}
+          negotiatorData={negotiatorData as unknown as DealNegotiatorType}
         />
         <TeamDashboardViewSelector />
         <Table className="border-collapse border border-gray-200">
@@ -525,7 +525,8 @@ function ReceivedCar() {
                                       ),
                                       config: {
                                         expandable:
-                                          deal.negotiations_Trade_Details &&
+                                          typeof deal.negotiations_Trade_Details
+                                            ?.length === "number" &&
                                           deal.negotiations_Trade_Details
                                             ?.length > 50,
                                         expandedComponent: () => (
@@ -542,7 +543,8 @@ function ReceivedCar() {
                                       ),
                                       config: {
                                         expandable:
-                                          deal.negotiations_Travel_Limit &&
+                                          typeof deal.negotiations_Travel_Limit
+                                            ?.length === "number" &&
                                           deal.negotiations_Travel_Limit
                                             ?.length > 50,
                                         expandedComponent: () => (
@@ -559,7 +561,8 @@ function ReceivedCar() {
                                       ),
                                       config: {
                                         expandable:
-                                          deal.shipping_info &&
+                                          typeof deal.shipping_info?.length ===
+                                            "number" &&
                                           deal.shipping_info?.length > 50,
                                         expandedComponent: () => (
                                           <p>{deal.shipping_info}</p>
