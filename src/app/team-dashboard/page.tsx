@@ -59,6 +59,7 @@ export default function DealList() {
     currentPage,
     setCurrentPage,
     setCurrentDeals,
+    refetch,
   } = useTeamDashboard();
 
   const { notification } = useAppSelector((state) => state.notification);
@@ -129,35 +130,8 @@ export default function DealList() {
 
       if (filterType === "dealCoordinators") {
         updatedFilters.stages = "";
-
-        if (updatedFilters.dealCoordinators === value) {
-          updatedFilters.dealCoordinators = "";
-          setLoading(true);
-          fetchActiveDeals(id)
-            .then((deals) => {
-              setOriginalDeals(deals as NegotiationDataType[]);
-              const defaultFilteredDeals = deals?.filter(
-                (deal: NegotiationData) =>
-                  allowedStatuses.includes(deal.negotiations_Status ?? "")
-              );
-              setFilteredDeals(defaultFilteredDeals as NegotiationDataType[]);
-              setLoading(false);
-            })
-            .catch((error) => console.error("Error applying filter:", error));
-        } else {
-          updatedFilters.dealCoordinators = value;
-          setLoading(true);
-          fetchActiveDeals(value)
-            .then((deals) => {
-              setOriginalDeals(deals as NegotiationDataType[]);
-              const defaultFilteredDeals = deals?.filter(
-                (deal: NegotiationData) =>
-                  allowedStatuses.includes(deal.negotiations_Status ?? "")
-              );
-              setFilteredDeals(defaultFilteredDeals as NegotiationDataType[]);
-              setLoading(false);
-            })
-            .catch((error) => console.error("Error applying filter:", error));
+        if (updatedFilters.dealCoordinators !== value) {
+          refetch(value);
         }
       } else if (filterType === "stages") {
         if (updatedFilters.stages === value) {
