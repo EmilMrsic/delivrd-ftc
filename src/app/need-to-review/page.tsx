@@ -55,7 +55,7 @@ import ClientDetailsPopup from "@/components/Team/team-detail-popup";
 import TeamClientDetailsPopup from "@/components/Team/team-client-detail-popup";
 import { statuses } from "@/components/Team/filter-popup";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
-import { DealNegotiatorType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotationDataType } from "@/lib/models/team";
 import { TeamDashboardViewHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
@@ -144,7 +144,11 @@ function NeedToReview() {
     setFilteredDeals,
     setOriginalDeals,
     negotiatorData,
-  } = useTeamDashboard();
+    negotiations,
+    team,
+  } = useTeamDashboard({
+    all: true,
+  });
 
   const [sortConfig, setSortConfig] = useState({
     key: "submittedDate", // default sorting by Submitted Date
@@ -198,57 +202,84 @@ function NeedToReview() {
     });
   };
 
-  const fetchTeamAndDeals = async () => {
-    try {
-      setLoading(true);
-      const teamQuery = collection(db, "team delivrd");
-      const teamSnapshot = await getDocs(teamQuery);
+  // const fetchTeamAndDeals = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const teamQuery = collection(db, "team delivrd");
+  //     const teamSnapshot = await getDocs(teamQuery);
 
-      let teamsWithDeals = [];
+  //     let teamsWithDeals = [];
 
-      for (const teamDoc of teamSnapshot.docs) {
-        const teamMember: any = { id: teamDoc.id, ...teamDoc.data() };
-        const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
+  //     for (const teamDoc of teamSnapshot.docs) {
+  //       const teamMember: any = { id: teamDoc.id, ...teamDoc.data() };
+  //       const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
 
-        let negotiations = [];
+  //       let negotiations = [];
 
-        if (activeDeals.length > 0) {
-          const chunkedDeals = [];
-          for (let i = 0; i < activeDeals.length; i += 30) {
-            const chunk = activeDeals.slice(i, i + 30).filter(Boolean);
-            if (chunk.length > 0) chunkedDeals.push(chunk);
+  //       if (activeDeals.length > 0) {
+  //         const chunkedDeals = [];
+  //         for (let i = 0; i < activeDeals.length; i += 30) {
+  //           const chunk = activeDeals.slice(i, i + 30).filter(Boolean);
+  //           if (chunk.length > 0) chunkedDeals.push(chunk);
+  //         }
+
+  //         for (const chunk of chunkedDeals) {
+  //           const negotiationsQuery = query(
+  //             collection(db, "negotiations"),
+  //             where("__name__", "in", chunk)
+  //           );
+  //           const negotiationsSnapshot = await getDocs(negotiationsQuery);
+  //           negotiations.push(
+  //             ...negotiationsSnapshot.docs
+  //               .map((doc) => ({
+  //                 id: doc.id,
+  //                 ...doc.data(),
+  //               }))
+  //               .filter(
+  //                 (negotiation: any) =>
+  //                   negotiation.negotiations_Status.trim() === "Needs To Review"
+  //               )
+  //           );
+  //         }
+  //       }
+
+  //       teamMember.negotiations = negotiations;
+  //       teamsWithDeals.push(teamMember);
+  //     }
+  //     setLoading(false);
+  //     setTeamData(teamsWithDeals);
+  //   } catch (error) {
+  //     setLoading(false);
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
+
+  useEffect(() => {
+    if (negotiations) {
+      const teamIdToObject: {
+        [key: string]: NegotationDataType[];
+      } = {};
+
+      negotiations.map((deal: NegotationDataType) => {
+        if (deal.negotiations_deal_coordinator) {
+          if (!teamIdToObject[deal.negotiations_deal_coordinator]) {
+            teamIdToObject[deal.negotiations_deal_coordinator] = [];
           }
 
-          for (const chunk of chunkedDeals) {
-            const negotiationsQuery = query(
-              collection(db, "negotiations"),
-              where("__name__", "in", chunk)
-            );
-            const negotiationsSnapshot = await getDocs(negotiationsQuery);
-            negotiations.push(
-              ...negotiationsSnapshot.docs
-                .map((doc) => ({
-                  id: doc.id,
-                  ...doc.data(),
-                }))
-                .filter(
-                  (negotiation: any) =>
-                    negotiation.negotiations_Status.trim() === "Needs To Review"
-                )
-            );
-          }
+          teamIdToObject[deal.negotiations_deal_coordinator].push(deal);
         }
+      });
 
-        teamMember.negotiations = negotiations;
-        teamsWithDeals.push(teamMember);
+      for (const index in team) {
+        const member = team[index];
+        const teamMemberDeals = teamIdToObject[member.id] ?? [];
+        team[index].negotiations = teamMemberDeals;
       }
+
+      setTeamData(team);
       setLoading(false);
-      setTeamData(teamsWithDeals);
-    } catch (error) {
-      setLoading(false);
-      console.error("Error fetching data:", error);
     }
-  };
+  }, [negotiations]);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -348,7 +379,6 @@ function NeedToReview() {
   };
 
   useEffect(() => {
-    fetchTeamAndDeals();
     getReviewDealsWithoutCoordinator().then((res) =>
       setDealsWithoutCoordinator(res as NegotiationData[])
     );
