@@ -134,7 +134,9 @@ const DealDetailCard = ({
             <DollarSign className="h-5 w-5 text-[#0989E5]" />
             <span>
               <strong>Finance Type:</strong>{" "}
-              {userData?.deals && userData?.deals[0]?.payment_type}
+              {(negotiationData[0] &&
+                negotiationData[0]?.negotiations_How_To_Pay) ??
+                ""}
             </span>
           </div>
           <div className="flex items-center space-x-2 text-[#202125]">

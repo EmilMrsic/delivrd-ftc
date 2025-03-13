@@ -106,7 +106,7 @@ const ClientOverviewCard = ({
         </div>
         <Separator className="my-4" />
         <div className="flex items-center space-x-4 mt-2">
-          <Avatar className="h-16 w-16">
+          <Avatar className="h-16 w-16 ">
             <AvatarImage
               src={
                 (dealNegotiatorData?.profile_pic &&
@@ -114,6 +114,7 @@ const ClientOverviewCard = ({
                 `/placeholder.svg?height=60&width=60`
               }
               alt="Staff"
+              className="rounded-full"
             />
             <AvatarFallback>TO</AvatarFallback>
           </Avatar>
