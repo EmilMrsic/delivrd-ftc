@@ -205,6 +205,15 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
     );
   };
 
+  const modules = {
+    toolbar: [
+      ["bold", "italic", "underline", "strike"],
+      [{ header: [1, 2, false] }],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link"], // Ensure link button is present
+    ],
+  };
+
   const handleEditFileUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
     logId: string
@@ -232,9 +241,19 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   }, [negotiationId]);
 
   const makeLinksClickable = (content: string) => {
-    return content.replace(
-      /(https?:\/\/[^\s]+)/g,
-      '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline;">$1</a>'
+    return (
+      content
+        // Style existing <a> tags (links added via React Quill)
+        .replace(
+          /<a([^>]+href="https?:\/\/[^"]+)"([^>]*)>/g,
+          `<a$1$2 style="color: blue; text-decoration: underline; word-break: break-word;">`
+        )
+        // Convert plain URLs into clickable links
+        .replace(
+          /(?<!href=")(https?:\/\/[^\s"<]+)/g,
+          (match) =>
+            `<a href="${match}" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline; word-break: break-word;">${match}</a>`
+        )
     );
   };
 
@@ -256,8 +275,13 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
             .map((log) => (
               <div key={log.id} className="flex items-start space-x-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={user.profile_pic} alt={user.name[0]} />
-                  <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  <AvatarImage
+                    src={user.profile_pic}
+                    alt={user?.name !== null ? user?.name[0] : ""}
+                  />
+                  <AvatarFallback>
+                    {user?.name !== null ? user?.name[0] : ""}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="p-3 rounded-lg bg-gray-100 flex-grow">
                   <div className="flex justify-between items-center mb-1">
@@ -275,6 +299,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                       }}
                     >
                       <ReactQuill
+                        modules={modules}
                         value={editContent}
                         onChange={setEditContent}
                       />

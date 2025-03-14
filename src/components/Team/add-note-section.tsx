@@ -187,8 +187,13 @@ const AddNoteSection = ({
             .map((note, index) => (
               <div key={index} className="flex items-start space-x-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={user[0]} alt={user.name[0]} />
-                  <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  <AvatarImage
+                    src={user[0]}
+                    alt={user?.name !== null ? user?.name[0] : ""}
+                  />
+                  <AvatarFallback>
+                    {user?.name !== null ? user?.name[0] : ""}
+                  </AvatarFallback>
                 </Avatar>
                 <div
                   className={`p-3 rounded-lg flex-grow ${
