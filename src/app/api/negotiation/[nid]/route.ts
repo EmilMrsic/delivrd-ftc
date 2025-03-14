@@ -1,15 +1,5 @@
-import { db } from "@/firebase/config";
-import { getActiveDealObjects } from "@/lib/helpers/negotiation";
-import { DealNegotiatorModel, NegotiationDataType } from "@/lib/models/team";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
-import { chunk } from "lodash";
+import { getActiveDealDocuments } from "@/lib/helpers/negotiation";
+import { NegotiationDataType } from "@/lib/models/team";
 import { NextResponse } from "next/server";
 
 export const GET = async (
@@ -22,22 +12,12 @@ export const GET = async (
     negotiations: [],
   };
   const { nid } = params;
-  const teamDocRef = doc(db, "team delivrd", nid);
-  const teamSnapshot = await getDoc(teamDocRef);
 
-  if (!teamSnapshot.exists()) {
-    console.log("Team document not found");
-    return;
-  }
-
-  const teamData = DealNegotiatorModel.parse(teamSnapshot.data());
-  const activeDeals = teamData.active_deals;
-
-  if (!Array.isArray(activeDeals) || activeDeals.length === 0) {
-    console.log("No active deals found");
-    output.negotiations = [];
-  } else {
-    output.negotiations = await getActiveDealObjects(activeDeals);
+  const deals = await getActiveDealDocuments({
+    dealNegotiatorId: nid,
+  });
+  if (deals.length > 0) {
+    output.negotiations = deals;
   }
 
   return NextResponse.json(output);

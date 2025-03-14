@@ -32,13 +32,12 @@ export const DealNegotiatorDropdown = ({
           className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
         >
           {allDealNegotiator.some(
-            (negotiator) => negotiator.id === deal.negotiations_deal_coordinator
+            (negotiator) => negotiator.id === deal.dealCoordinatorId
           ) ? (
             <p>
               {
                 allDealNegotiator.find(
-                  (negotiator) =>
-                    negotiator.id === deal.negotiations_deal_coordinator
+                  (negotiator) => negotiator.id === deal.dealCoordinatorId
                 )?.name
               }
             </p>

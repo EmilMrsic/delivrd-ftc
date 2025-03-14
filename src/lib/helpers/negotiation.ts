@@ -10,8 +10,8 @@ export const sortNegotiationsByStatus = (
   direction: "ascending" | "descending" = "ascending"
 ) => {
   return negotiations.sort((a, b) => {
-    const statusA = a.negotiations_Status ?? "";
-    const statusB = b.negotiations_Status ?? "";
+    const statusA = a.stage ?? "";
+    const statusB = b.stage ?? "";
 
     const indexA = negotiationStatusOrder.indexOf(statusA);
     const indexB = negotiationStatusOrder.indexOf(statusB);
@@ -28,10 +28,10 @@ export const sortNegotiationsByStatus = (
 export const pruneNegotiations = (negotiations: NegotiationDataType[]) => {
   return negotiations.filter((negotiation) => {
     return (
-      negotiation.negotiations_Status !== "Closed" &&
-      negotiation.negotiations_Status !== "Paid Lost Contact" &&
-      negotiation.negotiations_Status !== "Refunded" &&
-      negotiation.negotiations_Status !== "Closed No Review"
+      negotiation.stage !== "Closed" &&
+      negotiation.stage !== "Paid Lost Contact" &&
+      negotiation.stage !== "Refunded" &&
+      negotiation.stage !== "Closed No Review"
     );
   });
 };
@@ -41,7 +41,6 @@ export const sortDataHelper = (
   currentDeals: NegotiationDataType[]
 ) => {
   return (key: string, direction: string) => {
-    console.log("got here:", key, direction);
     if (key == "negotiations_Status") {
       console.log("sorting by status");
       const sortedDeals = sortNegotiationsByStatus(
@@ -65,6 +64,21 @@ export const sortDataHelper = (
       setCurrentDeals(sortedDeals);
     }
   };
+};
+
+export const getActiveDealDocuments = async (dealQuery: {
+  dealNegotiatorId?: string;
+}) => {
+  const negotiationsCollectionRef = collection(db, "delivrd_negotiations");
+  const negotiationsQuery = query(
+    negotiationsCollectionRef,
+    where("dealCoordinatorId", "==", dealQuery.dealNegotiatorId)
+  );
+  const negotiationsSnapshot = await getDocs(negotiationsQuery);
+  return negotiationsSnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return NegotiationDataModel.parse(data);
+  });
 };
 
 export const getActiveDealObjects = async (activeDeals: string[]) => {

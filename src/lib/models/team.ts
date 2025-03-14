@@ -12,120 +12,196 @@ export const DealNegotiatorModel = z.object({
   source: z.string(),
 });
 
+// export const NegotiationDataModel = z.object({
+//   deals: z.array(z.string()).default([]),
+//   id: z.string(),
+//   arrival_to_client: z.string().nullable(),
+//   arrival_to_dealer: z.string().nullable(),
+//   model_of_interest: z.string().nullable().optional(),
+//   vehicle_of_interest: z.string().nullable().optional(),
+//   consult_notes: z.string().nullable().optional(),
+//   close_date: z.string().nullable(),
+//   date_paid: z.string().nullable(),
+//   incoming_bids: z.array(z.any()).default([]),
+//   negotiations_Address: z.string().nullable(),
+//   brand: z.string().nullable(),
+//   budget: z.union([z.number(), z.string()]).nullable(),
+//   negotiations_Client: z.string(),
+//   negotiations_Color_Options: z.object({
+//     interior_preferred: z.string(),
+//     exterior_preferred: z.string(),
+//     interior_deal_breaker: z.string(),
+//     exterior_deal_breakers: z.string(),
+//   }),
+//   negotiations_Created: z.string(),
+//   dealStartDate: z.string().nullable(),
+//   review: z.string().nullable().optional(),
+//   negotiations_Drivetrain: z.string().nullable(),
+//   clientEmail: z.string().nullable(),
+//   clientFirstName: z.string(),
+//   negotiations_How_To_Pay: z.string().nullable(),
+//   negotiations_Invoice_Link: z.string().nullable(),
+//   negotiations_Invoice_Status: z.string().nullable(),
+//   negotiations_Invoice_Status_Updates_Log: z.string().nullable(),
+//   clientLastName: z.string().nullable(),
+//   negotiations_Model: z.string().nullable(),
+//   negotiations_New_or_Used: z.string().nullable(),
+//   negotiations_Onboarding_Complete: z.string().nullable(),
+//   negotiations_Payment_Budget: z.union([z.number(), z.string()]).nullable(),
+//   clientPhone: z.string().nullable(),
+//   negotiations_Privilege_Level_From_Users: z.array(z.string()).default([]),
+//   negotiations_Project_Short_Link: z.string().nullable(),
+//   negotiations_Status: z.string().nullable(),
+//   negotiations_Status_Updated: z.string().nullable(),
+//   negotiations_Trade_Details: z.string().nullable(),
+//   negotiations_Travel_Limit: z.string().nullable(),
+//   negotiations_Trim: z.string().nullable(),
+//   negotiations_Trim_Package_Options: z.string().nullable(),
+//   negotiations_Zip_Code: z.string().nullable(),
+//   negotiations_city: z.string().nullable(),
+//   negotiations_state: z.string().nullable(),
+//   negotiations_deal_coordinator: z.string().nullable(),
+//   shipping_info: z.string().nullable(),
+//   trade_in_info: z.string().nullable().optional(),
+//   trade_in_vin: z.string().nullable().optional(),
+//   trade_in_mileage: z.string().nullable().optional(),
+//   trade_in_comments: z.string().nullable().optional(),
+//   trade_in_files: z.array(z.string()).default([]),
+// });
+
 /**
- * export interface NegotiationData {
-  deals: string[]; // Array of strings, where [0: ""]
-  id: string;
-  arrival_to_client: string;
-  arrival_to_dealer: string;
-  model_of_interest: string;
-  vehicle_of_interest: string;
-  consult_notes: string;
-  close_date: string;
-  date_paid: string;
-  incoming_bids: any[]; // Array of any type as the content is not specified
-  negotiations_Address: string | null;
-  negotiations_Brand: string | null;
-  negotiations_Budget: string | null;
-  negotiations_Client: string;
-  negotiations_Color_Options: {
-    interior_preferred: string;
-    exterior_preferred: string;
-    interior_deal_breaker: string;
-    exterior_deal_breakers: string;
-  };
-  negotiations_Created: string; // ISO date string
-  negotiations_Deal_Start_Date: string | null; // null if not provided
-  review?: string;
-  negotiations_Drivetrain: string | null;
-  negotiations_Email: string;
-  negotiations_First_Name: string;
-  negotiations_How_To_Pay: string | null;
-  negotiations_Invoice_Link: string | null;
-  negotiations_Invoice_Status: string | null;
-  negotiations_Invoice_Status_Updates_Log: string | null;
-  negotiations_Last_Name: string;
-  negotiations_Model: string | null;
-  negotiations_New_or_Used: string | null;
-  negotiations_Onboarding_Complete: string;
-  negotiations_Payment_Budget: string | null;
-  negotiations_Phone: string;
-  negotiations_Privilege_Level_From_Users: string[]; // Array of strings, example includes "Client"
-  negotiations_Project_Short_Link: string | null;
-  negotiations_Status: string | null;
-  negotiations_Status_Updated: string | null;
-  negotiations_Trade_Details: string | null;
-  negotiations_Travel_Limit: string | null;
-  negotiations_Trim: string | null;
-  negotiations_Trim_Package_Options: string | null;
-  negotiations_Zip_Code: string | null;
-  negotiations_city: string | null;
-  negotiations_state: string | null;
-  negotiations_deal_coordinator: string | null;
-  shipping_info: string | null;
-  trade_in_info?: string;
-  trade_in_vin?: string;
-  trade_in_mileage?: string;
-  trade_in_comments?: string;
-  trade_in_files?: string[];
-}
+ * budget: '250',
+  desiredInterior: 'All black: Black Leather and Black Open-Pore Wood trim',
+  drivetrain: 'The hybrid only comes in AWD',
+  dealCoordinatorId: 'recAGTrcu7ThaOHjz',
+  howToPay: 'Need to Discuss',
+  prefix: 'Ms.',
+  workLogs: [
+    {
+      comments: 'Reached out to local dealers for initial pricing.',
+      coordinatorId: 'coordA',
+      workLogId: 'wlog1',
+      fileUrls: [Array],
+      createdAt: '2025-03-11T09:42:22.000Z'
+    },
+    {
+      coordinatorId: 'coordB',
+      comments: 'Negotiated final price with the second dealership.',
+      fileUrls: [],
+      createdAt: '2025-03-12T11:00:00.000Z',
+      workLogId: 'wlog2'
+    },
+    {
+      coordinatorId: 'coordC',
+      workLogId: 'wlog3',
+      fileUrls: [Array],
+      comments: 'Scheduled a test drive for the client next week.',
+      createdAt: '2025-03-13T14:30:00.000Z'
+    }
+  ],
+  closeDate: '',
+  desiredExterior: 'First choice is Eminent White Pearl',
+  clientFirstName: 'Jodi',
+  shippingInfo: 'testing data',
+  negotiationId: 'rec57FTnhL3HPCfhf',
+  clientPhone: '(440) 821-4804',
+  tradeDetails: {
+    mileage: '42,000',
+    fileUrls: [
+      'https://example.com/trade-1.jpg',
+      'https://example.com/trade-2.jpg'
+    ],
+    comments: 'Client wants to trade in a 2018 Honda Accord.',
+    vin: '1HGCV1F31JA123456'
+  },
+  userId: 'recrHRG9X2dD0hN9E',
+  state: 'Ohio',
+  incomingBids: [ 'rec8BYaWKkX6psaQhGh', 'recNCS5YdQ7hBZC8C' ],
+  createdAt: '2025-03-01T02:09:56.000Z',
+  clientEmail: 'jbosak04@gmail.com',
+  stage: 'Actively Negotiating',
+  invoiceStatus: 'PAID',
+  model: 'RX350 Hybrid',
+  updatedAt: '2025-03-13T20:16:23.696Z',
+  city: 'North Olmsted',
+  excludedInterior: 'Palomino leather with Ash bamboo trim.',
+  source: 'airtable',
+  internalNotes: [
+    {
+      createdAt: '2025-03-11T09:43:33.000Z',
+      authorId: 'recAuthor1',
+      text: 'First internal note. Checking negotiation details.',
+      mentionedTeammember: 'recTeammemberA',
+      noteId: 'note001'
+    },
+    {
+      createdAt: '2025-03-12T10:15:00.000Z',
+      mentionedTeammember: 'recTeammemberB',
+      text: 'Second internal note. Followed up with the client.',
+      noteId: 'note002',
+      authorId: 'recAuthor2'
+    }
+  ],
+  travelLimit: 'Client is willing to travel up to: Approx 225 miles - delivery would depend on cost from where they live',
+  condition: 'New',
+  excludedExterior: 'Do not want Matador Red Mica, Copper Crest, Cloudburst Grey, Nori Green Pearl, or Nightfall Mica. Would consider Caviar or Iridium.',
+  invoiceLink: 'https://payments.delivrdto.me/zz7u3ysw',
+  monthlyBudget: 700,
+  brand: 'Lexus',
+  clientLastName: 'Bosak',
+  invoiceStatusUpdatesLog: { created: '', paid: '' },
+  id: 'rec57FTnhL3HPCfhf',
+  datePaid: '2025-03-01T00:00:00.000Z',
+  dealStartDate: '2025-03-11T00:00:00.000Z'
  */
 
 export const NegotiationDataModel = z.object({
-  deals: z.array(z.string()).default([]),
-  id: z.string(),
-  arrival_to_client: z.string().nullable(),
-  arrival_to_dealer: z.string().nullable(),
-  model_of_interest: z.string().nullable().optional(),
-  vehicle_of_interest: z.string().nullable().optional(),
-  consult_notes: z.string().nullable().optional(),
-  close_date: z.string().nullable(),
-  date_paid: z.string().nullable(),
-  incoming_bids: z.array(z.any()).default([]),
-  negotiations_Address: z.string().nullable(),
-  negotiations_Brand: z.string().nullable(),
-  negotiations_Budget: z.union([z.number(), z.string()]).nullable(),
-  negotiations_Client: z.string(),
-  negotiations_Color_Options: z.object({
-    interior_preferred: z.string(),
-    exterior_preferred: z.string(),
-    interior_deal_breaker: z.string(),
-    exterior_deal_breakers: z.string(),
+  budget: z.string(),
+  desiredInterior: z.string(),
+  drivetrain: z.string(),
+  dealCoordinatorId: z.string(),
+  howToPay: z.string(),
+  prefix: z.string(),
+  workLogs: z.array(z.any()),
+  closeDate: z.string(),
+  desiredExterior: z.string(),
+  clientFirstName: z.string(),
+  shippingInfo: z.string(),
+  negotiationId: z.string(),
+  clientPhone: z.string(),
+  tradeDetails: z.object({
+    mileage: z.string(),
+    fileUrls: z.array(z.string()),
+    comments: z.string(),
+    vin: z.string(),
   }),
-  negotiations_Created: z.string(),
-  negotiations_Deal_Start_Date: z.string().nullable(),
-  review: z.string().nullable().optional(),
-  negotiations_Drivetrain: z.string().nullable(),
-  negotiations_Email: z.string().nullable(),
-  negotiations_First_Name: z.string(),
-  negotiations_How_To_Pay: z.string().nullable(),
-  negotiations_Invoice_Link: z.string().nullable(),
-  negotiations_Invoice_Status: z.string().nullable(),
-  negotiations_Invoice_Status_Updates_Log: z.string().nullable(),
-  negotiations_Last_Name: z.string().nullable(),
-  negotiations_Model: z.string().nullable(),
-  negotiations_New_or_Used: z.string().nullable(),
-  negotiations_Onboarding_Complete: z.string().nullable(),
-  negotiations_Payment_Budget: z.union([z.number(), z.string()]).nullable(),
-  negotiations_Phone: z.string().nullable(),
-  negotiations_Privilege_Level_From_Users: z.array(z.string()).default([]),
-  negotiations_Project_Short_Link: z.string().nullable(),
-  negotiations_Status: z.string().nullable(),
-  negotiations_Status_Updated: z.string().nullable(),
-  negotiations_Trade_Details: z.string().nullable(),
-  negotiations_Travel_Limit: z.string().nullable(),
-  negotiations_Trim: z.string().nullable(),
-  negotiations_Trim_Package_Options: z.string().nullable(),
-  negotiations_Zip_Code: z.string().nullable(),
-  negotiations_city: z.string().nullable(),
-  negotiations_state: z.string().nullable(),
-  negotiations_deal_coordinator: z.string().nullable(),
-  shipping_info: z.string().nullable(),
-  trade_in_info: z.string().nullable().optional(),
-  trade_in_vin: z.string().nullable().optional(),
-  trade_in_mileage: z.string().nullable().optional(),
-  trade_in_comments: z.string().nullable().optional(),
-  trade_in_files: z.array(z.string()).default([]),
+  userId: z.string(),
+  state: z.string(),
+  incomingBids: z.array(z.string()),
+  createdAt: z.string(),
+  clientEmail: z.string(),
+  stage: z.string(),
+  invoiceStatus: z.string(),
+  model: z.string(),
+  updatedAt: z.string(),
+  city: z.string(),
+  excludedInterior: z.string(),
+  source: z.string(),
+  internalNotes: z.array(z.any()),
+  travelLimit: z.string(),
+  condition: z.string(),
+  excludedExterior: z.string(),
+  invoiceLink: z.string(),
+  monthlyBudget: z.number(),
+  brand: z.string(),
+  clientLastName: z.string(),
+  invoiceStatusUpdatesLog: z.object({
+    created: z.string(),
+    paid: z.string(),
+  }),
+  id: z.string(),
+  datePaid: z.string(),
+  dealStartDate: z.string(),
 });
 
 export type DealNegotiatorType = z.infer<typeof DealNegotiatorModel>;

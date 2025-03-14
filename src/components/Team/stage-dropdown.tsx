@@ -23,13 +23,12 @@ export const StageDropdown = ({
         <Button
           variant="outline"
           style={{
-            backgroundColor: getStatusStyles(deal?.negotiations_Status ?? "")
-              .backgroundColor,
-            color: getStatusStyles(deal?.negotiations_Status ?? "").textColor, // Set dynamic text color
+            backgroundColor: getStatusStyles(deal?.stage ?? "").backgroundColor,
+            color: getStatusStyles(deal?.stage ?? "").textColor, // Set dynamic text color
           }}
           className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
         >
-          <p>{deal.negotiations_Status}</p>
+          <p>{deal.stage}</p>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 h-56 overflow-scroll">

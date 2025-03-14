@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
 export const useNegotiations = (config: { all?: boolean } = {}) => {
-  const [id, setId] = useState<string>(getUserData().deal_coordinator_id);
+  const [id, setId] = useState<string>("recAGTrcu7ThaOHjz"); //getUserData().deal_coordinator_id);
 
   const negotiationsQuery = useQuery({
     queryKey: ["negotiations"],

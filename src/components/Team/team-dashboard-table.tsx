@@ -71,6 +71,7 @@ const TeamDashboardTable = ({
   loading,
   setCurrentDeals,
 }: TeamDashboardTableProps) => {
+  console.log("got here in table:", currentDeals);
   const router = useRouter();
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
   const [openNoteState, setOpenNoteStates] = useState<Record<string, boolean>>(
@@ -267,8 +268,8 @@ const TeamDashboardTable = ({
                 {
                   text: deal.negotiations_Client,
                 },
-                deal.negotiations_Brand,
-                deal.negotiations_Model,
+                deal.brand,
+                deal.model,
                 {
                   Component: () => (
                     <StageDropdown
@@ -306,23 +307,23 @@ const TeamDashboardTable = ({
                 {
                   Component: () => (
                     <>
-                      <div>{dateFormat(deal.date_paid ?? "")}</div>
+                      <div>{dateFormat(deal.datePaid ?? "")}</div>
                       <div className="text-xs text-[#0989E5]">
-                        {getElapsedTime(deal.date_paid ?? "", NOW)}
+                        {getElapsedTime(deal.datePaid ?? "", NOW)}
                       </div>
                     </>
                   ),
                 },
                 {
                   Component: () =>
-                    deal.arrival_to_dealer && (
+                    deal.arrivalToDealer && (
                       <DatePickerCell
-                        initialDate={deal.arrival_to_dealer}
+                        initialDate={deal.arrivalToDealer}
                         onDateChange={(date) =>
                           handleDateChange(
                             date ?? "",
                             deal.id,
-                            "arrival_to_dealer"
+                            "arrivalToDealer"
                           )
                         }
                       />
@@ -331,13 +332,9 @@ const TeamDashboardTable = ({
                 {
                   Component: () => (
                     <DatePickerCell
-                      initialDate={deal.negotiations_Deal_Start_Date ?? ""}
+                      initialDate={deal.dealStartDate ?? ""}
                       onDateChange={(date) =>
-                        handleDateChange(
-                          date ?? "",
-                          deal.id,
-                          "negotiations_Deal_Start_Date"
-                        )
+                        handleDateChange(date ?? "", deal.id, "dealStartDate")
                       }
                     />
                   ),
@@ -359,9 +356,9 @@ const TeamDashboardTable = ({
                 {
                   Component: () => (
                     <DatePickerCell
-                      initialDate={deal.close_date ?? ""}
+                      initialDate={deal.closeDate ?? ""}
                       onDateChange={(date) =>
-                        handleDateChange(date ?? "", deal.id, "close_date")
+                        handleDateChange(date ?? "", deal.id, "closeDate")
                       }
                     />
                   ),
