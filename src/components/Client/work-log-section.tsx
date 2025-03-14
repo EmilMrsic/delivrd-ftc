@@ -51,6 +51,13 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
     setWorkLogs(logsData);
   };
 
+  const makeLinksClickable = (content: string) => {
+    return content.replace(
+      /(https?:\/\/[^\s]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline;">$1</a>'
+    );
+  };
+
   useEffect(() => {
     fetchWorkLogs();
   }, [negotiationId]);
@@ -73,8 +80,13 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
             .map((log) => (
               <div key={log.id} className="flex items-start space-x-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={user.profile_pic} alt={user.name[0]} />
-                  <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  <AvatarImage
+                    src={user.profile_pic}
+                    alt={user?.name !== null ? user?.name[0] : ""}
+                  />
+                  <AvatarFallback>
+                    {user?.name !== null ? user?.name[0] : ""}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="p-3 rounded-lg bg-gray-100 flex-grow">
                   <div className="flex justify-between items-center mb-1">
@@ -86,7 +98,14 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
 
                   <div className="flex justify-between">
                     <div
-                      dangerouslySetInnerHTML={{ __html: log.content }}
+                      style={{
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word",
+                        whiteSpace: "normal",
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: makeLinksClickable(log.content),
+                      }}
                     ></div>
                   </div>
                   <div className="flex space-x-4 mt-2">

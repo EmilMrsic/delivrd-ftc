@@ -70,6 +70,19 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
 
   const saveEdit = async (logId: string) => {
     try {
+      // Query Firestore to find the document where "id" matches logId
+      const q = query(collection(db, "work_log"), where("id", "==", logId));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        console.error("No document found with ID:", logId);
+        toast({ title: "Error: Work log not found", variant: "destructive" });
+        return;
+      }
+
+      // Get the first matching document reference
+      const logRef = querySnapshot.docs[0].ref;
+
       // Upload new files and get URLs
       const uploadedFiles = await Promise.all(
         editFiles.map(async (file) => {
@@ -82,10 +95,10 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         })
       );
 
-      // Remove null values and add to workLogs state immediately
+      // Remove null values
       const newFileUrls = uploadedFiles.filter(Boolean) as string[];
 
-      // Update workLogs state instantly for a smooth UI
+      // Update workLogs state instantly for UI smoothness
       setWorkLogs((prevLogs) =>
         prevLogs.map((log) =>
           log.id === logId
@@ -98,8 +111,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         )
       );
 
-      // Update Firestore after state is updated
-      const logRef = doc(db, "work_log", logId);
+      // Update Firestore after UI state is updated
       await updateDoc(logRef, {
         content: editContent,
         attachments: [
@@ -219,6 +231,13 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
     fetchWorkLogs();
   }, [negotiationId]);
 
+  const makeLinksClickable = (content: string) => {
+    return content.replace(
+      /(https?:\/\/[^\s]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline;">$1</a>'
+    );
+  };
+
   return (
     <Card className="bg-white shadow-lg">
       <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
@@ -248,7 +267,13 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                     </p>
                   </div>
                   {editingLog === log.id ? (
-                    <div>
+                    <div
+                      style={{
+                        width: "100%",
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word",
+                      }}
+                    >
                       <ReactQuill
                         value={editContent}
                         onChange={setEditContent}
@@ -272,7 +297,14 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                   ) : (
                     <div className="flex justify-between">
                       <div
-                        dangerouslySetInnerHTML={{ __html: log.content }}
+                        style={{
+                          wordBreak: "break-word",
+                          overflowWrap: "break-word",
+                          whiteSpace: "normal",
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: makeLinksClickable(log.content),
+                        }}
                       ></div>
                       <Button
                         variant="ghost"

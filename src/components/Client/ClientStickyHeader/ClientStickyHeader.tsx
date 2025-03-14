@@ -35,8 +35,9 @@ const ClientStickyHeader = ({
               clipRule="evenodd"
             />
           </svg>
-          {userData?.color_options &&
-            userData?.color_options.exterior.preferred}
+          {(userData?.color_options &&
+            userData?.color_options.exterior?.preferred) ??
+            ""}
         </span>
         <span>
           <DollarSign className="inline mr-1 h-4 w-4" />
