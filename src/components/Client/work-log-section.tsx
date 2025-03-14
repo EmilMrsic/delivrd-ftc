@@ -52,10 +52,15 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   };
 
   const makeLinksClickable = (content: string) => {
-    return content.replace(
-      /(https?:\/\/[^\s]+)/g,
-      '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline;">$1</a>'
-    );
+    return content
+      .replace(
+        /<a\s+[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g,
+        `<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline; word-break: break-word;">$2</a>`
+      )
+      .replace(
+        /(?<!href=")(https?:\/\/[^\s"<]+)/g,
+        `<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline; word-break: break-word;">$1</a>`
+      );
   };
 
   useEffect(() => {

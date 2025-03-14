@@ -243,16 +243,15 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   const makeLinksClickable = (content: string) => {
     return (
       content
-        // Style existing <a> tags (links added via React Quill)
+        // Ensure existing <a> tags are formatted correctly and don't break
         .replace(
-          /<a([^>]+href="https?:\/\/[^"]+)"([^>]*)>/g,
-          `<a$1$2 style="color: blue; text-decoration: underline; word-break: break-word;">`
+          /<a\s+[^>]*href="([^"]+)"[^>]*>(.*?)<\/a>/g,
+          `<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline; word-break: break-word;">$2</a>`
         )
         // Convert plain URLs into clickable links
         .replace(
           /(?<!href=")(https?:\/\/[^\s"<]+)/g,
-          (match) =>
-            `<a href="${match}" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline; word-break: break-word;">${match}</a>`
+          `<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline; word-break: break-word;">$1</a>`
         )
     );
   };
