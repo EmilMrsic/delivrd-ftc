@@ -48,7 +48,7 @@ import { TeamDashboardViewHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
 type NegotiationsGroupedType = {
-  [groupKey: string]: NegotiationData[];
+  [groupKey: string]: NegotiationDataType[];
 };
 
 type TeamDataType = {
@@ -66,30 +66,23 @@ type TeamDataType = {
 function ReceivedCar() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [teamData, setTeamData] = useState<TeamDataType[]>([]);
-  const router = useRouter();
   const [userData, setUserData] = useState<IUser>();
-  const [expandedNote, setExpandedNote] = useState<{
-    id: string;
-    note: string;
-  } | null>(null);
-  const [shippingInfo, setExpandedShippingInfo] = useState<{
-    id: string;
-    note: string;
-  } | null>(null);
-
-  const [tradeInfo, setExpandedTradeInfo] = useState<{
-    id: string;
-    note: string;
-  } | null>(null);
 
   const [dealsWithoutCoordinator, setDealsWithoutCoordinator] = useState<
-    NegotiationData[]
+    NegotiationDataType[]
   >([]);
   const [loading, setLoading] = useState(false);
-  const { allDealNegotiator, negotiatorData, negotiations, team } =
-    useTeamDashboard({
-      all: true,
-    });
+  const {
+    allDealNegotiator,
+    negotiatorData,
+    negotiations: negotiationsFromTeamDashboard,
+    team,
+  } = useTeamDashboard({
+    all: true,
+    filter: {
+      // status: "Shipping",
+    },
+  });
 
   const [expandedStatusRows, setExpandedStatusRows] = useState<{
     [key: string]: boolean;
@@ -117,12 +110,16 @@ function ReceivedCar() {
   };
 
   useEffect(() => {
-    if (negotiations) {
-      const filteredDeals = negotiations.filter(
-        (item: any) =>
-          item.negotiations_Status === "Shipping" ||
-          item.negotiations_Status === "Delivery Scheduled" ||
-          item.negotiations_Status === "Follow Up Issue"
+    if (negotiationsFromTeamDashboard) {
+      const filteredDeals = negotiationsFromTeamDashboard.filter(
+        (item: any) => {
+          return true;
+          return (
+            item.negotiations_Status === "Shipping" ||
+            item.negotiations_Status === "Delivery Scheduled" ||
+            item.negotiations_Status === "Follow Up Issue"
+          );
+        }
       );
 
       const teamIdToObject: {
@@ -130,18 +127,19 @@ function ReceivedCar() {
       } = {};
 
       filteredDeals.map((deal: NegotiationDataType) => {
-        if (deal.negotiations_deal_coordinator) {
-          if (!teamIdToObject[deal.negotiations_deal_coordinator]) {
-            teamIdToObject[deal.negotiations_deal_coordinator] = [];
+        if (deal.dealCoordinatorId) {
+          if (!teamIdToObject[deal.dealCoordinatorId]) {
+            teamIdToObject[deal.dealCoordinatorId] = [];
           }
 
-          teamIdToObject[deal.negotiations_deal_coordinator].push(deal);
+          teamIdToObject[deal.dealCoordinatorId].push(deal);
         }
       });
 
       for (const index in team) {
         const member = team[index];
         const teamMemberDeals = teamIdToObject[member.id] ?? [];
+        console.log(member.id, member.name, teamMemberDeals);
         const groupedByStatus = teamMemberDeals.reduce(
           (acc: any, negotiation: any) => {
             const status = negotiation.negotiations_Status || "Unknown";
@@ -158,7 +156,7 @@ function ReceivedCar() {
       setTeamData(team);
       setLoading(false);
     }
-  }, [negotiations]);
+  }, [negotiationsFromTeamDashboard]);
 
   const sortData = (key: string, direction: string) => {
     setSortConfig((prevConfig) => {
@@ -232,10 +230,8 @@ function ReceivedCar() {
   }, []);
 
   useEffect(() => {
-    getDealsWithoutCoordinator().then((res) =>
-      setDealsWithoutCoordinator(res as NegotiationData[])
-    );
-  }, []);
+    setDealsWithoutCoordinator(negotiationsFromTeamDashboard);
+  }, [negotiationsFromTeamDashboard]);
 
   return (
     <>
@@ -313,7 +309,7 @@ function ReceivedCar() {
                                     <ChevronDown className="h-4 w-4" />
                                   ) : (
                                     <ChevronRight className="h-4 w-4" />
-                                  )}
+                                  )}{" "}
                                 </Button>
                               </TableCell>
                               <TableCell colSpan={16}>
@@ -328,268 +324,267 @@ function ReceivedCar() {
                               </TableCell>
                             </TableRow>
                             {expandedStatusRows[`${team.id}_${status}`] && (
-                              <TailwindPlusTable
-                                headers={[
-                                  {
-                                    header: "No.",
-                                  },
-                                  {
-                                    header: "Client",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Client",
-                                    },
-                                  },
-                                  {
-                                    header: "Phone",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Phone",
-                                    },
-                                  },
-                                  {
-                                    header: "Zip Code",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Zip_Code",
-                                    },
-                                  },
-                                  {
-                                    header: "Brand",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Brand",
-                                    },
-                                  },
-                                  {
-                                    header: "Deal Negotiator",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_deal_coordinator",
-                                    },
-                                  },
-                                  {
-                                    header: "Model",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Model",
-                                    },
-                                  },
-                                  {
-                                    header: "Status",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Status",
-                                    },
-                                  },
-                                  {
-                                    header: "Deal Start Date",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Deal_Start_Date",
-                                    },
-                                  },
-                                  {
-                                    header: "Arrival to Client",
-                                    config: {
-                                      sortable: true,
-                                      key: "arrival_to_client",
-                                    },
-                                  },
-                                  {
-                                    header: "Arrival to Dealer",
-                                    config: {
-                                      sortable: true,
-                                      key: "arrival_to_dealer",
-                                    },
-                                  },
-                                  {
-                                    header: "Trade Details",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Trade_Details",
-                                    },
-                                  },
-                                  {
-                                    header: "Travel Limit",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Travel_Limit",
-                                    },
-                                  },
-                                  {
-                                    header: "Shipping Info",
-                                    config: {
-                                      sortable: true,
-                                      key: "shipping_info",
-                                    },
-                                  },
-                                  {
-                                    header: "Interior Preferred",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Color_Options.interior_preferred",
-                                    },
-                                  },
-                                  {
-                                    header: "Interior Deal Breaker",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Color_Options.interior_deal_breaker",
-                                    },
-                                  },
-                                  {
-                                    header: "Exterior Preferred",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Color_Options.exterior_preferred",
-                                    },
-                                  },
-                                  {
-                                    header: "Exterior Deal Breakers",
-                                    config: {
-                                      sortable: true,
-                                      key: "negotiations_Color_Options.exterior_deal_breakers",
-                                    },
-                                  },
-                                ]}
-                                rows={deals
-                                  .filter((deal) => {
-                                    const today = new Date();
-                                    const paidDate = new Date(
-                                      deal.arrival_to_client
-                                    );
-                                    const diffTime =
-                                      today.getTime() - paidDate.getTime();
-                                    const diffDays =
-                                      diffTime / (1000 * 3600 * 24);
+                              <TableRow>
+                                <TableCell colSpan={16}>
+                                  <TailwindPlusTable
+                                    headers={[
+                                      {
+                                        header: "No.",
+                                      },
+                                      {
+                                        header: "Client",
+                                        config: {
+                                          sortable: true,
+                                          key: "clientNamefull",
+                                        },
+                                      },
+                                      {
+                                        header: "Phone",
+                                        config: {
+                                          sortable: true,
+                                          key: "clientPhone",
+                                        },
+                                      },
+                                      {
+                                        header: "Zip Code",
+                                        config: {
+                                          sortable: true,
+                                          key: "zip",
+                                        },
+                                      },
+                                      {
+                                        header: "Brand",
+                                        config: {
+                                          sortable: true,
+                                          key: "brand",
+                                        },
+                                      },
+                                      {
+                                        header: "Deal Negotiator",
+                                        config: {
+                                          sortable: true,
+                                          key: "dealCoordinatorId",
+                                        },
+                                      },
+                                      {
+                                        header: "Model",
+                                        config: {
+                                          sortable: true,
+                                          key: "model",
+                                        },
+                                      },
+                                      {
+                                        header: "Status",
+                                        config: {
+                                          sortable: true,
+                                          key: "stage",
+                                        },
+                                      },
+                                      {
+                                        header: "Deal Start Date",
+                                        config: {
+                                          sortable: true,
+                                          key: "dealStartDate",
+                                        },
+                                      },
+                                      {
+                                        header: "Arrival to Client",
+                                        config: {
+                                          sortable: true,
+                                          key: "arrival_to_client",
+                                        },
+                                      },
+                                      {
+                                        header: "Arrival to Dealer",
+                                        config: {
+                                          sortable: true,
+                                          key: "arrival_to_dealer",
+                                        },
+                                      },
+                                      {
+                                        header: "Trade Details",
+                                        config: {
+                                          sortable: true,
+                                          key: "tradeDetails",
+                                        },
+                                      },
+                                      {
+                                        header: "Travel Limit",
+                                        config: {
+                                          sortable: true,
+                                          key: "travelLimit",
+                                        },
+                                      },
+                                      {
+                                        header: "Shipping Info",
+                                        config: {
+                                          sortable: true,
+                                          key: "shippingInfo",
+                                        },
+                                      },
+                                      {
+                                        header: "Interior Preferred",
+                                        config: {
+                                          sortable: true,
+                                          key: "desiredInterior",
+                                        },
+                                      },
+                                      {
+                                        header: "Interior Deal Breaker",
+                                        config: {
+                                          sortable: true,
+                                          key: "excludedInterior",
+                                        },
+                                      },
+                                      {
+                                        header: "Exterior Preferred",
+                                        config: {
+                                          sortable: true,
+                                          key: "desiredExterior",
+                                        },
+                                      },
+                                      {
+                                        header: "Exterior Deal Breakers",
+                                        config: {
+                                          sortable: true,
+                                          key: "excludedExterior",
+                                        },
+                                      },
+                                    ]}
+                                    rows={deals
+                                      .filter((deal) => {
+                                        return true;
+                                        const today = new Date();
+                                        const paidDate = new Date(
+                                          deal.arrivalToClient
+                                        );
+                                        const diffTime =
+                                          today.getTime() - paidDate.getTime();
+                                        const diffDays =
+                                          diffTime / (1000 * 3600 * 24);
 
-                                    return diffDays >= 1;
-                                  })
-                                  .map((deal, index) => [
-                                    {
-                                      text: `${index + 1}`,
-                                      link: `/team-profile?id=${deal.id}`,
-                                    },
-                                    {
-                                      text: deal.negotiations_Client,
-                                    },
-                                    {
-                                      text: deal.negotiations_Phone,
-                                    },
-                                    {
-                                      text: deal.negotiations_Zip_Code,
-                                    },
-                                    {
-                                      text: deal.negotiations_Brand,
-                                    },
-                                    allDealNegotiator.find(
-                                      (negotiator) =>
-                                        negotiator.id ===
-                                        deal.negotiations_deal_coordinator
-                                    )?.name || "Not Assigned",
-                                    {
-                                      text: deal.negotiations_Model,
-                                    },
-                                    {
-                                      Component: () => (
-                                        <Button
-                                          variant="outline"
-                                          style={{
-                                            backgroundColor: getStatusStyles(
-                                              deal?.negotiations_Status ?? ""
-                                            ).backgroundColor,
-                                            color: getStatusStyles(
-                                              deal?.negotiations_Status ?? ""
-                                            ).textColor,
-                                          }}
-                                          className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
-                                        >
-                                          <p>{deal.negotiations_Status}</p>
-                                        </Button>
-                                      ),
-                                    },
-                                    {
-                                      text: deal.negotiations_Deal_Start_Date,
-                                    },
-                                    {
-                                      text: deal.arrival_to_client,
-                                    },
-                                    {
-                                      text: deal.arrival_to_dealer,
-                                    },
-                                    {
-                                      text: deal.negotiations_Trade_Details?.substring(
-                                        0,
-                                        50
-                                      ),
-                                      config: {
-                                        expandable:
-                                          typeof deal.negotiations_Trade_Details
-                                            ?.length === "number" &&
-                                          deal.negotiations_Trade_Details
-                                            ?.length > 50,
-                                        expandedComponent: () => (
-                                          <p>
-                                            {deal.negotiations_Trade_Details}
-                                          </p>
-                                        ),
-                                      },
-                                    },
-                                    {
-                                      text: deal.negotiations_Travel_Limit?.substring(
-                                        0,
-                                        50
-                                      ),
-                                      config: {
-                                        expandable:
-                                          typeof deal.negotiations_Travel_Limit
-                                            ?.length === "number" &&
-                                          deal.negotiations_Travel_Limit
-                                            ?.length > 50,
-                                        expandedComponent: () => (
-                                          <p>
-                                            {deal.negotiations_Travel_Limit}
-                                          </p>
-                                        ),
-                                      },
-                                    },
-                                    {
-                                      text: deal.shipping_info?.substring(
-                                        0,
-                                        50
-                                      ),
-                                      config: {
-                                        expandable:
-                                          typeof deal.shipping_info?.length ===
-                                            "number" &&
-                                          deal.shipping_info?.length > 50,
-                                        expandedComponent: () => (
-                                          <p>{deal.shipping_info}</p>
-                                        ),
-                                      },
-                                    },
-                                    {
-                                      text: deal.negotiations_Color_Options
-                                        .interior_preferred,
-                                    },
-                                    {
-                                      text: deal.negotiations_Color_Options
-                                        .interior_deal_breaker,
-                                    },
-                                    {
-                                      text: deal.negotiations_Color_Options
-                                        .exterior_preferred,
-                                    },
-                                    {
-                                      text: deal.negotiations_Color_Options
-                                        .exterior_deal_breakers,
-                                    },
-                                  ])}
-                                sortConfig={sortConfig}
-                                setSortConfig={setSortConfig}
-                                sortData={sortData}
-                              />
+                                        return diffDays >= 1;
+                                      })
+                                      .map((deal, index) => [
+                                        {
+                                          text: `${index + 1}`,
+                                          link: `/team-profile?id=${deal.id}`,
+                                        },
+                                        {
+                                          text: deal.clientNamefull,
+                                        },
+                                        {
+                                          text: deal.clientPhone,
+                                        },
+                                        {
+                                          text: deal.zip,
+                                        },
+                                        {
+                                          text: deal.brand,
+                                        },
+                                        allDealNegotiator.find(
+                                          (negotiator) =>
+                                            negotiator.id ===
+                                            deal.dealCoordinatorId
+                                        )?.name || "Not Assigned",
+                                        {
+                                          text: deal.model,
+                                        },
+                                        {
+                                          Component: () => (
+                                            <Button
+                                              variant="outline"
+                                              style={{
+                                                backgroundColor:
+                                                  getStatusStyles(
+                                                    deal?.stage ?? ""
+                                                  ).backgroundColor,
+                                                color: getStatusStyles(
+                                                  deal?.stage ?? ""
+                                                ).textColor,
+                                              }}
+                                              className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
+                                            >
+                                              <p>{deal.stage}</p>
+                                            </Button>
+                                          ),
+                                        },
+                                        {
+                                          text: deal.dealStartDate,
+                                        },
+                                        {
+                                          text: deal.arrivalToClient,
+                                        },
+                                        {
+                                          text: deal.arrivalToDealer,
+                                        },
+                                        {
+                                          text: deal.tradeDetails?.comments?.substring(
+                                            0,
+                                            50
+                                          ),
+                                          config: {
+                                            expandable:
+                                              typeof deal.tradeDetails?.comments
+                                                ?.length === "number" &&
+                                              deal.tradeDetails?.comments
+                                                ?.length > 50,
+                                            expandedComponent: () => (
+                                              <p>
+                                                {deal.tradeDetails?.comments}
+                                              </p>
+                                            ),
+                                          },
+                                        },
+                                        {
+                                          text: deal.travelLimit?.substring(
+                                            0,
+                                            50
+                                          ),
+                                          config: {
+                                            expandable:
+                                              typeof deal.travelLimit
+                                                ?.length === "number" &&
+                                              deal.travelLimit?.length > 50,
+                                            expandedComponent: () => (
+                                              <p>{deal.travelLimit}</p>
+                                            ),
+                                          },
+                                        },
+                                        {
+                                          text: deal.shippingInfo?.substring(
+                                            0,
+                                            50
+                                          ),
+                                          config: {
+                                            expandable:
+                                              typeof deal.shippingInfo
+                                                ?.length === "number" &&
+                                              deal.shippingInfo?.length > 50,
+                                            expandedComponent: () => (
+                                              <p>{deal.shippingInfo}</p>
+                                            ),
+                                          },
+                                        },
+                                        {
+                                          text: deal?.desiredInterior,
+                                        },
+                                        {
+                                          text: deal?.excludedInterior,
+                                        },
+                                        {
+                                          text: deal?.desiredExterior,
+                                        },
+                                        {
+                                          text: deal?.excludedExterior,
+                                        },
+                                      ])}
+                                    sortConfig={sortConfig}
+                                    setSortConfig={setSortConfig}
+                                    sortData={sortData}
+                                  />
+                                </TableCell>
+                              </TableRow>
                             )}
                           </React.Fragment>
                         )

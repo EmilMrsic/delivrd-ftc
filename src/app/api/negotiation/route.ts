@@ -1,19 +1,19 @@
 import { db } from "@/firebase/config";
-import { getActiveDealObjects } from "@/lib/helpers/negotiation";
+import {
+  getActiveDealDocuments,
+  getActiveDealObjects,
+} from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { collection, getDocs } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
-export const GET = async (_request: Request) => {
+export const POST = async (request: Request) => {
   const teamQuery = collection(db, "team delivrd");
   const teamSnapshot = await getDocs(teamQuery);
   const teamData: DealNegotiatorType[] = [];
   const allActiveDeals: string[] = [];
   teamSnapshot.docs.map((doc) => {
     const document = doc.data();
-    allActiveDeals.push(
-      ...document.active_deals.filter((deal: string) => deal !== null)
-    );
     teamData.push(document as DealNegotiatorType);
   });
 
@@ -25,8 +25,15 @@ export const GET = async (_request: Request) => {
     team: teamData,
   };
 
-  if (allActiveDeals.length > 0) {
-    output.negotiations = await getActiveDealObjects(allActiveDeals);
+  const { filter } = await request.json();
+
+  const deals = await getActiveDealDocuments({
+    filter,
+  });
+
+  console.log("got here:");
+  if (deals) {
+    output.negotiations = deals;
   }
 
   return NextResponse.json(output);

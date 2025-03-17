@@ -51,72 +51,32 @@ const trimPackageFields = [
 ];
 
 const OldDeals = () => {
-  const router = useRouter();
-  const { negotiatorData, allDealNegotiator } = useTeamDashboard();
-  const [loading, setLoading] = useState<boolean>(false);
+  const {
+    negotiatorData,
+    allDealNegotiator,
+    negotiations: negotiationsFromTeamDashboard,
+  } = useTeamDashboard({
+    all: true,
+    // filter: {
+    //   status: ["Actively Negotiating", "Deal Started", "Paid"],
+    // },
+  });
+  const [loading, setLoading] = useState<boolean>(true);
   const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);
-  const [trimDetails, setTrimDetails] = useState<{
-    id: string;
-    trim: string;
-  } | null>(null);
-  const [selectedDeal, setSelectedDeal] = useState<NegotiationData | null>(
-    null
-  );
-  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [sortConfig, setSortConfig] = useState({
     key: "submittedDate",
     direction: "ascending",
   });
 
-  // const sortWithoutCoordinatorData = (key: string) => {
-  //   setSortConfig((prevConfig) => {
-  //     const newDirection =
-  //       prevConfig.key === key && prevConfig.direction === "ascending"
-  //         ? "descending"
-  //         : "ascending";
-
-  //     const sortedNegotiations = [...negotiations].sort((a: any, b: any) => {
-  //       let aValue = a[key];
-  //       let bValue = b[key];
-
-  //       if (typeof aValue === "string") aValue = aValue.toLowerCase();
-  //       if (typeof bValue === "string") bValue = bValue.toLowerCase();
-
-  //       if (aValue == null) return newDirection === "ascending" ? 1 : -1;
-  //       if (bValue == null) return newDirection === "ascending" ? -1 : 1;
-
-  //       if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-  //         return newDirection === "ascending"
-  //           ? Number(aValue) - Number(bValue)
-  //           : Number(bValue) - Number(aValue);
-  //       }
-
-  //       if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
-  //       if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
-  //       return 0;
-  //     });
-
-  //     setNegotiations(sortedNegotiations);
-
-  //     return { key, direction: newDirection };
-  //   });
-  // };
-
   const sortData = sortDataHelper(setNegotiations, negotiations);
 
   useEffect(() => {
-    setLoading(true);
-    fetchAllOldNegotiations()
-      .then((res) => {
-        setNegotiations(res);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
-  }, []);
+    setNegotiations(negotiationsFromTeamDashboard);
+    setLoading(false);
+  }, [negotiationsFromTeamDashboard]);
+
+  console.log(negotiations);
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
@@ -125,144 +85,142 @@ const OldDeals = () => {
       />
       <TeamDashboardViewSelector />
       <Card className="bg-white shadow-lg">
-        <TailwindPlusTable
-          headers={[
-            {
-              header: "#",
-              config: {
-                size: 50,
+        {!negotiations || loading ? (
+          <Loader />
+        ) : (
+          <TailwindPlusTable
+            headers={[
+              {
+                header: "#",
+                config: {
+                  size: 50,
+                },
               },
-            },
-            {
-              header: "Client",
-              config: {
-                sortable: true,
-                key: "negotiations_Client",
+              {
+                header: "Client",
+                config: {
+                  sortable: true,
+                  key: "clientNamefull",
+                },
               },
-            },
-            {
-              header: "Make",
-              config: {
-                sortable: true,
-                key: "negotiations_Brand",
+              {
+                header: "Make",
+                config: {
+                  sortable: true,
+                  key: "brand",
+                },
               },
-            },
-            {
-              header: "Model",
-              config: {
-                sortable: true,
-                key: "model_of_interest",
+              {
+                header: "Model",
+                config: {
+                  sortable: true,
+                  key: "model",
+                },
               },
-            },
-            {
-              header: "Stage",
-              config: {
-                sortable: true,
-                key: "negotiations_Status",
+              {
+                header: "Stage",
+                config: {
+                  sortable: true,
+                  key: "stage",
+                },
               },
-            },
-            {
-              header: "Payment Date",
-              config: {
-                sortable: true,
-                key: "date_paid",
+              {
+                header: "Payment Date",
+                config: {
+                  sortable: true,
+                  key: "datePaid",
+                },
               },
-            },
-            {
-              header: "Start Date",
-              config: {
-                sortable: true,
-                key: "negotiations_Deal_Start_Date",
+              {
+                header: "Start Date",
+                config: {
+                  sortable: true,
+                  key: "dealStartDate",
+                },
               },
-            },
-            {
-              header: "Deal Negotiator",
-              config: {
-                sortable: true,
-                key: "negotiations_deal_coordinator",
+              {
+                header: "Deal Negotiator",
+                config: {
+                  sortable: true,
+                  key: "dealCoordinatorId",
+                },
               },
-            },
-            {
-              header: "Trim Package",
-              config: {
-                sortable: true,
-                key: "negotiations_Trim_Package_Options",
+              {
+                header: "Trim Package",
+                config: {
+                  sortable: true,
+                  key: "trim",
+                },
               },
-            },
-          ]}
-          rows={negotiations
-            .filter((deal) => {
-              if (!deal.date_paid) return false;
-              const today = new Date();
-              const paidDate = new Date(deal.date_paid);
-              const diffTime = today.getTime() - paidDate.getTime();
-              const diffDays = diffTime / (1000 * 3600 * 24); // Convert ms to days
+            ]}
+            rows={negotiations
+              .filter((deal) => {
+                return true;
+                if (!deal.datePaid) return false;
+                const today = new Date();
+                const paidDate = new Date(deal.datePaid);
+                const diffTime = today.getTime() - paidDate.getTime();
+                const diffDays = diffTime / (1000 * 3600 * 24); // Convert ms to days
 
-              return diffDays >= 14; // ✅ 14 days or more
-            })
-            .map((deal, index) => [
-              {
-                text: index + 1,
-                config: {
-                  link: `/team-profile?id=${deal.id}`,
+                return diffDays >= 14; // ✅ 14 days or more
+              })
+              .map((deal, index) => [
+                {
+                  text: index + 1,
+                  config: {
+                    link: `/team-profile?id=${deal.id}`,
+                  },
                 },
-              },
-              {
-                text: deal.negotiations_Client,
-                config: {
-                  expandable: true,
-                  expandedComponent: ({ expanded, setExpanded }: any) => (
-                    <ClientDetailsPopup
-                      setNegotiations={setNegotiations}
-                      open={expanded}
-                      onClose={() => setExpanded(false)}
-                      deal={deal}
-                      fields={trimPackageFields as any}
-                    />
+                {
+                  text: deal.clientNamefull,
+                  config: {
+                    expandable: true,
+                    expandedComponent: ({ expanded, setExpanded }: any) => (
+                      <ClientDetailsPopup
+                        setNegotiations={setNegotiations}
+                        open={expanded}
+                        onClose={() => setExpanded(false)}
+                        deal={deal}
+                        fields={trimPackageFields as any}
+                      />
+                    ),
+                  },
+                },
+                deal.brand,
+                deal.model,
+                {
+                  Component: () => (
+                    <Button
+                      variant="outline"
+                      style={{
+                        backgroundColor: getStatusStyles(deal?.stage ?? "")
+                          .backgroundColor,
+                        color: getStatusStyles(deal?.stage ?? "").textColor,
+                      }}
+                      className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
+                    >
+                      <p>{deal.stage}</p>
+                    </Button>
                   ),
                 },
-              },
-              deal.negotiations_Brand,
-              deal.model_of_interest,
-              {
-                Component: () => (
-                  <Button
-                    variant="outline"
-                    style={{
-                      backgroundColor: getStatusStyles(
-                        deal?.negotiations_Status ?? ""
-                      ).backgroundColor,
-                      color: getStatusStyles(deal?.negotiations_Status ?? "")
-                        .textColor,
-                    }}
-                    className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
-                  >
-                    <p>{deal.negotiations_Status}</p>
-                  </Button>
-                ),
-              },
-              deal.date_paid,
-              deal.negotiations_Deal_Start_Date,
-              allDealNegotiator.find(
-                (negotiator) =>
-                  negotiator.id === deal.negotiations_deal_coordinator
-              )?.name || "Not Assigned",
-              {
-                text:
-                  deal.negotiations_Trim_Package_Options?.substring(0, 50) ||
-                  "",
-                config: {
-                  expandable: true,
-                  expandedComponent: () => (
-                    <div>{deal.negotiations_Trim_Package_Options}</div>
-                  ),
+                deal.datePaid,
+                deal.dealStartDate,
+                allDealNegotiator.find(
+                  (negotiator) => negotiator.id === deal.dealCoordinatorId
+                )?.name || "Not Assigned",
+                {
+                  text: deal.trim?.substring(0, 50) || "",
+                  config: {
+                    expandable: true,
+                    expandedComponent: () => <div>{deal.trim}</div>,
+                  },
                 },
-              },
-            ])}
-          sortConfig={sortConfig}
-          setSortConfig={setSortConfig}
-          sortData={sortData}
-        />
+              ])}
+            sortConfig={sortConfig}
+            setSortConfig={setSortConfig}
+            sortData={sortData}
+          />
+        )}
       </Card>
     </div>
   );

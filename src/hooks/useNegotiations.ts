@@ -3,14 +3,20 @@ import { getUserData } from "@/lib/user";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
-export const useNegotiations = (config: { all?: boolean } = {}) => {
+export const useNegotiations = (
+  config: { all?: boolean; filter?: { [key: string]: string | string[] } } = {}
+) => {
   const [id, setId] = useState<string>("recAGTrcu7ThaOHjz"); //getUserData().deal_coordinator_id);
 
   const negotiationsQuery = useQuery({
     queryKey: ["negotiations"],
     queryFn: async () => {
       const request = await backendRequest(
-        config.all ? `negotiation` : `negotiation/${id}`
+        config.all ? `negotiation` : `negotiation/${id}`,
+        "POST",
+        {
+          filter: config.filter,
+        }
       );
 
       return request;

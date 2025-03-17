@@ -17,7 +17,14 @@ import {
 import { useNegotiations } from "./useNegotiations";
 import { NegotiationDataType } from "@/lib/models/team";
 
-const useTeamDashboard = (config: { all?: boolean } = {}) => {
+const useTeamDashboard = (
+  config: {
+    all?: boolean;
+    filter?: {
+      [key: string]: string | string[];
+    };
+  } = {}
+) => {
   const { negotiations, refetch, team } = useNegotiations(config);
   const [filteredDeals, setFilteredDeals] = useState<NegotiationDataType[]>([]);
   const [allInternalNotes, setAllInternalNotes] = useState<

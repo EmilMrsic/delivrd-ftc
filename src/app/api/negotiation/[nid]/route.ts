@@ -2,10 +2,12 @@ import { getActiveDealDocuments } from "@/lib/helpers/negotiation";
 import { NegotiationDataType } from "@/lib/models/team";
 import { NextResponse } from "next/server";
 
-export const GET = async (
-  _request: Request,
+export const POST = async (
+  request: Request,
   { params }: { params: { nid: string } }
 ) => {
+  const postData = await request.json();
+  const { filter } = postData;
   const output: {
     negotiations: NegotiationDataType[];
   } = {
@@ -15,7 +17,9 @@ export const GET = async (
 
   const deals = await getActiveDealDocuments({
     dealNegotiatorId: nid,
+    filter: filter,
   });
+
   if (deals.length > 0) {
     output.negotiations = deals;
   }

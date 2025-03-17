@@ -1,7 +1,13 @@
 import { NegotiationData } from "@/types";
 import { negotiationStatusOrder } from "../constants/negotiations";
 import { NegotiationDataModel, NegotiationDataType } from "../models/team";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  QueryConstraint,
+  where,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { chunk } from "lodash";
 
@@ -68,15 +74,44 @@ export const sortDataHelper = (
 
 export const getActiveDealDocuments = async (dealQuery: {
   dealNegotiatorId?: string;
+  filter?: {
+    [key: string]: string | string[];
+  };
 }) => {
   const negotiationsCollectionRef = collection(db, "delivrd_negotiations");
+  const queryConditions: QueryConstraint[] = [
+    where("dealCoordinatorId", "!=", null),
+  ];
+
+  if (dealQuery?.dealNegotiatorId) {
+    queryConditions.push(
+      where("dealCoordinatorId", "==", dealQuery.dealNegotiatorId)
+    );
+  }
+
+  if (dealQuery?.filter) {
+    Object.keys(dealQuery.filter).forEach((key) => {
+      if (dealQuery?.filter?.[key]) {
+        if (Array.isArray(dealQuery.filter[key])) {
+          queryConditions.push(where(key, "in", dealQuery.filter[key]));
+        } else {
+          queryConditions.push(where(key, "==", dealQuery.filter[key]));
+        }
+      }
+    });
+  }
+
   const negotiationsQuery = query(
     negotiationsCollectionRef,
-    where("dealCoordinatorId", "==", dealQuery.dealNegotiatorId)
+    ...queryConditions
   );
+
   const negotiationsSnapshot = await getDocs(negotiationsQuery);
+  console.log("got here 1", negotiationsSnapshot.docs.length);
   return negotiationsSnapshot.docs.map((doc) => {
+    console.log("got here 2");
     const data = doc.data();
+    console.log("data:", data);
     return NegotiationDataModel.parse(data);
   });
 };

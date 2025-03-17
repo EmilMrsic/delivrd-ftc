@@ -59,17 +59,17 @@ import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TeamDashboardViewHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
-type TeamDataType = {
-  activeDeals: string[];
-  deals: string[];
-  email: string;
-  id: string;
-  name: string;
-  profile_pic: string;
-  role: string;
-  video_link: string;
-  negotiations: NegotiationData[];
-};
+// type TeamDataType = {
+//   activeDeals: string[];
+//   deals: string[];
+//   email: string;
+//   id: string;
+//   name: string;
+//   profile_pic: string;
+//   role: string;
+//   video_link: string;
+//   negotiations: NegotiationData[];
+// };
 
 const fields = [
   {
@@ -111,7 +111,7 @@ const fields = [
 
 function NeedToReview() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [teamData, setTeamData] = useState<TeamDataType[]>([]);
+  const [teamData, setTeamData] = useState<DealNegotiatorType[]>([]);
   const router = useRouter();
   const [userData, setUserData] = useState<IUser>();
   const [expandedNote, setExpandedNote] = useState<{
@@ -130,13 +130,13 @@ function NeedToReview() {
   const [openDealerNegotiatorState, setOpenDealerNegotiatorState] = useState<
     Record<string, boolean>
   >({});
-  const [selectedDeal, setSelectedDeal] = useState<NegotiationData | null>(
+  const [selectedDeal, setSelectedDeal] = useState<NegotiationDataType | null>(
     null
   );
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [dealsWithoutCoordinator, setDealsWithoutCoordinator] = useState<
-    NegotiationData[]
+    NegotiationDataType[]
   >([]);
   const [loading, setLoading] = useState(false);
   const {
@@ -148,6 +148,9 @@ function NeedToReview() {
     team,
   } = useTeamDashboard({
     all: true,
+    // filter: {
+    //   status: "Needs To Review",
+    // },
   });
 
   const [sortConfig, setSortConfig] = useState({
@@ -261,18 +264,19 @@ function NeedToReview() {
       } = {};
 
       negotiations.map((deal: NegotiationDataType) => {
-        if (deal.negotiations_deal_coordinator) {
-          if (!teamIdToObject[deal.negotiations_deal_coordinator]) {
-            teamIdToObject[deal.negotiations_deal_coordinator] = [];
+        if (deal.dealCoordinatorId) {
+          if (!teamIdToObject[deal.dealCoordinatorId]) {
+            teamIdToObject[deal.dealCoordinatorId] = [];
           }
 
-          teamIdToObject[deal.negotiations_deal_coordinator].push(deal);
+          teamIdToObject[deal.dealCoordinatorId].push(deal);
         }
       });
 
       for (const index in team) {
         const member = team[index];
         const teamMemberDeals = teamIdToObject[member.id] ?? [];
+        console.log("got here:", member);
         team[index].negotiations = teamMemberDeals;
       }
 
@@ -378,11 +382,9 @@ function NeedToReview() {
     }));
   };
 
-  useEffect(() => {
-    getReviewDealsWithoutCoordinator().then((res) =>
-      setDealsWithoutCoordinator(res as NegotiationData[])
-    );
-  }, []);
+  // useEffect(() => {
+  //   setDealsWithoutCoordinator(negotiations);
+  // }, [negotiations]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -406,7 +408,7 @@ function NeedToReview() {
                 </TableCell>
               </TableRow>
             </TableBody>
-          ) : teamData.length > 0 || dealsWithoutCoordinator.length > 0 ? (
+          ) : teamData.length > 0 || dealsWithoutCoordinator?.length > 0 ? (
             <>
               <TableHeader>
                 <TableRow>
@@ -864,19 +866,19 @@ function NeedToReview() {
                                   },
                                 },
                               ]}
-                              rows={team.negotiations.map((deal, index) => [
+                              rows={team?.negotiations?.map((deal, index) => [
                                 {
                                   text: `${index + 1}`,
                                   link: `/team-profile?id=${deal.id}`,
                                 },
                                 {
-                                  text: deal.negotiations_Client,
+                                  text: deal.clientNamefull,
                                 },
                                 {
-                                  text: deal.negotiations_Brand,
+                                  text: deal.brand,
                                 },
                                 {
-                                  text: deal.negotiations_Model,
+                                  text: deal.model,
                                 },
                                 {
                                   Component: () => (
@@ -900,14 +902,14 @@ function NeedToReview() {
                                           {allDealNegotiator.some(
                                             (negotiator) =>
                                               negotiator.id ===
-                                              deal.negotiations_deal_coordinator
+                                              deal.dealCoordinatorId
                                           ) ? (
                                             <p>
                                               {
                                                 allDealNegotiator.find(
                                                   (negotiator) =>
                                                     negotiator.id ===
-                                                    deal.negotiations_deal_coordinator
+                                                    deal.dealCoordinatorId
                                                 )?.name
                                               }
                                             </p>
@@ -951,44 +953,34 @@ function NeedToReview() {
                                       variant="outline"
                                       style={{
                                         backgroundColor: getStatusStyles(
-                                          deal?.negotiations_Status ?? ""
+                                          deal?.stage ?? ""
                                         ).backgroundColor,
                                         color: getStatusStyles(
-                                          deal?.negotiations_Status ?? ""
+                                          deal?.stage ?? ""
                                         ).textColor, // Set dynamic text color
                                       }}
                                       className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
                                     >
-                                      <p>{deal.negotiations_Status}</p>
+                                      <p>{deal.stage}</p>
                                     </Button>
                                   ),
                                 },
                                 {
-                                  text: deal.negotiations_Phone,
+                                  text: deal.clientPhone,
                                 },
                                 {
-                                  text: deal.negotiations_Email,
+                                  text: deal.clientEmail,
                                 },
                                 {
-                                  text: deal.negotiations_Zip_Code,
+                                  text: deal.zip,
                                 },
                                 {
-                                  text:
-                                    deal.negotiations_Trim_Package_Options?.substring(
-                                      0,
-                                      50
-                                    ) || "",
+                                  text: deal.trim?.substring(0, 50) || "",
                                   config: {
                                     expandable:
-                                      typeof deal.negotiations_Trim_Package_Options ===
-                                        "string" &&
-                                      deal.negotiations_Trim_Package_Options
-                                        ?.length > 50,
-                                    expandedComponent: () => (
-                                      <p>
-                                        {deal.negotiations_Trim_Package_Options}
-                                      </p>
-                                    ),
+                                      typeof deal.trim === "string" &&
+                                      deal.trim?.length > 50,
+                                    expandedComponent: () => <p>{deal.trim}</p>,
                                   },
                                 },
                                 {
@@ -1004,26 +996,22 @@ function NeedToReview() {
                                   },
                                 },
                                 {
-                                  text: deal.negotiations_Drivetrain,
+                                  text: deal.drivetrain,
                                 },
                                 {
-                                  text: deal.negotiations_Color_Options
-                                    .exterior_deal_breakers,
+                                  text: deal.excludedExterior,
                                 },
                                 {
-                                  text: deal.negotiations_Color_Options
-                                    .exterior_preferred,
+                                  text: deal.desiredExterior,
                                 },
                                 {
-                                  text: deal.negotiations_Color_Options
-                                    .interior_deal_breaker,
+                                  text: deal.excludedInterior,
                                 },
                                 {
-                                  text: deal.negotiations_Color_Options
-                                    .interior_preferred,
+                                  text: deal.desiredInterior,
                                 },
                                 {
-                                  text: dateFormat(deal.date_paid),
+                                  text: dateFormat(deal.datePaid),
                                 },
                               ])}
                               sortConfig={sortConfig}
@@ -1390,7 +1378,7 @@ function NeedToReview() {
             </div>
           </div>
         )}
-        {selectedDeal && (
+        {/* {selectedDeal && (
           <TeamClientDetailsPopup
             setTeamData={setTeamData}
             open={isOpen}
@@ -1398,7 +1386,7 @@ function NeedToReview() {
             deal={selectedDeal}
             fields={fields as any}
           />
-        )}
+        )} */}
       </div>
     </>
   );

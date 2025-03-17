@@ -82,10 +82,13 @@ const fields = [
   { label: "Model", field: "model_of_interest", icon: <Car size={14} /> },
 ];
 const ViewByBrand = () => {
-  const router = useRouter();
-  const { negotiatorData } = useTeamDashboard();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { negotiatorData, negotiations: negotiationsFromTeamDashboard } =
+    useTeamDashboard({
+      filter: {
+        //status: ["Actively Negotiating", "Deal Started", "Paid"],
+      },
+    });
+  const [loading, setLoading] = useState<boolean>(true);
   const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);
   const [filteredNegotiations, setFilteredNegotiations] = useState<
     NegotiationDataType[]
@@ -97,97 +100,39 @@ const ViewByBrand = () => {
     condition: "", // 'New' or 'Used'
   });
 
-  const [trimDetails, setTrimDetails] = useState<{
-    id: string;
-    trim: string;
-  } | null>(null);
-
-  const [expandedNote, setExpandedNote] = useState<{
-    id: string;
-    note: string;
-  } | null>(null);
-  const [selectedDeal, setSelectedDeal] = useState<NegotiationData | null>(
-    null
-  );
-
   const [sortConfig, setSortConfig] = useState({
     key: "submittedDate",
     direction: "ascending",
   });
 
-  const sortWithoutCoordinatorData = (key: string) => {
-    setSortConfig((prevConfig) => {
-      const newDirection =
-        prevConfig.key === key && prevConfig.direction === "ascending"
-          ? "descending"
-          : "ascending";
-
-      const sortedNegotiations = [...negotiations].sort((a: any, b: any) => {
-        let aValue = a[key];
-        let bValue = b[key];
-
-        if (typeof aValue === "string") aValue = aValue.toLowerCase();
-        if (typeof bValue === "string") bValue = bValue.toLowerCase();
-
-        if (aValue == null) return newDirection === "ascending" ? 1 : -1;
-        if (bValue == null) return newDirection === "ascending" ? -1 : 1;
-
-        if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-          return newDirection === "ascending"
-            ? Number(aValue) - Number(bValue)
-            : Number(bValue) - Number(aValue);
-        }
-
-        if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
-        if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
-        return 0;
-      });
-
-      setNegotiations(sortedNegotiations);
-
-      return { key, direction: newDirection };
-    });
-  };
+  useEffect(() => {
+    console.log("negotiationsFromTeamDashboard", negotiationsFromTeamDashboard);
+    setNegotiations(negotiationsFromTeamDashboard);
+    setLoading(false);
+  }, [negotiationsFromTeamDashboard]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchAllActiveNegotiations()
-      .then((res) => {
-        console.log({ res });
-        setNegotiations(res);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
-  }, []);
+    if (negotiations) {
+      let filtered = [...negotiations];
 
-  useEffect(() => {
-    if (!isOpen) {
-      setSelectedDeal(null);
+      if (filters.makes) {
+        filtered = filtered.filter((deal) => deal.brand === filters.makes);
+      }
+
+      if (filters.condition && filters.condition !== "All") {
+        filtered = filtered.filter(
+          (deal) => deal.new_or_used === filters.condition
+        );
+      }
+
+      console.log("setting filtered");
+
+      setFilteredNegotiations(filtered);
     }
-  }, [isOpen]);
-
-  useEffect(() => {
-    let filtered = [...negotiations];
-
-    if (filters.makes) {
-      filtered = filtered.filter(
-        (deal) => deal.negotiations_Brand === filters.makes
-      );
-    }
-
-    if (filters.condition && filters.condition !== "All") {
-      filtered = filtered.filter(
-        (deal) => deal.negotiations_New_or_Used === filters.condition
-      );
-    }
-
-    setFilteredNegotiations(filtered);
   }, [filters, negotiations]);
 
   const sortData = sortDataHelper(setNegotiations, negotiations);
+  console.log(negotiations);
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
@@ -228,193 +173,195 @@ const ViewByBrand = () => {
         <TeamDashboardViewSelector />
       </div>
       <Card className="bg-white shadow-lg">
-        <TailwindPlusTable
-          headers={[
-            {
-              header: "#",
-              config: {
-                size: 50,
+        {!filteredNegotiations?.length || loading ? (
+          <Loader />
+        ) : (
+          <TailwindPlusTable
+            headers={[
+              {
+                header: "#",
+                config: {
+                  size: 50,
+                },
               },
-            },
-            {
-              header: "Client",
-              config: {
-                sortable: true,
-                key: "negotiations_Client",
+              {
+                header: "Client",
+                config: {
+                  sortable: true,
+                  key: "clientNamefull",
+                },
               },
-            },
-            {
-              header: "Make",
-              config: {
-                sortable: true,
-                key: "negotiations_Brand",
+              {
+                header: "Make",
+                config: {
+                  sortable: true,
+                  key: "brand",
+                },
               },
-            },
-            {
-              header: "Model",
-              config: {
-                sortable: true,
-                key: "model_of_interest",
+              {
+                header: "Model",
+                config: {
+                  sortable: true,
+                  key: "model",
+                },
               },
-            },
-            {
-              header: "Phone Number",
-              config: {
-                sortable: true,
-                key: "negotiations_Phone",
+              {
+                header: "Phone Number",
+                config: {
+                  sortable: true,
+                  key: "clientPhone",
+                },
               },
-            },
-            {
-              header: "Email",
-              config: {
-                sortable: true,
-                key: "negotiations_Email",
+              {
+                header: "Email",
+                config: {
+                  sortable: true,
+                  key: "clientEmail",
+                },
               },
-            },
-            {
-              header: "Stage",
-              config: {
-                sortable: true,
-                key: "negotiations_Status",
+              {
+                header: "Stage",
+                config: {
+                  sortable: true,
+                  key: "stage",
+                },
               },
-            },
-            {
-              header: "Zip Code",
-              config: {
-                sortable: true,
-                key: "negotiations_Zip_Code",
+              {
+                header: "Zip Code",
+                config: {
+                  sortable: true,
+                  key: "zip",
+                },
               },
-            },
-            {
-              header: "New or Used",
-              config: {
-                sortable: true,
-                key: "negotiations_New_or_Used",
+              {
+                header: "New or Used",
+                config: {
+                  sortable: true,
+                  key: "condition",
+                },
               },
-            },
-            {
-              header: "Trim Package",
-              config: {
-                sortable: true,
-                key: "negotiations_Trim_Package_Options",
+              {
+                header: "Trim Package",
+                config: {
+                  sortable: true,
+                  key: "trim",
+                },
               },
-            },
-            {
-              header: "Consult Notes",
-              config: {
-                sortable: true,
-                key: "consult_notes",
+              {
+                header: "Consult Notes",
+                config: {
+                  sortable: true,
+                  key: "consult_notes",
+                },
               },
-            },
-            {
-              header: "Drivetrain",
-              config: {
-                sortable: true,
-                key: "negotiations_Drivetrain",
+              {
+                header: "Drivetrain",
+                config: {
+                  sortable: true,
+                  key: "drivetrain",
+                },
               },
-            },
-            {
-              header: "Exterior Deal Breaker",
-              config: {
-                sortable: true,
-                key: "negotiations_Color_Options.exterior_deal_breakers",
+              {
+                header: "Exterior Deal Breaker",
+                config: {
+                  sortable: true,
+                  key: "excludedExterior",
+                },
               },
-            },
-            {
-              header: "Exterior Preffered",
-              config: {
-                sortable: true,
-                key: "negotiations_Color_Options.exterior_preferred",
+              {
+                header: "Exterior Preffered",
+                config: {
+                  sortable: true,
+                  key: "desiredExterior",
+                },
               },
-            },
-            {
-              header: "Interior Deal Breaker",
-              config: {
-                sortable: true,
-                key: "negotiations_Color_Options.interior_deal_breaker",
+              {
+                header: "Interior Deal Breaker",
+                config: {
+                  sortable: true,
+                  key: "desiredInterior",
+                },
               },
-            },
-            {
-              header: "Interior Preffered",
-              config: {
-                sortable: true,
-                key: "negotiations_Color_Options.interior_preferred",
+              {
+                header: "Interior Preffered",
+                config: {
+                  sortable: true,
+                  key: "desiredInterior",
+                },
               },
-            },
-            {
-              header: "Date Paid",
-              config: {
-                sortable: true,
-                key: "date_paid",
+              {
+                header: "Date Paid",
+                config: {
+                  sortable: true,
+                  key: "datePaid",
+                },
               },
-            },
-          ]}
-          rows={filteredNegotiations.map((deal, idx) => [
-            {
-              text: `${idx + 1}`,
-              link: `/team-profile?id=${deal.id}`,
-            },
-            {
-              text: deal.negotiations_Client,
-              config: {
-                expandable: true,
-                expandedComponent: ({ expanded, setExpanded }: any) => (
-                  <ClientDetailsPopup
-                    setNegotiations={setNegotiations}
-                    open={expanded}
-                    onClose={() => setExpanded(false)}
-                    deal={deal}
-                    fields={fields as any}
-                  />
+            ]}
+            rows={filteredNegotiations.map((deal, idx) => [
+              {
+                text: `${idx + 1}`,
+                link: `/team-profile?id=${deal.id}`,
+              },
+              {
+                text: deal.clientNamefull,
+                config: {
+                  expandable: true,
+                  expandedComponent: ({ expanded, setExpanded }: any) => (
+                    <ClientDetailsPopup
+                      setNegotiations={setNegotiations}
+                      open={expanded}
+                      onClose={() => setExpanded(false)}
+                      deal={deal}
+                      fields={fields as any}
+                    />
+                  ),
+                },
+              },
+              deal.brand,
+              deal.model,
+              deal.clientPhone,
+              deal.clientEmail,
+              {
+                Component: () => (
+                  <Button
+                    variant="outline"
+                    style={{
+                      backgroundColor: getStatusStyles(deal?.stage ?? "")
+                        .backgroundColor,
+                      color: getStatusStyles(deal?.stage ?? "").textColor, // Set dynamic text color
+                    }}
+                    className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
+                  >
+                    <p>{deal.stage}</p>
+                  </Button>
                 ),
               },
-            },
-            deal.negotiations_Brand,
-            deal.model_of_interest,
-            deal.negotiations_Phone,
-            deal.negotiations_Email,
-            {
-              Component: () => (
-                <Button
-                  variant="outline"
-                  style={{
-                    backgroundColor: getStatusStyles(
-                      deal?.negotiations_Status ?? ""
-                    ).backgroundColor,
-                    color: getStatusStyles(deal?.negotiations_Status ?? "")
-                      .textColor, // Set dynamic text color
-                  }}
-                  className="cursor-pointer p-1 w-fit h-fit text-xs rounded-full"
-                >
-                  <p>{deal.negotiations_Status}</p>
-                </Button>
-              ),
-            },
-            deal.negotiations_Zip_Code,
-            deal.negotiations_New_or_Used,
-            deal.negotiations_Trim_Package_Options,
-            {
-              text: deal?.consult_notes?.substring(0, 50),
-              config: {
-                expandable:
-                  typeof deal?.consult_notes?.length === "number" &&
-                  deal?.consult_notes?.length > 50,
-                expandedComponent: ({ expanded, setExpanded }: any) => (
-                  <div>{deal.consult_notes}</div>
-                ),
+              deal.zip,
+              deal.condition,
+              deal.trim,
+              {
+                text: deal?.consult_notes?.substring(0, 50),
+                config: {
+                  expandable:
+                    typeof deal?.consult_notes?.length === "number" &&
+                    deal?.consult_notes?.length > 50,
+                  expandedComponent: ({ expanded, setExpanded }: any) => (
+                    <div>{deal.consult_notes}</div>
+                  ),
+                },
               },
-            },
-            deal.negotiations_Drivetrain,
-            deal.negotiations_Color_Options.exterior_deal_breakers,
-            deal.negotiations_Color_Options.exterior_preferred,
-            deal.negotiations_Color_Options.interior_deal_breaker,
-            deal.negotiations_Color_Options.interior_preferred,
-            deal.date_paid,
-          ])}
-          sortConfig={sortConfig}
-          setSortConfig={setSortConfig}
-          sortData={sortData}
-        />
+              deal.drivetrain,
+              deal.excludedExterior,
+              deal.desiredExterior,
+              deal.excludedInterior,
+              deal.desiredInterior,
+              deal.datePaid,
+            ])}
+            sortConfig={sortConfig}
+            setSortConfig={setSortConfig}
+            sortData={sortData}
+          />
+        )}
       </Card>
     </div>
   );

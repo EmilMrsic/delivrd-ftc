@@ -180,84 +180,84 @@ const TeamDashboardTable = ({
             header: "Client",
             config: {
               sortable: true,
-              key: "negotiations_Client",
+              key: "clientNamefull",
             },
           },
           {
             header: "Make",
             config: {
               sortable: true,
-              key: "negotiations_Brand",
+              key: "brand",
             },
           },
           {
             header: "Model",
             config: {
               sortable: true,
-              key: "negotiations_Model",
+              key: "model",
             },
           },
           {
             header: "Stage",
             config: {
               sortable: true,
-              key: "negotiations_Status",
+              key: "stage",
             },
           },
           {
             header: "Zip Code",
             config: {
               sortable: true,
-              key: "negotiations_Zip_Code",
+              key: "zip",
             },
           },
           {
             header: "Deal Negotiator",
             config: {
               sortable: true,
-              key: "negotiations_Deal_Negotiator",
+              key: "dealCoordinatorId",
             },
           },
           {
             header: "Onboarding Complete",
             config: {
               sortable: true,
-              key: "negotiations_Onboarding_Complete",
+              key: "onboardingComplete",
             },
           },
           {
             header: "Date Paid",
             config: {
               sortable: true,
-              key: "date_paid",
+              key: "datePaid",
             },
           },
           {
             header: "Arrival To Dealer",
             config: {
               sortable: true,
-              key: "arrival_to_dealer",
+              key: "arrivalToDealer",
             },
           },
           {
             header: "Start Date",
             config: {
               sortable: true,
-              key: "negotiations_Deal_Start_Date",
+              key: "dealStartDate",
             },
           },
           {
             header: "Arrival To Client",
             config: {
               sortable: true,
-              key: "arrival_to_client",
+              key: "arrivalToClient",
             },
           },
           {
             header: "Close Date",
             config: {
               sortable: true,
-              key: "close_date",
+              key: "closeDate",
             },
           },
           "Actions",
@@ -266,7 +266,7 @@ const TeamDashboardTable = ({
           currentDeals && currentDeals.length > 0
             ? currentDeals.map((deal) => [
                 {
-                  text: deal.negotiations_Client,
+                  text: deal.clientNamefull,
                 },
                 deal.brand,
                 deal.model,
@@ -282,7 +282,7 @@ const TeamDashboardTable = ({
                     />
                   ),
                 },
-                deal.negotiations_Zip_Code,
+                deal.zip,
                 {
                   Component: () => (
                     <DealNegotiatorDropdown
@@ -296,9 +296,8 @@ const TeamDashboardTable = ({
                 },
                 {
                   Component: () =>
-                    deal?.negotiations_Onboarding_Complete &&
-                    deal?.negotiations_Onboarding_Complete?.toLowerCase() ===
-                      "yes" ? (
+                    deal?.onboardingComplete &&
+                    deal?.onboardingComplete?.toLowerCase() === "yes" ? (
                       <Check className="text-green-500" />
                     ) : (
                       <X className="text-red-500" />
@@ -316,7 +315,7 @@ const TeamDashboardTable = ({
                 },
                 {
                   Component: () =>
-                    deal.arrivalToDealer && (
+                    deal.arrivalToDealer ? (
                       <DatePickerCell
                         initialDate={deal.arrivalToDealer}
                         onDateChange={(date) =>
@@ -327,6 +326,8 @@ const TeamDashboardTable = ({
                           )
                         }
                       />
+                    ) : (
+                      <>TBD</>
                     ),
                 },
                 {
@@ -340,18 +341,21 @@ const TeamDashboardTable = ({
                   ),
                 },
                 {
-                  Component: () => (
-                    <DatePickerCell
-                      initialDate={deal.arrival_to_client ?? ""}
-                      onDateChange={(date) =>
-                        handleDateChange(
-                          date ?? "",
-                          deal.id,
-                          "arrival_to_client"
-                        )
-                      }
-                    />
-                  ),
+                  Component: () =>
+                    deal.arrivalToClient ? (
+                      <DatePickerCell
+                        initialDate={deal.arrivalToClient ?? ""}
+                        onDateChange={(date) =>
+                          handleDateChange(
+                            date ?? "",
+                            deal.id,
+                            "arrivalToClient"
+                          )
+                        }
+                      />
+                    ) : (
+                      <>TBD</>
+                    ),
                 },
                 {
                   Component: () => (
@@ -388,539 +392,3 @@ const TeamDashboardTable = ({
 };
 
 export default TeamDashboardTable;
-
-// {false && (
-//   <Table>
-//     <TableHeader className="max-w-[1000px] overflow-scroll">
-//       <TableRow>
-//         <TableHead></TableHead>
-//         <TableHead
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "negotiations_Client" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "negotiations_Client", direction });
-//             sortData("negotiations_Client", direction);
-//           }}
-//         >
-//           Client
-//           <button>
-//             {sortConfig.key === "negotiations_Client" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>
-//         <TableHead
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "negotiations_Brand" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "negotiations_Brand", direction });
-//             sortData("negotiations_Brand", direction);
-//           }}
-//         >
-//           Make
-//           <button>
-//             {sortConfig.key === "negotiations_Brand" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>
-//         <TableHead
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "negotiations_Model" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "negotiations_Model", direction });
-//             sortData("negotiations_Model", direction);
-//           }}
-//         >
-//           Model
-//           <button>
-//             {sortConfig.key === "negotiations_Model" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>
-//         <TableHead
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "negotiations_Status" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "negotiations_Status", direction });
-//             sortData("negotiations_Status", direction);
-//           }}
-//         >
-//           Stage
-//           <button>
-//             {sortConfig.key === "negotiations_Status" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>
-//         <TableHead
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "negotiations_Zip_Code" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "negotiations_Zip_Code", direction });
-//             sortData("negotiations_Zip_Code", direction);
-//           }}
-//         >
-//           Zip Code
-//           <button>
-//             {sortConfig.key === "negotiations_Zip_Code" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>
-//         <TableHead>Deal Negotiator</TableHead>
-//         <TableHead>Onboarding Complete</TableHead>
-//         <TableHead
-//           className="cursor-pointer"
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "datePaid" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "datePaid", direction });
-//             sortData("negotiations_Created", direction);
-//           }}
-//         >
-//           Date Paid
-//           <button>
-//             {sortConfig.key === "datePaid" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>{" "}
-//         <TableHead
-//           className="cursor-pointer"
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "arriveToDealer" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "arriveToDealer", direction });
-//             sortData("arrival_to_dealer", direction);
-//           }}
-//         >
-//           Arrival To Dealer
-//           <button>
-//             {sortConfig.key === "arriveToDealer" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>{" "}
-//         <TableHead
-//           className="cursor-pointer"
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "startDate" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "startDate", direction });
-//             sortData("negotiations_Deal_Start_Date", direction);
-//           }}
-//         >
-//           Start Date
-//           <button>
-//             {sortConfig.key === "startDate" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>
-//         <TableHead
-//           className="cursor-pointer"
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "arriveToClient" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "arriveToClient", direction });
-//             sortData("arrival_to_client", direction);
-//           }}
-//         >
-//           Arrival To Client
-//           <button>
-//             {sortConfig.key === "arriveToClient" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>
-//         <TableHead
-//           className="cursor-pointer"
-//           onClick={() => {
-//             const direction =
-//               sortConfig.key === "closeDate" &&
-//               sortConfig.direction === "ascending"
-//                 ? "descending"
-//                 : "ascending";
-//             setSortConfig({ key: "closeDate", direction });
-//             sortData("close_date", direction);
-//           }}
-//         >
-//           Close Date
-//           <button>
-//             {sortConfig.key === "closeDate" ? (
-//               sortConfig.direction === "ascending" ? (
-//                 <span>↑</span>
-//               ) : (
-//                 <span>↓</span>
-//               )
-//             ) : (
-//               <span>↕</span>
-//             )}
-//           </button>
-//         </TableHead>
-//         <TableHead>Actions</TableHead>
-//       </TableRow>
-//     </TableHeader>
-
-//     {loading ? (
-//       <TableBody>
-//         <TableRow>
-//           <TableCell colSpan={14} className="text-center py-4">
-//             <Loader />
-//           </TableCell>
-//         </TableRow>
-//       </TableBody>
-//     ) : currentDeals?.length ? (
-//       <TableBody>
-//         {currentDeals?.map((deal, index) => (
-//           <TableRow
-//             className={`cursor-pointer ${
-//               index % 2 === 0
-//                 ? "bg-white hover:bg-gray-100"
-//                 : "bg-gray-50 hover:bg-gray-200"
-//             }`}
-//             key={deal.id}
-//             onClick={(e) => {
-//               if (!stopPropagation) {
-//                 e.preventDefault();
-//                 e.stopPropagation();
-//                 router.push(`/team-profile?id=${deal.id}`);
-//               } else {
-//                 setStopPropagation(false);
-//               }
-//             }}
-//           >
-//             <TableCell>{index + 1}</TableCell>
-//             <TableCell className="font-medium max-w-[220px]">
-//               <span>{deal.negotiations_Client}</span>
-//               {allInternalNotes[deal?.id]?.length > 0 && (
-//                 <DropdownMenu
-//                   open={openNoteState[deal.id] || false}
-//                   onOpenChange={(isOpen) =>
-//                     toggleInternalNotesDropdown(deal.id, isOpen)
-//                   }
-//                 >
-//                   <DropdownMenuTrigger asChild>
-//                     <StickyNoteIcon
-//                       height={15}
-//                       width={15}
-//                       className="ml-2 text-gray-500 cursor-pointer"
-//                     />
-//                   </DropdownMenuTrigger>
-//                   <DropdownMenuContent
-//                     align="start"
-//                     side="right"
-//                     className="w-56 max-h-56 overflow-auto bg-white border border-gray-300 shadow-lg rounded-md p-2"
-//                   >
-//                     <p className="text-lg font-bold">Notes</p>
-//                     {allInternalNotes[deal.id].map((note, index) => (
-//                       <DropdownMenuItem
-//                         key={index}
-//                         className=" hover:bg-gray-100 rounded p-1"
-//                       >
-//                         <div className="flex flex-col">
-//                           <p className="text-black">{note.note}</p>
-//                           <p className="text-gray-700">{note.time}</p>
-//                         </div>
-//                       </DropdownMenuItem>
-//                     ))}
-//                   </DropdownMenuContent>
-//                 </DropdownMenu>
-//               )}
-//             </TableCell>
-
-//             <TableCell className="max-w-[180px]">
-//               {deal.negotiations_Brand}
-//             </TableCell>
-
-//             <TableCell>{deal.negotiations_Model}</TableCell>
-
-//             <TableCell>
-//               <DropdownMenu
-//                 open={openStates[deal.id] || false}
-//                 onOpenChange={(isOpen) => toggleDropdown(deal.id, isOpen)}
-//               >
-//                 <DropdownMenuTrigger asChild>
-//                   <Button
-//                     variant="outline"
-//                     style={{
-//                       backgroundColor: getStatusStyles(
-//                         deal?.negotiations_Status ?? ""
-//                       ).backgroundColor,
-//                       color: getStatusStyles(
-//                         deal?.negotiations_Status ?? ""
-//                       ).textColor, // Set dynamic text color
-//                     }}
-//                     className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
-//                   >
-//                     <p>{deal.negotiations_Status}</p>
-//                   </Button>
-//                 </DropdownMenuTrigger>
-//                 <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-//                   {dealStageOptions.map((stage: string) => (
-//                     <DropdownMenuItem
-//                       key={stage}
-//                       onClick={(e) => {
-//                         e.preventDefault();
-//                         e.stopPropagation();
-//                         handleStageChange(deal.id, stage); // Update stage
-//                         toggleDropdown(deal.id, false);
-//                       }}
-//                     >
-//                       {stage}
-//                     </DropdownMenuItem>
-//                   ))}
-//                 </DropdownMenuContent>
-//               </DropdownMenu>
-//             </TableCell>
-
-//             <TableCell>{deal.negotiations_Zip_Code}</TableCell>
-
-//             <TableCell>
-//               <DropdownMenu
-//                 open={openNegotiatorState[deal.id] || false}
-//                 onOpenChange={(isOpen) =>
-//                   toggleNegotiatorDropdown(deal.id, isOpen)
-//                 }
-//               >
-//                 <DropdownMenuTrigger asChild>
-//                   <Button
-//                     variant="outline"
-//                     className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-//                   >
-//                     {allDealNegotiator.some(
-//                       (negotiator) =>
-//                         negotiator.id ===
-//                         deal.negotiations_deal_coordinator
-//                     ) ? (
-//                       <p>
-//                         {
-//                           allDealNegotiator.find(
-//                             (negotiator) =>
-//                               negotiator.id ===
-//                               deal.negotiations_deal_coordinator
-//                           )?.name
-//                         }
-//                       </p>
-//                     ) : (
-//                       <p>Not Assigned</p>
-//                     )}
-//                   </Button>
-//                 </DropdownMenuTrigger>
-//                 <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-//                   {allDealNegotiator.map(
-//                     (negotiator: DealNegotiator, index) => (
-//                       <DropdownMenuItem
-//                         key={index}
-//                         onClick={(e) => {
-//                           e.preventDefault();
-//                           e.stopPropagation();
-//                           updateDealNegotiator(deal.id, negotiator.id);
-//                           toggleNegotiatorDropdown(deal.id, false);
-//                         }}
-//                       >
-//                         {negotiator.name}
-//                       </DropdownMenuItem>
-//                     )
-//                   )}
-//                 </DropdownMenuContent>
-//               </DropdownMenu>
-//             </TableCell>
-//             <TableCell className="text-center">
-//               {deal?.negotiations_Onboarding_Complete &&
-//               deal?.negotiations_Onboarding_Complete?.toLowerCase() ===
-//                 "yes" ? (
-//                 <Check className="text-green-500" />
-//               ) : (
-//                 <X className="text-red-500" />
-//               )}
-//             </TableCell>
-//             <TableCell>
-//               <div>{dateFormat(deal.date_paid ?? "")}</div>
-//               <div className="text-xs text-[#0989E5]">
-//                 {getElapsedTime(deal.date_paid ?? "", NOW)}
-//               </div>
-//             </TableCell>
-
-//             <TableCell>
-//               <DatePickerCell
-//                 initialDate={deal.arrival_to_dealer}
-//                 onDateChange={(date) =>
-//                   handleDateChange(
-//                     date ?? "",
-//                     deal.id,
-//                     "arrival_to_dealer"
-//                   )
-//                 }
-//               />
-//             </TableCell>
-//             <TableCell>
-//               <DatePickerCell
-//                 initialDate={deal.negotiations_Deal_Start_Date ?? ""}
-//                 onDateChange={(date) =>
-//                   handleDateChange(
-//                     date ?? "",
-//                     deal.id,
-//                     "negotiations_Deal_Start_Date"
-//                   )
-//                 }
-//               />
-//             </TableCell>
-//             <TableCell>
-//               <DatePickerCell
-//                 initialDate={deal.arrival_to_client ?? ""}
-//                 onDateChange={(date) =>
-//                   handleDateChange(
-//                     date ?? "",
-//                     deal.id,
-//                     "arrival_to_client"
-//                   )
-//                 }
-//               />{" "}
-//             </TableCell>
-//             <TableCell>
-//               <DatePickerCell
-//                 initialDate={deal.close_date ?? ""}
-//                 onDateChange={(date) =>
-//                   handleDateChange(date ?? "", deal.id, "close_date")
-//                 }
-//               />{" "}
-//             </TableCell>
-
-//             <TableCell>
-//               <DropdownMenu>
-//                 <DropdownMenuTrigger asChild>
-//                   <Button variant="ghost" className="h-8 w-8 p-0">
-//                     <span className="sr-only">Open menu</span>
-//                     <MoreHorizontal className="h-4 w-4" />
-//                   </Button>
-//                 </DropdownMenuTrigger>
-//                 <DropdownMenuContent align="end">
-//                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
-//                   <div className="flex flex-col items-start">
-//                     <DealNegotiatorDialog
-//                       setStopPropogation={setStopPropagation}
-//                       deal={deal}
-//                       dealNegotiator={negotiatorData}
-//                       formatDate={dateFormat}
-//                     />
-//                     <ShippingInfoDialog
-//                       setCurrentDeals={setCurrentDeals}
-//                       currentDeals={currentDeals}
-//                       deal={deal}
-//                       setStopPropogation={setStopPropagation}
-//                     />
-//                     <p
-//                       onClick={(e) => {
-//                         e.stopPropagation();
-//                         handleAskForReview(deal.id);
-//                       }}
-//                       className="text-sm pl-4 pr-1 py-1 cursor-pointer"
-//                     >
-//                       Ask For Review
-//                     </p>
-//                     <ManualBidUpload
-//                       setStopPropagation={setStopPropagation}
-//                       id={deal?.id}
-//                     />
-//                   </div>
-//                 </DropdownMenuContent>
-//               </DropdownMenu>
-//             </TableCell>
-//           </TableRow>
-//         ))}
-//       </TableBody>
-//     ) : (
-//       <TableBody>
-//         <TableRow>
-//           <TableCell colSpan={13} className="text-center py-4">
-//             <p>No Data Found</p>
-//           </TableCell>
-//         </TableRow>
-//       </TableBody>
-//     )}
-//   </Table>
-// )}
