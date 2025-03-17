@@ -300,7 +300,9 @@ const ViewByBrand = () => {
             rows={filteredNegotiations.map((deal, idx) => [
               {
                 text: `${idx + 1}`,
-                link: `/team-profile?id=${deal.id}`,
+                config: {
+                  link: `/team-profile?id=${deal.id}`,
+                },
               },
               {
                 text: deal.clientNamefull,

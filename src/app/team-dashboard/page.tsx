@@ -60,7 +60,7 @@ export default function DealList() {
     setCurrentPage,
     setCurrentDeals,
     refetch,
-  } = useTeamDashboard();
+  } = useTeamDashboard({});
 
   const { notification } = useAppSelector((state) => state.notification);
   const { notificationCount } = useAppSelector((state) => state.notification);

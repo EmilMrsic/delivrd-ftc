@@ -409,7 +409,7 @@ function NeedToReview() {
                 </TableCell>
               </TableRow>
             </TableBody>
-          ) : teamData.length > 0 || dealsWithoutCoordinator?.length > 0 ? (
+          ) : teamData?.length > 0 || dealsWithoutCoordinator?.length > 0 ? (
             <>
               <TableHeader>
                 <TableRow>
@@ -863,7 +863,9 @@ function NeedToReview() {
                                 (deal, index) => [
                                   {
                                     text: `${index + 1}`,
-                                    link: `/team-profile?id=${deal.id}`,
+                                    config: {
+                                      link: `/team-profile?id=${deal.id}`,
+                                    },
                                   },
                                   {
                                     text: deal.clientNamefull,

@@ -54,7 +54,7 @@ const ReminderStatus = () => {
       status: "Proposal Sent",
     },
   });
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);
 
   const [sortConfig, setSortConfig] = useState({
@@ -76,53 +76,61 @@ const ReminderStatus = () => {
       />
       <TeamDashboardViewSelector />
       <Card className="bg-white shadow-lg">
-        <TailwindPlusTable
-          headers={[
-            { header: "#", config: { size: 50 } },
-            {
-              header: "Client",
-              config: { sortable: true, key: "negotiations_Client" },
-            },
-            {
-              header: "Stage",
-              config: { sortable: true, key: "negotiations_Status" },
-            },
-            {
-              header: "Invoice Status",
-              config: { sortable: true, key: "negotiations_Invoice_Status" },
-            },
-          ]}
-          rows={negotiations.map((deal, idx) => [
-            {
-              text: `${idx + 1}`,
-              link: `/team-profile?id=${deal.id}`,
-            },
-            {
-              text: deal.clientNamefull,
-              config: {
-                expandable: true,
-                expandedComponent: ({ expanded, setExpanded }: any) => (
-                  <ClientDetailsPopup
-                    setNegotiations={setNegotiations}
-                    open={expanded}
-                    onClose={() => setExpanded(false)}
-                    deal={deal}
-                    fields={trimPackageFields as any}
-                  />
-                ),
+        {!negotiations && !loading ? (
+          <div className="flex justify-center items-center h-full">
+            <Loader />
+          </div>
+        ) : (
+          <TailwindPlusTable
+            headers={[
+              { header: "#", config: { size: 50 } },
+              {
+                header: "Client",
+                config: { sortable: true, key: "negotiations_Client" },
               },
-            },
-            {
-              text: deal.stage,
-            },
-            {
-              text: deal.invoiceStatus,
-            },
-          ])}
-          sortConfig={sortConfig}
-          setSortConfig={setSortConfig}
-          sortData={sortData}
-        />
+              {
+                header: "Stage",
+                config: { sortable: true, key: "negotiations_Status" },
+              },
+              {
+                header: "Invoice Status",
+                config: { sortable: true, key: "negotiations_Invoice_Status" },
+              },
+            ]}
+            rows={negotiations.map((deal, idx) => [
+              {
+                text: `${idx + 1}`,
+                config: {
+                  link: `/team-profile?id=${deal.id}`,
+                },
+              },
+              {
+                text: deal.clientNamefull,
+                config: {
+                  expandable: true,
+                  expandedComponent: ({ expanded, setExpanded }: any) => (
+                    <ClientDetailsPopup
+                      setNegotiations={setNegotiations}
+                      open={expanded}
+                      onClose={() => setExpanded(false)}
+                      deal={deal}
+                      fields={trimPackageFields as any}
+                    />
+                  ),
+                },
+              },
+              {
+                text: deal.stage,
+              },
+              {
+                text: deal.invoiceStatus,
+              },
+            ])}
+            sortConfig={sortConfig}
+            setSortConfig={setSortConfig}
+            sortData={sortData}
+          />
+        )}
       </Card>
     </div>
   );

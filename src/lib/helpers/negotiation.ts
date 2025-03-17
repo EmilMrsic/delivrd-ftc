@@ -109,9 +109,7 @@ export const getActiveDealDocuments = async (dealQuery: {
   const negotiationsSnapshot = await getDocs(negotiationsQuery);
   console.log("got here 1", negotiationsSnapshot.docs.length);
   return negotiationsSnapshot.docs.map((doc) => {
-    console.log("got here 2");
     const data = doc.data();
-    console.log("data:", data);
     return NegotiationDataModel.parse(data);
   });
 };
