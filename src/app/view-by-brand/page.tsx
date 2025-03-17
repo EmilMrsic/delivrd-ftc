@@ -74,7 +74,7 @@ const fields = [
   { label: "Brand", field: "negotiations_Brand" },
   {
     label: "Client Consult Notes",
-    field: "consult_notes",
+    field: "consultNotes",
     icon: <StickyNote size={14} />,
     type: "textarea",
   },
@@ -251,7 +251,7 @@ const ViewByBrand = () => {
                 header: "Consult Notes",
                 config: {
                   sortable: true,
-                  key: "consult_notes",
+                  key: "consultNotes",
                 },
               },
               {
@@ -340,13 +340,13 @@ const ViewByBrand = () => {
               deal.condition,
               deal.trim,
               {
-                text: deal?.consult_notes?.substring(0, 50),
+                text: deal?.consultNotes?.substring(0, 50),
                 config: {
                   expandable:
-                    typeof deal?.consult_notes?.length === "number" &&
-                    deal?.consult_notes?.length > 50,
+                    typeof deal?.consultNotes?.length === "number" &&
+                    deal?.consultNotes?.length > 50,
                   expandedComponent: ({ expanded, setExpanded }: any) => (
-                    <div>{deal.consult_notes}</div>
+                    <div>{deal.consultNotes}</div>
                   ),
                 },
               },

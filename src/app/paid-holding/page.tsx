@@ -58,7 +58,7 @@ const fields = [
   { label: "Brand", field: "negotiations_Brand" },
   {
     label: "Client Consult Notes",
-    field: "consult_notes",
+    field: "consultNotes",
     icon: <StickyNote size={14} />,
     type: "textarea",
   },
@@ -173,7 +173,7 @@ const PaidHolding = () => {
                 header: "Consult Notes",
                 config: {
                   sortable: true,
-                  key: "consult_notes",
+                  key: "consultNotes",
                 },
               },
               {
@@ -235,18 +235,18 @@ const PaidHolding = () => {
                 (negotiator) => negotiator.id === deal.dealCoordinatorId
               )?.name || "Not Assigned",
               {
-                text: deal?.consult_notes?.substring(0, 50) || "",
+                text: deal?.consultNotes?.substring(0, 50) || "",
                 config: {
                   expandable:
-                    typeof deal?.consult_notes?.length === "number" &&
-                    deal?.consult_notes?.length > 50,
+                    typeof deal?.consultNotes?.length === "number" &&
+                    deal?.consultNotes?.length > 50,
                   expandedComponent: () => (
                     <>
                       <h2 className="text-lg font-semibold mb-2">
                         Consult Note
                       </h2>
                       <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {deal.consult_notes}
+                        {deal.consultNotes}
                       </p>
                     </>
                   ),

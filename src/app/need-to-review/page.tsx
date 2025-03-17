@@ -95,7 +95,7 @@ const fields = [
   { label: "Brand", field: "negotiations_Brand" },
   {
     label: "Client Consult Notes",
-    field: "consult_notes",
+    field: "consultNotes",
     icon: <StickyNote size={14} />,
     type: "textarea",
   },
@@ -645,17 +645,17 @@ function NeedToReview() {
                                       </button>{" "}
                                     </TableCell>
                                     <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
-                                      {deal?.consult_notes?.length > 50
-                                        ? `${deal?.consult_notes?.substring(
+                                      {deal?.consultNotes?.length > 50
+                                        ? `${deal?.consultNotes?.substring(
                                             0,
                                             50
                                           )}...`
-                                        : deal.consult_notes}
+                                        : deal.consultNotes}
                                       <button
                                         onClick={() =>
                                           setExpandedNote({
                                             id: deal.id,
-                                            note: deal.consult_notes,
+                                            note: deal.consultNotes,
                                           })
                                         }
                                         className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
@@ -820,7 +820,7 @@ function NeedToReview() {
                                   header: "Consult Notes",
                                   config: {
                                     sortable: true,
-                                    key: "consult_notes",
+                                    key: "consultNotes",
                                   },
                                 },
                                 {
@@ -985,13 +985,13 @@ function NeedToReview() {
                                 },
                                 {
                                   text:
-                                    deal?.consult_notes?.substring(0, 50) || "",
+                                    deal?.consultNotes?.substring(0, 50) || "",
                                   config: {
                                     expandable:
-                                      typeof deal.consult_notes === "string" &&
-                                      deal.consult_notes.length > 50,
+                                      typeof deal.consultNotes === "string" &&
+                                      deal.consultNotes.length > 50,
                                     expandedComponent: () => (
-                                      <p>{deal.consult_notes}</p>
+                                      <p>{deal.consultNotes}</p>
                                     ),
                                   },
                                 },

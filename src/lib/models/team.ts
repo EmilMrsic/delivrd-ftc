@@ -54,6 +54,7 @@ export const NegotiationDataModel = z.object({
   onboardingComplete: z.string(),
   vehicleOfinterest: z.string(),
   trim: z.string(),
+  consultNotes: z.string(),
 });
 
 export const DealNegotiatorModel = z.object({
