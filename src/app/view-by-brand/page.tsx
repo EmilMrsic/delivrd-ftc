@@ -121,7 +121,7 @@ const ViewByBrand = () => {
 
       if (filters.condition && filters.condition !== "All") {
         filtered = filtered.filter(
-          (deal) => deal.new_or_used === filters.condition
+          (deal) => deal.condition === filters.condition
         );
       }
 

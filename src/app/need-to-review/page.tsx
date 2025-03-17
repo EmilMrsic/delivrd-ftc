@@ -161,7 +161,8 @@ function NeedToReview() {
   const sortData = (key: string, direction: string) => {
     setSortConfig((prevConfig) => {
       const sortedTeams = [...teamData].map((team) => {
-        const sortedNegotiations = [...team.negotiations].sort(
+        const sortableNegotiations = team?.negotiations ?? [];
+        const sortedNegotiations = sortableNegotiations.sort(
           (a: any, b: any) => {
             let aValue = a[key];
             let bValue = b[key];
@@ -499,7 +500,7 @@ function NeedToReview() {
                               </TableHeader>
 
                               <TableBody>
-                                {dealsWithoutCoordinator.map((deal, index) => (
+                                {/* {dealsWithoutCoordinator.map((deal, index) => (
                                   <TableRow
                                     key={deal.id}
                                     className={`cursor-pointer bg-white hover:bg-gray-100 `}
@@ -520,13 +521,13 @@ function NeedToReview() {
                                       />
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
-                                      <span>{deal.negotiations_Client}</span>
+                                      <span>{deal.clientNamefull}</span>
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
-                                      {deal.negotiations_Brand}
+                                      {deal.brand}
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
-                                      {deal.negotiations_Model}
+                                      {deal.model}
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
                                       <DropdownMenu
@@ -548,14 +549,14 @@ function NeedToReview() {
                                             {allDealNegotiator.some(
                                               (negotiator) =>
                                                 negotiator.id ===
-                                                deal.negotiations_deal_coordinator
+                                                deal.dealCoordinatorId
                                             ) ? (
                                               <p>
                                                 {
                                                   allDealNegotiator.find(
                                                     (negotiator) =>
                                                       negotiator.id ===
-                                                      deal.negotiations_deal_coordinator
+                                                      deal.dealCoordinatorId
                                                   )?.name
                                                 }
                                               </p>
@@ -597,42 +598,35 @@ function NeedToReview() {
                                         variant="outline"
                                         style={{
                                           backgroundColor: getStatusStyles(
-                                            deal?.negotiations_Status ?? ""
+                                            deal?.stage ?? ""
                                           ).backgroundColor,
                                           color: getStatusStyles(
-                                            deal?.negotiations_Status ?? ""
+                                            deal?.stage ?? ""
                                           ).textColor, // Set dynamic text color
                                         }}
                                         className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
                                       >
-                                        <p>{deal.negotiations_Status}</p>
+                                        <p>{deal.stage}</p>
                                       </Button>
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
-                                      {deal.negotiations_Phone}
+                                      {deal.clientPhone}
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
-                                      {deal.negotiations_Email}
+                                      {deal.clientEmail}
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
-                                      {deal.negotiations_Zip_Code}
+                                      {deal.zip}
                                     </TableCell>
                                     <TableCell className="px-4 relative max-w-[100px] truncate py-2 border-r">
-                                      {deal?.negotiations_Trim_Package_Options &&
-                                      deal?.negotiations_Trim_Package_Options
-                                        ?.length > 50
-                                        ? `${deal?.negotiations_Trim_Package_Options?.substring(
-                                            0,
-                                            50
-                                          )}...`
-                                        : deal.negotiations_Trim_Package_Options}
+                                      {deal?.trim && deal?.trim?.length > 50
+                                        ? `${deal?.trim?.substring(0, 50)}...`
+                                        : deal.trim}
                                       <button
                                         onClick={() =>
                                           setTrimDetails({
                                             id: deal.id,
-                                            trim:
-                                              deal.negotiations_Trim_Package_Options ??
-                                              "",
+                                            trim: deal.trim ?? "",
                                           })
                                         }
                                         className="absolute top-[5px] right-[10px] transform  text-gray-500 hover:text-gray-700"
@@ -668,12 +662,11 @@ function NeedToReview() {
                                       </button>{" "}
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
-                                      {deal.negotiations_Drivetrain}
+                                      {deal.drivetrain}
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
                                       {
-                                        deal.negotiations_Color_Options
-                                          .exterior_deal_breakers
+                                        deal.colorOptions.exterior_deal_breakers
                                       }
                                     </TableCell>
                                     <TableCell className="px-4 py-2 border-r">
@@ -699,7 +692,7 @@ function NeedToReview() {
                                       <div>{dateFormat(deal.date_paid)}</div>
                                     </TableCell>
                                   </TableRow>
-                                ))}
+                                ))} */}
                               </TableBody>
                             </Table>
                           </div>
@@ -740,7 +733,7 @@ function NeedToReview() {
                           <div className="flex flex-col">
                             <p>{team.name}</p>
                             <p className="text-xs">
-                              No of Deals: {team.negotiations.length}
+                              No of Deals: {team?.negotiations?.length ?? 0}
                             </p>
                           </div>
                         </TableCell>
@@ -757,63 +750,63 @@ function NeedToReview() {
                                   header: "Client",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Client",
+                                    key: "clientNamefull",
                                   },
                                 },
                                 {
                                   header: "Make",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Brand",
+                                    key: "brand",
                                   },
                                 },
                                 {
                                   header: "Model",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Model",
+                                    key: "model",
                                   },
                                 },
                                 {
                                   header: "Deal Negotiator",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_deal_coordinator",
+                                    key: "dealCoordinatorId",
                                   },
                                 },
                                 {
                                   header: "Stage",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Status",
+                                    key: "stage",
                                   },
                                 },
                                 {
                                   header: "Phone Number",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Phone",
+                                    key: "clientPhone",
                                   },
                                 },
                                 {
                                   header: "Email",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Email",
+                                    key: "clientEmail",
                                   },
                                 },
                                 {
                                   header: "Zip Code",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Zip_Code",
+                                    key: "zip",
                                   },
                                 },
                                 {
                                   header: "Trim Package",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Trim_Package_Options",
+                                    key: "trim",
                                   },
                                 },
                                 {
@@ -827,193 +820,198 @@ function NeedToReview() {
                                   header: "Drivetrain",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Drivetrain",
+                                    key: "drivetrain",
                                   },
                                 },
                                 {
                                   header: "Exterior Deal Breaker",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Color_Options.exterior_deal_breakers",
+                                    key: "excludedExterior",
                                   },
                                 },
                                 {
                                   header: "Exterior Preffered",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Color_Options.exterior_preferred",
+                                    key: "desiredExterior",
                                   },
                                 },
                                 {
                                   header: "Interior Deal Breaker",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Color_Options.interior_deal_breaker",
+                                    key: "excludedInterior",
                                   },
                                 },
                                 {
                                   header: "Interior Preffered",
                                   config: {
                                     sortable: true,
-                                    key: "negotiations_Color_Options.interior_preferred",
+                                    key: "desiredInterior",
                                   },
                                 },
                                 {
                                   header: "Date Paid",
                                   config: {
                                     sortable: true,
-                                    key: "date_paid",
+                                    key: "datePaid",
                                   },
                                 },
                               ]}
-                              rows={team?.negotiations?.map((deal, index) => [
-                                {
-                                  text: `${index + 1}`,
-                                  link: `/team-profile?id=${deal.id}`,
-                                },
-                                {
-                                  text: deal.clientNamefull,
-                                },
-                                {
-                                  text: deal.brand,
-                                },
-                                {
-                                  text: deal.model,
-                                },
-                                {
-                                  Component: () => (
-                                    <DropdownMenu
-                                      open={
-                                        openDealerNegotiatorState[deal.id] ||
-                                        false
-                                      }
-                                      onOpenChange={(isOpen) =>
-                                        toggleDealNegotiatorDropdown(
-                                          deal.id,
-                                          isOpen
-                                        )
-                                      }
-                                    >
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-                                        >
-                                          {allDealNegotiator.some(
-                                            (negotiator) =>
-                                              negotiator.id ===
-                                              deal.dealCoordinatorId
-                                          ) ? (
-                                            <p>
-                                              {
-                                                allDealNegotiator.find(
-                                                  (negotiator) =>
-                                                    negotiator.id ===
-                                                    deal.dealCoordinatorId
-                                                )?.name
-                                              }
-                                            </p>
-                                          ) : (
-                                            <p>Not Assigned</p>
-                                          )}
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                                        {allDealNegotiator.map(
-                                          (
-                                            negotiator: DealNegotiator,
-                                            index
-                                          ) => (
-                                            <DropdownMenuItem
-                                              key={index}
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                updateDealNegotiator(
-                                                  deal.id,
-                                                  negotiator.id
-                                                );
-                                                toggleNegotiatorDropdown(
-                                                  deal.id,
-                                                  false
-                                                );
-                                              }}
-                                            >
-                                              {negotiator.name}
-                                            </DropdownMenuItem>
-                                          )
-                                        )}
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  ),
-                                },
-                                {
-                                  Component: () => (
-                                    <Button
-                                      variant="outline"
-                                      style={{
-                                        backgroundColor: getStatusStyles(
-                                          deal?.stage ?? ""
-                                        ).backgroundColor,
-                                        color: getStatusStyles(
-                                          deal?.stage ?? ""
-                                        ).textColor, // Set dynamic text color
-                                      }}
-                                      className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
-                                    >
-                                      <p>{deal.stage}</p>
-                                    </Button>
-                                  ),
-                                },
-                                {
-                                  text: deal.clientPhone,
-                                },
-                                {
-                                  text: deal.clientEmail,
-                                },
-                                {
-                                  text: deal.zip,
-                                },
-                                {
-                                  text: deal.trim?.substring(0, 50) || "",
-                                  config: {
-                                    expandable:
-                                      typeof deal.trim === "string" &&
-                                      deal.trim?.length > 50,
-                                    expandedComponent: () => <p>{deal.trim}</p>,
+                              rows={(team?.negotiations ?? [])?.map(
+                                (deal, index) => [
+                                  {
+                                    text: `${index + 1}`,
+                                    link: `/team-profile?id=${deal.id}`,
                                   },
-                                },
-                                {
-                                  text:
-                                    deal?.consultNotes?.substring(0, 50) || "",
-                                  config: {
-                                    expandable:
-                                      typeof deal.consultNotes === "string" &&
-                                      deal.consultNotes.length > 50,
-                                    expandedComponent: () => (
-                                      <p>{deal.consultNotes}</p>
+                                  {
+                                    text: deal.clientNamefull,
+                                  },
+                                  {
+                                    text: deal.brand,
+                                  },
+                                  {
+                                    text: deal.model,
+                                  },
+                                  {
+                                    Component: () => (
+                                      <DropdownMenu
+                                        open={
+                                          openDealerNegotiatorState[deal.id] ||
+                                          false
+                                        }
+                                        onOpenChange={(isOpen) =>
+                                          toggleDealNegotiatorDropdown(
+                                            deal.id,
+                                            isOpen
+                                          )
+                                        }
+                                      >
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            variant="outline"
+                                            className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
+                                          >
+                                            {allDealNegotiator.some(
+                                              (negotiator) =>
+                                                negotiator.id ===
+                                                deal.dealCoordinatorId
+                                            ) ? (
+                                              <p>
+                                                {
+                                                  allDealNegotiator.find(
+                                                    (negotiator) =>
+                                                      negotiator.id ===
+                                                      deal.dealCoordinatorId
+                                                  )?.name
+                                                }
+                                              </p>
+                                            ) : (
+                                              <p>Not Assigned</p>
+                                            )}
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                                          {allDealNegotiator.map(
+                                            (
+                                              negotiator: DealNegotiator,
+                                              index
+                                            ) => (
+                                              <DropdownMenuItem
+                                                key={index}
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  updateDealNegotiator(
+                                                    deal.id,
+                                                    negotiator.id
+                                                  );
+                                                  toggleNegotiatorDropdown(
+                                                    deal.id,
+                                                    false
+                                                  );
+                                                }}
+                                              >
+                                                {negotiator.name}
+                                              </DropdownMenuItem>
+                                            )
+                                          )}
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
                                     ),
                                   },
-                                },
-                                {
-                                  text: deal.drivetrain,
-                                },
-                                {
-                                  text: deal.excludedExterior,
-                                },
-                                {
-                                  text: deal.desiredExterior,
-                                },
-                                {
-                                  text: deal.excludedInterior,
-                                },
-                                {
-                                  text: deal.desiredInterior,
-                                },
-                                {
-                                  text: dateFormat(deal.datePaid),
-                                },
-                              ])}
+                                  {
+                                    Component: () => (
+                                      <Button
+                                        variant="outline"
+                                        style={{
+                                          backgroundColor: getStatusStyles(
+                                            deal?.stage ?? ""
+                                          ).backgroundColor,
+                                          color: getStatusStyles(
+                                            deal?.stage ?? ""
+                                          ).textColor, // Set dynamic text color
+                                        }}
+                                        className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
+                                      >
+                                        <p>{deal.stage}</p>
+                                      </Button>
+                                    ),
+                                  },
+                                  {
+                                    text: deal.clientPhone,
+                                  },
+                                  {
+                                    text: deal.clientEmail,
+                                  },
+                                  {
+                                    text: deal.zip,
+                                  },
+                                  {
+                                    text: deal.trim?.substring(0, 50) || "",
+                                    config: {
+                                      expandable:
+                                        typeof deal.trim === "string" &&
+                                        deal.trim?.length > 50,
+                                      expandedComponent: () => (
+                                        <p>{deal.trim}</p>
+                                      ),
+                                    },
+                                  },
+                                  {
+                                    text:
+                                      deal?.consultNotes?.substring(0, 50) ||
+                                      "",
+                                    config: {
+                                      expandable:
+                                        typeof deal.consultNotes === "string" &&
+                                        deal.consultNotes.length > 50,
+                                      expandedComponent: () => (
+                                        <p>{deal.consultNotes}</p>
+                                      ),
+                                    },
+                                  },
+                                  {
+                                    text: deal.drivetrain,
+                                  },
+                                  {
+                                    text: deal.excludedExterior,
+                                  },
+                                  {
+                                    text: deal.desiredExterior,
+                                  },
+                                  {
+                                    text: deal.excludedInterior,
+                                  },
+                                  {
+                                    text: deal.desiredInterior,
+                                  },
+                                  {
+                                    text: dateFormat(deal.datePaid),
+                                  },
+                                ]
+                              )}
                               sortConfig={sortConfig}
                               setSortConfig={setSortConfig}
                               sortData={sortData}

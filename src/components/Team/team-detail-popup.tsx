@@ -16,7 +16,7 @@ import { NegotiationDataType } from "@/lib/models/team";
 
 type FieldConfig = {
   label: string;
-  field: keyof NegotiationData;
+  field: keyof NegotiationDataType;
   icon?: JSX.Element;
   type?: "input" | "textarea";
 };
@@ -39,27 +39,27 @@ export default function ClientDetailsPopup({
   const [formData, setFormData] = useState(deal);
   const { allDealNegotiator } = useTeamDashboard();
 
-  const handleInputChange = (field: keyof NegotiationData, value: string) => {
+  const handleInputChange = (
+    field: keyof NegotiationDataType,
+    value: string
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleBlur = async (field: keyof NegotiationData) => {
+  const handleBlur = async (field: keyof NegotiationDataType) => {
     const dealRef = doc(db, "negotiations", deal.id);
     try {
       await updateDoc(dealRef, { [field]: formData[field] });
-      if (
-        field === "negotiations_First_Name" ||
-        field === "negotiations_Last_Name"
-      ) {
+      if (field === "clientFirstName" || field === "clientLastName") {
         setNegotiations((prevDeals) =>
           prevDeals.map((d) =>
             d.id === deal.id
               ? {
                   ...d,
                   negotiations_Client:
-                    formData["negotiations_First_Name"] +
+                    formData["clientFirstName"] +
                     " " +
-                    formData["negotiations_Last_Name"],
+                    formData["clientLastName"],
                 }
               : d
           )
@@ -69,7 +69,7 @@ export default function ClientDetailsPopup({
             d.id === deal.id
               ? {
                   ...d,
-                  negotiations_First_Name: formData["negotiations_First_Name"],
+                  clientFirstName: formData["clientFirstName"],
                 }
               : d
           )
@@ -79,7 +79,7 @@ export default function ClientDetailsPopup({
             d.id === deal.id
               ? {
                   ...d,
-                  negotiations_Last_Name: formData["negotiations_Last_Name"],
+                  clientLastName: formData["clientLastName"],
                 }
               : d
           )
@@ -102,7 +102,7 @@ export default function ClientDetailsPopup({
         <DialogHeader className="flex justify-between items-start">
           <p>Client</p>
           <DialogTitle className="text-2xl font-semibold">
-            {formData.negotiations_Client}
+            {formData.clientNamefull}
           </DialogTitle>
         </DialogHeader>
 
@@ -112,8 +112,7 @@ export default function ClientDetailsPopup({
               <label className="w-40 text-sm font-medium flex items-center gap-1">
                 {icon} {label}
               </label>
-              {field === "negotiations_deal_coordinator" ||
-              field === "negotiations_Status" ? (
+              {field === "dealCoordinatorId" || field === "stage" ? (
                 <select
                   className="w-full border rounded p-2"
                   value={formData[field] || ""}
@@ -124,13 +123,10 @@ export default function ClientDetailsPopup({
                   onBlur={() => handleBlur(field)}
                 >
                   <option value="">
-                    Select{" "}
-                    {field === "negotiations_Status"
-                      ? "Stage"
-                      : "Deal Coordinator"}
+                    Select {field === "stage" ? "Stage" : "Deal Coordinator"}
                   </option>
 
-                  {field === "negotiations_deal_coordinator"
+                  {field === "dealCoordinatorId"
                     ? allDealNegotiator.map((negotiator) => (
                         <option key={negotiator.id} value={negotiator.id}>
                           {negotiator.name}

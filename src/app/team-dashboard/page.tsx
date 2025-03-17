@@ -99,10 +99,10 @@ export default function DealList() {
 
     const filtered = originalDeals?.filter((deal) => {
       return (
-        deal.negotiations_Client?.toLowerCase().includes(term) ||
-        deal.negotiations_Brand?.toLowerCase().includes(term) ||
-        deal.negotiations_Model?.toLowerCase().includes(term) ||
-        deal.negotiations_Status?.toLowerCase().includes(term)
+        deal.clientNamefull?.toLowerCase().includes(term) ||
+        deal.brand?.toLowerCase().includes(term) ||
+        deal.model?.toLowerCase().includes(term) ||
+        deal.stage?.toLowerCase().includes(term)
       );
     });
 
@@ -183,15 +183,13 @@ export default function DealList() {
                 "Follow-up Issue",
               ];
               const deals = originalDeals.filter((deal) =>
-                allowedStatuses.includes(deal.negotiations_Status ?? "")
+                allowedStatuses.includes(deal.stage ?? "")
               );
               setFilteredDeals(deals);
               setLoading(false);
             } else {
               const deals = originalDeals.filter(
-                (deal) =>
-                  deal.negotiations_Status &&
-                  deal.negotiations_Status.trim() === value.trim()
+                (deal) => deal.stage && deal.stage.trim() === value.trim()
               );
               setFilteredDeals(deals);
               setLoading(false);
@@ -227,24 +225,21 @@ export default function DealList() {
     const filtered = originalDeals?.filter((deal) => {
       const matchesStage =
         currentFilters.stages.length === 0
-          ? allowedStatuses.includes(deal.negotiations_Status ?? "")
+          ? allowedStatuses.includes(deal.stage ?? "")
           : currentFilters.stages.includes("Not Closed")
-          ? otherStages.includes(deal.negotiations_Status?.trim() ?? "")
-          : currentFilters.stages.includes(
-              deal.negotiations_Status?.trim() ?? ""
-            );
+          ? otherStages.includes(deal.stage?.trim() ?? "")
+          : currentFilters.stages.includes(deal.stage?.trim() ?? "");
       const matchesMake =
         currentFilters.makes.length === 0 ||
-        currentFilters.makes.includes(deal.negotiations_Brand ?? "");
+        currentFilters.makes.includes(deal.brand ?? "");
 
       const matchesCoordinators =
         currentFilters.dealCoordinators === "" ||
-        currentFilters.dealCoordinators ===
-          (deal.negotiations_deal_coordinator ?? "");
+        currentFilters.dealCoordinators === (deal.dealCoordinatorId ?? "");
       const onboardingStatus =
-        deal.hasOwnProperty("negotiations_Onboarding_Complete") &&
-        deal?.negotiations_Onboarding_Complete &&
-        deal?.negotiations_Onboarding_Complete?.toLowerCase() === "yes"
+        deal.hasOwnProperty("onboardingComplete") &&
+        deal?.onboardingComplete &&
+        deal?.onboardingComplete?.toLowerCase() === "yes"
           ? "yes"
           : "no";
       const matchesOnboarding =
