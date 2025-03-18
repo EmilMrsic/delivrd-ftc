@@ -20,10 +20,12 @@ import {
 } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { TailwindPlusCard } from "../tailwind-plus/card";
+import { NegotiationDataType } from "@/lib/models/team";
+import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
 
 type AddNoteSectionProps = {
   user: any;
-  negotiation: EditNegotiationData | null;
+  negotiation: NegotiationDataType | null;
   dealNegotiator?: DealNegotiator;
   negotiationId: string;
   incomingBids: IncomingBid[];
@@ -170,14 +172,7 @@ const AddNoteSection = ({
   }, [negotiationId]);
 
   return (
-    // <Card className="bg-white shadow-lg">
-    //   <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
-    //     <CardTitle className="flex items-center">
-    //       <FileText className="mr-2" /> Internal Notes
-    //     </CardTitle>
-    //   </CardHeader>
-    //   <CardContent className="p-6">
-    <TailwindPlusCard title="Internal Notes">
+    <TailwindPlusCard title="Internal Notes" icon={FileText}>
       <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
         {allInternalNotes
           .sort((a, b) => {
@@ -189,7 +184,11 @@ const AddNoteSection = ({
           .map((note, index) => (
             <div key={index} className="flex items-start space-x-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user[0]} alt={user.name[0]} />
+                <AvatarImage
+                  src={user[0]}
+                  alt={user.name[0]}
+                  className="rounded-full"
+                />
                 <AvatarFallback>{user.name[0]}</AvatarFallback>
               </Avatar>
               <div
@@ -206,13 +205,13 @@ const AddNoteSection = ({
             </div>
           ))}
       </div>
-      <div className="flex space-x-2">
-        <Textarea
+      <div className="space-x-2">
+        <TailwindPlusTextarea
           placeholder="Add a note..."
           value={newInternalNote}
           onChange={handleInputChange}
           onKeyDown={handleKeyboardNavigation}
-          className="flex-grow"
+          // className="flex-grow"
         />
         {isMentioning && mentionSuggestions.length > 0 && (
           <div className="absolute z-10 mt-[50px] w-[250px] bg-white border border-gray-300 rounded-md shadow-lg">
@@ -231,9 +230,11 @@ const AddNoteSection = ({
             </ul>
           </div>
         )}
-        <Button onClick={() => addInternalNote(newInternalNote)}>
-          Add Note
-        </Button>
+        <div className="flex justify-end mt-4">
+          <Button onClick={() => addInternalNote(newInternalNote)}>
+            Add Note
+          </Button>
+        </div>
       </div>
     </TailwindPlusCard>
   );

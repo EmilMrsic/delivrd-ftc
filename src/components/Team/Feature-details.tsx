@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Car, DollarSign, ThumbsUp, X } from "lucide-react";
+import { Calendar, Car, DollarSign, ThumbsUp, X } from "lucide-react";
 import EditableDropdown from "../base/editable-dropdown";
-import EditableInput from "../base/input-field";
+import EditableInput, { InputField } from "../base/input-field";
 import { Separator } from "@radix-ui/react-separator";
 import EditableTextArea from "../base/editable-textarea";
 import { EditNegotiationData } from "@/types";
@@ -18,7 +18,11 @@ import { TailwindPlusCard } from "../tailwind-plus/card";
 type FeatureDetailsProps = {
   negotiation: NegotiationDataType | null;
   negotiationId: string | null;
-  handleChange: (section: string, child: string, value: string) => void;
+  handleChange: (updateObject: {
+    key: string;
+    newValue: string;
+    parentKey?: string;
+  }) => void;
   setShowStickyHeader?: (item: boolean) => void;
 };
 
@@ -91,67 +95,78 @@ const FeatureDetails = ({
   }, [negotiation]);
 
   return (
-    <TailwindPlusCard title="Deal Details">
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <Car className="h-5 w-5 text-[#0989E5]" />
-        <span>
-          <EditableDropdown
-            options={["New", "Used"]}
-            label="Condition"
-            value={negotiation?.condition ?? ""}
-            negotiationId={negotiationId ?? ""}
-            field="condition"
-            onChange={(newValue) =>
-              handleChange("dealInfo", "condition", newValue)
-            }
-          />
-        </span>
-      </div>
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <Car className="h-5 w-5 text-[#0989E5]" />
-        <EditableDropdown
+    <TailwindPlusCard title="Deal Details" icon={Car}>
+      <div className="space-y-4">
+        <InputField
+          type="searchableDropdown"
+          options={["New", "Used"]}
+          label="Condition"
+          value={negotiation?.condition ?? ""}
+          negotiationId={negotiationId ?? ""}
+          field="condition"
+          onChange={(newValue) =>
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
+          }
+          icon={Car}
+        />
+        <InputField
           options={vehicleOfInterest}
           label="Vehicle of Interest"
           value={negotiation?.brand ?? ""}
           negotiationId={negotiationId ?? ""}
           field="brand"
-          onChange={(newValue) => handleChange("dealInfo", "brand", newValue)}
+          onChange={(newValue) =>
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
+          }
+          type="searchableDropdown"
+          icon={Car}
         />
-      </div>
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <Car className="h-5 w-5 text-[#0989E5]" />
-        <EditableInput
+        <InputField
           label="Model"
           value={negotiation?.model ?? "Model not available"}
           negotiationId={negotiationId ?? ""}
           field="model"
-          onChange={(newValue) => handleChange("dealInfo", "model", newValue)}
+          onChange={(newValue) =>
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
+          }
+          icon={Car}
         />
-      </div>
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 text-[#0989E5]"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-            clipRule="evenodd"
-          />
-        </svg>
-        <EditableInput
+        <InputField
           label="Trim"
           value={negotiation?.trim ?? "Trim info not available"}
           negotiationId={negotiationId ?? ""}
           field="trim"
-          onChange={(newValue) => handleChange("dealInfo", "trim", newValue)}
+          onChange={(newValue) =>
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
+          }
+          icon={() => (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-gray-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                clipRule="evenodd"
+              />
+            </svg>
+          )}
         />
-      </div>
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <Car className="h-5 w-5 text-[#0989E5]" />
-        <EditableDropdown
+        <InputField
           options={[
             "No Preference",
             "Two-wheel drive",
@@ -163,81 +178,101 @@ const FeatureDetails = ({
           negotiationId={negotiationId ?? ""}
           field="drivetrain"
           onChange={(newValue) =>
-            handleChange("dealInfo", "drivetrain", newValue)
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
           }
+          type="searchableDropdown"
+          icon={Car}
         />
-      </div>
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 text-[#0989E5]"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
-        </svg>
-        <EditableInput
+
+        <InputField
           label="Trade In"
           value={negotiation?.tradeInInfo ?? "Trade in not available"}
           negotiationId={negotiationId ?? ""}
           field="tradeInInfo"
           onChange={(newValue) =>
-            handleChange("dealInfo", "tradeInInfo", newValue)
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
           }
+          icon={() => (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-gray-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+            </svg>
+          )}
         />
-      </div>
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <DollarSign className="h-5 w-5 text-[#0989E5]" />
-        <EditableDropdown
+        <InputField
           options={["Lease", "Cash", "Finance", "Need to Discuss"]}
           label="Finance Type"
           value={negotiation?.howToPay ?? "Need to Discuss"}
           negotiationId={negotiationId ?? ""}
           field="howToPay"
           onChange={(newValue) =>
-            handleChange("dealInfo", "howToPay", newValue)
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
           }
+          icon={DollarSign}
+          type="searchableDropdown"
         />
-      </div>
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <DollarSign className="h-5 w-5 text-[#0989E5]" />
-        <EditableInput
+        <InputField
           label="Budget"
           value={negotiation?.budget ?? "No negotiation budget"}
           negotiationId={negotiationId ?? ""}
           field="budget"
-          onChange={(newValue) => handleChange("dealInfo", "budget", newValue)}
+          onChange={(newValue) =>
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
+          }
+          icon={DollarSign}
         />
-      </div>
-      <div className="flex items-center space-x-2 text-[#202125]">
-        <DollarSign className="h-5 w-5 text-[#0989E5]" />
-        <EditableInput
+        <InputField
           label="Monthly Budget"
           value={negotiation?.monthlyBudget ?? "No monthly budget"}
           negotiationId={negotiationId ?? ""}
           field="monthlyBudget"
           onChange={(newValue) =>
-            handleChange("dealInfo", "monthlyBudget", newValue)
+            handleChange({
+              key: "dealInfo",
+              newValue: newValue,
+            })
           }
+          icon={DollarSign}
         />
-      </div>
-      <Separator className="my-4" />
-      <div className="space-y-2">
-        <h3 className="font-semibold text-lg">Features and Trim Details</h3>
-        <EditableTextArea
-          value={negotiation?.trim ?? "Trim details not available"}
-          negotiationId={negotiationId ?? ""}
-          field="trimPackageOptions"
-          onChange={(newValue) => handleChange("dealInfo", "trim", newValue)}
-        />
-      </div>
-      <div className="space-x-2 flex items-center">
-        <h3 className="font-semibold text-lg">Date Paid:</h3>
-        <p>{dateFormat(negotiation?.datePaid ?? "")}</p>
-      </div>
-      <div className="space-x-2 flex items-center">
-        <h3 className="font-semibold text-lg">Start Date:</h3>
-        <DatePicker
+        <Separator className="my-4" />
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg">Features and Trim Details</h3>
+          <EditableTextArea
+            value={negotiation?.trim ?? "Trim details not available"}
+            negotiationId={negotiationId ?? ""}
+            field="trimPackageOptions"
+            onChange={(newValue) =>
+              handleChange({
+                key: "dealInfo",
+                newValue: newValue,
+              })
+            }
+          />
+        </div>
+        <div className="space-x-2 flex items-center">
+          <Calendar className="w-5 h-5 text-gray-400" />
+          <h3 className="font-semibold text-[15px]">Date Paid:</h3>
+          <p>{dateFormat(negotiation?.datePaid ?? "")}</p>
+        </div>
+
+        <InputField
+          label="Start Date"
           selected={dealStartDate}
           onChange={(date) => {
             setDealStartDate(date);
@@ -245,13 +280,11 @@ const FeatureDetails = ({
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
-          className="border border-gray-300 rounded-md px-2 py-1"
+          type="datePicker"
+          icon={Calendar}
         />
-      </div>
-
-      <div className="space-x-2 flex items-center">
-        <h3 className="font-semibold text-lg">Arrival To Dealer:</h3>
-        <DatePicker
+        <InputField
+          label="Arrival To Dealer"
           selected={arrivalToDealer}
           onChange={(date) => {
             setArrivalToDealer(date);
@@ -259,12 +292,12 @@ const FeatureDetails = ({
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
-          className="border border-gray-300 rounded-md px-2 py-1"
+          type="datePicker"
+          icon={Calendar}
         />
-      </div>
-      <div className="space-x-2 flex items-center">
-        <h3 className="font-semibold text-lg">Arrival To Client:</h3>
-        <DatePicker
+
+        <InputField
+          label="Arrival To Client"
           selected={arrivalToClient}
           onChange={(date) => {
             setArrivalToClient(date);
@@ -272,12 +305,12 @@ const FeatureDetails = ({
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
-          className="border border-gray-300 rounded-md px-2 py-1"
+          type="datePicker"
+          icon={Calendar}
         />
-      </div>
-      <div className="space-x-2 flex items-center">
-        <h3 className="font-semibold text-lg">Close Date:</h3>
-        <DatePicker
+
+        <InputField
+          label="Close Date"
           selected={closeDate}
           onChange={(date) => {
             setCloseDate(date);
@@ -286,72 +319,71 @@ const FeatureDetails = ({
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
           className="border border-gray-300 rounded-md px-2 py-1"
+          type="datePicker"
+          icon={Calendar}
         />
-      </div>
 
-      <Separator className="my-4" />
-      <div className="space-y-4">
         <h3 className="font-semibold text-lg">Colors</h3>
-        <div className="flex items-center space-x-2 text-[#202125]">
-          <ThumbsUp className="h-5 w-5 text-[#0989E5]" />
-          <EditableInput
-            negotiations={negotiation}
-            label="Internal Colors Desired"
-            value={negotiation?.desiredInterior ?? "No preference"}
-            negotiationId={negotiationId ?? ""}
-            field="desiredInterior"
-            onChange={(newValue) =>
-              handleChange(
-                "otherData",
-                "negotiations_Color_Options.interior_preferred",
-                newValue
-              )
-            }
-          />
-        </div>
-        <div className="flex items-center space-x-2 text-[#202125]">
-          <ThumbsUp className="h-5 w-5 text-[#0989E5]" />
-          <EditableInput
-            negotiations={negotiation}
-            label="External Colors Desired"
-            value={negotiation?.desiredExterior ?? "No preference"}
-            negotiationId={negotiationId ?? ""}
-            field="desiredExterior"
-            onChange={(newValue) =>
-              handleChange(
-                "otherData",
-                "negotiations_Color_Options.exterior_preferred",
-                newValue
-              )
-            }
-          />
-        </div>
-        <div className="flex items-center space-x-2 text-[#202125]">
-          <X className="h-5 w-5 text-red-500" />
-          <EditableInput
-            negotiations={negotiation}
-            label="External Colors Not Wanted"
-            value={negotiation?.excludedExterior ?? "No preference"}
-            negotiationId={negotiationId ?? ""}
-            field="excludedExterior"
-            onChange={(newValue) =>
-              handleChange("otherData", "excludedExterior", newValue)
-            }
-          />
-        </div>
-        <div className="flex items-center space-x-2 text-[#202125]">
-          <X className="h-5 w-5 text-red-500" />
-          <EditableInput
-            negotiations={negotiation}
-            label="Internal Colors Not Wanted"
-            value={negotiation?.excludedInterior ?? "No preference"}
-            negotiationId={negotiationId ?? ""}
-            field="excludedInterior"
-            onChange={(newValue) =>
-              handleChange("otherData", "excludedInterior", newValue)
-            }
-          />
-        </div>
+        <InputField
+          negotiations={negotiation}
+          label="Internal Colors Desired"
+          value={negotiation?.desiredInterior ?? "No preference"}
+          negotiationId={negotiationId ?? ""}
+          field="desiredInterior"
+          onChange={(newValue) =>
+            handleChange({
+              key: "otherData",
+              newValue: newValue,
+              parentKey: "negotiations_Color_Options.interior_preferred",
+            })
+          }
+          icon={ThumbsUp}
+        />
+
+        <InputField
+          negotiations={negotiation}
+          label="External Colors Desired"
+          value={negotiation?.desiredExterior ?? "No preference"}
+          negotiationId={negotiationId ?? ""}
+          field="desiredExterior"
+          onChange={(newValue) =>
+            handleChange({
+              key: "otherData",
+              newValue: newValue,
+              parentKey: "negotiations_Color_Options.exterior_preferred",
+            })
+          }
+          icon={ThumbsUp}
+        />
+
+        <InputField
+          negotiations={negotiation}
+          label="External Colors Not Wanted"
+          value={negotiation?.excludedExterior ?? "No preference"}
+          negotiationId={negotiationId ?? ""}
+          field="excludedExterior"
+          onChange={(newValue) =>
+            handleChange({
+              key: "otherData",
+              newValue: newValue,
+            })
+          }
+          icon={X}
+        />
+        <InputField
+          negotiations={negotiation}
+          label="Internal Colors Not Wanted"
+          value={negotiation?.excludedInterior ?? "No preference"}
+          negotiationId={negotiationId ?? ""}
+          field="excludedInterior"
+          onChange={(newValue) =>
+            handleChange({
+              key: "otherData",
+              newValue: newValue,
+            })
+          }
+          icon={X}
+        />
       </div>
     </TailwindPlusCard>
   );

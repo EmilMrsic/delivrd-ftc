@@ -19,6 +19,7 @@ import { DialogTitle } from "@radix-ui/react-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { generateRandomId } from "@/lib/utils";
 import { EditNegotiationData } from "@/types";
+import { TailwindPlusButton } from "../tailwind-plus/button";
 
 interface FormData {
   dealerName: string;
@@ -245,8 +246,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
             setIsDialogOpen(true);
           }}
         >
-          <button
-            className="flex items-center bg-white text-black rounded-lg p-2"
+          <TailwindPlusButton
             onClick={(e) => {
               e.stopPropagation();
               setStopPropagation && setStopPropagation(true);
@@ -255,7 +255,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
           >
             <UploadIcon className="mr-2 h-4 w-4" />
             <p className="font-normal text-sm"> Manual Bids Upload</p>
-          </button>
+          </TailwindPlusButton>
         </DialogTrigger>
 
         <DialogContent className="p-8 bg-white rounded-lg max-w-[700px] mx-auto shadow-xl h-[95%] overflow-scroll">

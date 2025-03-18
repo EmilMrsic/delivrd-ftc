@@ -3,6 +3,7 @@ import { clsx } from "clsx";
 type HeadingProps = {
   as?: "div" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   dark?: boolean;
+  size?: "small" | "medium" | "large";
 } & React.ComponentPropsWithoutRef<
   "div" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
 >;
@@ -29,6 +30,7 @@ export function Subheading({
   className,
   as: Element = "h2",
   dark = false,
+  size = "small",
   ...props
 }: HeadingProps) {
   return (
@@ -36,8 +38,9 @@ export function Subheading({
       {...props}
       data-dark={dark ? "true" : undefined}
       className={clsx(
-        className,
-        "font-mono text-xs/5 font-semibold tracking-widest text-gray-500 uppercase data-dark:text-gray-400"
+        "font-mono  font-semibold tracking-widest text-gray-500 uppercase data-dark:text-gray-400",
+        (size === "small" && "text-xs/5") || "text-xl",
+        className
       )}
     />
   );

@@ -66,6 +66,7 @@ import DeleteBidSection from "@/components/Team/delete-bid-section";
 import { TeamHeader } from "@/components/base/header";
 import { DealNegotiatorType } from "@/lib/models/team";
 import { TailwindPlusCard } from "@/components/tailwind-plus/card";
+import { IncomingBidCard } from "@/components/Team/profile/incoming-bid";
 
 function ProjectProfile() {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -136,37 +137,38 @@ function ProjectProfile() {
     toast({ title: "Comment added successfully" });
   };
 
-  const handleChange = (
-    parentKey: string,
-    childKey: string,
-    newValue: string
-  ) => {
+  const handleChange = (updateObject: {
+    key: string;
+    newValue: string;
+    parentKey?: string;
+  }) => {
     setNegotiation((prevState: any) => {
-      let updatedParent: any = {};
+      const { key, newValue, parentKey } = updateObject;
+      // let updatedParent: any = {};
 
-      if (
-        parentKey === "otherData" &&
-        childKey.startsWith("negotiations_Color_Options")
-      ) {
-        updatedParent = { ...prevState[parentKey] };
-        const field = childKey.split(".")[1]; // get the field name (e.g., 'interior_preferred')
+      // if (
+      //   parentKey === "otherData" &&
+      //   childKey.startsWith("negotiations_Color_Options")
+      // ) {
+      //   updatedParent = { ...prevState[parentKey] };
+      //   const field = childKey.split(".")[1]; // get the field name (e.g., 'interior_preferred')
 
-        if (updatedParent.negotiations_Color_Options) {
-          updatedParent.negotiations_Color_Options = {
-            ...updatedParent.negotiations_Color_Options,
-            [field]: newValue,
-          };
-        }
-      } else {
-        updatedParent = {
-          ...prevState[parentKey],
-          [childKey]: newValue,
-        };
-      }
+      //   if (updatedParent.negotiations_Color_Options) {
+      //     updatedParent.negotiations_Color_Options = {
+      //       ...updatedParent.negotiations_Color_Options,
+      //       [field]: newValue,
+      //     };
+      //   }
+      // } else {
+      //   updatedParent = {
+      //     ...prevState[parentKey],
+      //     [childKey]: newValue,
+      //   };
+      // }
 
       return {
         ...prevState,
-        [parentKey]: updatedParent,
+        [key]: newValue,
       };
     });
   };
@@ -220,6 +222,7 @@ function ProjectProfile() {
   };
 
   const handleSave = (bidId: string) => {
+    return;
     setIncomingBids(
       incomingBids.map((bid) =>
         bid.bid_id === bidId
@@ -386,7 +389,7 @@ function ProjectProfile() {
   }, [negotiationId]);
 
   return (
-    <div className="container mx-auto p-4 space-y-6 min-h-screen">
+    <div className="container mx-auto p-4 space-y-6 min-h-screen w-[90vw]">
       <TeamHeader
         handleBellClick={handleBellClick}
         notificationCount={notificationCount}
@@ -396,85 +399,88 @@ function ProjectProfile() {
 
       {showStickyHeader && <StickyHeader negotiation={negotiation} />}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <div className="md:hidden">
-            <FeatureDetails
-              setShowStickyHeader={setShowStickyHeader}
-              negotiation={negotiation}
-              negotiationId={negotiationId}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-[98%] mx-auto">
+        <div className="md:col-span-2">
+          <div className="md:sticky md:top-4 space-y-6">
+            {/* <div className="md:hidden">
+              <FeatureDetails
+                setShowStickyHeader={setShowStickyHeader}
+                negotiation={negotiation}
+                negotiationId={negotiationId}
+                handleChange={handleChange}
+              />
+            </div> */}
+
+            <ClientDetails
               handleChange={handleChange}
+              negotiation={negotiation}
+              dealNegotiator={dealNegotiator}
+              negotiationId={negotiationId}
             />
-          </div>
 
-          <ClientDetails
-            handleChange={handleChange}
-            negotiation={negotiation}
-            dealNegotiator={dealNegotiator}
-            negotiationId={negotiationId}
-          />
-
-          {/* <IncomingBids
-            incomingBids={incomingBids}
-            negotiationId={negotiationId ?? ""}
-            dealers={dealers}
-            handleDeleteBid={handleDeleteBid}
-            handleEdit={handleEdit}
-            handleSave={handleSave}
-            openDialog={openDialog}
-            setOpenDialog={setOpenDialog}
-            setEditingBidId={setEditingBidId}
-          /> */}
-
-          <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
-            <div>
-              <p className="text-xl font-bold">Delivrd</p>
-              <p className="text-sm mt-1 opacity-75">
-                Click on the button to show or hide deleted bids
-              </p>
-            </div>
-            <button
-              onClick={() => setShowDeletedBids(!showDeletedBids)}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg transition duration-300 transform hover:scale-105"
-            >
-              {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
-            </button>
-          </div>
-          {showDeletedBids && (
-            <DeleteBidSection
-              dealers={dealers}
+            <IncomingBids
               incomingBids={incomingBids}
-              setCommentingBidId={setCommentingBidId}
-              setEditedBid={setEditedBid}
-              setEditingBidId={setEditingBidId}
-              editedBid={editedBid}
-              editingBidId={editingBidId}
-              commentingBidId={commentingBidId}
-              setNewComment={setNewComment}
-              newComment={newComment}
-              addComment={addComment}
-              handleBidFileUpload={handleBidFileUpload}
-              handleDeleteFile={handleDeleteFile}
+              negotiationId={negotiationId ?? ""}
+              dealers={dealers}
+              handleDeleteBid={handleDeleteBid}
               handleEdit={handleEdit}
               handleSave={handleSave}
-              setOpenDialog={setOpenDialog}
               openDialog={openDialog}
+              setOpenDialog={setOpenDialog}
+              setEditingBidId={setEditingBidId}
             />
-          )}
 
-          <AddNoteSection
-            user={user}
-            negotiationId={negotiationId ?? ""}
-            negotiation={negotiation}
-            incomingBids={incomingBids}
-            allDealNegotiator={allDealNegotiator}
-            dealNegotiator={dealNegotiator}
-          />
-          <ActivityLogSection activityLog={activityLog} />
+            <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
+              <div>
+                <p className="text-xl font-bold">Delivrd</p>
+                <p className="text-sm mt-1 opacity-75">
+                  Click on the button to show or hide deleted bids
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDeletedBids(!showDeletedBids)}
+                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg transition duration-300 transform hover:scale-105"
+              >
+                {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
+              </button>
+            </div>
+            {showDeletedBids && (
+              <DeleteBidSection
+                dealers={dealers}
+                incomingBids={incomingBids}
+                setCommentingBidId={setCommentingBidId}
+                setEditedBid={setEditedBid}
+                setEditingBidId={setEditingBidId}
+                editedBid={editedBid}
+                editingBidId={editingBidId}
+                commentingBidId={commentingBidId}
+                setNewComment={setNewComment}
+                newComment={newComment}
+                addComment={addComment}
+                handleBidFileUpload={handleBidFileUpload}
+                handleDeleteFile={handleDeleteFile}
+                handleEdit={handleEdit}
+                handleSave={handleSave}
+                setOpenDialog={setOpenDialog}
+                openDialog={openDialog}
+              />
+            )}
+
+            <AddNoteSection
+              user={user}
+              negotiationId={negotiationId ?? ""}
+              negotiation={negotiation}
+              incomingBids={incomingBids}
+              allDealNegotiator={allDealNegotiator}
+              dealNegotiator={dealNegotiator}
+            />
+
+            <ActivityLogSection activityLog={activityLog} />
+          </div>
         </div>
 
         <div className="md:col-span-1">
-          <div className="md:sticky md:top-4">
+          <div className="md:sticky md:top-4 space-y-6">
             <FeatureDetails
               negotiation={negotiation}
               negotiationId={negotiationId}
@@ -494,7 +500,10 @@ function ProjectProfile() {
                 negotiationId={negotiationId ?? ""}
                 field="shipping_info"
                 onChange={(newValue) =>
-                  handleChange("dealInfo", "shipping_info", newValue)
+                  handleChange({
+                    key: "shipping_info",
+                    newValue: newValue,
+                  })
                 }
               />
             </TailwindPlusCard>
@@ -527,414 +536,38 @@ export const IncomingBids = ({
   setEditingBidId: (editingBidId: string | null) => void;
 }) => {
   return (
-    <Card className="bg-white shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <FileText className="mr-2" />
-            Incoming Bids
-          </div>
-          <div className="flex items-center">
-            <ManualBidUpload id={negotiationId} />
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-8">
-          {incomingBids.length ? (
-            incomingBids
-              ?.filter((bid) => !bid?.delete)
-              .sort((a, b) => {
-                if (a.client_offer === "accepted") return -1;
-                if (b.client_offer === "accepted") return 1;
-                const dateA = new Date(a?.timestamp || 0).getTime();
-                const dateB = new Date(b?.timestamp || 0).getTime();
-                return dateB - dateA; // Newest bids first
-              })
-              .map((bidDetails, index) => {
-                const matchingDealer = dealers.find(
-                  (dealer) => dealer.id === bidDetails.dealerId
-                );
-                const hasAcceptedOffer = incomingBids.find(
-                  (bid) => bid.client_offer === "accepted"
-                );
-                return (
-                  <div
-                    key={index}
-                    className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
-                    ${
-                      hasAcceptedOffer && bidDetails.client_offer !== "accepted"
-                        ? "opacity-45"
-                        : ""
-                    } ${
-                      bidDetails.vote && bidDetails.vote === "like"
-                        ? "bg-green-100 border-green-600 "
-                        : bidDetails.vote === "dislike"
-                        ? "bg-orange-100 border-orange-600"
-                        : "bg-white border-blue-600"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-lg font-semibold text-[#202125]">
-                        {matchingDealer?.Dealership
-                          ? `${matchingDealer.Dealership} Offer`
-                          : "No Dealership"}
-                      </h3>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent opening the dialog
-                            handleDeleteBid(bidDetails.bid_id);
-                          }}
-                          className="bg-red-600 text-white rounded-full p-2 hover:bg-red-700"
-                        >
-                          <Trash className="w-5 h-5" />
-                        </button>
-                        <VoteSection
-                          bidDetails={bidDetails}
-                          setIncomingBids={setIncomingBids}
-                        />
-                      </div>
-                    </div>
-                    <time className="block mb-2 text-sm text-[#202125]">
-                      {formatDate(bidDetails?.timestamp)}
-                    </time>
-                    <p className="text-[#202125] mb-4">
-                      Price: $
-                      {bidDetails?.price
-                        ? bidDetails?.price
-                        : "No price available"}
-                    </p>
-                    <div className="flex space-x-2 mb-4">
-                      <Dialog
-                        open={openDialog === bidDetails.bid_id}
-                        onOpenChange={(isOpen) => {
-                          if (!isOpen) {
-                            setEditingBidId(null); // Reset editedBid when closing
-                          }
-                          setOpenDialog(
-                            isOpen ? bidDetails.bid_id ?? "" : null
-                          );
-                        }}
-                      >
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <FileText className="mr-2 h-4 w-4" />
-                            View Offer
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent style={{ background: "white" }}>
-                          <div className="text-[#202125] space-y-4">
-                            <div className="flex items-center gap-3">
-                              <p className="text-2xl font-bold">
-                                {matchingDealer?.Dealership} Detail
-                              </p>
-                              {editingBidId === bidDetails.bid_id ? (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleSave(bidDetails.bid_id)}
-                                >
-                                  <Save className="h-4 w-4 mr-2" /> Save
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleEdit(bidDetails)}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-
-                            {/* Files Section */}
-                            <div className="flex flex-wrap h-[150px] overflow-y-scroll gap-4 mt-4">
-                              {bidDetails.files.map((file, index) => {
-                                const isImage = [
-                                  "jpg",
-                                  "jpeg",
-                                  "png",
-                                  "gif",
-                                  "bmp",
-                                  "webp",
-                                ].some((ext) =>
-                                  file.toLowerCase().includes(ext)
-                                );
-
-                                return (
-                                  <div
-                                    key={index}
-                                    onClick={() => window.open(file, "_blank")}
-                                    className="relative cursor-pointer w-20 h-20 flex items-center justify-center rounded-md "
-                                  >
-                                    <div className="absolute top-0 right-0 z-[99]">
-                                      {editingBidId === bidDetails.bid_id && (
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation(); // Prevent opening file when clicking the cross
-                                            handleDeleteFile(
-                                              file,
-                                              bidDetails.bid_id
-                                            );
-                                          }}
-                                          className="absolute top-0 right-0 bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
-                                        >
-                                          <X size={16} />
-                                        </button>
-                                      )}
-                                    </div>
-                                    {isImage ? (
-                                      <img
-                                        onClick={() =>
-                                          window.open(file, "_blank")
-                                        }
-                                        src={file}
-                                        alt="Uploaded file"
-                                        className="object-cover w-full h-full"
-                                      />
-                                    ) : (
-                                      <embed
-                                        onClick={() =>
-                                          window.open(file, "_blank")
-                                        }
-                                        type="application/pdf"
-                                        width="100%"
-                                        height="100%"
-                                        src={file}
-                                        style={{ zIndex: -1 }}
-                                      />
-                                    )}
-                                  </div>
-                                );
-                              })}
-                              {editingBidId === bidDetails.bid_id && (
-                                <div className="flex items-center justify-center w-20 h-20 bg-gray-200 rounded-md cursor-pointer">
-                                  <label
-                                    htmlFor="file-upload"
-                                    className="text-center flex flex-col items-center text-gray-600"
-                                  >
-                                    <input
-                                      type="file"
-                                      id="file-upload"
-                                      onChange={(e) =>
-                                        handleBidFileUpload(
-                                          e.target.files,
-                                          bidDetails.bid_id
-                                        )
-                                      }
-                                      className="hidden cursor-pointer"
-                                      multiple
-                                    />
-                                    <Upload className="w-8 h-8 text-gray-600" />
-                                    <p>Upload</p>
-                                  </label>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="space-y-1 mt-4">
-                              <p className="font-semibold text-lg">
-                                {matchingDealer?.SalesPersonName}
-                              </p>
-                              <p>
-                                {matchingDealer?.City}
-                                <br />
-                                {matchingDealer?.State}
-                              </p>
-                              <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 rounded-full">
-                                {editingBidId === bidDetails.bid_id ? (
-                                  <div className="space-x-2 flex">
-                                    <label className="flex p-2 rounded-full bg-green-100 items-center space-x-2">
-                                      <input
-                                        type="radio"
-                                        name="inventoryStatus"
-                                        value="In Stock"
-                                        checked={
-                                          editedBid.inventoryStatus ===
-                                          "In Stock"
-                                        }
-                                        onChange={() =>
-                                          setEditedBid({
-                                            ...editedBid,
-                                            inventoryStatus: "In Stock",
-                                          })
-                                        }
-                                        className="w-4 h-4"
-                                      />
-                                      <span>In Stock</span>
-                                    </label>
-
-                                    <label className="flex p-2 rounded-full bg-yellow-100 items-center space-x-2">
-                                      <input
-                                        type="radio"
-                                        name="inventoryStatus"
-                                        value="In Transit"
-                                        checked={
-                                          editedBid.inventoryStatus ===
-                                          "In Transit"
-                                        }
-                                        onChange={() =>
-                                          setEditedBid({
-                                            ...editedBid,
-                                            inventoryStatus: "In Transit",
-                                          })
-                                        }
-                                        className="w-4 h-4"
-                                      />
-                                      <span>In Transit</span>
-                                    </label>
-                                  </div>
-                                ) : (
-                                  <p
-                                    className={`p-2 rounded-full ${
-                                      bidDetails.inventoryStatus === "In Stock"
-                                        ? "bg-green-100"
-                                        : "bg-yellow-100"
-                                    }`}
-                                  >
-                                    {bidDetails?.inventoryStatus}
-                                  </p>
-                                )}
-                              </span>
-                            </div>
-
-                            <div className="flex justify-between mt-4 border-t pt-4">
-                              <div>
-                                <p className="text-gray-500">Date Submitted</p>
-                                <p>{formatDate(bidDetails.timestamp)}</p>
-                              </div>
-                              <div>
-                                <p className="text-gray-500">Price</p>
-                                {editingBidId === bidDetails.bid_id ? (
-                                  <Input
-                                    type="number"
-                                    value={editedBid.price}
-                                    onChange={(e) =>
-                                      setEditedBid({
-                                        ...editedBid,
-                                        price: e.target.value,
-                                      })
-                                    }
-                                  />
-                                ) : (
-                                  <p className="text-2xl font-semibold">
-                                    ${bidDetails.price}
-                                  </p>
-                                )}
-                                <p className="text-gray-500">
-                                  Total Discount: $
-                                  {editingBidId === bidDetails.bid_id ? (
-                                    <Input
-                                      type="number"
-                                      value={editedBid.discountPrice}
-                                      onChange={(e) =>
-                                        setEditedBid({
-                                          ...editedBid,
-                                          discountPrice: e.target.value,
-                                        })
-                                      }
-                                    />
-                                  ) : (
-                                    bidDetails.discountPrice
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="border-t pt-4 flex flex-col ">
-                              <p className="font-semibold">
-                                Additional Comments
-                              </p>
-                              {parseComment(bidDetails.comments)}
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setCommentingBidId(
-                            commentingBidId === bidDetails.bid_id
-                              ? null
-                              : bidDetails.bid_id
-                          )
-                        }
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Comment
-                      </Button>
-                    </div>
-                    {commentingBidId === bidDetails.bid_id && (
-                      <div className="mb-4">
-                        <Textarea
-                          placeholder="Add a comment..."
-                          value={newComment[bidDetails.bid_id] || ""}
-                          onChange={(e) =>
-                            setNewComment((prev) => ({
-                              ...prev,
-                              [bidDetails.bid_id]: e.target.value,
-                            }))
-                          }
-                          className="mb-2"
-                        />
-                        <Button onClick={() => addComment(bidDetails.bid_id)}>
-                          Submit Comment
-                        </Button>
-                      </div>
-                    )}
-
-                    {bidCommentsByBidId[bidDetails.bid_id] &&
-                    bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
-                      bidCommentsByBidId[bidDetails.bid_id].map(
-                        (comment, index) => (
-                          <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
-                            <div
-                              key={index}
-                              className="p-2 flex flex-col  mt-1"
-                            >
-                              <p>
-                                <strong>
-                                  {comment.deal_coordinator_name === "N/A"
-                                    ? comment.client_name
-                                    : comment.deal_coordinator_name}
-                                  :
-                                </strong>{" "}
-                                {parseComment(comment.comment)}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                {comment.time}
-                              </p>
-                            </div>
-                            {comment.deal_coordinator_name === "N/A" ? (
-                              <p className="pr-2">From Client</p>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                className="border-black"
-                                onClick={() => handleSendComment(comment)}
-                              >
-                                Send To Client
-                              </Button>
-                            )}
-                          </div>
-                        )
-                      )
-                    ) : (
-                      <p className="text-sm text-gray-500">
-                        No comments available for this bid.
-                      </p>
-                    )}
-                  </div>
-                );
-              })
-          ) : (
-            <p>No incoming bids available</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <TailwindPlusCard
+      title="Incoming Bids"
+      icon={FileText}
+      actions={() => <ManualBidUpload id={negotiationId} />}
+    >
+      <div className="space-y-8">
+        {incomingBids.length ? (
+          incomingBids
+            ?.filter((bid) => !bid?.delete)
+            .sort((a, b) => {
+              if (a.client_offer === "accepted") return -1;
+              if (b.client_offer === "accepted") return 1;
+              const dateA = new Date(a?.timestamp || 0).getTime();
+              const dateB = new Date(b?.timestamp || 0).getTime();
+              return dateB - dateA; // Newest bids first
+            })
+            .map((bidDetails, index) => (
+              <IncomingBidCard
+                bidDetails={bidDetails}
+                dealers={dealers}
+                incomingBids={incomingBids}
+                setEditingBidId={setEditingBidId}
+                setOpenDialog={setOpenDialog}
+                index={index}
+                handleDeleteBid={handleDeleteBid}
+              />
+            ))
+        ) : (
+          <p>No incoming bids available</p>
+        )}
+      </div>
+    </TailwindPlusCard>
   );
 };
 

@@ -9,6 +9,7 @@ import {
   where,
 } from "firebase/firestore"; // Import Firestore functions
 import { db } from "@/firebase/config";
+import { Field, Label } from "@headlessui/react";
 
 interface EditableDropdownProps {
   options: string[]; // Array of strings for dropdown options
@@ -76,8 +77,8 @@ const SearchableDropdown: React.FC<EditableDropdownProps> = ({
   }));
 
   return (
-    <div className="flex items-center space-x-2">
-      <label className="font-bold w-fit whitespace-nowrap">{label}:</label>
+    <Field className="w-full">
+      <Label className="font-bold w-fit whitespace-nowrap">{label}:</Label>
       <Select
         options={formattedOptions}
         onChange={handleDropdownChange}
@@ -88,7 +89,7 @@ const SearchableDropdown: React.FC<EditableDropdownProps> = ({
         className="w-full"
         placeholder="Select an option"
       />
-    </div>
+    </Field>
   );
 };
 

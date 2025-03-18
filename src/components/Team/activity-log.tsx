@@ -10,14 +10,7 @@ type ActivityLogProps = {
 
 const ActivityLogSection = ({ activityLog }: ActivityLogProps) => {
   return (
-    // <Card className="bg-white shadow-lg">
-    //   <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
-    //     <CardTitle className="flex items-center">
-    //       <FileText className="mr-2" /> Activity Log
-    //     </CardTitle>
-    //   </CardHeader>
-    //   <CardContent className="p-6">
-    <TailwindPlusCard title="Activity Log">
+    <TailwindPlusCard title="Activity Log" icon={FileText}>
       <ul className="space-y-4">
         {activityLog.map((activity, index) => {
           return (

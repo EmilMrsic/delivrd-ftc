@@ -21,6 +21,7 @@ import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNegotiations } from "./useNegotiations";
+import { NegotiationDataType } from "@/lib/models/team";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -42,17 +43,22 @@ const useTeamProfile = () => {
   const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
     []
   );
-  // const [negotiation, setNegotiation] = useState<EditNegotiationData | null>(
-  //   null
-  // );
+  const [negotiation, setNegotiation] = useState<NegotiationDataType | null>(
+    null
+  );
   const negotiationId = params.get("id");
-  const { negotiations } = useNegotiations({
+  const { negotiations: negotiationsFromUseNegotiations } = useNegotiations({
     all: true,
     filter: {
       id: negotiationId ?? "",
     },
   });
-  const negotiation = negotiations?.[0];
+
+  useEffect(() => {
+    if (negotiationsFromUseNegotiations) {
+      setNegotiation(negotiationsFromUseNegotiations[0]);
+    }
+  }, [negotiationsFromUseNegotiations]);
 
   const fetchDealers = async () => {
     const dealersData = [];
@@ -76,6 +82,7 @@ const useTeamProfile = () => {
 
     return dealersData;
   };
+
   const fetchBidComments = async () => {
     const groupedBidComments: GroupedBidComments = {};
     const bidCommentsRef = collection(db, "bid comment");
@@ -181,7 +188,7 @@ const useTeamProfile = () => {
       }
     };
 
-    getBidsByIds(negotiation?.otherData?.incoming_bids ?? []);
+    getBidsByIds(negotiation?.incomingBids ?? []);
   }, [negotiation]);
 
   useEffect(() => {
@@ -191,16 +198,12 @@ const useTeamProfile = () => {
 
   useEffect(() => {
     const getDealNegotiatorData = async () => {
-      if (!negotiation?.clientInfo?.negotiations_deal_coordinator) return;
+      if (!negotiation?.dealCoordinatorId) return;
 
       try {
         const teamDocRef = query(
           collection(db, "team delivrd"),
-          where(
-            "id",
-            "==",
-            negotiation?.clientInfo?.negotiations_deal_coordinator
-          )
+          where("id", "==", negotiation?.dealCoordinatorId)
         );
 
         const querySnapshot = await getDocs(teamDocRef);
@@ -218,6 +221,7 @@ const useTeamProfile = () => {
 
     getDealNegotiatorData();
   }, [negotiation]);
+
   return {
     dealNegotiator,
     setDealNegotiator,
@@ -228,7 +232,7 @@ const useTeamProfile = () => {
     allDealNegotiator,
     setAllDealNegotiator,
     negotiation,
-    // setNegotiation,
+    setNegotiation,
     negotiationId,
     notification,
     notificationCount,

@@ -10,6 +10,14 @@ import {
 import { db } from "@/firebase/config";
 import { useToast } from "@/hooks/use-toast";
 import { EditNegotiationData } from "@/types";
+import { Phone } from "lucide-react";
+import { Checkbox, Field, Label } from "@headlessui/react";
+import { TailwindPlusInput } from "../tailwind-plus/input";
+import SearchableDropdown from "./searchable-dropdown";
+import "react-datepicker/dist/react-datepicker.css";
+import "./datepicker-custom.css";
+import DatePicker from "react-datepicker";
+import clsx from "clsx";
 
 interface EditableInputProps {
   label: string;
@@ -47,6 +55,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
   }, [value]);
 
   const handleBlur = async () => {
+    return;
     if (negotiationId && field) {
       try {
         const usersQuery = query(
@@ -132,9 +141,9 @@ const EditableInput: React.FC<EditableInputProps> = ({
   };
 
   return (
-    <div className="flex items-center w-full">
-      <label className="font-bold text-[15px]">{label}:</label>
-      <input
+    <Field className="w-full">
+      <Label className="font-bold text-[15px]">{label}:</Label>
+      <TailwindPlusInput
         ref={inputRef}
         type="text"
         value={isFocused ? value : truncateValue(value)}
@@ -146,12 +155,90 @@ const EditableInput: React.FC<EditableInputProps> = ({
           setIsFocused(false);
           handleBlur();
         }}
-        className={` ${
-          isFocused
-            ? "border-2 rounded border-blue-500"
-            : "border-b-2 border-orange-500"
-        } px-2 py-1 focus:outline-none`}
       />
+    </Field>
+  );
+};
+
+export const InputField = (props: {
+  label: string;
+  value: string;
+  onChange?: (newValue: string) => void;
+  negotiationId: string;
+  field: string;
+  userField?: string;
+  negotiations?: EditNegotiationData | null;
+  firstName?: string;
+  lastName?: string;
+  options?: string[];
+  icon?: React.ComponentType<{ className?: string }>;
+  type?: "text" | "searchableDropdown" | "datePicker";
+  dateFormat?: string;
+  placeholderText?: string;
+  selected?: Date;
+}) => {
+  const Icon = props.icon;
+
+  if (props.type === "datePicker") {
+    console.log("got here:", props.type);
+  }
+
+  let InputComponent;
+  switch (props.type) {
+    case "searchableDropdown":
+      InputComponent = SearchableDropdown;
+      break;
+    case "datePicker":
+      InputComponent = DatePicker;
+      break;
+
+    default:
+      InputComponent = EditableInput;
+  }
+
+  const ComponentDisplay = (
+    <InputComponent
+      label={props.label}
+      value={props.value}
+      onChange={props.onChange}
+      negotiationId={props.negotiationId}
+      field={props.field}
+      userField={props.userField}
+      negotiations={props.negotiations}
+      options={props.options}
+      dateFormat={props.dateFormat}
+      placeholderText={props.placeholderText}
+      selected={props.selected}
+      className={
+        props.type === "datePicker"
+          ? clsx(
+              "block w-full rounded-lg border border-transparent ring-1 shadow-sm ring-black/10 p-2 cursor-pointer",
+              "px-[calc(--spacing(2)-1px)] py-[calc(--spacing(1.5)-1px)] text-base/6 sm:text-sm/6",
+              "data-focus:outline data-focus:outline-2 data-focus:-outline-offset-1 data-focus:outline-black"
+            )
+          : ""
+      }
+    />
+  );
+
+  const FieldDisplay = <>{ComponentDisplay}</>;
+
+  return (
+    <div className="flex items-center space-x-2 text-[#202125]">
+      {props.type === "datePicker" ? (
+        <>
+          {Icon && <Icon className="h-5 w-5 text-gray-400" />}
+          <Field className="w-full">
+            <Label className="font-bold text-[15px]">{props.label}:</Label>
+            <div className="w-full">{FieldDisplay}</div>
+          </Field>
+        </>
+      ) : (
+        <>
+          {Icon && <Icon className="h-5 w-5 text-gray-400" />}
+          {FieldDisplay}
+        </>
+      )}
     </div>
   );
 };
