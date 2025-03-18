@@ -80,7 +80,7 @@ function ReceivedCar() {
   } = useTeamDashboard({
     all: true,
     filter: {
-      // status: "Shipping",
+      status: "Shipping",
     },
   });
 

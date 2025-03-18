@@ -137,7 +137,6 @@ export default function DealList() {
         if (updatedFilters.stages === value) {
           updatedFilters.stages = "";
           setLoading(true);
-
           fetchActiveDeals(
             updatedFilters.dealCoordinators.length
               ? updatedFilters.dealCoordinators

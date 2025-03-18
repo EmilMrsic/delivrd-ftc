@@ -107,29 +107,30 @@ export const getActiveDealDocuments = async (dealQuery: {
   );
 
   const negotiationsSnapshot = await getDocs(negotiationsQuery);
-  console.log("got here 1", negotiationsSnapshot.docs.length);
+
   return negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();
+    // return data;
     return NegotiationDataModel.parse(data);
   });
 };
 
-export const getActiveDealObjects = async (activeDeals: string[]) => {
-  const negotiationsCollectionRef = collection(db, "negotiations");
-  const chunkedIds = chunk(activeDeals, 30);
-  const negotiationData = await Promise.all(
-    chunkedIds.map(async (idChunk) => {
-      const negotiationsQuery = query(
-        negotiationsCollectionRef,
-        where("__name__", "in", idChunk)
-      );
-      const negotiationsSnapshot = await getDocs(negotiationsQuery);
-      return negotiationsSnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return NegotiationDataModel.parse(data);
-      });
-    })
-  );
+// export const getActiveDealObjects = async (activeDeals: string[]) => {
+//   const negotiationsCollectionRef = collection(db, "negotiations");
+//   const chunkedIds = chunk(activeDeals, 30);
+//   const negotiationData = await Promise.all(
+//     chunkedIds.map(async (idChunk) => {
+//       const negotiationsQuery = query(
+//         negotiationsCollectionRef,
+//         where("__name__", "in", idChunk)
+//       );
+//       const negotiationsSnapshot = await getDocs(negotiationsQuery);
+//       return negotiationsSnapshot.docs.map((doc) => {
+//         const data = doc.data();
+//         return NegotiationDataModel.parse(data);
+//       });
+//     })
+//   );
 
-  return negotiationData.flat();
-};
+//   return negotiationData.flat();
+// };
