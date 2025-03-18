@@ -9,11 +9,13 @@ import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import useTeamProfile from "@/hooks/useTeamProfile";
+import { NegotiationDataType } from "@/lib/models/team";
+import { TailwindPlusCard } from "../tailwind-plus/card";
 
 type TradeCardProps = {
   negotiationId: string | null;
   handleChange: (section: string, child: string, value: string) => void;
-  negotiation: EditNegotiationData | null;
+  negotiation: NegotiationDataType | null;
 };
 
 const TradeCard = ({
@@ -88,110 +90,107 @@ const TradeCard = ({
   };
 
   return (
-    <Card className="bg-white shadow-lg mb-5">
-      <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
-        <CardTitle className="flex items-center">
-          <Car className="mr-2" /> Trade In Info
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4 mt-2">
-        <EditableTextArea
-          value={
-            negotiation?.dealInfo.trade_in_info ??
-            "No trade in info at the moment"
-          }
-          negotiationId={negotiationId ?? ""}
-          field="trade_in_info"
-          onChange={(newValue) =>
-            handleChange("dealInfo", "trade_in_info", newValue)
+    // <Card className="bg-white shadow-lg mb-5">
+    //   <CardHeader className="bg-gradient-to-r from-[#202125] to-[#0989E5] text-white">
+    //     <CardTitle className="flex items-center">
+    //       <Car className="mr-2" /> Trade In Info
+    //     </CardTitle>
+    //   </CardHeader>
+    //   <CardContent className="flex flex-col gap-4 mt-2">
+    <TailwindPlusCard title="Trade In Info">
+      <EditableTextArea
+        value={negotiation?.tradeInInfo ?? "No trade in info at the moment"}
+        negotiationId={negotiationId ?? ""}
+        field="trade_in_info"
+        onChange={(newValue) =>
+          handleChange("dealInfo", "trade_in_info", newValue)
+        }
+      />
+      <EditableInput
+        field="trade_in_vin"
+        negotiationId={negotiationId ?? ""}
+        label="Vin"
+        value={negotiation?.tradeInVin ?? ""}
+        onChange={(newValue) =>
+          handleChange("dealInfo", "trade_in_vin", newValue)
+        }
+      />
+      <EditableInput
+        field="trade_in_mileage"
+        negotiationId={negotiationId ?? ""}
+        label="Mileage"
+        value={negotiation?.tradeInMileage ?? ""}
+        onChange={(newValue) =>
+          handleChange("dealInfo", "trade_in_mileage", newValue)
+        }
+      />
+      <EditableInput
+        field="trade_in_comments"
+        negotiationId={negotiationId ?? ""}
+        label="Comments"
+        value={negotiation?.tradeInComments ?? ""}
+        onChange={(newValue) =>
+          handleChange("dealInfo", "trade_in_comments", newValue)
+        }
+      />
+      <div className="w-full">
+        <label className="block text-sm font-medium text-gray-700">
+          Upload Files
+        </label>
+        <input
+          type="file"
+          multiple
+          className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+          onChange={(e) =>
+            handleFileUpload(e.target.files, negotiationId ?? "")
           }
         />
-        <EditableInput
-          field="trade_in_vin"
-          negotiationId={negotiationId ?? ""}
-          label="Vin"
-          value={negotiation?.dealInfo?.trade_in_vin ?? ""}
-          onChange={(newValue) =>
-            handleChange("dealInfo", "trade_in_vin", newValue)
-          }
-        />
-        <EditableInput
-          field="trade_in_mileage"
-          negotiationId={negotiationId ?? ""}
-          label="Mileage"
-          value={negotiation?.dealInfo?.trade_in_mileage ?? ""}
-          onChange={(newValue) =>
-            handleChange("dealInfo", "trade_in_mileage", newValue)
-          }
-        />
-        <EditableInput
-          field="trade_in_comments"
-          negotiationId={negotiationId ?? ""}
-          label="Comments"
-          value={negotiation?.dealInfo?.trade_in_comments ?? ""}
-          onChange={(newValue) =>
-            handleChange("dealInfo", "trade_in_comments", newValue)
-          }
-        />
-        <div className="w-full">
-          <label className="block text-sm font-medium text-gray-700">
-            Upload Files
-          </label>
-          <input
-            type="file"
-            multiple
-            className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-            onChange={(e) =>
-              handleFileUpload(e.target.files, negotiationId ?? "")
-            }
-          />
-        </div>
+      </div>
 
-        {/* Display Uploaded Files */}
-        <div className="flex space-x-4 mt-2">
-          {negotiation?.dealInfo?.trade_in_files?.map((file, index) => {
-            const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].some(
-              (ext) => file.toLowerCase().includes(ext)
-            );
+      {/* Display Uploaded Files */}
+      <div className="flex space-x-4 mt-2">
+        {negotiation?.dealInfo?.trade_in_files?.map((file, index) => {
+          const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].some(
+            (ext) => file.toLowerCase().includes(ext)
+          );
 
-            return (
-              <div key={index} className="relative w-20 h-20">
-                <div
-                  onClick={() => window.open(file, "_blank")}
-                  className="cursor-pointer bg-transparent w-full h-full flex items-center justify-center rounded-md overflow-hidden"
-                >
-                  {isImage ? (
-                    <img
-                      src={file}
-                      alt="Uploaded file"
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <embed
-                      type="application/pdf"
-                      width="100%"
-                      height="100%"
-                      src={file}
-                    />
-                  )}
-                </div>
-
-                {/* Remove button (cross icon) */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent opening file when clicking the cross
-                    handleRemoveFile(file);
-                  }}
-                  className="absolute top-[-10px] right-[-10px] bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
-                >
-                  <X size={16} />
-                </button>
+          return (
+            <div key={index} className="relative w-20 h-20">
+              <div
+                onClick={() => window.open(file, "_blank")}
+                className="cursor-pointer bg-transparent w-full h-full flex items-center justify-center rounded-md overflow-hidden"
+              >
+                {isImage ? (
+                  <img
+                    src={file}
+                    alt="Uploaded file"
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <embed
+                    type="application/pdf"
+                    width="100%"
+                    height="100%"
+                    src={file}
+                  />
+                )}
               </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+
+              {/* Remove button (cross icon) */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent opening file when clicking the cross
+                  handleRemoveFile(file);
+                }}
+                className="absolute top-[-10px] right-[-10px] bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </TailwindPlusCard>
   );
 };
 

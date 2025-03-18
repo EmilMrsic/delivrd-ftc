@@ -20,6 +20,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNegotiations } from "./useNegotiations";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -41,10 +42,17 @@ const useTeamProfile = () => {
   const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
     []
   );
-  const [negotiation, setNegotiation] = useState<EditNegotiationData | null>(
-    null
-  );
+  // const [negotiation, setNegotiation] = useState<EditNegotiationData | null>(
+  //   null
+  // );
   const negotiationId = params.get("id");
+  const { negotiations } = useNegotiations({
+    all: true,
+    filter: {
+      id: negotiationId ?? "",
+    },
+  });
+  const negotiation = negotiations?.[0];
 
   const fetchDealers = async () => {
     const dealersData = [];
@@ -182,29 +190,6 @@ const useTeamProfile = () => {
   }, []);
 
   useEffect(() => {
-    const getNegotiation = async () => {
-      if (!negotiationId) return;
-
-      try {
-        const id = negotiationId;
-        const negotiationDocRef = doc(db, "negotiations", id);
-
-        const docSnap = await getDoc(negotiationDocRef);
-
-        if (docSnap.exists()) {
-          setNegotiation(mapNegotiationData(docSnap.data()));
-        } else {
-          console.log("No such negotiation!");
-        }
-      } catch (error) {
-        console.error("Error fetching negotiation:", error);
-      }
-    };
-
-    getNegotiation();
-  }, [negotiationId]);
-
-  useEffect(() => {
     const getDealNegotiatorData = async () => {
       if (!negotiation?.clientInfo?.negotiations_deal_coordinator) return;
 
@@ -243,7 +228,7 @@ const useTeamProfile = () => {
     allDealNegotiator,
     setAllDealNegotiator,
     negotiation,
-    setNegotiation,
+    // setNegotiation,
     negotiationId,
     notification,
     notificationCount,

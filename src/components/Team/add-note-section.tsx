@@ -19,6 +19,7 @@ import {
   sendNotification,
 } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { TailwindPlusCard } from "../tailwind-plus/card";
 
 type AddNoteSectionProps = {
   user: any;
@@ -169,72 +170,72 @@ const AddNoteSection = ({
   }, [negotiationId]);
 
   return (
-    <Card className="bg-white shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
-        <CardTitle className="flex items-center">
-          <FileText className="mr-2" /> Internal Notes
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
-          {allInternalNotes
-            .sort((a, b) => {
-              const dateA = Date.parse(a.time);
-              const dateB = Date.parse(b.time);
-              return dateB - dateA; // Newest to oldest
-            })
+    // <Card className="bg-white shadow-lg">
+    //   <CardHeader className="bg-gradient-to-r from-[#0989E5] to-[#202125] text-white">
+    //     <CardTitle className="flex items-center">
+    //       <FileText className="mr-2" /> Internal Notes
+    //     </CardTitle>
+    //   </CardHeader>
+    //   <CardContent className="p-6">
+    <TailwindPlusCard title="Internal Notes">
+      <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
+        {allInternalNotes
+          .sort((a, b) => {
+            const dateA = Date.parse(a.time);
+            const dateB = Date.parse(b.time);
+            return dateB - dateA; // Newest to oldest
+          })
 
-            .map((note, index) => (
-              <div key={index} className="flex items-start space-x-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={user[0]} alt={user.name[0]} />
-                  <AvatarFallback>{user.name[0]}</AvatarFallback>
-                </Avatar>
-                <div
-                  className={`p-3 rounded-lg flex-grow ${
-                    note.client === user.name ? "bg-blue-100" : "bg-gray-100"
+          .map((note, index) => (
+            <div key={index} className="flex items-start space-x-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user[0]} alt={user.name[0]} />
+                <AvatarFallback>{user.name[0]}</AvatarFallback>
+              </Avatar>
+              <div
+                className={`p-3 rounded-lg flex-grow ${
+                  note.client === user.name ? "bg-blue-100" : "bg-gray-100"
+                }`}
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <p className="font-semibold">{user.name}</p>
+                  <p className="text-xs text-gray-500">{note.time}</p>
+                </div>
+                <p>{note.note}</p>
+              </div>
+            </div>
+          ))}
+      </div>
+      <div className="flex space-x-2">
+        <Textarea
+          placeholder="Add a note..."
+          value={newInternalNote}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyboardNavigation}
+          className="flex-grow"
+        />
+        {isMentioning && mentionSuggestions.length > 0 && (
+          <div className="absolute z-10 mt-[50px] w-[250px] bg-white border border-gray-300 rounded-md shadow-lg">
+            <ul className="max-h-40 overflow-y-auto">
+              {mentionSuggestions.map((mention, index) => (
+                <li
+                  key={mention.id}
+                  onClick={() => handleMentionSelect(mention)}
+                  className={`p-2 cursor-pointer ${
+                    index === selectedMentionIndex ? "bg-gray-200" : ""
                   }`}
                 >
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="font-semibold">{user.name}</p>
-                    <p className="text-xs text-gray-500">{note.time}</p>
-                  </div>
-                  <p>{note.note}</p>
-                </div>
-              </div>
-            ))}
-        </div>
-        <div className="flex space-x-2">
-          <Textarea
-            placeholder="Add a note..."
-            value={newInternalNote}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyboardNavigation}
-            className="flex-grow"
-          />
-          {isMentioning && mentionSuggestions.length > 0 && (
-            <div className="absolute z-10 mt-[50px] w-[250px] bg-white border border-gray-300 rounded-md shadow-lg">
-              <ul className="max-h-40 overflow-y-auto">
-                {mentionSuggestions.map((mention, index) => (
-                  <li
-                    key={mention.id}
-                    onClick={() => handleMentionSelect(mention)}
-                    className={`p-2 cursor-pointer ${
-                      index === selectedMentionIndex ? "bg-gray-200" : ""
-                    }`}
-                  >
-                    {mention.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <Button onClick={() => addInternalNote(newInternalNote)}>
-            Add Note
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+                  {mention.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <Button onClick={() => addInternalNote(newInternalNote)}>
+          Add Note
+        </Button>
+      </div>
+    </TailwindPlusCard>
   );
 };
 
