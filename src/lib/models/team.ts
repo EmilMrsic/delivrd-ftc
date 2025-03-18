@@ -3,7 +3,7 @@ import { z } from "zod";
 export const NegotiationDataModel = z.object({
   arrivalToClient: z.string(),
   arrivalToDealer: z.string(),
-  budget: z.string(),
+  budget: z.union([z.number(), z.string()]),
   desiredInterior: z.string(),
   drivetrain: z.string(),
   dealCoordinatorId: z.string(),
