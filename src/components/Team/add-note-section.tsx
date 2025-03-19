@@ -6,12 +6,7 @@ import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import {
-  DealNegotiator,
-  EditNegotiationData,
-  IncomingBid,
-  InternalNotes,
-} from "@/types";
+import { DealNegotiator, IncomingBid } from "@/types";
 import {
   getCurrentDateTime,
   getCurrentTimestamp,
@@ -20,7 +15,11 @@ import {
 } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { TailwindPlusCard } from "../tailwind-plus/card";
-import { NegotiationDataType } from "@/lib/models/team";
+import {
+  DealNegotiatorType,
+  InternalNotesType,
+  NegotiationDataType,
+} from "@/lib/models/team";
 import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
 
 type AddNoteSectionProps = {
@@ -40,45 +39,50 @@ const AddNoteSection = ({
   incomingBids,
   allDealNegotiator,
 }: AddNoteSectionProps) => {
-  const [allInternalNotes, setAllInternalNotes] = useState<InternalNotes[]>([]);
-  const [mentionedUsers, setMentionedUsers] = useState<DealNegotiator[]>([]);
+  console.log("user:", user);
+  const [allInternalNotes, setAllInternalNotes] = useState<InternalNotesType[]>(
+    []
+  );
+  const [mentionedUsers, setMentionedUsers] = useState<DealNegotiatorType[]>(
+    []
+  );
   const [newInternalNote, setNewInternalNote] = useState<string>("");
   const [mentionSuggestions, setMentionSuggestions] = useState<
-    DealNegotiator[]
+    DealNegotiatorType[]
   >([]);
   const [selectedMentionIndex, setSelectedMentionIndex] = useState<number>(-1);
 
   const [isMentioning, setIsMentioning] = useState<boolean>(false);
 
-  const fetchBidNotes = async (negotiation_id: string) => {
-    const notesRef = collection(db, "internal notes"); // Reference to "internal notes" collection
-    let negotiationNotesData: InternalNotes[] = [];
+  // const fetchBidNotes = async (negotiation_id: string) => {
+  //   const notesRef = collection(db, "internal notes"); // Reference to "internal notes" collection
+  //   let negotiationNotesData: InternalNotes[] = [];
 
-    try {
-      // Query notes based on the provided "negotiation_id"
-      const notesQuery = query(
-        notesRef,
-        where("negotiation_id", "==", negotiation_id)
-      );
-      const notesSnap = await getDocs(notesQuery);
+  //   try {
+  //     // Query notes based on the provided "negotiation_id"
+  //     const notesQuery = query(
+  //       notesRef,
+  //       where("negotiation_id", "==", negotiation_id)
+  //     );
+  //     const notesSnap = await getDocs(notesQuery);
 
-      if (!notesSnap.empty) {
-        notesSnap.forEach((doc) => {
-          const notesData = doc.data() as InternalNotes;
-          negotiationNotesData.push(notesData);
-        });
-      } else {
-        console.warn(`No notes found for negotiation ID ${negotiation_id}`);
-      }
-    } catch (error) {
-      console.error(
-        `Error fetching notes for negotiation ID ${negotiation_id}:`,
-        error
-      );
-    }
+  //     if (!notesSnap.empty) {
+  //       notesSnap.forEach((doc) => {
+  //         const notesData = doc.data() as InternalNotes;
+  //         negotiationNotesData.push(notesData);
+  //       });
+  //     } else {
+  //       console.warn(`No notes found for negotiation ID ${negotiation_id}`);
+  //     }
+  //   } catch (error) {
+  //     console.error(
+  //       `Error fetching notes for negotiation ID ${negotiation_id}:`,
+  //       error
+  //     );
+  //   }
 
-    setAllInternalNotes(negotiationNotesData); // Update the state with fetched notes
-  };
+  //   setAllInternalNotes(negotiationNotesData); // Update the state with fetched notes
+  // };
 
   const handleMentionSelect = (mention: DealNegotiator) => {
     const newNote =
@@ -132,15 +136,14 @@ const AddNoteSection = ({
         let newNote = {
           sender: user,
           mentioned_user: mentionedUsers,
-          client:
-            negotiation?.clientInfo?.negotiations_Client ?? "Unknown Client",
+          client: negotiation?.clientNamefull ?? "Unknown Client",
           deal_coordinator: dealNegotiator?.id ?? "Unknown ID",
           deal_coordinator_name: dealNegotiator?.name ?? "Unknown Name",
           negotiation_id: negotiationId ?? "Unknown Negotiation ID",
           note: newInternalNote,
           time: getCurrentDateTime() ?? "Unknown Time",
         };
-        setAllInternalNotes((prevNotes: InternalNotes[]) => [
+        setAllInternalNotes((prevNotes: InternalNotesType[]) => [
           ...prevNotes,
           newNote,
         ]);
@@ -151,7 +154,7 @@ const AddNoteSection = ({
           if (item.fcmToken) {
             sendNotification(
               item.fcmToken,
-              `${negotiation.clientInfo.negotiations_Client} added a note`,
+              `${negotiation.clientNamefull} added a note`,
               newInternalNote,
               window.location.href
             );
@@ -168,42 +171,47 @@ const AddNoteSection = ({
   };
 
   useEffect(() => {
-    fetchBidNotes(negotiationId ?? "");
-  }, [negotiationId]);
+    // fetchBidNotes(negotiationId ?? "");
+    setAllInternalNotes(negotiation?.internalNotes ?? []);
+  }, [negotiation]);
 
   return (
     <TailwindPlusCard title="Internal Notes" icon={FileText}>
       <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
         {allInternalNotes
           .sort((a, b) => {
-            const dateA = Date.parse(a.time);
-            const dateB = Date.parse(b.time);
+            const dateA = Date.parse(a.createdAt);
+            const dateB = Date.parse(b.createdAt);
             return dateB - dateA; // Newest to oldest
           })
 
-          .map((note, index) => (
-            <div key={index} className="flex items-start space-x-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src={user[0]}
-                  alt={user.name[0]}
-                  className="rounded-full"
-                />
-                <AvatarFallback>{user.name[0]}</AvatarFallback>
-              </Avatar>
-              <div
-                className={`p-3 rounded-lg flex-grow ${
-                  note.client === user.name ? "bg-blue-100" : "bg-gray-100"
-                }`}
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <p className="font-semibold">{user.name}</p>
-                  <p className="text-xs text-gray-500">{note.time}</p>
+          .map((note, index) => {
+            return (
+              <div key={index} className="flex items-start space-x-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage
+                    src={user[0]}
+                    alt={user.name[0]}
+                    className="rounded-full"
+                  />
+                  <AvatarFallback>{user.name[0]}</AvatarFallback>
+                </Avatar>
+                <div
+                  className={`p-3 rounded-lg flex-grow ${
+                    negotiation?.userId === user.name
+                      ? "bg-blue-100"
+                      : "bg-gray-100"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="font-semibold">{user.name}</p>
+                    <p className="text-xs text-gray-500">{note.createdAt}</p>
+                  </div>
+                  <p>{note.text}</p>
                 </div>
-                <p>{note.note}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
       </div>
       <div className="space-x-2">
         <TailwindPlusTextarea

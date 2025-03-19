@@ -20,6 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import { generateRandomId } from "@/lib/utils";
 import { EditNegotiationData } from "@/types";
 import { TailwindPlusButton } from "../tailwind-plus/button";
+import { TailwindPlusInput } from "../tailwind-plus/input";
+import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
 
 interface FormData {
   dealerName: string;
@@ -315,7 +317,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                   <label className="block text-sm font-medium">
                     Dealer Name *
                   </label>
-                  <input
+                  <TailwindPlusInput
                     type="text"
                     name="dealerName"
                     value={formData.dealerName}
@@ -333,7 +335,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                   <label className="block text-sm font-medium">
                     Dealer Number *
                   </label>
-                  <input
+                  <TailwindPlusInput
                     type="text"
                     name="dealerNumber"
                     value={formData.dealerNumber}
@@ -353,7 +355,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                   <label className="block text-sm font-medium">
                     Sales Person Name
                   </label>
-                  <input
+                  <TailwindPlusInput
                     type="text"
                     name="salesPersonName"
                     value={formData.salesPersonName}
@@ -365,7 +367,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                   <label className="block text-sm font-medium">
                     Sales Person Email
                   </label>
-                  <input
+                  <TailwindPlusInput
                     type="email"
                     name="salesPersonEmail"
                     value={formData.salesPersonEmail}
@@ -376,7 +378,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
 
                 <div className="flex-1">
                   <label className="block text-sm font-medium">City</label>
-                  <input
+                  <TailwindPlusInput
                     type="text"
                     name="city"
                     value={formData.city}
@@ -389,7 +391,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
               <div className="flex space-x-4">
                 <div className="flex-1">
                   <label className="block text-sm font-medium">State</label>
-                  <input
+                  <TailwindPlusInput
                     type="text"
                     name="state"
                     value={formData.state}
@@ -403,7 +405,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                 <label className="block text-sm font-medium">
                   Price - Excluding Tax & Title *
                 </label>
-                <input
+                <TailwindPlusInput
                   type="number"
                   placeholder="Enter Price"
                   name="priceExcludingTax"
@@ -423,7 +425,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                   <label className="block text-sm font-medium">
                     Discount Amount *
                   </label>
-                  <input
+                  <TailwindPlusInput
                     type="number"
                     placeholder="Enter Price"
                     name="discountAmount"
@@ -472,7 +474,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                 <label className="block text-sm font-medium">
                   Additional Comments
                 </label>
-                <textarea
+                <TailwindPlusTextarea
                   name="additionalComments"
                   value={formData.additionalComments}
                   onChange={handleChange}

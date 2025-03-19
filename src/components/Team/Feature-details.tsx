@@ -14,6 +14,7 @@ import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusCard } from "../tailwind-plus/card";
+import { formatDateToLocal } from "@/lib/helpers/dates";
 
 type FeatureDetailsProps = {
   negotiation: NegotiationDataType | null;
@@ -56,20 +57,10 @@ const FeatureDetails = ({
     };
   }, []);
 
-  const formatDateToLocal = (date: Date | null) => {
-    if (date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed
-      const day = String(date.getDate()).padStart(2, "0");
-
-      return `${month}-${day}-${year}`; // Format as yyyy-MM-dd
-    }
-  };
-
   const handleDateChange = async (date: Date | null, fieldPath: string) => {
     const id = negotiation?.id;
     try {
-      const docRef = doc(db, "negotiations", id ?? "");
+      const docRef = doc(db, "delivrd_negotiations", id ?? "");
       await updateDoc(docRef, {
         [fieldPath]: formatDateToLocal(date),
       });
@@ -106,7 +97,7 @@ const FeatureDetails = ({
           field="condition"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "condition",
               newValue: newValue,
             })
           }
@@ -120,7 +111,7 @@ const FeatureDetails = ({
           field="brand"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "brand",
               newValue: newValue,
             })
           }
@@ -134,7 +125,7 @@ const FeatureDetails = ({
           field="model"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "model",
               newValue: newValue,
             })
           }
@@ -147,7 +138,7 @@ const FeatureDetails = ({
           field="trim"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "trim",
               newValue: newValue,
             })
           }
@@ -179,7 +170,7 @@ const FeatureDetails = ({
           field="drivetrain"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "drivetrain",
               newValue: newValue,
             })
           }
@@ -194,7 +185,7 @@ const FeatureDetails = ({
           field="tradeInInfo"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "tradeInInfo",
               newValue: newValue,
             })
           }
@@ -217,7 +208,7 @@ const FeatureDetails = ({
           field="howToPay"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "howToPay",
               newValue: newValue,
             })
           }
@@ -231,7 +222,7 @@ const FeatureDetails = ({
           field="budget"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "budget",
               newValue: newValue,
             })
           }
@@ -244,7 +235,7 @@ const FeatureDetails = ({
           field="monthlyBudget"
           onChange={(newValue) =>
             handleChange({
-              key: "dealInfo",
+              key: "monthlyBudget",
               newValue: newValue,
             })
           }
@@ -259,7 +250,7 @@ const FeatureDetails = ({
             field="trimPackageOptions"
             onChange={(newValue) =>
               handleChange({
-                key: "dealInfo",
+                key: "trimPackageOptions",
                 newValue: newValue,
               })
             }
@@ -326,15 +317,14 @@ const FeatureDetails = ({
         <h3 className="font-semibold text-lg">Colors</h3>
         <InputField
           negotiations={negotiation}
-          label="Internal Colors Desired"
-          value={negotiation?.desiredInterior ?? "No preference"}
+          label="External Colors Desired"
+          value={negotiation?.desiredExterior ?? "No preference"}
           negotiationId={negotiationId ?? ""}
-          field="desiredInterior"
+          field="desiredExterior"
           onChange={(newValue) =>
             handleChange({
-              key: "otherData",
+              key: "desiredExterior",
               newValue: newValue,
-              parentKey: "negotiations_Color_Options.interior_preferred",
             })
           }
           icon={ThumbsUp}
@@ -342,15 +332,14 @@ const FeatureDetails = ({
 
         <InputField
           negotiations={negotiation}
-          label="External Colors Desired"
-          value={negotiation?.desiredExterior ?? "No preference"}
+          label="Internal Colors Desired"
+          value={negotiation?.desiredInterior ?? "No preference"}
           negotiationId={negotiationId ?? ""}
-          field="desiredExterior"
+          field="desiredInterior"
           onChange={(newValue) =>
             handleChange({
-              key: "otherData",
+              key: "desiredInterior",
               newValue: newValue,
-              parentKey: "negotiations_Color_Options.exterior_preferred",
             })
           }
           icon={ThumbsUp}
@@ -364,7 +353,7 @@ const FeatureDetails = ({
           field="excludedExterior"
           onChange={(newValue) =>
             handleChange({
-              key: "otherData",
+              key: "excludedExterior",
               newValue: newValue,
             })
           }
@@ -378,7 +367,7 @@ const FeatureDetails = ({
           field="excludedInterior"
           onChange={(newValue) =>
             handleChange({
-              key: "otherData",
+              key: "excludedInterior",
               newValue: newValue,
             })
           }

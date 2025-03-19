@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./datepicker-custom.css";
 import DatePicker from "react-datepicker";
 import clsx from "clsx";
+import { formatDateToLocal } from "@/lib/helpers/dates";
 
 interface EditableInputProps {
   label: string;
@@ -29,6 +30,8 @@ interface EditableInputProps {
   negotiations?: EditNegotiationData | null;
   firstName?: string;
   lastName?: string;
+  parentKey?: string;
+  onBlur?: () => void;
 }
 
 const EditableInput: React.FC<EditableInputProps> = ({
@@ -41,10 +44,10 @@ const EditableInput: React.FC<EditableInputProps> = ({
   negotiations,
   firstName,
   lastName,
+  parentKey,
+  onBlur,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
-
-  const { toast } = useToast();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,84 +58,9 @@ const EditableInput: React.FC<EditableInputProps> = ({
   }, [value]);
 
   const handleBlur = async () => {
-    return;
-    if (negotiationId && field) {
-      try {
-        const usersQuery = query(
-          collection(db, "users"),
-          where("negotiation_id", "array-contains", negotiationId)
-        );
-
-        const userSnapshot = await getDocs(usersQuery);
-
-        if (userSnapshot.empty) {
-          console.error(
-            "No user found with this negotiationId:",
-            negotiationId
-          );
-          return;
-        }
-
-        const userDoc = userSnapshot.docs[0];
-        console.log("User found:", userDoc.id, userDoc.data());
-        const userDocRef = doc(db, "users", userDoc.id);
-
-        if (userField) {
-          let newValue = "";
-
-          if (userField === "firstName" || userField === "lastName") {
-            newValue = firstName + " " + lastName;
-          }
-
-          await updateDoc(userDocRef, {
-            name: newValue,
-          });
-        }
-
-        const negotiationDocRef = doc(db, "negotiations", negotiationId);
-
-        const colorOptions =
-          negotiations?.otherData?.negotiations_Color_Options;
-
-        if (field.includes("negotiations_Color_Options") && colorOptions) {
-          const property = field.split(".")[1]; // Get the property name (e.g., 'interior_preferred')
-
-          if (colorOptions.hasOwnProperty(property)) {
-            const updatedColorOptions = {
-              ...colorOptions,
-              [property]: value, // Update the specific property in the object
-            };
-
-            await updateDoc(negotiationDocRef, {
-              negotiations_Color_Options: updatedColorOptions,
-            });
-            toast({
-              title: "Field Updated",
-            });
-          } else {
-            console.error(
-              `Property ${property} not found in negotiations_Color_Options object`
-            );
-          }
-        } else {
-          await updateDoc(negotiationDocRef, {
-            [field]: value,
-          });
-          toast({
-            title: "Field Updated",
-          });
-          console.log(
-            "Updated negotiation field:",
-            field,
-            "with value:",
-            value
-          );
-        }
-      } catch (error) {
-        console.error("Error handling blur operation:", error);
-      }
-    }
+    onBlur?.();
   };
+
   const truncateValue = (value: string) => {
     if (value.length > 20) {
       return `${value.slice(0, 20)}...`;
@@ -176,12 +104,84 @@ export const InputField = (props: {
   dateFormat?: string;
   placeholderText?: string;
   selected?: Date;
+  parentKey?: string;
 }) => {
-  const Icon = props.icon;
+  const { toast } = useToast();
 
-  if (props.type === "datePicker") {
-    console.log("got here:", props.type);
-  }
+  const handleUpdate = async () => {
+    // TODO: find some way to make this generic or move out to a component
+    // as its currently used only for team-profile
+    const {
+      negotiationId,
+      field,
+      userField,
+      parentKey,
+      firstName,
+      lastName,
+      value,
+    } = props;
+    if (negotiationId && field) {
+      try {
+        const usersQuery = query(
+          collection(db, "users"),
+          where("negotiation_id", "array-contains", negotiationId)
+        );
+
+        const userSnapshot = await getDocs(usersQuery);
+
+        if (userSnapshot.empty) {
+          console.error(
+            "No user found with this negotiationId:",
+            negotiationId
+          );
+          return;
+        }
+
+        const userDoc = userSnapshot.docs[0];
+        console.log("User found:", userDoc.id, userDoc.data());
+        const userDocRef = doc(db, "users", userDoc.id);
+
+        if (userField) {
+          let newValue = "";
+
+          if (userField === "firstName" || userField === "lastName") {
+            newValue = firstName + " " + lastName;
+          }
+
+          await updateDoc(userDocRef, {
+            clientNamefull: newValue,
+          });
+        }
+
+        const negotiationDocRef = doc(
+          db,
+          "delivrd_negotiations",
+          negotiationId
+        );
+
+        let keyName = field;
+        if (parentKey) {
+          keyName = parentKey + "." + field;
+        }
+        console.log("got field:", keyName);
+        let useableValue = value;
+        // if (props.type === "datePicker") {
+        //   useableValue = formatDateToLocal(value);
+        // }
+        // await updateDoc(negotiationDocRef, {
+        //   [keyName]: useableValue,
+        // });
+        toast({
+          title: "Field Updated",
+        });
+        console.log("Updated negotiation field:", field, "with value:", value);
+      } catch (error) {
+        console.error("Error handling blur operation:", error);
+      }
+    }
+  };
+
+  const Icon = props.icon;
 
   let InputComponent;
   switch (props.type) {
@@ -200,7 +200,10 @@ export const InputField = (props: {
     <InputComponent
       label={props.label}
       value={props.value}
-      onChange={props.onChange}
+      onChange={(value) => {
+        props.onChange?.(value);
+        console.log("onChange", value);
+      }}
       negotiationId={props.negotiationId}
       field={props.field}
       userField={props.userField}
@@ -209,6 +212,13 @@ export const InputField = (props: {
       dateFormat={props.dateFormat}
       placeholderText={props.placeholderText}
       selected={props.selected}
+      parentKey={props.parentKey}
+      onBlur={() => {
+        if (!props.type || props.type === "text") {
+          console.log("blurring");
+          handleUpdate();
+        }
+      }}
       className={
         props.type === "datePicker"
           ? clsx(

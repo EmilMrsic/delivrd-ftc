@@ -109,10 +109,10 @@ function ProjectProfile() {
     if (!newComment[bid_id]?.trim()) return;
 
     const newCommentData: BidComments = {
-      client_phone_number: negotiation?.clientInfo.negotiations_Phone ?? "",
+      client_phone_number: negotiation?.clientPhone ?? "",
       bid_id,
-      client_name: negotiation?.clientInfo.negotiations_Client ?? "",
-      client: negotiation?.clientInfo.negotiations_Client ?? "",
+      client_name: negotiation?.clientNamefull ?? "",
+      client: negotiation?.clientNamefull ?? "",
       comment: newComment[bid_id],
       deal_coordinator: dealNegotiator?.id ?? "",
       deal_coordinator_name: dealNegotiator?.name ?? "",
@@ -166,9 +166,18 @@ function ProjectProfile() {
       //   };
       // }
 
+      let value = newValue;
+      let keyName = parentKey ? parentKey : key;
+      if (parentKey) {
+        value = {
+          ...prevState[parentKey],
+          [key]: newValue,
+        };
+      }
+
       return {
         ...prevState,
-        [key]: newValue,
+        [keyName]: value,
       };
     });
   };

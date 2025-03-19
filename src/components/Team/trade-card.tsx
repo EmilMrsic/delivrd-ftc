@@ -28,6 +28,7 @@ const TradeCard = ({
   negotiation,
 }: TradeCardProps) => {
   const { setNegotiation } = useTeamProfile();
+
   const handleFileUpload = async (files: FileList | null, bidId: string) => {
     const id = bidId;
     if (!files || !bidId) return;
@@ -108,37 +109,43 @@ const TradeCard = ({
           }
         />
         <InputField
-          field="trade_in_vin"
+          field="vin"
+          parentKey="tradeDetails"
           negotiationId={negotiationId ?? ""}
           label="Vin"
-          value={negotiation?.tradeInVin ?? ""}
+          value={negotiation?.tradeDetails?.vin ?? ""}
           onChange={(newValue) =>
             handleChange({
-              key: "trade_in_vin",
+              key: "vin",
+              parentKey: "tradeDetails",
               newValue: newValue,
             })
           }
         />
         <InputField
-          field="trade_in_mileage"
+          field="mileage"
+          parentKey="tradeDetails"
           negotiationId={negotiationId ?? ""}
           label="Mileage"
-          value={negotiation?.tradeInMileage ?? ""}
+          value={negotiation?.tradeDetails?.mileage ?? ""}
           onChange={(newValue) =>
             handleChange({
-              key: "trade_in_mileage",
+              key: "mileage",
+              parentKey: "tradeDetails",
               newValue: newValue,
             })
           }
         />
         <InputField
-          field="trade_in_comments"
+          field="comments"
+          parentKey="tradeDetails"
           negotiationId={negotiationId ?? ""}
           label="Comments"
-          value={negotiation?.tradeInComments ?? ""}
+          value={negotiation?.tradeDetails?.comments ?? ""}
           onChange={(newValue) =>
             handleChange({
-              key: "trade_in_comments",
+              key: "comments",
+              parentKey: "tradeDetails",
               newValue: newValue,
             })
           }
