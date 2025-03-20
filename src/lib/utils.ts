@@ -505,6 +505,19 @@ export const allowedStatuses = [
   "Follow Up Issue",
 ];
 
+export const managerAllowedStatuses = [
+  "Deal Started",
+  "Actively Negotiating",
+  "Delivery Scheduled",
+  "Deal Complete- Long Distance",
+  "Long Term Order",
+  "Shipping",
+  "Needs To Review",
+  "Follow Up",
+  "Follow Up Issue",
+  "Paid",
+];
+
 export const fetchAllActiveNegotiations = async () => {
   try {
     const negotiationsQuery = query(

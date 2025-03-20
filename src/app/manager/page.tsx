@@ -29,6 +29,7 @@ import {
   dateFormat,
   getDealsWithoutCoordinator,
   getStatusStyles,
+  managerAllowedStatuses,
 } from "@/lib/utils";
 import { Loader } from "@/components/base/loader";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
@@ -681,7 +682,7 @@ function Manager() {
                                 <TableBody>
                                   {team.negotiations
                                     .filter((item) =>
-                                      allowedStatuses.includes(
+                                      managerAllowedStatuses.includes(
                                         item?.negotiations_Status ?? ""
                                       )
                                     )

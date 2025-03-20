@@ -59,8 +59,7 @@ import VoteSection from "@/components/Team/vote-section";
 import { useRouter } from "next/navigation";
 import EditableTextArea from "@/components/base/editable-textarea";
 import { Input } from "@/components/ui/input";
-import EditableInput from "@/components/base/input-field";
-import axios from "axios";
+
 import TradeCard from "@/components/Team/trade-card";
 import DeleteBidSection from "@/components/Team/delete-bid-section";
 import WorkLogSection from "@/components/Team/work-log-section";
