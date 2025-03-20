@@ -249,6 +249,7 @@ export interface InternalNotes {
   deal_coordinator_name: string;
   negotiation_id: string;
   time: string;
+  sender: any;
 }
 
 export interface IncomingBid {
