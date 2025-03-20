@@ -424,12 +424,6 @@ export default function DealList() {
     };
   }, []);
 
-  useEffect(() => {
-    if (notificationCount > 0) {
-      alert("You have unread notifications");
-    }
-  });
-
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">

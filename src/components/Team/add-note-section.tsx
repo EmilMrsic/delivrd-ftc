@@ -188,20 +188,28 @@ const AddNoteSection = ({
               <div key={index} className="flex items-start space-x-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage
-                    src={note.sender?.name[0] ?? ""}
-                    alt={note.sender?.name[0] ?? ""}
+                    src={
+                      note.sender && note.sender.name ? note.sender.name[0] : ""
+                    }
+                    alt={
+                      note.sender && note.sender.name ? note.sender.name[0] : ""
+                    }
                   />
-                  <AvatarFallback>{note.sender?.name[0] ?? ""}</AvatarFallback>
+                  <AvatarFallback>
+                    {note.sender && note.sender.name ? note.sender.name[0] : ""}
+                  </AvatarFallback>
                 </Avatar>
                 <div
                   className={`p-3 rounded-lg flex-grow ${
-                    note.sender?.name ?? "" === user.name
+                    note.sender && note.sender.name === user.name
                       ? "bg-blue-100"
                       : "bg-gray-100"
                   }`}
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <p className="font-semibold">{note.sender?.name ?? ""}</p>
+                    <p className="font-semibold">
+                      {note.sender ? note.sender.name : "Unknown"}
+                    </p>
                     <p className="text-xs text-gray-500">{note.time}</p>
                   </div>
                   <p>{note.note}</p>

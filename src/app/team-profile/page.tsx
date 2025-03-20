@@ -27,7 +27,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db, messaging } from "@/firebase/config";
-import { ActivityLog, BidComments } from "@/types";
+import { ActivityLog, BidComments, IncomingBid } from "@/types";
 import {
   formatDate,
   generateRandomId,
@@ -350,6 +350,48 @@ function ProjectProfile() {
     }
   };
 
+  const handleAcceptOffer = async (acceptedBid: IncomingBid) => {
+    console.log(acceptedBid.bid_id);
+    try {
+      const bidRef = doc(db, "Incoming Bids", acceptedBid.bid_id);
+
+      await updateDoc(bidRef, { accept_offer: true });
+
+      setIncomingBids((prevBids) =>
+        prevBids.map((bid) => ({
+          ...bid,
+          accept_offer: bid.bid_id === acceptedBid.bid_id,
+        }))
+      );
+      const updatedBid = {
+        ...acceptedBid,
+        accept_offer: true,
+      };
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_ACCEPT_OFFER_URL ?? "",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedBid),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({ title: "Offer accepted" });
+      } else {
+        console.error("Failed to send review request:", result.error);
+        toast({
+          title: "Failed to send review request",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+    }
+  };
+
   useEffect(() => {
     const getActivityLogsByNegotiationId = async (negotiationId: string) => {
       try {
@@ -496,10 +538,20 @@ function ProjectProfile() {
                       const hasAcceptedOffer = incomingBids.find(
                         (bid) => bid.client_offer === "accepted"
                       );
+                      const hasAcceptedBid = incomingBids.some(
+                        (bid) => bid.accept_offer === true
+                      );
+                      const isAcceptedBid = bidDetails.accept_offer === true;
+                      const isDisabled = hasAcceptedBid && !isAcceptedBid;
+
                       return (
                         <div
                           key={index}
                           className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
+
+                            ${
+                              isDisabled ? "opacity-45 pointer-events-none" : ""
+                            }
                             ${
                               hasAcceptedOffer &&
                               bidDetails.client_offer !== "accepted"
@@ -533,6 +585,20 @@ function ProjectProfile() {
                                 bidDetails={bidDetails}
                                 setIncomingBids={setIncomingBids}
                               />
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleAcceptOffer(bidDetails)}
+                                className={`${
+                                  bidDetails.accept_offer === true
+                                    ? "bg-green-500 text-white"
+                                    : "bg-white text-black"
+                                }`}
+                              >
+                                {bidDetails.accept_offer
+                                  ? "Offer Accepted"
+                                  : "Accept Offer"}
+                              </Button>
                             </div>
                           </div>
                           <time className="block mb-2 text-sm text-[#202125]">
