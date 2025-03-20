@@ -1,48 +1,29 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 
 import "react-datepicker/dist/react-datepicker.css";
-import { Check, MoreHorizontal, StickyNoteIcon, X } from "lucide-react";
-import { Button } from "../ui/button";
+import { Check, X } from "lucide-react";
 import {
   dateFormat,
   dealStageOptions,
   getElapsedTime,
   getStatusStyles,
 } from "@/lib/utils";
-import DealNegotiatorDialog from "./deal-negotiator-dialog";
-import { DealNegotiator, InternalNotes, NegotiationData } from "@/types";
+
+import { InternalNotes } from "@/types";
 import { useRouter } from "next/navigation";
 import { Loader } from "../base/loader";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import DatePickerCell from "./datepicker-cell";
-import ShippingInfoDialog from "./shipping-info-dialog";
-import ManualBidUpload from "./Manual-bid-upload-modal";
 import { TailwindPlusTable } from "../tailwind-plus/table";
 import { StageDropdown } from "./stage-dropdown";
 import { DealNegotiatorDropdown } from "./deal-negotiator-dropdown";
 import { DashboardTableActions } from "./dashboard-table-actions";
-import {
-  sortDataHelper,
-  sortNegotiationsByStatus,
-} from "@/lib/helpers/negotiation";
+import { sortDataHelper } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
+import { TailwindPlusExpandableTable } from "../tailwind-plus/expandable-table";
+import { Button } from "../ui/button";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -57,6 +38,10 @@ type TeamDashboardTableProps = {
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
   negotiatorData?: DealNegotiatorType;
   loading: boolean;
+  negotiationsByColumn: Record<string, NegotiationDataType[]>;
+  sortConfig: { key: string; direction: string };
+  setSortConfig: (config: { key: string; direction: string }) => void;
+  sortData: (key: string, direction: string) => void;
 };
 
 const TeamDashboardTable = ({
@@ -70,22 +55,20 @@ const TeamDashboardTable = ({
   negotiatorData,
   loading,
   setCurrentDeals,
+  negotiationsByColumn,
+  sortConfig,
+  setSortConfig,
+  sortData,
 }: TeamDashboardTableProps) => {
-  console.log("got here in table:", currentDeals);
   const router = useRouter();
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
-  const [openNoteState, setOpenNoteStates] = useState<Record<string, boolean>>(
-    {}
-  );
+  // const [openNoteState, setOpenNoteStates] = useState<Record<string, boolean>>(
+  //   {}
+  // );
 
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
     Record<string, boolean>
   >({});
-
-  const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate", // default sorting by Submitted Date
-    direction: "ascending", // default direction
-  });
 
   const toggleDropdown = (id: string, isOpen: boolean) => {
     setOpenStates((prev) => ({
@@ -101,14 +84,12 @@ const TeamDashboardTable = ({
     }));
   };
 
-  const toggleInternalNotesDropdown = (id: string, isOpen: boolean) => {
-    setOpenNoteStates((prev) => ({
-      ...prev,
-      [id]: isOpen,
-    }));
-  };
-
-  const sortData = sortDataHelper(setCurrentDeals, currentDeals);
+  // const toggleInternalNotesDropdown = (id: string, isOpen: boolean) => {
+  //   setOpenNoteStates((prev) => ({
+  //     ...prev,
+  //     [id]: isOpen,
+  //   }));
+  // };
 
   const handleDateChange = async (
     date: string,
@@ -173,6 +154,110 @@ const TeamDashboardTable = ({
   }
 
   return (
+    <TailwindPlusExpandableTable
+      defaultExpanded={[0]}
+      rows={Object.keys(negotiationsByColumn).map((key, keyIdx) => {
+        const stage = negotiationsByColumn[key];
+
+        return {
+          Component: () => (
+            <>
+              <Button
+                variant="outline"
+                style={{
+                  backgroundColor: getStatusStyles(key ?? "").backgroundColor,
+                  color: getStatusStyles(key ?? "").textColor, // Set dynamic text color
+                }}
+                className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
+              >
+                <p>{key}</p>
+              </Button>
+              {stage.length}
+            </>
+          ),
+          expandedComponent: () => (
+            <DashboardTable
+              currentDeals={stage}
+              handleStageChange={handleStageChange}
+              toggleDropdown={toggleDropdown}
+              openStates={openStates}
+              allDealNegotiator={allDealNegotiator}
+              updateDealNegotiator={updateDealNegotiator}
+              toggleNegotiatorDropdown={toggleNegotiatorDropdown}
+              openNegotiatorState={openNegotiatorState}
+              handleDateChange={handleDateChange}
+              handleAskForReview={handleAskForReview}
+              setStopPropagation={setStopPropagation}
+              setCurrentDeals={setCurrentDeals}
+              negotiatorData={negotiatorData}
+              sortConfig={sortConfig}
+              setSortConfig={setSortConfig}
+              sortData={sortData}
+            />
+          ),
+        };
+      })}
+    />
+  );
+
+  // return (
+  //   <DashboardTable
+  //     currentDeals={currentDeals}
+  //     handleStageChange={handleStageChange}
+  //     toggleDropdown={toggleDropdown}
+  //     openStates={openStates}
+  //     allDealNegotiator={allDealNegotiator}
+  //     updateDealNegotiator={updateDealNegotiator}
+  //     toggleNegotiatorDropdown={toggleNegotiatorDropdown}
+  //     openNegotiatorState={openNegotiatorState}
+  //     handleDateChange={handleDateChange}
+  //     handleAskForReview={handleAskForReview}
+  //     setStopPropagation={setStopPropagation}
+  //     setCurrentDeals={setCurrentDeals}
+  //     negotiatorData={negotiatorData}
+  //     sortConfig={sortConfig}
+  //     setSortConfig={setSortConfig}
+  //     sortData={sortData}
+  //   />
+  // );
+};
+
+export const DashboardTable = ({
+  currentDeals,
+  handleStageChange,
+  toggleDropdown,
+  openStates,
+  allDealNegotiator,
+  updateDealNegotiator,
+  toggleNegotiatorDropdown,
+  openNegotiatorState,
+  handleDateChange,
+  handleAskForReview,
+  setStopPropagation,
+  setCurrentDeals,
+  negotiatorData,
+  sortConfig,
+  setSortConfig,
+  sortData,
+}: {
+  currentDeals: NegotiationDataType[];
+  handleStageChange: (id: string, newStage: string) => void;
+  toggleDropdown: (id: string, isOpen: boolean) => void;
+  openStates: Record<string, boolean>;
+  allDealNegotiator: DealNegotiatorType[];
+  updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  toggleNegotiatorDropdown: (id: string, isOpen: boolean) => void;
+  openNegotiatorState: Record<string, boolean>;
+  handleDateChange: (date: string, dealId: string, dateType: string) => void;
+  handleAskForReview: (id: string) => void;
+  setStopPropagation: (item: boolean) => void;
+  setCurrentDeals: (item: NegotiationDataType[]) => void;
+  negotiatorData: DealNegotiatorType;
+  sortConfig: { key: string; direction: string };
+  setSortConfig: (config: { key: string; direction: string }) => void;
+  sortData: (key: string, direction: string) => void;
+}) => {
+  return (
     <>
       <TailwindPlusTable
         headers={[
@@ -198,11 +283,14 @@ const TeamDashboardTable = ({
             },
           },
           {
-            header: "Stage",
+            header: "Condition",
             config: {
               sortable: true,
-              key: "stage",
+              key: "condition",
             },
+          },
+          {
+            header: "Stage",
           },
           {
             header: "Zip Code",
@@ -270,6 +358,7 @@ const TeamDashboardTable = ({
                 },
                 deal.brand,
                 deal.model,
+                deal.condition,
                 {
                   Component: () => (
                     <StageDropdown

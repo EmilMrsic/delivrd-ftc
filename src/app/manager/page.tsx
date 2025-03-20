@@ -42,7 +42,7 @@ import { toast } from "@/hooks/use-toast";
 import { usePathname, useRouter } from "next/navigation";
 import { statuses } from "@/components/Team/filter-popup";
 import Link from "next/link";
-import { TeamHeader } from "@/components/base/header";
+import { TeamDashboardViewHeader, TeamHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
@@ -338,7 +338,7 @@ function Manager() {
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
-      <TeamHeader
+      <TeamDashboardViewHeader
         handleBellClick={() => {}}
         notificationCount={0}
         notification={[]}

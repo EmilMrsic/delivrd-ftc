@@ -37,11 +37,19 @@ import SearchAll from "@/components/Team/search-all";
 import { TeamHeader } from "@/components/base/header";
 import { TeamDashboardFilters } from "@/components/Team/team-dashboard-filters";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
+import {
+  mapNegotiationsByColumn,
+  sortDataHelper,
+  sortMappedDataHelper,
+} from "@/lib/helpers/negotiation";
 
 export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
+  const [negotiationsByColumn, setNegotiationsByColumn] = useState<
+    Record<string, NegotiationDataType[]>
+  >({});
 
   const {
     filteredDeals,
@@ -60,6 +68,7 @@ export default function DealList() {
     setCurrentPage,
     setCurrentDeals,
     refetch,
+    negotiations,
   } = useTeamDashboard({});
 
   const { notification } = useAppSelector((state) => state.notification);
@@ -78,6 +87,22 @@ export default function DealList() {
 
   const handleBellClick = () => {
     dispatch(setNotificationCount(0));
+  };
+
+  const [sortConfig, setSortConfig] = useState({
+    key: "submittedDate", // default sorting by Submitted Date
+    direction: "ascending", // default direction
+  });
+
+  const sortData = (key: string, direction: string) => {
+    const sortedData = sortMappedDataHelper(
+      negotiationsByColumn,
+      key,
+      direction
+    );
+    setSortConfig({ key, direction });
+    setNegotiationsByColumn(sortedData);
+    // sortDataHelper(setCurrentDeals, currentDeals);
   };
 
   const [filters, setFilters] = useState({
@@ -395,6 +420,22 @@ export default function DealList() {
   }, []);
 
   useEffect(() => {
+    if (negotiations) {
+      const negotiationsByColumn = mapNegotiationsByColumn(
+        negotiations,
+        "stage"
+      );
+      const sortedNegotiationsByColumn = sortMappedDataHelper(
+        negotiationsByColumn,
+        "condition",
+        "ascending"
+      );
+      setNegotiationsByColumn(sortedNegotiationsByColumn);
+      // sortData("submittedDate", "ascending");
+    }
+  }, [negotiations]);
+
+  useEffect(() => {
     if (notificationCount > 0) {
       alert("You have unread notifications");
     }
@@ -432,8 +473,12 @@ export default function DealList() {
             currentDeals={currentDeals}
             handleStageChange={handleStageChange}
             updateDealNegotiator={updateDealNegotiator}
+            negotiationsByColumn={negotiationsByColumn}
+            sortConfig={sortConfig}
+            setSortConfig={setSortConfig}
+            sortData={sortData}
           />
-          <TeamTablePagination
+          {/* <TeamTablePagination
             setCurrentDeal={setCurrentDeals}
             filteredDeal={filteredDeals}
             totalPages={totalPages}
@@ -441,7 +486,7 @@ export default function DealList() {
             handleItemsPerPageChange={handleItemsPerPageChange}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-          />
+          /> */}
         </CardContent>
       </Card>
     </div>

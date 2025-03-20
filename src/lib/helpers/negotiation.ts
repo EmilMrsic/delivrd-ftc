@@ -47,19 +47,22 @@ export const pruneNegotiations = (negotiations: NegotiationDataType[]) => {
 };
 
 export const sortDataHelper = (
-  setCurrentDeals: (deals: NegotiationDataType[]) => void,
-  currentDeals: NegotiationDataType[]
+  currentDeals: NegotiationDataType[],
+  setCurrentDeals?: (deals: NegotiationDataType[]) => void
 ) => {
   return (key: string, direction: string) => {
-    if (key == "negotiations_Status") {
-      console.log("sorting by status");
-      const sortedDeals = sortNegotiationsByStatus(
+    let sortedDeals: NegotiationDataType[] = [];
+    if (key == "stage") {
+      sortedDeals = sortNegotiationsByStatus(
         currentDeals as NegotiationDataType[],
         direction === "ascending" ? "ascending" : "descending"
       );
-      setCurrentDeals(sortedDeals as NegotiationDataType[]);
+
+      if (setCurrentDeals) {
+        setCurrentDeals(sortedDeals as NegotiationDataType[]);
+      }
     } else {
-      const sortedDeals = [...currentDeals].sort((a: any, b: any) => {
+      sortedDeals = [...currentDeals].sort((a: any, b: any) => {
         let aValue = a[key];
         let bValue = b[key];
 
@@ -71,9 +74,30 @@ export const sortDataHelper = (
         return 0;
       });
 
-      setCurrentDeals(sortedDeals);
+      if (setCurrentDeals) {
+        setCurrentDeals(sortedDeals);
+      }
+    }
+
+    if (!setCurrentDeals) {
+      return sortedDeals;
     }
   };
+};
+
+export const sortMappedDataHelper = (
+  mappedNegotiations: Record<string, NegotiationDataType[]>,
+  key: string,
+  direction: string
+) => {
+  const sortedMappedNegotiations: Record<string, NegotiationDataType[]> = {};
+  Object.keys(mappedNegotiations).forEach((status) => {
+    const sortDataFn = sortDataHelper(mappedNegotiations[status]);
+    const sortedData = sortDataFn(key, direction);
+    sortedMappedNegotiations[status] = sortedData;
+  });
+
+  return sortedMappedNegotiations;
 };
 
 export const getActiveDealDocuments = async (dealQuery: {
@@ -167,7 +191,6 @@ export const mapNegotiationsToTeam = (
   for (const index in team) {
     const member = team[index];
     const teamMemberDeals = teamIdToObject[member.id] ?? [];
-    console.log("got here:", member);
     team[index].negotiations = teamMemberDeals;
   }
 
@@ -175,4 +198,19 @@ export const mapNegotiationsToTeam = (
     team,
     dealsWithoutCoordinator,
   };
+};
+
+export const mapNegotiationsByColumn = (
+  negotiations: NegotiationDataType[],
+  column: string
+) => {
+  const negotiationsByColumn = negotiations.reduce((acc, deal) => {
+    const columnValue = deal[column as keyof NegotiationDataType];
+    if (!acc[columnValue]) {
+      acc[columnValue] = [];
+    }
+    acc[columnValue].push(deal);
+    return acc;
+  }, {} as Record<string, NegotiationDataType[]>);
+  return negotiationsByColumn;
 };
