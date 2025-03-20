@@ -22,6 +22,7 @@ import { EditNegotiationData } from "@/types";
 import { TailwindPlusButton } from "../tailwind-plus/button";
 import { TailwindPlusInput } from "../tailwind-plus/input";
 import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
+import { TailwindPlusDialogContent } from "../tailwind-plus/dialog";
 
 interface FormData {
   dealerName: string;
@@ -92,6 +93,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
         }));
       }
     } else {
+      console.log("isOpen", name, value);
       setFormData((prevData) => ({
         ...prevData,
         [name]: value,
@@ -177,7 +179,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
       }
       const negotiationRef = doc(db, "negotiations", id ?? "");
       await updateDoc(negotiationRef, {
-        incoming_bids: arrayUnion(bid_id),
+        incomingBids: arrayUnion(bid_id),
       });
       setLoader(false);
       setFormData({
@@ -260,7 +262,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
           </TailwindPlusButton>
         </DialogTrigger>
 
-        <DialogContent className="p-8 bg-white rounded-lg max-w-[700px] mx-auto shadow-xl h-[95%] overflow-scroll">
+        <TailwindPlusDialogContent>
           <div
             onClick={(e) => {
               e.stopPropagation();
@@ -509,7 +511,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
               </div>
             </form>
           </div>
-        </DialogContent>
+        </TailwindPlusDialogContent>
       </>
     </Dialog>
   );

@@ -4,7 +4,15 @@ import { FileText } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { DealNegotiator, IncomingBid } from "@/types";
 import {
@@ -21,12 +29,14 @@ import {
   NegotiationDataType,
 } from "@/lib/models/team";
 import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
+import { v4 as uuidv4 } from "uuid";
 
 type AddNoteSectionProps = {
   user: any;
   negotiation: NegotiationDataType | null;
   dealNegotiator?: DealNegotiator;
-  negotiationId: string;
+  // negotiationId: string;
+  setNegotiation: (negotiation: NegotiationDataType) => void;
   incomingBids: IncomingBid[];
   allDealNegotiator: DealNegotiator[];
 };
@@ -35,14 +45,15 @@ const AddNoteSection = ({
   user,
   negotiation,
   dealNegotiator,
-  negotiationId,
+  // negotiationId,
   incomingBids,
   allDealNegotiator,
+  setNegotiation,
 }: AddNoteSectionProps) => {
   console.log("user:", user);
-  const [allInternalNotes, setAllInternalNotes] = useState<InternalNotesType[]>(
-    []
-  );
+  // const [allInternalNotes, setAllInternalNotes] = useState<InternalNotesType[]>(
+  //   []
+  // );
   const [mentionedUsers, setMentionedUsers] = useState<DealNegotiatorType[]>(
     []
   );
@@ -133,34 +144,24 @@ const AddNoteSection = ({
     if (newInternalNote.trim()) {
       const teamMembers = await getUsersWithTeamPrivilege();
       if (negotiation && dealNegotiator) {
-        let newNote = {
-          sender: user,
-          mentioned_user: mentionedUsers,
-          client: negotiation?.clientNamefull ?? "Unknown Client",
-          deal_coordinator: dealNegotiator?.id ?? "Unknown ID",
-          deal_coordinator_name: dealNegotiator?.name ?? "Unknown Name",
-          negotiation_id: negotiationId ?? "Unknown Negotiation ID",
-          note: newInternalNote,
-          time: getCurrentDateTime() ?? "Unknown Time",
+        const newNote: InternalNotesType = {
+          authorId: user.id,
+          mentionedTeammember: mentionedUsers.map((user) => user.id).join(","),
+          createdAt: getCurrentDateTime(),
+          text: newInternalNote,
+          noteId: uuidv4(),
         };
-        setAllInternalNotes((prevNotes: InternalNotesType[]) => [
-          ...prevNotes,
-          newNote,
-        ]);
-        const notesRef = collection(db, "internal notes");
-        await addDoc(notesRef, newNote);
-        const teamWithToken = teamMembers.filter((item) => item.fcmToken);
-        teamWithToken.forEach((item) => {
-          if (item.fcmToken) {
-            sendNotification(
-              item.fcmToken,
-              `${negotiation.clientNamefull} added a note`,
-              newInternalNote,
-              window.location.href
-            );
-          }
+        console.log("adding new note:", newNote);
+        setNegotiation({
+          ...negotiation,
+          internalNotes: [...negotiation.internalNotes, newNote],
         });
-        setNewInternalNote("");
+
+        const notesRef = doc(db, "delivrd_negotiations", negotiation.id);
+        await updateDoc(notesRef, {
+          internalNotes: [...negotiation.internalNotes, newNote],
+        });
+
         setMentionedUsers([]);
 
         toast({ title: "Note added successfully" });
@@ -170,15 +171,10 @@ const AddNoteSection = ({
     }
   };
 
-  useEffect(() => {
-    // fetchBidNotes(negotiationId ?? "");
-    setAllInternalNotes(negotiation?.internalNotes ?? []);
-  }, [negotiation]);
-
   return (
     <TailwindPlusCard title="Internal Notes" icon={FileText}>
       <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
-        {allInternalNotes
+        {negotiation?.internalNotes
           .sort((a, b) => {
             const dateA = Date.parse(a.createdAt);
             const dateB = Date.parse(b.createdAt);

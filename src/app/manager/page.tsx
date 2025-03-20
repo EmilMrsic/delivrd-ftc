@@ -42,6 +42,11 @@ import { toast } from "@/hooks/use-toast";
 import { usePathname, useRouter } from "next/navigation";
 import { statuses } from "@/components/Team/filter-popup";
 import Link from "next/link";
+import { TeamHeader } from "@/components/base/header";
+import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
+import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
+import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -57,7 +62,7 @@ type TeamDataType = {
 
 function Manager() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [teamData, setTeamData] = useState<TeamDataType[]>([]);
+  const [teamData, setTeamData] = useState<DealNegotiatorType[]>([]);
   const router = useRouter();
   const [userData, setUserData] = useState<IUser>();
   const [sortConfig, setSortConfig] = useState({
@@ -69,7 +74,7 @@ function Manager() {
     Record<string, boolean>
   >({});
   const [dealsWithoutCoordinator, setDealsWithoutCoordinator] = useState<
-    NegotiationData[]
+    NegotiationDataType[]
   >([]);
   const [loading, setLoading] = useState(false);
   const {
@@ -77,7 +82,11 @@ function Manager() {
     setFilteredDeals,
     setOriginalDeals,
     negotiatorData,
-  } = useTeamDashboard();
+    negotiations: negotiationsFromTeamDashboard,
+    team: teamFromTeamDashboard,
+  } = useTeamDashboard({
+    all: true,
+  });
 
   const toggleRow = (teamId: string) => {
     setExpandedRows((prevExpandedRows) => {
@@ -90,6 +99,24 @@ function Manager() {
       return newExpandedRows;
     });
   };
+
+  useEffect(() => {
+    if (negotiationsFromTeamDashboard) {
+      console.log(
+        "negotiationsFromTeamDashboard:",
+        negotiationsFromTeamDashboard
+      );
+      const { team: teamWithNegotiations, dealsWithoutCoordinator } =
+        mapNegotiationsToTeam(
+          negotiationsFromTeamDashboard,
+          teamFromTeamDashboard
+        );
+
+      setTeamData(teamWithNegotiations);
+      setDealsWithoutCoordinator(dealsWithoutCoordinator);
+      setLoading(false);
+    }
+  }, [negotiationsFromTeamDashboard]);
 
   const fetchTeamAndDeals = async () => {
     try {
@@ -232,12 +259,6 @@ function Manager() {
       [id]: isOpen,
     }));
   };
-  useEffect(() => {
-    fetchTeamAndDeals();
-    getDealsWithoutCoordinator().then((res) =>
-      setDealsWithoutCoordinator(res as NegotiationData[])
-    );
-  }, []);
 
   const sortData = (key: string) => {
     setSortConfig((prevConfig) => {
@@ -316,53 +337,14 @@ function Manager() {
   };
 
   return (
-    <>
-      <div className="flex justify-between items-center bg-[#202125] p-6 mb-5 shadow-lg">
-        <div
-          onClick={() => router.push("/team-dashboard")}
-          className="flex flex-col items-start cursor-pointer"
-        >
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-            alt="DELIVRD Logo"
-            className="h-8 mb-2"
-          />
-          <p className="text-white text-sm">Putting Dreams In Driveways</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-              Client Deals Dashboard
-            </h1>
-            <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-              {negotiatorData?.name}
-            </h1>
-          </div>
-        </div>
-      </div>
-      <div className="space-y-2 ml-10 w-[150px]">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
-              Select View
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-auto">
-            <div className="flex flex-col w-fit">
-              {statuses.map((status, index) => (
-                <Link
-                  key={index}
-                  className="p-2 text-sm hover:underline cursor-pointer"
-                  href={`/${status.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  {status}
-                </Link>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="container mx-auto p-4 space-y-6 min-h-screen">
+      <TeamHeader
+        handleBellClick={() => {}}
+        notificationCount={0}
+        notification={[]}
+        negotiatorData={negotiatorData}
+      />
+      <TeamDashboardViewSelector />
       <div className="w-full overflow-x-auto">
         <Table>
           {loading ? (
@@ -373,7 +355,7 @@ function Manager() {
                 </TableCell>
               </TableRow>
             </TableBody>
-          ) : teamData.length > 0 || dealsWithoutCoordinator.length > 0 ? (
+          ) : teamData?.length > 0 || dealsWithoutCoordinator?.length > 0 ? (
             <>
               <TableHeader>
                 <TableRow>
@@ -404,180 +386,16 @@ function Manager() {
                     <TableRow>
                       <TableCell colSpan={2} className="p-0">
                         <div className="w-full px-5 overflow-x-auto">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    sortWithoutCoordinatorData(
-                                      "negotiations_Client"
-                                    )
-                                  }
-                                >
-                                  Client
-                                </TableHead>
-                                <TableHead
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    sortWithoutCoordinatorData(
-                                      "negotiations_Brand"
-                                    )
-                                  }
-                                >
-                                  Make
-                                </TableHead>
-                                <TableHead
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    sortWithoutCoordinatorData(
-                                      "negotiations_Model"
-                                    )
-                                  }
-                                >
-                                  Model
-                                </TableHead>
-                                <TableHead>Stage</TableHead>
-                                <TableHead
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    sortWithoutCoordinatorData(
-                                      "negotiations_Zip_Code"
-                                    )
-                                  }
-                                >
-                                  Zip Code
-                                </TableHead>
-                                <TableHead>Deal Negotiator</TableHead>
-                                <TableHead>Onboarding Complete</TableHead>
-                                <TableHead
-                                  className="cursor-pointer"
-                                  onClick={() =>
-                                    sortWithoutCoordinatorData("submittedDate")
-                                  }
-                                >
-                                  Date Paid
-                                </TableHead>
-                              </TableRow>
-                            </TableHeader>
-
-                            <TableBody>
-                              {dealsWithoutCoordinator.map((deal, index) => (
-                                <TableRow
-                                  key={deal.id}
-                                  className={`cursor-pointer ${
-                                    index % 2 === 0
-                                      ? "bg-white hover:bg-gray-100"
-                                      : "bg-gray-50 hover:bg-gray-200"
-                                  }`}
-                                >
-                                  <TableCell className="font-medium max-w-[220px]">
-                                    <span>{deal.negotiations_Client}</span>
-                                  </TableCell>
-                                  <TableCell className="max-w-[180px]">
-                                    {deal.negotiations_Brand}
-                                  </TableCell>
-                                  <TableCell>
-                                    {deal.negotiations_Model}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="outline"
-                                      style={{
-                                        backgroundColor: getStatusStyles(
-                                          deal?.negotiations_Status ?? ""
-                                        ).backgroundColor,
-                                        color: getStatusStyles(
-                                          deal?.negotiations_Status ?? ""
-                                        ).textColor, // Set dynamic text color
-                                      }}
-                                      className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
-                                    >
-                                      <p>{deal.negotiations_Status}</p>
-                                    </Button>
-                                  </TableCell>
-                                  <TableCell>
-                                    {deal.negotiations_Zip_Code}
-                                  </TableCell>
-                                  <TableCell>
-                                    <DropdownMenu
-                                      open={
-                                        openNegotiatorState[deal.id] || false
-                                      }
-                                      onOpenChange={(isOpen) =>
-                                        toggleNegotiatorDropdown(
-                                          deal.id,
-                                          isOpen
-                                        )
-                                      }
-                                    >
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          variant="outline"
-                                          className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-                                        >
-                                          {allDealNegotiator.some(
-                                            (negotiator) =>
-                                              negotiator.id ===
-                                              deal.negotiations_deal_coordinator
-                                          ) ? (
-                                            <p>
-                                              {
-                                                allDealNegotiator.find(
-                                                  (negotiator) =>
-                                                    negotiator.id ===
-                                                    deal.negotiations_deal_coordinator
-                                                )?.name
-                                              }
-                                            </p>
-                                          ) : (
-                                            <p>Not Assigned</p>
-                                          )}
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                                        {allDealNegotiator.map(
-                                          (
-                                            negotiator: DealNegotiator,
-                                            index
-                                          ) => (
-                                            <DropdownMenuItem
-                                              key={index}
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                updateDealNegotiator(
-                                                  deal.id,
-                                                  negotiator.id
-                                                );
-                                                toggleNegotiatorDropdown(
-                                                  deal.id,
-                                                  false
-                                                );
-                                              }}
-                                            >
-                                              {negotiator.name}
-                                            </DropdownMenuItem>
-                                          )
-                                        )}
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </TableCell>{" "}
-                                  <TableCell className="text-center">
-                                    {deal.negotiations_Onboarding_Complete?.toLowerCase() ===
-                                    "yes" ? (
-                                      <Check className="text-green-500" />
-                                    ) : (
-                                      <X className="text-red-500" />
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    <div>{dateFormat(deal.date_paid)}</div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
+                          <ManagerTable
+                            deals={dealsWithoutCoordinator}
+                            sortConfig={sortConfig}
+                            setSortConfig={setSortConfig}
+                            sortData={sortWithoutCoordinatorData}
+                            openNegotiatorState={openNegotiatorState}
+                            toggleNegotiatorDropdown={toggleNegotiatorDropdown}
+                            updateDealNegotiator={updateDealNegotiator}
+                            allDealNegotiator={allDealNegotiator}
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -631,135 +449,18 @@ function Manager() {
                         <TableRow>
                           <TableCell colSpan={2} className="p-0">
                             <div className="w-full px-5 overflow-x-auto">
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead
-                                      className="cursor-pointer"
-                                      onClick={() =>
-                                        sortData("negotiations_Client")
-                                      }
-                                    >
-                                      Client
-                                    </TableHead>
-                                    <TableHead
-                                      className="cursor-pointer"
-                                      onClick={() =>
-                                        sortData("negotiations_Brand")
-                                      }
-                                    >
-                                      Make
-                                    </TableHead>
-                                    <TableHead
-                                      className="cursor-pointer"
-                                      onClick={() =>
-                                        sortData("negotiations_Model")
-                                      }
-                                    >
-                                      Model
-                                    </TableHead>
-                                    <TableHead>Stage</TableHead>
-                                    <TableHead
-                                      className="cursor-pointer"
-                                      onClick={() =>
-                                        sortData("negotiations_Zip_Code")
-                                      }
-                                    >
-                                      Zip Code
-                                    </TableHead>
-                                    <TableHead>Deal Negotiator</TableHead>
-                                    <TableHead>Onboarding Complete</TableHead>
-                                    <TableHead
-                                      className="cursor-pointer"
-                                      onClick={() => sortData("date_paid")}
-                                    >
-                                      Date Paid
-                                    </TableHead>
-                                  </TableRow>
-                                </TableHeader>
-
-                                <TableBody>
-                                  {team.negotiations
-                                    .filter((item) =>
-                                      allowedStatuses.includes(
-                                        item?.negotiations_Status ?? ""
-                                      )
-                                    )
-                                    .map((deal, index) => (
-                                      <TableRow
-                                        key={deal.id}
-                                        className={`cursor-pointer ${
-                                          index % 2 === 0
-                                            ? "bg-white hover:bg-gray-100"
-                                            : "bg-gray-50 hover:bg-gray-200"
-                                        }`}
-                                      >
-                                        <TableCell className="font-medium max-w-[220px]">
-                                          <span>
-                                            {deal.negotiations_Client}
-                                          </span>
-                                        </TableCell>
-                                        <TableCell className="max-w-[180px]">
-                                          {deal.negotiations_Brand}
-                                        </TableCell>
-                                        <TableCell>
-                                          {deal.negotiations_Model}
-                                        </TableCell>
-                                        <TableCell>
-                                          <Button
-                                            variant="outline"
-                                            style={{
-                                              backgroundColor: getStatusStyles(
-                                                deal?.negotiations_Status ?? ""
-                                              ).backgroundColor,
-                                              color: getStatusStyles(
-                                                deal?.negotiations_Status ?? ""
-                                              ).textColor, // Set dynamic text color
-                                            }}
-                                            className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
-                                          >
-                                            <p>{deal.negotiations_Status}</p>
-                                          </Button>
-                                        </TableCell>
-                                        <TableCell>
-                                          {deal.negotiations_Zip_Code}
-                                        </TableCell>
-                                        <TableCell>
-                                          {allDealNegotiator.some(
-                                            (negotiator) =>
-                                              negotiator.id ===
-                                              deal.negotiations_deal_coordinator
-                                          ) ? (
-                                            <p>
-                                              {
-                                                allDealNegotiator.find(
-                                                  (negotiator) =>
-                                                    negotiator.id ===
-                                                    deal.negotiations_deal_coordinator
-                                                )?.name
-                                              }
-                                            </p>
-                                          ) : (
-                                            <p>Not Assigned</p>
-                                          )}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                          {deal.negotiations_Onboarding_Complete?.toLowerCase() ===
-                                          "yes" ? (
-                                            <Check className="text-green-500" />
-                                          ) : (
-                                            <X className="text-red-500" />
-                                          )}
-                                        </TableCell>
-                                        <TableCell>
-                                          <div>
-                                            {dateFormat(deal.date_paid)}
-                                          </div>
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                </TableBody>
-                              </Table>
+                              <ManagerTable
+                                deals={team.negotiations}
+                                sortConfig={sortConfig}
+                                setSortConfig={setSortConfig}
+                                sortData={sortData}
+                                openNegotiatorState={openNegotiatorState}
+                                toggleNegotiatorDropdown={
+                                  toggleNegotiatorDropdown
+                                }
+                                updateDealNegotiator={updateDealNegotiator}
+                                allDealNegotiator={allDealNegotiator}
+                              />
                             </div>
                           </TableCell>
                         </TableRow>
@@ -779,8 +480,171 @@ function Manager() {
           )}
         </Table>
       </div>
-    </>
+    </div>
   );
 }
+
+export const ManagerTable = ({
+  deals,
+  sortConfig,
+  setSortConfig,
+  sortData,
+  openNegotiatorState,
+  toggleNegotiatorDropdown,
+  updateDealNegotiator,
+  allDealNegotiator,
+}: {
+  deals: NegotiationDataType[];
+  sortConfig: { key: string; direction: string };
+  setSortConfig: (config: { key: string; direction: string }) => void;
+  sortData: (key: string, direction: string) => void;
+  openNegotiatorState: Record<string, boolean>;
+  toggleNegotiatorDropdown: (id: string, isOpen: boolean) => void;
+  updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  allDealNegotiator: DealNegotiator[];
+}) => {
+  return (
+    <TailwindPlusTable
+      headers={[
+        {
+          header: "Client",
+          config: {
+            sortable: true,
+            key: "clientNamefull",
+          },
+        },
+        {
+          header: "Make",
+          config: {
+            sortable: true,
+            key: "brand",
+          },
+        },
+        {
+          header: "Model",
+          config: {
+            sortable: true,
+            key: "model",
+          },
+        },
+        {
+          header: "Stage",
+          config: {
+            sortable: true,
+            key: "stage",
+          },
+        },
+        {
+          header: "Zip Code",
+          config: {
+            sortable: true,
+            key: "zip",
+          },
+        },
+        {
+          header: "Deal Negotiator",
+          config: {
+            sortable: true,
+            key: "dealCoordinatorId",
+          },
+        },
+        {
+          header: "Onboarding Complete",
+          config: {
+            sortable: true,
+            key: "onboardingComplete",
+          },
+        },
+        {
+          header: "Date Paid",
+          config: {
+            sortable: true,
+            key: "datePaid",
+          },
+        },
+      ]}
+      rows={deals.map((deal, idx) => [
+        deal.clientNamefull,
+        deal.brand,
+        deal.model,
+        {
+          Component: () => (
+            <Button
+              variant="outline"
+              style={{
+                backgroundColor: getStatusStyles(deal?.stage ?? "")
+                  .backgroundColor,
+                color: getStatusStyles(deal?.stage ?? "").textColor, // Set dynamic text color
+              }}
+              className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
+            >
+              <p>{deal.stage}</p>
+            </Button>
+          ),
+        },
+        deal.zip,
+        {
+          Component: () => (
+            <DropdownMenu
+              open={openNegotiatorState[deal.id] || false}
+              onOpenChange={(isOpen) =>
+                toggleNegotiatorDropdown(deal.id, isOpen)
+              }
+            >
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
+                >
+                  {allDealNegotiator.some(
+                    (negotiator) => negotiator.id === deal.dealCoordinatorId
+                  ) ? (
+                    <p>
+                      {
+                        allDealNegotiator.find(
+                          (negotiator) =>
+                            negotiator.id === deal.dealCoordinatorId
+                        )?.name
+                      }
+                    </p>
+                  ) : (
+                    <p>Not Assigned</p>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+                {allDealNegotiator.map((negotiator: DealNegotiator, index) => (
+                  <DropdownMenuItem
+                    key={index}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      updateDealNegotiator(deal.id, negotiator.id);
+                      toggleNegotiatorDropdown(deal.id, false);
+                    }}
+                  >
+                    {negotiator.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ),
+        },
+        {
+          Component: () =>
+            deal.onboardingComplete?.toLowerCase() === "yes" ? (
+              <Check className="text-green-500" />
+            ) : (
+              <X className="text-red-500" />
+            ),
+        },
+        dateFormat(deal.datePaid),
+      ])}
+      sortConfig={sortConfig}
+      setSortConfig={setSortConfig}
+      sortData={sortData}
+    />
+  );
+};
 
 export default Manager;

@@ -339,7 +339,7 @@ export const IncomingBidCard = ({
         </div>
       )}
 
-      {/* {bidCommentsByBidId[bidDetails.bid_id] &&
+      {bidCommentsByBidId[bidDetails.bid_id] &&
       bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
         bidCommentsByBidId[bidDetails.bid_id].map((comment, index) => (
           <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
@@ -372,7 +372,7 @@ export const IncomingBidCard = ({
         <p className="text-sm text-gray-500">
           No comments available for this bid.
         </p>
-      )} */}
+      )}
     </div>
   );
 };

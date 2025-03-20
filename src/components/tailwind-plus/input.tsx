@@ -8,6 +8,7 @@ export const TailwindPlusInput = ({
   onBlur,
   onChange,
   ref,
+  name,
 }: {
   type?: "text" | "searchableDropdown";
   value: string;
@@ -15,6 +16,7 @@ export const TailwindPlusInput = ({
   onBlur: () => void;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   ref: React.RefObject<HTMLInputElement>;
+  name: string;
 }) => {
   return (
     <Input
@@ -24,6 +26,7 @@ export const TailwindPlusInput = ({
       onBlur={onBlur}
       onChange={onChange}
       ref={ref}
+      name={name}
       className={clsx(
         "block w-full rounded-lg border border-transparent ring-1 shadow-sm ring-black/10 p-2",
         "px-[calc(--spacing(2)-1px)] py-[calc(--spacing(1.5)-1px)] text-base/6 sm:text-sm/6",

@@ -1,6 +1,10 @@
 import { NegotiationData } from "@/types";
 import { negotiationStatusOrder } from "../constants/negotiations";
-import { NegotiationDataModel, NegotiationDataType } from "../models/team";
+import {
+  DealNegotiatorType,
+  NegotiationDataModel,
+  NegotiationDataType,
+} from "../models/team";
 import {
   collection,
   getDocs,
@@ -132,4 +136,43 @@ export const getActiveDealObjects = async (activeDeals: string[]) => {
   );
 
   return negotiationData.flat();
+};
+
+export const mapNegotiationsToTeam = (
+  negotiations: NegotiationDataType[],
+  team: DealNegotiatorType[]
+): {
+  team: DealNegotiatorType[];
+  dealsWithoutCoordinator: NegotiationDataType[];
+} => {
+  const dealsWithoutCoordinator: NegotiationDataType[] = [];
+  const teamIdToObject: {
+    [key: string]: NegotiationDataType[];
+  } = {};
+
+  negotiations.map((deal: NegotiationDataType) => {
+    if (deal.dealCoordinatorId) {
+      if (!teamIdToObject[deal.dealCoordinatorId]) {
+        teamIdToObject[deal.dealCoordinatorId] = [];
+      }
+
+      teamIdToObject[deal.dealCoordinatorId].push(deal);
+    } else if (
+      ["Actively Negotiating", "Paid", "Deal Started"].includes(deal.stage)
+    ) {
+      dealsWithoutCoordinator.push(deal);
+    }
+  });
+
+  for (const index in team) {
+    const member = team[index];
+    const teamMemberDeals = teamIdToObject[member.id] ?? [];
+    console.log("got here:", member);
+    team[index].negotiations = teamMemberDeals;
+  }
+
+  return {
+    team,
+    dealsWithoutCoordinator,
+  };
 };

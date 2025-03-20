@@ -144,27 +144,6 @@ function ProjectProfile() {
   }) => {
     setNegotiation((prevState: any) => {
       const { key, newValue, parentKey } = updateObject;
-      // let updatedParent: any = {};
-
-      // if (
-      //   parentKey === "otherData" &&
-      //   childKey.startsWith("negotiations_Color_Options")
-      // ) {
-      //   updatedParent = { ...prevState[parentKey] };
-      //   const field = childKey.split(".")[1]; // get the field name (e.g., 'interior_preferred')
-
-      //   if (updatedParent.negotiations_Color_Options) {
-      //     updatedParent.negotiations_Color_Options = {
-      //       ...updatedParent.negotiations_Color_Options,
-      //       [field]: newValue,
-      //     };
-      //   }
-      // } else {
-      //   updatedParent = {
-      //     ...prevState[parentKey],
-      //     [childKey]: newValue,
-      //   };
-      // }
 
       let value = newValue;
       let keyName = parentKey ? parentKey : key;
@@ -231,7 +210,6 @@ function ProjectProfile() {
   };
 
   const handleSave = (bidId: string) => {
-    return;
     setIncomingBids(
       incomingBids.map((bid) =>
         bid.bid_id === bidId
@@ -437,6 +415,13 @@ function ProjectProfile() {
               openDialog={openDialog}
               setOpenDialog={setOpenDialog}
               setEditingBidId={setEditingBidId}
+              setCommentingBidId={setCommentingBidId}
+              commentingBidId={commentingBidId}
+              newComment={newComment}
+              setNewComment={setNewComment}
+              addComment={addComment}
+              bidCommentsByBidId={bidCommentsByBidId}
+              parseComment={parseComment}
             />
 
             <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
@@ -448,7 +433,7 @@ function ProjectProfile() {
               </div>
               <button
                 onClick={() => setShowDeletedBids(!showDeletedBids)}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg transition duration-300 transform hover:scale-105"
+                className="px-6 py-3 bg-white hover:bg-red-700 text-black rounded-full shadow-lg transition duration-300 transform hover:scale-105"
               >
                 {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
               </button>
@@ -477,7 +462,7 @@ function ProjectProfile() {
 
             <AddNoteSection
               user={user}
-              negotiationId={negotiationId ?? ""}
+              setNegotiation={setNegotiation}
               negotiation={negotiation}
               incomingBids={incomingBids}
               allDealNegotiator={allDealNegotiator}
@@ -507,10 +492,10 @@ function ProjectProfile() {
                   negotiation?.shippingInfo ?? "No shipping info at the moment"
                 }
                 negotiationId={negotiationId ?? ""}
-                field="shipping_info"
+                field="shippingInfo"
                 onChange={(newValue) =>
                   handleChange({
-                    key: "shipping_info",
+                    key: "shippingInfo",
                     newValue: newValue,
                   })
                 }
@@ -533,6 +518,13 @@ export const IncomingBids = ({
   openDialog,
   setOpenDialog,
   setEditingBidId,
+  setCommentingBidId,
+  commentingBidId,
+  newComment,
+  setNewComment,
+  addComment,
+  bidCommentsByBidId,
+  parseComment,
 }: {
   incomingBids: IncomingBid[];
   negotiationId: string;
@@ -543,6 +535,13 @@ export const IncomingBids = ({
   openDialog: string | null;
   setOpenDialog: (openDialog: string | null) => void;
   setEditingBidId: (editingBidId: string | null) => void;
+  setCommentingBidId: (commentingBidId: string | null) => void;
+  commentingBidId: string | null;
+  newComment: { [key: string]: string };
+  setNewComment: (newComment: { [key: string]: string }) => void;
+  addComment: (bidId: string) => void;
+  bidCommentsByBidId: { [key: string]: BidComments[] };
+  parseComment: (comment: string) => React.ReactNode;
 }) => {
   return (
     <TailwindPlusCard
@@ -570,6 +569,14 @@ export const IncomingBids = ({
                 setOpenDialog={setOpenDialog}
                 index={index}
                 handleDeleteBid={handleDeleteBid}
+                setCommentingBidId={setCommentingBidId}
+                commentingBidId={commentingBidId}
+                newComment={newComment}
+                setNewComment={setNewComment}
+                addComment={addComment}
+                bidCommentsByBidId={bidCommentsByBidId}
+                parseComment={parseComment}
+                openDialog={openDialog}
               />
             ))
         ) : (
