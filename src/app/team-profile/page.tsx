@@ -183,7 +183,7 @@ function ProjectProfile() {
             href={part}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 underline text-wrap break-words"
+            className="text-blue-600 underline w-[450px] text-wrap break-words"
           >
             {part}
           </Link>
@@ -360,7 +360,7 @@ function ProjectProfile() {
         prevBids.map((bid) => ({
           ...bid,
           accept_offer: bid.bid_id === acceptedBid.bid_id,
-          vote: "like",
+          vote: bid.bid_id === acceptedBid.bid_id ? "like" : bid.vote,
         }))
       );
       const updatedBid = {
@@ -379,7 +379,7 @@ function ProjectProfile() {
       const result = await response.json();
 
       if (result.success) {
-        toast({ title: "Offer accepted" });
+        toast({ title: "Offer accepted", variant: "default" });
       } else {
         console.error("Failed to accept offer:", result.error);
         toast({
@@ -546,6 +546,8 @@ function ProjectProfile() {
                     .sort((a, b) => {
                       if (a.client_offer === "accepted") return -1;
                       if (b.client_offer === "accepted") return 1;
+                      if (a.accept_offer) return -1;
+                      if (b.accept_offer) return 1;
                       const dateA = new Date(a?.timestamp || 0).getTime();
                       const dateB = new Date(b?.timestamp || 0).getTime();
                       return dateB - dateA; // Newest bids first
