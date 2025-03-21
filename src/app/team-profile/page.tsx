@@ -351,16 +351,16 @@ function ProjectProfile() {
   };
 
   const handleAcceptOffer = async (acceptedBid: IncomingBid) => {
-    console.log(acceptedBid.bid_id);
     try {
       const bidRef = doc(db, "Incoming Bids", acceptedBid.bid_id);
 
-      await updateDoc(bidRef, { accept_offer: true });
+      await updateDoc(bidRef, { accept_offer: true, vote: "like" });
 
       setIncomingBids((prevBids) =>
         prevBids.map((bid) => ({
           ...bid,
           accept_offer: bid.bid_id === acceptedBid.bid_id,
+          vote: "like",
         }))
       );
       const updatedBid = {
@@ -381,12 +381,31 @@ function ProjectProfile() {
       if (result.success) {
         toast({ title: "Offer accepted" });
       } else {
-        console.error("Failed to send review request:", result.error);
+        console.error("Failed to accept offer:", result.error);
         toast({
-          title: "Failed to send review request",
+          title: "Failed to accept offer",
           variant: "destructive",
         });
       }
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+    }
+  };
+
+  const handleCancelOffer = async (acceptedBid: IncomingBid) => {
+    try {
+      const bidRef = doc(db, "Incoming Bids", acceptedBid.bid_id);
+
+      await updateDoc(bidRef, { accept_offer: false });
+
+      setIncomingBids((prevBids) =>
+        prevBids.map((bid) => ({
+          ...bid,
+          accept_offer: bid.bid_id === acceptedBid.bid_id && false,
+        }))
+      );
+
+      toast({ title: "Offer canceled" });
     } catch (error) {
       console.error("Error accepting offer:", error);
     }
@@ -585,20 +604,27 @@ function ProjectProfile() {
                                 bidDetails={bidDetails}
                                 setIncomingBids={setIncomingBids}
                               />
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAcceptOffer(bidDetails)}
-                                className={`${
-                                  bidDetails.accept_offer === true
-                                    ? "bg-green-500 text-white"
-                                    : "bg-white text-black"
-                                }`}
-                              >
-                                {bidDetails.accept_offer
-                                  ? "Offer Accepted"
-                                  : "Accept Offer"}
-                              </Button>
+                              {bidDetails.accept_offer ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleCancelOffer(bidDetails)}
+                                  className={
+                                    "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
+                                  }
+                                >
+                                  Cancel Offer
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleAcceptOffer(bidDetails)}
+                                  className={"bg-white text-black"}
+                                >
+                                  Accept Offer
+                                </Button>
+                              )}
                             </div>
                           </div>
                           <time className="block mb-2 text-sm text-[#202125]">
