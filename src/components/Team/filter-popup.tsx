@@ -8,8 +8,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { dealStageOptions, vehicleOfInterest } from "@/lib/utils";
-import { DealNegotiator } from "@/types";
 import Link from "next/link";
+import { DealNegotiatorType } from "@/lib/models/team";
 
 type FilterPopupProps = {
   filters: any;
@@ -18,7 +18,7 @@ type FilterPopupProps = {
     value: string
   ) => void;
 
-  dealCoordinators: DealNegotiator[];
+  dealCoordinators: DealNegotiatorType[];
 };
 
 export const statuses = [
@@ -140,13 +140,9 @@ const FilterPopup = ({
                 (e) => setSearchCoordinators(e.target.value.toLowerCase()) // Update search state
               }
             />
-            <div className="h-56 overflow-scroll">
+            <div className="max-h-56 overflow-scroll">
               {dealCoordinators
-                .filter((coordinator) =>
-                  coordinator.name
-                    .toLowerCase()
-                    .includes(searchCoordinators.toLowerCase())
-                )
+                .filter((coordinator) => coordinator.visible)
                 .map((coordinator, index) => (
                   <DropdownMenuCheckboxItem
                     key={index}

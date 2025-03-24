@@ -10,7 +10,6 @@ export const TeamDashboardFilters = ({
   filters,
   handleFilterChange,
   clearFilters,
-  setCurrentDeals,
   searchTerm,
   handleSearch,
 }: any) => {

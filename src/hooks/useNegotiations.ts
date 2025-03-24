@@ -4,18 +4,31 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 
 export const useNegotiations = (
-  config: { all?: boolean; filter?: { [key: string]: string | string[] } } = {}
+  config: {
+    all?: boolean;
+    filter?: { [key: string]: string | string[] };
+    id?: string;
+  } = {}
 ) => {
-  const [id, setId] = useState<string>(getUserData().deal_coordinator_id);
+  const [id, setId] = useState<string>(
+    config.id || getUserData().deal_coordinator_id
+  );
+
+  const [filters, setFilters] = useState<{ [key: string]: string | string[] }>(
+    config.filter ?? {}
+  );
 
   const negotiationsQuery = useQuery({
     queryKey: ["negotiations"],
     queryFn: async () => {
+      console.log("filters: running", filters, id);
       const request = await backendRequest(
-        config.all ? `negotiation` : `negotiation/${id}`,
+        config.all
+          ? `negotiation`
+          : `negotiation/${id || getUserData().deal_coordinator_id}`,
         "POST",
         {
-          filter: config.filter,
+          filter: filters,
         }
       );
 
@@ -23,13 +36,18 @@ export const useNegotiations = (
     },
   });
 
-  const handleIdChange = (newId: string) => {
+  const handleIdChange = (
+    newId: string,
+    newFilters?: { [key: string]: string | string[] }
+  ) => {
     setId(newId);
+    console.log("newFilters: ", newFilters);
+    setFilters(newFilters ?? {});
   };
 
   useEffect(() => {
     negotiationsQuery.refetch();
-  }, [id]);
+  }, [id, filters]);
 
   return {
     negotiations: negotiationsQuery.data?.negotiations,

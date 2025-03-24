@@ -27,7 +27,8 @@ export const DashboardTableActions = ({
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      {/* align="end" */}
+      <DropdownMenuContent>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <div className="flex flex-col items-start">
           <DealNegotiatorDialog

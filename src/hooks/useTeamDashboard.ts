@@ -20,6 +20,7 @@ import { NegotiationDataType } from "@/lib/models/team";
 const useTeamDashboard = (
   config: {
     all?: boolean;
+    id?: string;
     filter?: {
       [key: string]: string | string[];
     };
