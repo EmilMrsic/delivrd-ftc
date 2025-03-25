@@ -24,6 +24,7 @@ import { sortDataHelper } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusExpandableTable } from "../tailwind-plus/expandable-table";
 import { Button } from "../ui/button";
+import { ClientProfile } from "./profile/client-profile";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -355,6 +356,13 @@ export const DashboardTable = ({
             ? currentDeals.map((deal) => [
                 {
                   text: deal.clientNamefull,
+                  config: {
+                    expandable: true,
+                    expandedComponent: () => (
+                      <ClientProfile negotiationId={deal.id} />
+                    ),
+                    expandedSize: "full",
+                  },
                 },
                 deal.brand,
                 deal.model,

@@ -6,7 +6,7 @@ import {
   flexRender,
   Header,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Expand } from "lucide-react";
 import Link from "next/link";
 
@@ -24,6 +24,7 @@ interface HeaderWithConfig {
 interface CellConfig {
   expandable?: boolean;
   expandedComponent?: React.ComponentType<any>;
+  expandedSize?: "full" | "normal";
   link?: string;
 }
 
@@ -141,9 +142,31 @@ export const TailwindTableExpandedPopover = ({
   expanded: [number, number] | null;
 }) => {
   const Component = cell.config?.expandedComponent;
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current?.contains(event.target)) {
+        setExpanded(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-4 max-h-[60vh] overflow-y-auto">
+      <div
+        className={cn(
+          "bg-white rounded-lg shadow-lg max-w-md w-full p-4 overflow-y-auto",
+          cell.config?.expandedSize === "full"
+            ? "max-h-[90vh]"
+            : "max-h-[60vh]",
+          cell.config?.expandedSize === "full" ? "max-w-[90vw]" : ""
+        )}
+        ref={ref}
+      >
         {Component && (
           <Component setExpanded={setExpanded} expanded={expanded} />
         )}
