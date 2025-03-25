@@ -35,7 +35,6 @@ import {
 import { db } from "@/firebase/config";
 import { DealNegotiator, IUser, NegotiationData } from "@/types";
 import {
-  dateFormat,
   getDealsWithoutCoordinator,
   getReviewDealsWithoutCoordinator,
   getStatusStyles,
@@ -59,6 +58,7 @@ import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TeamDashboardViewHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
+import { dateFormat } from "@/lib/helpers/dates";
 
 // type TeamDataType = {
 //   activeDeals: string[];
@@ -149,9 +149,9 @@ function NeedToReview() {
     team,
   } = useTeamDashboard({
     all: true,
-    // filter: {
-    //   status: "Needs To Review",
-    // },
+    filter: {
+      stage: "Needs To Review",
+    },
   });
 
   const [sortConfig, setSortConfig] = useState({
@@ -481,7 +481,7 @@ function NeedToReview() {
                         <TableRow>
                           <TableCell colSpan={2} className="p-0">
                             <ReviewTable
-                              team={team}
+                              negotiations={team?.negotiations ?? []}
                               allDealNegotiator={allDealNegotiator}
                               openDealerNegotiatorState={
                                 openDealerNegotiatorState
@@ -555,7 +555,7 @@ function NeedToReview() {
   );
 }
 
-export const ReviewTable = ({
+const ReviewTable = ({
   negotiations,
   allDealNegotiator,
   openDealerNegotiatorState,

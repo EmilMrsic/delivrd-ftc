@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
+import { dateFormat } from "@/lib/helpers/dates";
 import { sortDataHelper } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { fetchAllOldNegotiations, getStatusStyles } from "@/lib/utils";
@@ -69,7 +70,7 @@ const OldDeals = () => {
     direction: "ascending",
   });
 
-  const sortData = sortDataHelper(setNegotiations, negotiations);
+  const sortData = sortDataHelper(negotiations, setNegotiations);
 
   useEffect(() => {
     setNegotiations(negotiationsFromTeamDashboard);
@@ -155,7 +156,6 @@ const OldDeals = () => {
             ]}
             rows={negotiations
               .filter((deal) => {
-                return true;
                 if (!deal.datePaid) return false;
                 const today = new Date();
                 const paidDate = new Date(deal.datePaid);
@@ -203,8 +203,8 @@ const OldDeals = () => {
                     </Button>
                   ),
                 },
-                deal.datePaid,
-                deal.dealStartDate,
+                dateFormat(deal.datePaid),
+                dateFormat(deal.dealStartDate),
                 allDealNegotiator.find(
                   (negotiator) => negotiator.id === deal.dealCoordinatorId
                 )?.name || "Not Assigned",

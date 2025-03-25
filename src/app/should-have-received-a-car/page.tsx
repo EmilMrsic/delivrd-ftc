@@ -80,7 +80,7 @@ function ReceivedCar() {
   } = useTeamDashboard({
     all: true,
     filter: {
-      // status: "Shipping",
+      stage: "Shipping",
     },
   });
 
@@ -113,11 +113,10 @@ function ReceivedCar() {
     if (negotiationsFromTeamDashboard) {
       const filteredDeals = negotiationsFromTeamDashboard.filter(
         (item: any) => {
-          return true;
           return (
-            item.negotiations_Status === "Shipping" ||
-            item.negotiations_Status === "Delivery Scheduled" ||
-            item.negotiations_Status === "Follow Up Issue"
+            item.stage === "Shipping" ||
+            item.stage === "Delivery Scheduled" ||
+            item.stage === "Follow Up Issue"
           );
         }
       );
@@ -142,7 +141,7 @@ function ReceivedCar() {
         console.log(member.id, member.name, teamMemberDeals);
         const groupedByStatus = teamMemberDeals.reduce(
           (acc: any, negotiation: any) => {
-            const status = negotiation.negotiations_Status || "Unknown";
+            const status = negotiation.stage || "Unknown";
             if (!acc[status]) acc[status] = [];
             acc[status].push(negotiation);
             return acc;

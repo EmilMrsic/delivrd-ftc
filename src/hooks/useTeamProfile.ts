@@ -21,7 +21,7 @@ import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNegotiations } from "./useNegotiations";
-import { NegotiationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -40,9 +40,9 @@ const useTeamProfile = () => {
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const { notification } = useAppSelector((state) => state.notification);
   const [dealers, setDealers] = useState<DealerData[]>([]);
-  const [allDealNegotiator, setAllDealNegotiator] = useState<DealNegotiator[]>(
-    []
-  );
+  const [allDealNegotiator, setAllDealNegotiator] = useState<
+    DealNegotiatorType[]
+  >([]);
   const [negotiation, setNegotiation] = useState<NegotiationDataType | null>(
     null
   );
@@ -130,7 +130,7 @@ const useTeamProfile = () => {
         ...doc.data(),
       }));
 
-      return negotiatiatorData as DealNegotiator[];
+      return negotiatiatorData as DealNegotiatorType[];
     } catch (error) {
       console.log(error);
     }
@@ -148,7 +148,7 @@ const useTeamProfile = () => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
     fetchBidComments();
     getAllDealNegotiator().then((res) =>
-      setAllDealNegotiator(res as DealNegotiator[])
+      setAllDealNegotiator(res as DealNegotiatorType[])
     );
   }, [incomingBids]);
 

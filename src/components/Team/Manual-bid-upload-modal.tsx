@@ -324,7 +324,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                     name="dealerName"
                     value={formData.dealerName}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                    // className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />
                   {errors?.dealerName && (
                     <span className="text-red-500 text-sm">
@@ -342,7 +342,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                     name="dealerNumber"
                     value={formData.dealerNumber}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                    // className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />
                   {errors?.dealerNumber && (
                     <span className="text-red-500 text-sm">
@@ -362,7 +362,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                     name="salesPersonName"
                     value={formData.salesPersonName}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                    // className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />
                 </div>
                 <div className="flex-1">
@@ -374,7 +374,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                     name="salesPersonEmail"
                     value={formData.salesPersonEmail}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                    // className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />
                 </div>
 
@@ -385,7 +385,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                    // className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />
                 </div>
               </div>
@@ -398,7 +398,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                     name="state"
                     value={formData.state}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                    // className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />
                 </div>
               </div>
@@ -413,7 +413,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                   name="priceExcludingTax"
                   value={formData.priceExcludingTax}
                   onChange={handleChange}
-                  className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                  // className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                 />
                 {errors?.priceExcludingTax && (
                   <span className="text-red-500 text-sm">
@@ -433,7 +433,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                     name="discountAmount"
                     value={formData.discountAmount}
                     onChange={handleChange}
-                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                    // className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                   />
                   {errors?.discountAmount && (
                     <span className="text-red-500 text-sm">

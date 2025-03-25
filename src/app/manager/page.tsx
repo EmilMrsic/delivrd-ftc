@@ -39,14 +39,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { usePathname, useRouter } from "next/navigation";
-import { statuses } from "@/components/Team/filter-popup";
-import Link from "next/link";
-import { TeamDashboardViewHeader, TeamHeader } from "@/components/base/header";
+import { useRouter } from "next/navigation";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
+import { TeamHeader } from "@/components/base/header";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -268,7 +266,7 @@ function Manager() {
           : "ascending";
 
       const sortedTeams = [...teamData].map((team) => {
-        const sortedNegotiations = [...team.negotiations].sort(
+        const sortedNegotiations = [...(team.negotiations ?? [])].sort(
           (a: any, b: any) => {
             let aValue = a[key];
             let bValue = b[key];
@@ -338,11 +336,11 @@ function Manager() {
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
-      <TeamDashboardViewHeader
+      <TeamHeader
         handleBellClick={() => {}}
         notificationCount={0}
         notification={[]}
-        negotiatorData={negotiatorData}
+        negotiatorData={negotiatorData as unknown as DealNegotiatorType}
       />
       <TeamDashboardViewSelector />
       <div className="w-full overflow-x-auto">
@@ -432,13 +430,11 @@ function Manager() {
                             <p className="text-xs">
                               No of Deals:{" "}
                               {
-                                team.negotiations.filter(
+                                team.negotiations?.filter(
                                   (item) =>
-                                    item.negotiations_Status ===
-                                      "Deal Started" ||
-                                    item.negotiations_Status ===
-                                      "Actively Negotiating" ||
-                                    item.negotiations_Status === "Paid"
+                                    item.stage === "Deal Started" ||
+                                    item.stage === "Actively Negotiating" ||
+                                    item.stage === "Paid"
                                 ).length
                               }
                             </p>
@@ -450,7 +446,7 @@ function Manager() {
                           <TableCell colSpan={2} className="p-0">
                             <div className="w-full px-5 overflow-x-auto">
                               <ManagerTable
-                                deals={team.negotiations}
+                                deals={team.negotiations ?? []}
                                 sortConfig={sortConfig}
                                 setSortConfig={setSortConfig}
                                 sortData={sortData}
@@ -484,7 +480,7 @@ function Manager() {
   );
 }
 
-export const ManagerTable = ({
+const ManagerTable = ({
   deals,
   sortConfig,
   setSortConfig,

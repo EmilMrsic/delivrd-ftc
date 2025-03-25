@@ -51,7 +51,7 @@ const ReminderStatus = () => {
   } = useTeamDashboard({
     all: true,
     filter: {
-      status: "Proposal Sent",
+      stage: "Proposal Sent",
     },
   });
   const [loading, setLoading] = useState<boolean>(true);
@@ -62,7 +62,7 @@ const ReminderStatus = () => {
     direction: "ascending",
   });
 
-  const sortData = sortDataHelper(setNegotiations, negotiations);
+  const sortData = sortDataHelper(negotiations, setNegotiations);
 
   useEffect(() => {
     setNegotiations(negotiationsFromTeamDashboard);

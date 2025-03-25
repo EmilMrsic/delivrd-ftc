@@ -381,7 +381,7 @@ function ProjectProfile() {
         handleBellClick={handleBellClick}
         notificationCount={notificationCount}
         notification={notification}
-        negotiatorData={dealNegotiator}
+        negotiatorData={dealNegotiator as unknown as DealNegotiatorType}
       />
 
       {showStickyHeader && <StickyHeader negotiation={negotiation} />}
@@ -408,7 +408,7 @@ function ProjectProfile() {
             <IncomingBids
               incomingBids={incomingBids}
               negotiationId={negotiationId ?? ""}
-              dealers={dealers}
+              dealers={dealers as unknown as DealNegotiatorType[]}
               handleDeleteBid={handleDeleteBid}
               handleEdit={handleEdit}
               handleSave={handleSave}
@@ -508,7 +508,7 @@ function ProjectProfile() {
   );
 }
 
-export const IncomingBids = ({
+const IncomingBids = ({
   incomingBids,
   negotiationId,
   dealers,

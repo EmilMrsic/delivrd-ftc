@@ -7,3 +7,12 @@ export const formatDateToLocal = (date: Date | null) => {
     return `${month}-${day}-${year}`; // Format as yyyy-MM-dd
   }
 };
+
+export const dateFormat = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "2-digit",
+  });
+};

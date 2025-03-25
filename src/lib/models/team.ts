@@ -55,6 +55,12 @@ export const NegotiationDataModel = z.object({
   vehicleOfinterest: z.string(),
   trim: z.string(),
   consultNotes: z.string(),
+
+  // these are subject to change after emil
+  tradeInInfo: z.string(),
+  dealInfo: z.object({
+    trade_in_files: z.array(z.string()),
+  }),
 });
 
 export const DealNegotiatorModel = z.object({

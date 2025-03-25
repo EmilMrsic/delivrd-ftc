@@ -77,20 +77,20 @@ const PaidHolding = () => {
   } = useTeamDashboard({
     all: true,
     filter: {
-      status: "Paid Holding",
+      stage: "Paid Holding",
     },
   });
   const [loading, setLoading] = useState<boolean>(true);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  // const [isOpen, setIsOpen] = useState<boolean>(false);
   const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);
-  const [hoveredCell, setHoveredCell] = useState<string | null>(null);
-  const [expandedNote, setExpandedNote] = useState<{
-    id: string;
-    note: string;
-  } | null>(null);
-  const [selectedDeal, setSelectedDeal] = useState<NegotiationDataType | null>(
-    null
-  );
+  // const [hoveredCell, setHoveredCell] = useState<string | null>(null);
+  // const [expandedNote, setExpandedNote] = useState<{
+  //   id: string;
+  //   note: string;
+  // } | null>(null);
+  // const [selectedDeal, setSelectedDeal] = useState<NegotiationDataType | null>(
+  //   null
+  // );
   const [sortConfig, setSortConfig] = useState({
     key: "submittedDate", // default sorting by Submitted Date
     direction: "ascending", // default direction
@@ -101,13 +101,13 @@ const PaidHolding = () => {
     setLoading(false);
   }, [negotiationsFromTeamDashboard]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setSelectedDeal(null);
-    }
-  }, [isOpen]);
+  // useEffect(() => {
+  //   if (!isOpen) {
+  //     setSelectedDeal(null);
+  //   }
+  // }, [isOpen]);
 
-  const sortData = sortDataHelper(setNegotiations, negotiations);
+  const sortData = sortDataHelper(negotiations, setNegotiations);
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">

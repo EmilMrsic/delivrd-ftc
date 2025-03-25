@@ -5,6 +5,8 @@ import { formatDate } from "@/lib/utils";
 import { FileText, Pencil, Plus, Save, Trash, Upload, X } from "lucide-react";
 import VoteSection from "../vote-section";
 import { Textarea } from "@/components/ui/textarea";
+import { DealNegotiatorType } from "@/lib/models/team";
+import { BidComments, IncomingBid } from "@/types";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -33,10 +35,10 @@ export const IncomingBidCard = ({
   handleEdit,
 }: any) => {
   const matchingDealer = dealers.find(
-    (dealer) => dealer.id === bidDetails.dealerId
+    (dealer: DealNegotiatorType) => dealer.id === bidDetails.dealerId
   );
   const hasAcceptedOffer = incomingBids.find(
-    (bid) => bid.client_offer === "accepted"
+    (bid: IncomingBid) => bid.client_offer === "accepted"
   );
 
   return (
@@ -125,7 +127,7 @@ export const IncomingBidCard = ({
 
               {/* Files Section */}
               <div className="flex flex-wrap h-[150px] overflow-y-scroll gap-4 mt-4">
-                {bidDetails.files.map((file, index) => {
+                {bidDetails.files.map((file: string, index: number) => {
                   const isImage = [
                     "jpg",
                     "jpeg",
@@ -326,7 +328,7 @@ export const IncomingBidCard = ({
             placeholder="Add a comment..."
             value={newComment[bidDetails.bid_id] || ""}
             onChange={(e) =>
-              setNewComment((prev) => ({
+              setNewComment((prev: { [key: string]: string }) => ({
                 ...prev,
                 [bidDetails.bid_id]: e.target.value,
               }))
@@ -341,33 +343,35 @@ export const IncomingBidCard = ({
 
       {bidCommentsByBidId[bidDetails.bid_id] &&
       bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
-        bidCommentsByBidId[bidDetails.bid_id].map((comment, index) => (
-          <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
-            <div key={index} className="p-2 flex flex-col  mt-1">
-              <p>
-                <strong>
-                  {comment.deal_coordinator_name === "N/A"
-                    ? comment.client_name
-                    : comment.deal_coordinator_name}
-                  :
-                </strong>{" "}
-                {parseComment(comment.comment)}
-              </p>
-              <p className="text-sm text-gray-500">{comment.time}</p>
+        bidCommentsByBidId[bidDetails.bid_id].map(
+          (comment: BidComments, index: number) => (
+            <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
+              <div key={index} className="p-2 flex flex-col  mt-1">
+                <p>
+                  <strong>
+                    {comment.deal_coordinator_name === "N/A"
+                      ? comment.client_name
+                      : comment.deal_coordinator_name}
+                    :
+                  </strong>{" "}
+                  {parseComment(comment.comment)}
+                </p>
+                <p className="text-sm text-gray-500">{comment.time}</p>
+              </div>
+              {comment.deal_coordinator_name === "N/A" ? (
+                <p className="pr-2">From Client</p>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="border-black"
+                  onClick={() => handleSendComment(comment)}
+                >
+                  Send To Client
+                </Button>
+              )}
             </div>
-            {comment.deal_coordinator_name === "N/A" ? (
-              <p className="pr-2">From Client</p>
-            ) : (
-              <Button
-                variant="outline"
-                className="border-black"
-                onClick={() => handleSendComment(comment)}
-              >
-                Send To Client
-              </Button>
-            )}
-          </div>
-        ))
+          )
+        )
       ) : (
         <p className="text-sm text-gray-500">
           No comments available for this bid.

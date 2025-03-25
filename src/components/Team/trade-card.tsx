@@ -104,7 +104,7 @@ const TradeCard = ({
           onChange={(newValue) =>
             handleChange({
               key: "trade_in_info",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
         />
@@ -118,7 +118,7 @@ const TradeCard = ({
             handleChange({
               key: "vin",
               parentKey: "tradeDetails",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
         />
@@ -132,7 +132,7 @@ const TradeCard = ({
             handleChange({
               key: "mileage",
               parentKey: "tradeDetails",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
         />
@@ -146,7 +146,7 @@ const TradeCard = ({
             handleChange({
               key: "comments",
               parentKey: "tradeDetails",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
         />

@@ -9,14 +9,16 @@ export const TailwindPlusInput = ({
   onChange,
   ref,
   name,
+  placeholder,
 }: {
-  type?: "text" | "searchableDropdown";
+  type?: "text" | "searchableDropdown" | "email" | "number";
   value: string;
-  onFocus: () => void;
-  onBlur: () => void;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  ref: React.RefObject<HTMLInputElement>;
-  name: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  ref?: React.RefObject<HTMLInputElement>;
+  name?: string;
+  placeholder?: string;
 }) => {
   return (
     <Input
@@ -32,6 +34,7 @@ export const TailwindPlusInput = ({
         "px-[calc(--spacing(2)-1px)] py-[calc(--spacing(1.5)-1px)] text-base/6 sm:text-sm/6",
         "data-focus:outline data-focus:outline-2 data-focus:-outline-offset-1 data-focus:outline-black"
       )}
+      placeholder={placeholder}
     />
   );
 };

@@ -43,6 +43,7 @@ import {
   sortMappedDataHelper,
 } from "@/lib/helpers/negotiation";
 import { useRouter } from "next/navigation";
+import { getUserData } from "@/lib/user";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -195,8 +196,8 @@ export default function DealList() {
       );
     }
 
-    setFilters((prevFilters) => {
-      const updatedFilters = {
+    setFilters((prevFilters: typeof filters) => {
+      const updatedFilters: typeof filters = {
         ...DEFAULT_FILTERS,
         dealCoordinators: prevFilters.dealCoordinators,
       };
@@ -448,6 +449,8 @@ export default function DealList() {
       alert("You have unread notifications");
     }
   });
+
+  console.log("user data:", negotiations);
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">

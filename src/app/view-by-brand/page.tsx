@@ -84,8 +84,9 @@ const fields = [
 const ViewByBrand = () => {
   const { negotiatorData, negotiations: negotiationsFromTeamDashboard } =
     useTeamDashboard({
+      all: true,
       filter: {
-        //status: ["Actively Negotiating", "Deal Started", "Paid"],
+        stage: ["Actively Negotiating", "Deal Started", "Paid"],
       },
     });
   const [loading, setLoading] = useState<boolean>(true);
@@ -131,7 +132,7 @@ const ViewByBrand = () => {
     }
   }, [filters, negotiations]);
 
-  const sortData = sortDataHelper(setNegotiations, negotiations);
+  const sortData = sortDataHelper(negotiations, setNegotiations);
   console.log(negotiations);
 
   return (

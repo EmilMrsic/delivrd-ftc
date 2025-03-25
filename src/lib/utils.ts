@@ -19,6 +19,9 @@ import {
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { twMerge } from "tailwind-merge";
+import { dateFormat } from "./helpers/dates";
+
+export { dateFormat };
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -102,15 +105,6 @@ export const getElapsedTime = (
     const diffWeeks = Math.floor(diffDays / 7);
     return `${diffWeeks} week${diffWeeks !== 1 ? "s" : ""} ago`;
   }
-};
-
-export const dateFormat = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "2-digit",
-  });
 };
 
 export const mapNegotiationData = (data: any): EditNegotiationData => {

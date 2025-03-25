@@ -98,7 +98,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "condition",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={Car}
@@ -112,7 +112,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "brand",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           type="searchableDropdown"
@@ -126,7 +126,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "model",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={Car}
@@ -139,7 +139,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "trim",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={() => (
@@ -171,14 +171,14 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "drivetrain",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           type="searchableDropdown"
           icon={Car}
         />
 
-        <InputField
+        {/* <InputField
           label="Trade In"
           value={negotiation?.tradeInInfo ?? "Trade in not available"}
           negotiationId={negotiationId ?? ""}
@@ -186,7 +186,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "tradeInInfo",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={() => (
@@ -199,7 +199,7 @@ const FeatureDetails = ({
               <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
             </svg>
           )}
-        />
+        /> */}
         <InputField
           options={["Lease", "Cash", "Finance", "Need to Discuss"]}
           label="Finance Type"
@@ -209,7 +209,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "howToPay",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={DollarSign}
@@ -223,20 +223,20 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "budget",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={DollarSign}
         />
         <InputField
           label="Monthly Budget"
-          value={negotiation?.monthlyBudget ?? "No monthly budget"}
+          value={(negotiation?.monthlyBudget ?? "No monthly budget") as string}
           negotiationId={negotiationId ?? ""}
           field="monthlyBudget"
           onChange={(newValue) =>
             handleChange({
               key: "monthlyBudget",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={DollarSign}
@@ -251,7 +251,7 @@ const FeatureDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "trimPackageOptions",
-                newValue: newValue,
+                newValue: newValue as string,
               })
             }
           />
@@ -266,8 +266,10 @@ const FeatureDetails = ({
           label="Start Date"
           selected={dealStartDate}
           onChange={(date) => {
-            setDealStartDate(date);
-            handleDateChange(date, "dealStartDate");
+            if (date instanceof Date || date === null) {
+              setDealStartDate(date);
+              handleDateChange(date, "dealStartDate");
+            }
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
@@ -278,8 +280,10 @@ const FeatureDetails = ({
           label="Arrival To Dealer"
           selected={arrivalToDealer}
           onChange={(date) => {
-            setArrivalToDealer(date);
-            handleDateChange(date, "arrivalToDealer");
+            if (date instanceof Date || date === null) {
+              setArrivalToDealer(date);
+              handleDateChange(date, "arrivalToDealer");
+            }
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
@@ -291,8 +295,10 @@ const FeatureDetails = ({
           label="Arrival To Client"
           selected={arrivalToClient}
           onChange={(date) => {
-            setArrivalToClient(date);
-            handleDateChange(date, "arrivalToClient");
+            if (date instanceof Date || date === null) {
+              setArrivalToClient(date);
+              handleDateChange(date, "arrivalToClient");
+            }
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
@@ -304,12 +310,14 @@ const FeatureDetails = ({
           label="Close Date"
           selected={closeDate}
           onChange={(date) => {
-            setCloseDate(date);
-            handleDateChange(date, "closeDate");
+            if (date instanceof Date || date === null) {
+              setCloseDate(date);
+              handleDateChange(date, "closeDate");
+            }
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
-          className="border border-gray-300 rounded-md px-2 py-1"
+          // className="border border-gray-300 rounded-md px-2 py-1"
           type="datePicker"
           icon={Calendar}
         />
@@ -324,7 +332,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "desiredExterior",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={ThumbsUp}
@@ -339,7 +347,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "desiredInterior",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={ThumbsUp}
@@ -354,7 +362,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "excludedExterior",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={X}
@@ -368,7 +376,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "excludedInterior",
-              newValue: newValue,
+              newValue: newValue as string,
             })
           }
           icon={X}

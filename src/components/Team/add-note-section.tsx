@@ -38,7 +38,7 @@ type AddNoteSectionProps = {
   // negotiationId: string;
   setNegotiation: (negotiation: NegotiationDataType) => void;
   incomingBids: IncomingBid[];
-  allDealNegotiator: DealNegotiator[];
+  allDealNegotiator: DealNegotiatorType[];
 };
 
 const AddNoteSection = ({
@@ -95,7 +95,7 @@ const AddNoteSection = ({
   //   setAllInternalNotes(negotiationNotesData); // Update the state with fetched notes
   // };
 
-  const handleMentionSelect = (mention: DealNegotiator) => {
+  const handleMentionSelect = (mention: DealNegotiatorType) => {
     const newNote =
       newInternalNote.substring(0, newInternalNote.lastIndexOf("@")) +
       `@${mention.name} `;

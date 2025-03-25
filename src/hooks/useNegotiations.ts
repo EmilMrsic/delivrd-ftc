@@ -21,16 +21,13 @@ export const useNegotiations = (
   const negotiationsQuery = useQuery({
     queryKey: ["negotiations"],
     queryFn: async () => {
-      console.log("filters: running", filters, id);
-      const request = await backendRequest(
-        config.all
-          ? `negotiation`
-          : `negotiation/${id || getUserData().deal_coordinator_id}`,
-        "POST",
-        {
-          filter: filters,
-        }
-      );
+      const path = config.all
+        ? `negotiation`
+        : `negotiation/${id || getUserData().deal_coordinator_id}`;
+
+      const request = await backendRequest(path, "POST", {
+        filter: filters,
+      });
 
       return request;
     },

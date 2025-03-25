@@ -19,6 +19,7 @@ import "./datepicker-custom.css";
 import DatePicker from "react-datepicker";
 import clsx from "clsx";
 import { formatDateToLocal } from "@/lib/helpers/dates";
+import { NegotiationDataType } from "@/lib/models/team";
 
 interface EditableInputProps {
   label: string;
@@ -27,7 +28,7 @@ interface EditableInputProps {
   negotiationId: string;
   field: string;
   userField?: string;
-  negotiations?: EditNegotiationData | null;
+  negotiations?: NegotiationDataType | null;
   firstName?: string;
   lastName?: string;
   parentKey?: string;
@@ -90,12 +91,12 @@ const EditableInput: React.FC<EditableInputProps> = ({
 
 export const InputField = (props: {
   label: string;
-  value: string;
-  onChange?: (newValue: string) => void;
-  negotiationId: string;
-  field: string;
+  value?: string;
+  onChange?: (newValue: string | Date | null) => void;
+  negotiationId?: string;
+  field?: string;
   userField?: string;
-  negotiations?: EditNegotiationData | null;
+  negotiations?: NegotiationDataType | null;
   firstName?: string;
   lastName?: string;
   options?: string[];
@@ -103,7 +104,7 @@ export const InputField = (props: {
   type?: "text" | "searchableDropdown" | "datePicker";
   dateFormat?: string;
   placeholderText?: string;
-  selected?: Date;
+  selected?: Date | null;
   parentKey?: string;
 }) => {
   const { toast } = useToast();
@@ -199,16 +200,16 @@ export const InputField = (props: {
   const ComponentDisplay = (
     <InputComponent
       label={props.label}
-      value={props.value}
+      value={props.value ?? ""}
       onChange={(value) => {
         props.onChange?.(value);
         console.log("onChange", value);
       }}
-      negotiationId={props.negotiationId}
-      field={props.field}
+      negotiationId={props.negotiationId ?? ""}
+      field={props.field ?? ""}
       userField={props.userField}
       negotiations={props.negotiations}
-      options={props.options}
+      options={props.options ?? []}
       dateFormat={props.dateFormat}
       placeholderText={props.placeholderText}
       selected={props.selected}

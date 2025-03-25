@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { chunk } from "lodash";
+import { Dispatch, SetStateAction } from "react";
 
 export const sortNegotiationsByStatus = (
   negotiations: NegotiationDataType[],
@@ -48,7 +49,7 @@ export const pruneNegotiations = (negotiations: NegotiationDataType[]) => {
 
 export const sortDataHelper = (
   currentDeals: NegotiationDataType[],
-  setCurrentDeals?: (deals: NegotiationDataType[]) => void
+  setCurrentDeals?: Dispatch<SetStateAction<NegotiationDataType[]>>
 ) => {
   return (key: string, direction: string) => {
     let sortedDeals: NegotiationDataType[] = [];
@@ -94,7 +95,9 @@ export const sortMappedDataHelper = (
   Object.keys(mappedNegotiations).forEach((status) => {
     const sortDataFn = sortDataHelper(mappedNegotiations[status]);
     const sortedData = sortDataFn(key, direction);
-    sortedMappedNegotiations[status] = sortedData;
+    if (sortedData) {
+      sortedMappedNegotiations[status] = sortedData;
+    }
   });
 
   return sortedMappedNegotiations;
@@ -105,10 +108,10 @@ export const getActiveDealDocuments = async (dealQuery: {
   filter?: {
     [key: string]: string | string[];
   };
-}) => {
+}): Promise<NegotiationDataType[]> => {
   const negotiationsCollectionRef = collection(db, "delivrd_negotiations");
   const queryConditions: QueryConstraint[] = [
-    where("dealCoordinatorId", "!=", null),
+    // where("dealCoordinatorId", "!=", null),
   ];
 
   if (dealQuery?.dealNegotiatorId) {
@@ -116,6 +119,8 @@ export const getActiveDealDocuments = async (dealQuery: {
       where("dealCoordinatorId", "==", dealQuery.dealNegotiatorId)
     );
   }
+
+  console.log("dealQuery: ", dealQuery);
 
   if (dealQuery?.filter) {
     Object.keys(dealQuery.filter).forEach((key) => {
@@ -137,7 +142,6 @@ export const getActiveDealDocuments = async (dealQuery: {
   const negotiationsSnapshot = await getDocs(negotiationsQuery);
   return negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();
-    return data;
     return NegotiationDataModel.parse(data);
   });
 };
@@ -204,13 +208,19 @@ export const mapNegotiationsByColumn = (
   negotiations: NegotiationDataType[],
   column: string
 ) => {
-  const negotiationsByColumn = negotiations.reduce((acc, deal) => {
-    const columnValue = deal[column as keyof NegotiationDataType];
-    if (!acc[columnValue]) {
-      acc[columnValue] = [];
-    }
-    acc[columnValue].push(deal);
-    return acc;
-  }, {} as Record<string, NegotiationDataType[]>);
+  const negotiationsByColumn = negotiations.reduce(
+    (
+      acc: { [key: string]: NegotiationDataType[] },
+      deal: NegotiationDataType
+    ) => {
+      const columnValue = deal[column as keyof NegotiationDataType] as string;
+      if (!acc[columnValue]) {
+        acc[columnValue] = [];
+      }
+      acc[columnValue].push(deal);
+      return acc;
+    },
+    {} as Record<string, NegotiationDataType[]>
+  );
   return negotiationsByColumn;
 };

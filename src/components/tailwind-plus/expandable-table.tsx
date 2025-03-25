@@ -73,7 +73,7 @@ export const TailwindPlusExpandableTable = ({
               {expanded.has(idx) && row.expandedComponent && (
                 <TableRow>
                   <TableCell colSpan={2}>
-                    <ExpandedComponent />
+                    {ExpandedComponent && <ExpandedComponent />}
                   </TableCell>
                 </TableRow>
               )}
