@@ -54,7 +54,7 @@ export default function BiddingSection() {
   const [filteredBidVehicles, setFilteredBidVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("available");
-  const [subTab, setSubTab] = useState("new");
+  const [subTab, setSubTab] = useState("used");
   const [sortColumn, setSortColumn] = useState<keyof Vehicle>("carMake");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -152,12 +152,6 @@ export default function BiddingSection() {
     }
   };
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    const parsedUser = user && JSON.parse(user);
-    setUser(parsedUser);
-  }, []);
-
   function formatTimestamp(timestamp: { seconds: number }) {
     if (!timestamp || !timestamp.seconds) return "";
 
@@ -188,6 +182,7 @@ export default function BiddingSection() {
         if (dealerData) parsedUser.brand = dealerData.Brand;
 
         localStorage.setItem("user", JSON.stringify(parsedUser));
+        setUser(parsedUser);
 
         const querySnapshot = await getDocs(clientQuery);
         const vehicleData = querySnapshot.docs.map((doc) => {
@@ -288,6 +283,7 @@ export default function BiddingSection() {
 
       setFilteredVehicles(filteredSelectedVehicles);
     } else {
+      console.log(vehicles);
       const filteredSelectedVehicles = showSelected
         ? bidVehicles.filter((v) => selectedVehicles.includes(v.id || ""))
         : bidVehicles;
@@ -313,36 +309,38 @@ export default function BiddingSection() {
   }, [tab]);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    const parsedUser = user && JSON.parse(user);
     const filterVehicles = () => {
-      switch (subTab) {
-        case "all":
-          return vehicles.filter((vehicle) => {
-            if (vehicle.NewOrUsed === "New") {
-              return Array.isArray(parsedUser.brand)
-                ? parsedUser.brand.includes(vehicle.brand)
-                : vehicle.brand === parsedUser.brand;
-            }
-            // Include all Used vehicles
-            return vehicle.NewOrUsed === "Used";
-          });
+      if (user !== null) {
+        switch (subTab) {
+          case "all":
+            return vehicles.filter((vehicle) => {
+              if (vehicle.NewOrUsed === "New") {
+                return Array.isArray(user.brand)
+                  ? user.brand.includes(vehicle.brand)
+                  : vehicle.brand === user.brand;
+              }
+              // Include all Used vehicles
+              return vehicle.NewOrUsed === "Used";
+            });
 
-        case "new":
-          return vehicles.filter((vehicle) => {
-            return (
-              vehicle.NewOrUsed === "New" &&
-              (Array.isArray(parsedUser.brand)
-                ? parsedUser.brand.includes(vehicle.brand)
-                : vehicle.brand === parsedUser.brand)
-            );
-          });
+          case "new":
+            return vehicles.filter((vehicle) => {
+              return (
+                vehicle.NewOrUsed === "New" &&
+                (Array.isArray(user.brand)
+                  ? user.brand.includes(vehicle.brand)
+                  : vehicle.brand === user.brand)
+              );
+            });
 
-        case "used":
-          return vehicles.filter((vehicle) => vehicle.NewOrUsed === "Used");
+          case "used":
+            return vehicles.filter((vehicle) => vehicle.NewOrUsed === "Used");
 
-        default:
-          return vehicles;
+          default:
+            return vehicles;
+        }
+      } else {
+        return vehicles;
       }
     };
 
@@ -354,6 +352,7 @@ export default function BiddingSection() {
     if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
+
   return (
     <div className="min-h-screen  relative bg-background text-foreground">
       <Header user={user} />
@@ -468,7 +467,7 @@ export default function BiddingSection() {
                       className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
                     >
                       <TableCell className="font-medium">
-                        {vehicle.carMake}
+                        {vehicle.brand}
                       </TableCell>
                       <TableCell className="font-medium">
                         {vehicle.carModel}
