@@ -94,7 +94,7 @@ const formatFiltersForNegotiationsEndpoint = (
 };
 
 export default function DealList() {
-  const backButtonDetector = useBackButtonDetector();
+  // const backButtonDetector = useBackButtonDetector();
   const cachedFilters =
     sessionStorage.getItem("teamDashboardFilters") &&
     JSON.parse(sessionStorage.getItem("teamDashboardFilters") ?? "");
@@ -236,57 +236,57 @@ export default function DealList() {
 
     const filtered = originalDeals?.filter((deal) => {
       return (
-        deal.clientNamefull?.toLowerCase().includes(term) ||
-        deal.brand?.toLowerCase().includes(term) ||
-        deal.model?.toLowerCase().includes(term) ||
-        deal.stage?.toLowerCase().includes(term)
+        deal?.clientNamefull?.toLowerCase().includes(term) ||
+        deal?.brand?.toLowerCase().includes(term) ||
+        deal?.model?.toLowerCase().includes(term) ||
+        deal?.stage?.toLowerCase().includes(term)
       );
     });
 
     setFilteredDeals(filtered);
   };
 
-  const applyFilters = (currentFilters: typeof filters) => {
-    const otherStages = [
-      "Delivery Scheduled",
-      "Long Term Order",
-      "Shipping",
-      "Tomi Needs To Review",
-      "Ask for Review",
-      "Closed No Review",
-      "Follow Up Issue",
-    ];
+  // const applyFilters = (currentFilters: typeof filters) => {
+  //   const otherStages = [
+  //     "Delivery Scheduled",
+  //     "Long Term Order",
+  //     "Shipping",
+  //     "Tomi Needs To Review",
+  //     "Ask for Review",
+  //     "Closed No Review",
+  //     "Follow Up Issue",
+  //   ];
 
-    const filtered = originalDeals?.filter((deal) => {
-      const matchesStage =
-        currentFilters.stages.length === 0
-          ? allowedStatuses.includes(deal.stage ?? "")
-          : currentFilters.stages.includes("Not Closed")
-          ? otherStages.includes(deal.stage?.trim() ?? "")
-          : currentFilters.stages.includes(deal.stage?.trim() ?? "");
-      const matchesMake =
-        currentFilters.makes.length === 0 ||
-        currentFilters.makes.includes(deal.brand ?? "");
+  //   const filtered = originalDeals?.filter((deal) => {
+  //     const matchesStage =
+  //       currentFilters.stages.length === 0
+  //         ? allowedStatuses.includes(deal.stage ?? "")
+  //         : currentFilters.stages.includes("Not Closed")
+  //         ? otherStages.includes(deal.stage?.trim() ?? "")
+  //         : currentFilters.stages.includes(deal.stage?.trim() ?? "");
+  //     const matchesMake =
+  //       currentFilters.makes.length === 0 ||
+  //       currentFilters.makes.includes(deal.brand ?? "");
 
-      const matchesCoordinators =
-        currentFilters.dealCoordinators === "" ||
-        currentFilters.dealCoordinators === (deal.dealCoordinatorId ?? "");
-      const onboardingStatus =
-        deal.hasOwnProperty("onboardingComplete") &&
-        deal?.onboardingComplete &&
-        deal?.onboardingComplete?.toLowerCase() === "yes"
-          ? "yes"
-          : "no";
-      const matchesOnboarding =
-        currentFilters.onboarding.length === 0 ||
-        currentFilters.onboarding.includes(onboardingStatus);
+  //     const matchesCoordinators =
+  //       currentFilters.dealCoordinators === "" ||
+  //       currentFilters.dealCoordinators === (deal.dealCoordinatorId ?? "");
+  //     const onboardingStatus =
+  //       deal.hasOwnProperty("onboardingComplete") &&
+  //       deal?.onboardingComplete &&
+  //       deal?.onboardingComplete?.toLowerCase() === "yes"
+  //         ? "yes"
+  //         : "no";
+  //     const matchesOnboarding =
+  //       currentFilters.onboarding.length === 0 ||
+  //       currentFilters.onboarding.includes(onboardingStatus);
 
-      return (
-        matchesStage && matchesMake && matchesCoordinators && matchesOnboarding
-      );
-    });
-    setFilteredDeals(filtered);
-  };
+  //     return (
+  //       matchesStage && matchesMake && matchesCoordinators && matchesOnboarding
+  //     );
+  //   });
+  //   setFilteredDeals(filtered);
+  // };
 
   const clearFilters = () => {
     const userData = localStorage.getItem("user");
@@ -311,33 +311,38 @@ export default function DealList() {
 
   const handleStageChange = async (id: string, newStage: string) => {
     try {
-      await updateDoc(doc(db, "negotiations", id ?? ""), {
+      await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
         negotiations_Status: newStage,
       });
 
       if (newStage !== "Closed") {
-        await updateDoc(doc(db, "negotiations", id ?? ""), {
+        await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
           close_date: "",
         });
 
-        setCurrentDeals((prevDeals) =>
-          prevDeals?.map((deal) =>
-            deal.id === id
-              ? { ...deal, close_date: "", negotiations_Status: newStage }
-              : deal
-          )
+        refetch(
+          formattedCachedFilters?.dealCoordinatorId as string,
+          formattedCachedFilters
         );
+
+        // setCurrentDeals((prevDeals) =>
+        //   prevDeals?.map((deal) =>
+        //     deal.id === id
+        //       ? { ...deal, close_date: "", negotiations_Status: newStage }
+        //       : deal
+        //   )
+        // );
       } else {
-        setFilteredDeals((prevDeals) =>
-          prevDeals?.map((deal) =>
-            deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
-          )
-        );
-        setOriginalDeals((prevDeals) =>
-          prevDeals?.map((deal) =>
-            deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
-          )
-        );
+        // setFilteredDeals((prevDeals) =>
+        //   prevDeals?.map((deal) =>
+        //     deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
+        //   )
+        // );
+        // setOriginalDeals((prevDeals) =>
+        //   prevDeals?.map((deal) =>
+        //     deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
+        //   )
+        // );
       }
 
       toast({ title: "Status updated" });
@@ -348,7 +353,7 @@ export default function DealList() {
 
   const updateDealNegotiator = async (id: string, newNegotiatorId: string) => {
     try {
-      const dealRef = doc(db, "negotiations", id);
+      const dealRef = doc(db, "delivrd_negotiations", id);
 
       const dealSnap = await getDoc(dealRef);
       if (!dealSnap.exists()) {
@@ -374,20 +379,25 @@ export default function DealList() {
         });
       }
 
-      setFilteredDeals((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id
-            ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-            : deal
-        )
-      );
+      // setFilteredDeals((prevDeals) =>
+      //   prevDeals?.map((deal) =>
+      //     deal.id === id
+      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
+      //       : deal
+      //   )
+      // );
 
-      setOriginalDeals((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id
-            ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-            : deal
-        )
+      // setOriginalDeals((prevDeals) =>
+      //   prevDeals?.map((deal) =>
+      //     deal.id === id
+      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
+      //       : deal
+      //   )
+      // );
+
+      refetch(
+        formattedCachedFilters?.dealCoordinatorId as string,
+        formattedCachedFilters
       );
 
       console.log("Negotiator updated successfully!");

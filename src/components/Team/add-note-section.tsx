@@ -153,12 +153,12 @@ const AddNoteSection = ({
         console.log("adding new note:", newNote);
         setNegotiation({
           ...negotiation,
-          internalNotes: [...negotiation.internalNotes, newNote],
+          internalNotes: [...(negotiation.internalNotes ?? []), newNote],
         });
 
         const notesRef = doc(db, "delivrd_negotiations", negotiation.id);
         await updateDoc(notesRef, {
-          internalNotes: [...negotiation.internalNotes, newNote],
+          internalNotes: [...(negotiation.internalNotes ?? []), newNote],
         });
 
         setMentionedUsers([]);
@@ -174,7 +174,7 @@ const AddNoteSection = ({
     <TailwindPlusCard title="Internal Notes" icon={FileText}>
       <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
         {negotiation?.internalNotes
-          .sort((a, b) => {
+          ?.sort((a, b) => {
             const dateA = Date.parse(a.createdAt);
             const dateB = Date.parse(b.createdAt);
             return dateB - dateA; // Newest to oldest

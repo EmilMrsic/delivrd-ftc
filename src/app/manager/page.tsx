@@ -82,6 +82,7 @@ function Manager() {
     negotiatorData,
     negotiations: negotiationsFromTeamDashboard,
     team: teamFromTeamDashboard,
+    refetch,
   } = useTeamDashboard({
     all: true,
   });
@@ -191,7 +192,9 @@ function Manager() {
 
       const oldNegotiatorId = dealSnap.data().negotiations_deal_coordinator;
 
-      const movedDeal = dealsWithoutCoordinator?.find((deal) => deal.id === id);
+      const movedDeal = dealsWithoutCoordinator?.find(
+        (deal) => deal?.id === id
+      );
       if (!movedDeal)
         return console.error("Deal not found in unassigned deals");
 
@@ -209,13 +212,13 @@ function Manager() {
         });
       }
 
-      setFilteredDeals((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id
-            ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-            : deal
-        )
-      );
+      // setFilteredDeals((prevDeals) =>
+      //   prevDeals?.map((deal) =>
+      //     deal.id === id
+      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
+      //       : deal
+      //   )
+      // );
       setDealsWithoutCoordinator((prevDeals) =>
         prevDeals?.filter((deal) => deal.id !== id)
       );
@@ -232,13 +235,15 @@ function Manager() {
         })
       );
 
-      setOriginalDeals((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id
-            ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-            : deal
-        )
-      );
+      // setOriginalDeals((prevDeals) =>
+      //   prevDeals?.map((deal) =>
+      //     deal.id === id
+      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
+      //       : deal
+      //   )
+      // );
+
+      refetch();
 
       toast({ title: "Negotiator updated successfully" });
       console.log("Negotiator updated successfully!");

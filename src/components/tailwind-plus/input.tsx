@@ -12,7 +12,7 @@ export const TailwindPlusInput = ({
   placeholder,
 }: {
   type?: "text" | "searchableDropdown" | "email" | "number";
-  value: string;
+  value: string | number;
   onFocus?: () => void;
   onBlur?: () => void;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;

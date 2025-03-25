@@ -23,7 +23,7 @@ import { NegotiationDataType } from "@/lib/models/team";
 
 interface EditableInputProps {
   label: string;
-  value: string;
+  value: string | number;
   onChange: (newValue: string) => void;
   negotiationId: string;
   field: string;
@@ -54,7 +54,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.value !== value) {
-      inputRef.current.value = value;
+      inputRef.current.value = value as string;
     }
   }, [value]);
 
@@ -75,7 +75,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
       <TailwindPlusInput
         ref={inputRef}
         type="text"
-        value={isFocused ? value : truncateValue(value)}
+        value={isFocused ? value : truncateValue(value as string)}
         onChange={(e) => {
           onChange(e.target.value);
         }}
@@ -91,7 +91,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
 
 export const InputField = (props: {
   label: string;
-  value?: string;
+  value?: string | number;
   onChange?: (newValue: string) => void;
   onDateChange?: (newValue: Date | null) => void;
   negotiationId?: string;
@@ -209,7 +209,7 @@ export const InputField = (props: {
     ) : (
       <InputComponent
         label={props.label}
-        value={props.value ?? ""}
+        value={(props.value ?? "") as string}
         onChange={(value) => {
           if (props.type === "datePicker") {
             props.onDateChange?.(value as Date | null);

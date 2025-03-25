@@ -34,12 +34,16 @@ export const useNegotiations = (
   });
 
   const handleIdChange = (
-    newId: string,
+    newId?: string,
     newFilters?: { [key: string]: string | string[] }
   ) => {
-    setId(newId);
-    console.log("newFilters: ", newFilters);
-    setFilters(newFilters ?? {});
+    if (newId) {
+      setId(newId);
+    }
+
+    if (newFilters) {
+      setFilters(newFilters);
+    }
   };
 
   useEffect(() => {
