@@ -239,7 +239,9 @@ export default function DealList() {
         deal?.clientNamefull?.toLowerCase().includes(term) ||
         deal?.brand?.toLowerCase().includes(term) ||
         deal?.model?.toLowerCase().includes(term) ||
-        deal?.stage?.toLowerCase().includes(term)
+        deal?.zip?.toLowerCase().includes(term) ||
+        deal?.clientEmail?.toLowerCase().includes(term) ||
+        deal?.clientPhone?.toLowerCase().includes(term)
       );
     });
 
