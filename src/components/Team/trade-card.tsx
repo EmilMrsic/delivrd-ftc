@@ -27,7 +27,9 @@ const TradeCard = ({
   handleChange,
   negotiation,
 }: TradeCardProps) => {
-  const { setNegotiation } = useTeamProfile();
+  const { setNegotiation } = useTeamProfile({
+    negotiationId: negotiationId ?? "",
+  });
 
   const handleFileUpload = async (files: FileList | null, bidId: string) => {
     const id = bidId;

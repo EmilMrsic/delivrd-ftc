@@ -17,7 +17,6 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNegotiations } from "./useNegotiations";
@@ -27,18 +26,16 @@ type GroupedBidComments = {
   [bid_id: string]: BidComments[];
 };
 
-const useTeamProfile = () => {
-  const dispatch = useDispatch();
+const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   const [hasLoaded, setHasLoaded] = useState(false);
-  const { notificationCount } = useAppSelector((state) => state.notification);
+  // const { notificationCount } = useAppSelector((state) => state.notification);
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
-  const params = useSearchParams();
   const [user, setUser] = useState<any>();
   const [dealNegotiator, setDealNegotiator] = useState<DealNegotiator>();
 
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
-  const { notification } = useAppSelector((state) => state.notification);
+  // const { notification } = useAppSelector((state) => state.notification);
   const [dealers, setDealers] = useState<DealerData[]>([]);
   const [allDealNegotiator, setAllDealNegotiator] = useState<
     DealNegotiatorType[]
@@ -46,7 +43,7 @@ const useTeamProfile = () => {
   const [negotiation, setNegotiation] = useState<NegotiationDataType | null>(
     null
   );
-  const negotiationId = params.get("id");
+
   const { negotiations: negotiationsFromUseNegotiations } = useNegotiations({
     all: true,
     filter: {
@@ -136,13 +133,13 @@ const useTeamProfile = () => {
     }
   };
 
-  useEffect(() => {
-    if (!hasLoaded) {
-      setHasLoaded(true);
-    } else {
-      dispatch(setNotificationCount(notificationCount + 1));
-    }
-  }, [notification]);
+  // useEffect(() => {
+  //   if (!hasLoaded) {
+  //     setHasLoaded(true);
+  //   } else {
+  //     dispatch(setNotificationCount(notificationCount + 1));
+  //   }
+  // }, [notification]);
 
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
@@ -234,8 +231,8 @@ const useTeamProfile = () => {
     negotiation,
     setNegotiation,
     negotiationId,
-    notification,
-    notificationCount,
+    // notification,
+    // notificationCount,
     incomingBids,
     setIncomingBids,
     bidCommentsByBidId,

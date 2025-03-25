@@ -39,6 +39,7 @@ type DeleteBidSectionProps = {
   addComment: (item: string) => void;
   incomingBids: IncomingBid[];
   dealers: DealerData[];
+  negotiationId: string;
 };
 
 const DeleteBidSection = ({
@@ -59,6 +60,7 @@ const DeleteBidSection = ({
   addComment,
   incomingBids,
   dealers,
+  negotiationId,
 }: DeleteBidSectionProps) => {
   const parseComment = (comment: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -80,7 +82,9 @@ const DeleteBidSection = ({
       return part;
     });
   };
-  const { bidCommentsByBidId } = useTeamProfile();
+  const { bidCommentsByBidId } = useTeamProfile({
+    negotiationId: negotiationId ?? "",
+  });
   // <FileText className="mr-2" />
   // Deleted Incoming Bids
   return (

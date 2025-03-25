@@ -7,43 +7,12 @@ import { statuses } from "@/components/Team/filter-popup";
 import ClientDetailsPopup from "@/components/Team/team-detail-popup";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  DropDownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DropDownMenu } from "@/components/ui/dropdown-menu";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
 import { sortDataHelper } from "@/lib/helpers/negotiation";
-import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
-import {
-  dateFormat,
-  fetchAllActiveNegotiations,
-  fetchAllPaidHoldingNegotiations,
-  getStatusStyles,
-  vehicleOfInterest,
-} from "@/lib/utils";
-import { DealNegotiator, NegotiationData } from "@/types";
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import {
-  Car,
-  ChevronDown,
-  Expand,
-  MapPin,
-  StickyNote,
-  User,
-  X,
-} from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { NegotiationDataType } from "@/lib/models/team";
+import { getStatusStyles, vehicleOfInterest } from "@/lib/utils";
+import { Car, MapPin, StickyNote, User } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 const fields = [
