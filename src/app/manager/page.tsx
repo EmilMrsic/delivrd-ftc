@@ -100,10 +100,6 @@ function Manager() {
 
   useEffect(() => {
     if (negotiationsFromTeamDashboard) {
-      console.log(
-        "negotiationsFromTeamDashboard:",
-        negotiationsFromTeamDashboard
-      );
       const { team: teamWithNegotiations, dealsWithoutCoordinator } =
         mapNegotiationsToTeam(
           negotiationsFromTeamDashboard,

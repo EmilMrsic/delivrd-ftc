@@ -31,8 +31,6 @@ export const POST = async (request: Request) => {
     filter,
   });
 
-  console.log("deals: ", deals);
-
   if (deals) {
     output.negotiations = deals;
   }

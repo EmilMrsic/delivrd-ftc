@@ -433,15 +433,15 @@ function ProjectProfile() {
               </div>
               <button
                 onClick={() => setShowDeletedBids(!showDeletedBids)}
-                className="px-6 py-3 bg-white hover:bg-red-700 text-black rounded-full shadow-lg transition duration-300 transform hover:scale-105"
+                className="px-6 py-3 bg-white text-black hover:bg-black hover:text-white  rounded-full shadow-lg transition duration-300 transform hover:scale-105"
               >
                 {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
               </button>
             </div>
             {showDeletedBids && (
               <DeleteBidSection
-                dealers={dealers}
                 incomingBids={incomingBids}
+                dealers={dealers}
                 setCommentingBidId={setCommentingBidId}
                 setEditedBid={setEditedBid}
                 setEditingBidId={setEditingBidId}

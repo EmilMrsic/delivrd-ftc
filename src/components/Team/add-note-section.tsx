@@ -50,7 +50,6 @@ const AddNoteSection = ({
   allDealNegotiator,
   setNegotiation,
 }: AddNoteSectionProps) => {
-  console.log("user:", user);
   // const [allInternalNotes, setAllInternalNotes] = useState<InternalNotesType[]>(
   //   []
   // );

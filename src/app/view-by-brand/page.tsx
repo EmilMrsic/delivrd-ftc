@@ -107,7 +107,6 @@ const ViewByBrand = () => {
   });
 
   useEffect(() => {
-    console.log("negotiationsFromTeamDashboard", negotiationsFromTeamDashboard);
     setNegotiations(negotiationsFromTeamDashboard);
     setLoading(false);
   }, [negotiationsFromTeamDashboard]);
@@ -126,14 +125,11 @@ const ViewByBrand = () => {
         );
       }
 
-      console.log("setting filtered");
-
       setFilteredNegotiations(filtered);
     }
   }, [filters, negotiations]);
 
   const sortData = sortDataHelper(negotiations, setNegotiations);
-  console.log(negotiations);
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">

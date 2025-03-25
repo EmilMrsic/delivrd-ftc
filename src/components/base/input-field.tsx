@@ -92,7 +92,8 @@ const EditableInput: React.FC<EditableInputProps> = ({
 export const InputField = (props: {
   label: string;
   value?: string;
-  onChange?: (newValue: string | Date | null) => void;
+  onChange?: (newValue: string) => void;
+  onDateChange?: (newValue: Date | null) => void;
   negotiationId?: string;
   field?: string;
   userField?: string;
@@ -121,6 +122,7 @@ export const InputField = (props: {
       lastName,
       value,
     } = props;
+
     if (negotiationId && field) {
       try {
         const usersQuery = query(
@@ -139,7 +141,6 @@ export const InputField = (props: {
         }
 
         const userDoc = userSnapshot.docs[0];
-        console.log("User found:", userDoc.id, userDoc.data());
         const userDocRef = doc(db, "users", userDoc.id);
 
         if (userField) {
@@ -164,18 +165,13 @@ export const InputField = (props: {
         if (parentKey) {
           keyName = parentKey + "." + field;
         }
-        console.log("got field:", keyName);
         let useableValue = value;
-        // if (props.type === "datePicker") {
-        //   useableValue = formatDateToLocal(value);
-        // }
-        // await updateDoc(negotiationDocRef, {
-        //   [keyName]: useableValue,
-        // });
+        await updateDoc(negotiationDocRef, {
+          [keyName]: useableValue,
+        });
         toast({
           title: "Field Updated",
         });
-        console.log("Updated negotiation field:", field, "with value:", value);
       } catch (error) {
         console.error("Error handling blur operation:", error);
       }
@@ -197,40 +193,46 @@ export const InputField = (props: {
       InputComponent = EditableInput;
   }
 
-  const ComponentDisplay = (
-    <InputComponent
-      label={props.label}
-      value={props.value ?? ""}
-      onChange={(value) => {
-        props.onChange?.(value);
-        console.log("onChange", value);
-      }}
-      negotiationId={props.negotiationId ?? ""}
-      field={props.field ?? ""}
-      userField={props.userField}
-      negotiations={props.negotiations}
-      options={props.options ?? []}
-      dateFormat={props.dateFormat}
-      placeholderText={props.placeholderText}
-      selected={props.selected}
-      parentKey={props.parentKey}
-      onBlur={() => {
-        if (!props.type || props.type === "text") {
-          console.log("blurring");
-          handleUpdate();
-        }
-      }}
-      className={
-        props.type === "datePicker"
-          ? clsx(
-              "block w-full rounded-lg border border-transparent ring-1 shadow-sm ring-black/10 p-2 cursor-pointer",
-              "px-[calc(--spacing(2)-1px)] py-[calc(--spacing(1.5)-1px)] text-base/6 sm:text-sm/6",
-              "data-focus:outline data-focus:outline-2 data-focus:-outline-offset-1 data-focus:outline-black"
-            )
-          : ""
-      }
-    />
-  );
+  const ComponentDisplay =
+    props.type === "datePicker" ? (
+      <DatePicker
+        selected={props.selected}
+        onChange={(date) => {
+          props.onDateChange?.(date);
+        }}
+        className={clsx(
+          "block w-full rounded-lg border border-transparent ring-1 shadow-sm ring-black/10 p-2 cursor-pointer",
+          "px-[calc(--spacing(2)-1px)] py-[calc(--spacing(1.5)-1px)] text-base/6 sm:text-sm/6",
+          "data-focus:outline data-focus:outline-2 data-focus:-outline-offset-1 data-focus:outline-black"
+        )}
+      />
+    ) : (
+      <InputComponent
+        label={props.label}
+        value={props.value ?? ""}
+        onChange={(value) => {
+          if (props.type === "datePicker") {
+            props.onDateChange?.(value as Date | null);
+          } else {
+            props.onChange?.(value as string);
+          }
+        }}
+        negotiationId={props.negotiationId ?? ""}
+        field={props.field ?? ""}
+        userField={props.userField}
+        negotiations={props.negotiations}
+        options={props.options ?? []}
+        dateFormat={props.dateFormat}
+        placeholderText={props.placeholderText}
+        selected={props.selected}
+        parentKey={props.parentKey}
+        onBlur={() => {
+          if (!props.type || props.type === "text") {
+            handleUpdate();
+          }
+        }}
+      />
+    );
 
   const FieldDisplay = <>{ComponentDisplay}</>;
 

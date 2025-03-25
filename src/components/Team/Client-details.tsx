@@ -47,7 +47,7 @@ const ClientDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "clientPhone",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
             icon={Phone}
@@ -62,7 +62,7 @@ const ClientDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "prefix",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
             icon={User}
@@ -78,7 +78,7 @@ const ClientDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "clientFirstName",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
             icon={User}
@@ -94,7 +94,7 @@ const ClientDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "clientLastName",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
             icon={User}
@@ -108,7 +108,7 @@ const ClientDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "clientEmail",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
             icon={Mail}
@@ -121,7 +121,7 @@ const ClientDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "zip",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
             icon={() => (
@@ -191,7 +191,7 @@ const ClientDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "city",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
             icon={() => (
@@ -217,7 +217,7 @@ const ClientDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "state",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
             icon={() => (

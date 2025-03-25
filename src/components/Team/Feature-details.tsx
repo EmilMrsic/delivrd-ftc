@@ -98,7 +98,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "condition",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={Car}
@@ -112,7 +112,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "brand",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           type="searchableDropdown"
@@ -126,7 +126,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "model",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={Car}
@@ -139,7 +139,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "trim",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={() => (
@@ -171,7 +171,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "drivetrain",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           type="searchableDropdown"
@@ -186,7 +186,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "tradeInInfo",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={() => (
@@ -209,7 +209,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "howToPay",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={DollarSign}
@@ -223,7 +223,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "budget",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={DollarSign}
@@ -236,7 +236,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "monthlyBudget",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={DollarSign}
@@ -251,7 +251,7 @@ const FeatureDetails = ({
             onChange={(newValue) =>
               handleChange({
                 key: "trimPackageOptions",
-                newValue: newValue as string,
+                newValue: newValue,
               })
             }
           />
@@ -265,11 +265,9 @@ const FeatureDetails = ({
         <InputField
           label="Start Date"
           selected={dealStartDate}
-          onChange={(date) => {
-            if (date instanceof Date || date === null) {
-              setDealStartDate(date);
-              handleDateChange(date, "dealStartDate");
-            }
+          onDateChange={(date) => {
+            setDealStartDate(date);
+            handleDateChange(date, "dealStartDate");
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
@@ -279,11 +277,9 @@ const FeatureDetails = ({
         <InputField
           label="Arrival To Dealer"
           selected={arrivalToDealer}
-          onChange={(date) => {
-            if (date instanceof Date || date === null) {
-              setArrivalToDealer(date);
-              handleDateChange(date, "arrivalToDealer");
-            }
+          onDateChange={(date) => {
+            setArrivalToDealer(date);
+            handleDateChange(date, "arrivalToDealer");
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
@@ -294,11 +290,9 @@ const FeatureDetails = ({
         <InputField
           label="Arrival To Client"
           selected={arrivalToClient}
-          onChange={(date) => {
-            if (date instanceof Date || date === null) {
-              setArrivalToClient(date);
-              handleDateChange(date, "arrivalToClient");
-            }
+          onDateChange={(date) => {
+            setArrivalToClient(date);
+            handleDateChange(date, "arrivalToClient");
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
@@ -309,11 +303,9 @@ const FeatureDetails = ({
         <InputField
           label="Close Date"
           selected={closeDate}
-          onChange={(date) => {
-            if (date instanceof Date || date === null) {
-              setCloseDate(date);
-              handleDateChange(date, "closeDate");
-            }
+          onDateChange={(date) => {
+            setCloseDate(date);
+            handleDateChange(date, "closeDate");
           }}
           dateFormat="MM-dd-yyyy"
           placeholderText="Select a date"
@@ -332,7 +324,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "desiredExterior",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={ThumbsUp}
@@ -347,7 +339,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "desiredInterior",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={ThumbsUp}
@@ -362,7 +354,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "excludedExterior",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={X}
@@ -376,7 +368,7 @@ const FeatureDetails = ({
           onChange={(newValue) =>
             handleChange({
               key: "excludedInterior",
-              newValue: newValue as string,
+              newValue: newValue,
             })
           }
           icon={X}

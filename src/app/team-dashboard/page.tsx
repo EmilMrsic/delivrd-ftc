@@ -173,7 +173,6 @@ export default function DealList() {
   }, [filters]);
 
   const runFilters = () => {
-    console.log("running filters:", filters);
     const formattedFilters = formatFiltersForNegotiationsEndpoint(filters);
     refetch(formattedFilters.dealCoordinatorId as string, formattedFilters);
     setLoading(false);
@@ -318,7 +317,6 @@ export default function DealList() {
       });
 
       if (newStage !== "Closed") {
-        console.log("here", newStage);
         await updateDoc(doc(db, "negotiations", id ?? ""), {
           close_date: "",
         });
@@ -414,22 +412,6 @@ export default function DealList() {
   // }, []);
 
   useEffect(() => {
-    const onPopState = () => {
-      setIsBackNav(true);
-    };
-
-    window.addEventListener("popstate", onPopState);
-
-    return () => {
-      window.removeEventListener("popstate", onPopState);
-    };
-  }, []);
-
-  useEffect(() => {
-    console.log("isBackNav: ", isBackNav);
-  }, [isBackNav]);
-
-  useEffect(() => {
     if (negotiations) {
       const negotiationsByColumn = mapNegotiationsByColumn(
         negotiations,
@@ -449,8 +431,6 @@ export default function DealList() {
       alert("You have unread notifications");
     }
   });
-
-  console.log("user data:", negotiations);
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
