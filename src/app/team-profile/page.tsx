@@ -422,6 +422,7 @@ function ProjectProfile() {
               addComment={addComment}
               bidCommentsByBidId={bidCommentsByBidId}
               parseComment={parseComment}
+              handleSendComment={handleSendComment}
             />
 
             <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
@@ -525,6 +526,7 @@ const IncomingBids = ({
   addComment,
   bidCommentsByBidId,
   parseComment,
+  handleSendComment,
 }: {
   incomingBids: IncomingBid[];
   negotiationId: string;
@@ -542,6 +544,7 @@ const IncomingBids = ({
   addComment: (bidId: string) => void;
   bidCommentsByBidId: { [key: string]: BidComments[] };
   parseComment: (comment: string) => React.ReactNode;
+  handleSendComment: (data: BidComments) => void;
 }) => {
   return (
     <TailwindPlusCard
@@ -577,6 +580,7 @@ const IncomingBids = ({
                 bidCommentsByBidId={bidCommentsByBidId}
                 parseComment={parseComment}
                 openDialog={openDialog}
+                handleSendComment={handleSendComment}
               />
             ))
         ) : (
