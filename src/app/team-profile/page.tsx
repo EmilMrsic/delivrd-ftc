@@ -377,12 +377,7 @@ function ProjectProfile() {
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen w-[90vw]">
-      <TeamHeader
-        handleBellClick={handleBellClick}
-        notificationCount={notificationCount}
-        notification={notification}
-        negotiatorData={dealNegotiator as unknown as DealNegotiatorType}
-      />
+      <TeamHeader negotiatorData={dealNegotiator} />
 
       {showStickyHeader && <StickyHeader negotiation={negotiation} />}
 

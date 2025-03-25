@@ -1,5 +1,5 @@
 "use client";
-import { TeamDashboardViewHeader } from "@/components/base/header";
+import { TeamDashboardViewHeader, TeamHeader } from "@/components/base/header";
 import { Loader } from "@/components/base/loader";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
@@ -71,9 +71,7 @@ const ReminderStatus = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
-      <TeamDashboardViewHeader
-        negotiatorData={negotiatorData as unknown as DealNegotiatorType}
-      />
+      <TeamHeader />
       <TeamDashboardViewSelector />
       <Card className="bg-white shadow-lg">
         {!negotiations && !loading ? (

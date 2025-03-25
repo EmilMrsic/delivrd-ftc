@@ -61,3 +61,32 @@ export default function Component() {
     </div>
   );
 }
+
+export const UserAvatar = ({
+  user,
+  size,
+}: {
+  user: {
+    name: string;
+    profile_pic: string | null;
+  };
+  size?: "small" | "medium" | "large";
+}) => {
+  return (
+    <Avatar
+      className={
+        size === "small"
+          ? "h-8 w-8"
+          : size === "medium"
+          ? "h-10 w-10"
+          : "h-12 w-12"
+      }
+    >
+      <AvatarImage
+        src={user.profile_pic ?? "/placeholder.svg?height=40&width=40"}
+        alt="@example"
+      />
+      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+    </Avatar>
+  );
+};

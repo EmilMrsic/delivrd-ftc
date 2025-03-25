@@ -44,7 +44,7 @@ import Link from "next/link";
 import { statuses } from "@/components/Team/filter-popup";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
-import { TeamDashboardViewHeader } from "@/components/base/header";
+import { TeamDashboardViewHeader, TeamHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
 type NegotiationsGroupedType = {
@@ -235,9 +235,7 @@ function ReceivedCar() {
   return (
     <>
       <div className="container mx-auto p-4 space-y-6 min-h-screen">
-        <TeamDashboardViewHeader
-          negotiatorData={negotiatorData as unknown as DealNegotiatorType}
-        />
+        <TeamHeader />
         <TeamDashboardViewSelector />
         <Table className="border-collapse border border-gray-200">
           {loading ? (

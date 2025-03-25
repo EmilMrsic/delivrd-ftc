@@ -1,19 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
-  allowedStatuses,
-  fetchActiveDeals,
-  fetchAllNotClosedNegotiations,
-  fetchAllPaidNegotiations,
-} from "@/lib/utils";
-import { BellIcon, Search } from "lucide-react";
 import {
   arrayRemove,
   arrayUnion,
@@ -22,29 +9,17 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { NegotiationData } from "@/types";
 import { toast } from "@/hooks/use-toast";
-import TeamTablePagination from "@/components/Team/team-table-pagination";
-import FilterPopup from "@/components/Team/filter-popup";
-import { useDispatch } from "react-redux";
-import { setNotificationCount } from "../redux/Slice/notificationSlice";
-import { useAppSelector } from "../redux/store";
-import Link from "next/link";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import TeamDashboardTable from "@/components/Team/team-dashboard-table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
-import SearchAll from "@/components/Team/search-all";
+
 import { TeamHeader } from "@/components/base/header";
 import { TeamDashboardFilters } from "@/components/Team/team-dashboard-filters";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import {
   mapNegotiationsByColumn,
-  sortDataHelper,
   sortMappedDataHelper,
 } from "@/lib/helpers/negotiation";
-import { useRouter } from "next/navigation";
-import { getUserData } from "@/lib/user";
-import { useBackButtonDetector } from "@/hooks/useBackButtonDetector";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -132,10 +107,6 @@ export default function DealList() {
     filter: formattedCachedFilters ?? {},
   });
 
-  const { notification } = useAppSelector((state) => state.notification);
-  const { notificationCount } = useAppSelector((state) => state.notification);
-  const dispatch = useDispatch();
-
   // const totalPages = Math.ceil(filteredDeals?.length / itemsPerPage);
 
   // const handleItemsPerPageChange = (
@@ -145,10 +116,6 @@ export default function DealList() {
   //   setItemsPerPage(newItemsPerPage);
   //   setCurrentPage(1);
   // };
-
-  const handleBellClick = () => {
-    dispatch(setNotificationCount(0));
-  };
 
   const [sortConfig, setSortConfig] = useState({
     key: "submittedDate", // default sorting by Submitted Date
@@ -247,48 +214,6 @@ export default function DealList() {
 
     setFilteredDeals(filtered);
   };
-
-  // const applyFilters = (currentFilters: typeof filters) => {
-  //   const otherStages = [
-  //     "Delivery Scheduled",
-  //     "Long Term Order",
-  //     "Shipping",
-  //     "Tomi Needs To Review",
-  //     "Ask for Review",
-  //     "Closed No Review",
-  //     "Follow Up Issue",
-  //   ];
-
-  //   const filtered = originalDeals?.filter((deal) => {
-  //     const matchesStage =
-  //       currentFilters.stages.length === 0
-  //         ? allowedStatuses.includes(deal.stage ?? "")
-  //         : currentFilters.stages.includes("Not Closed")
-  //         ? otherStages.includes(deal.stage?.trim() ?? "")
-  //         : currentFilters.stages.includes(deal.stage?.trim() ?? "");
-  //     const matchesMake =
-  //       currentFilters.makes.length === 0 ||
-  //       currentFilters.makes.includes(deal.brand ?? "");
-
-  //     const matchesCoordinators =
-  //       currentFilters.dealCoordinators === "" ||
-  //       currentFilters.dealCoordinators === (deal.dealCoordinatorId ?? "");
-  //     const onboardingStatus =
-  //       deal.hasOwnProperty("onboardingComplete") &&
-  //       deal?.onboardingComplete &&
-  //       deal?.onboardingComplete?.toLowerCase() === "yes"
-  //         ? "yes"
-  //         : "no";
-  //     const matchesOnboarding =
-  //       currentFilters.onboarding.length === 0 ||
-  //       currentFilters.onboarding.includes(onboardingStatus);
-
-  //     return (
-  //       matchesStage && matchesMake && matchesCoordinators && matchesOnboarding
-  //     );
-  //   });
-  //   setFilteredDeals(filtered);
-  // };
 
   const clearFilters = () => {
     const userData = localStorage.getItem("user");
@@ -409,19 +334,6 @@ export default function DealList() {
     }
   };
 
-  // useEffect(() => {
-  //   const handlePopState = (event: any) => {
-  //     event.preventDefault();
-  //     clearFilters();
-  //   };
-
-  //   window.addEventListener("popstate", handlePopState);
-
-  //   return () => {
-  //     window.removeEventListener("popstate", handlePopState);
-  //   };
-  // }, []);
-
   useEffect(() => {
     if (negotiations) {
       const negotiationsByColumn = mapNegotiationsByColumn(
@@ -437,20 +349,9 @@ export default function DealList() {
     }
   }, [negotiations]);
 
-  useEffect(() => {
-    if (notificationCount > 0) {
-      alert("You have unread notifications");
-    }
-  });
-
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
-      <TeamHeader
-        handleBellClick={handleBellClick}
-        notificationCount={notificationCount}
-        notification={notification}
-        negotiatorData={negotiatorData as unknown as DealNegotiatorType}
-      />
+      <TeamHeader />
       <Card className="bg-white shadow-lg">
         <CardContent>
           <TeamDashboardFilters

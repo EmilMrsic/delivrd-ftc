@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { FileText } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage, UserAvatar } from "../ui/avatar";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import {
@@ -183,14 +183,17 @@ const AddNoteSection = ({
           .map((note, index) => {
             return (
               <div key={index} className="flex items-start space-x-3">
-                <Avatar className="h-10 w-10">
+                <UserAvatar
+                  user={{ name: user.name[0], profile_pic: user[0] }}
+                />
+                {/* <Avatar className="h-10 w-10">
                   <AvatarImage
                     src={user[0]}
                     alt={user.name[0]}
                     className="rounded-full"
                   />
                   <AvatarFallback>{user.name[0]}</AvatarFallback>
-                </Avatar>
+                </Avatar> */}
                 <div
                   className={`p-3 rounded-lg flex-grow ${
                     negotiation?.userId === user.name

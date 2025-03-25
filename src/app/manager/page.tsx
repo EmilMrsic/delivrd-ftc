@@ -337,12 +337,7 @@ function Manager() {
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
-      <TeamHeader
-        handleBellClick={() => {}}
-        notificationCount={0}
-        notification={[]}
-        negotiatorData={negotiatorData as unknown as DealNegotiatorType}
-      />
+      <TeamHeader />
       <TeamDashboardViewSelector />
       <div className="w-full overflow-x-auto">
         <Table>

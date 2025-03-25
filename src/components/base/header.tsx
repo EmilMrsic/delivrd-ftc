@@ -1,14 +1,14 @@
 import React, { FC } from "react";
 import { Button } from "../ui/button";
-import { IUser, notificationType } from "@/types";
+import { IUser } from "@/types";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { DropdownMenu, DropdownMenuContent } from "../ui/dropdown-menu";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { BellIcon } from "lucide-react";
 import { DealNegotiatorType } from "@/lib/models/team";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { Notifications } from "./notifications";
+import { UserAvatar } from "../ui/avatar";
 interface IHeaderProps {
   user: IUser | null;
 }
@@ -69,106 +69,36 @@ const Header: FC<IHeaderProps> = ({ user }) => {
 };
 
 export const TeamHeader = ({
-  handleBellClick,
-  notificationCount,
-  notification,
   negotiatorData,
 }: {
-  handleBellClick: () => void;
-  notificationCount: number;
-  notification: notificationType[];
-  negotiatorData: DealNegotiatorType;
+  negotiatorData?: DealNegotiatorType;
 }) => {
   return (
     <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
-      <div className="flex flex-col items-start">
-        <img
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-          alt="DELIVRD Logo"
-          className="h-8 mb-2"
-        />
-        <p className="text-white text-sm">Putting Dreams In Driveways</p>
-      </div>
-      <div className="flex items-center gap-3">
-        <DropdownMenu onOpenChange={handleBellClick}>
-          <DropdownMenuTrigger>
-            <div className="relative">
-              <BellIcon className="w-6 h-6" color="#fff" />
-              {notificationCount > 0 && (
-                <div className="absolute top-[-5px] right-[-5px] flex justify-center items-center w-4 h-4 bg-red-500 text-white text-xs rounded-full">
-                  {notificationCount}
-                </div>
-              )}
-            </div>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent className="z-50 ">
-            <div
-              className={`bg-white flex flex-col ${
-                notification.length ? "max-h-[300px]" : "h-auto"
-              }  overflow-y-scroll gap-3 p-2 z-10 rounded-xl`}
-            >
-              {notification.length ? (
-                notification.map((item, index) => (
-                  <Link
-                    key={index}
-                    target="_blank"
-                    href={item.link ?? "/"}
-                    className="flex flex-col gap-1 p-3 rounded-[8px] items-start hover:bg-gray-200"
-                  >
-                    <p className="font-bold text-lg">{item.title}</p>
-                    <p className="font-normal text-gray-500 text-sm">
-                      {item.body}
-                    </p>
-                  </Link>
-                ))
-              ) : (
-                <p>No notifications available</p>
-              )}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-            Client Deals Dashboard
-          </h1>
-          <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-            {negotiatorData?.name}
-          </h1>
+      <Link href={"/team-dashboard"}>
+        <div className="flex flex-col items-start">
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
+            alt="DELIVRD Logo"
+            className="h-8 mb-2"
+          />
+          <p className="text-white text-sm">Putting Dreams In Driveways</p>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export const TeamDashboardViewHeader = ({
-  negotiatorData,
-}: {
-  negotiatorData: DealNegotiatorType;
-}) => {
-  const router = useRouter();
-
-  return (
-    <div className="flex justify-between items-center bg-[#202125] p-6 mb-5 shadow-lg">
-      <div
-        onClick={() => router.push("/team-dashboard")}
-        className="flex flex-col items-start cursor-pointer"
-      >
-        <img
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-          alt="DELIVRD Logo"
-          className="h-8 mb-2"
-        />
-        <p className="text-white text-sm">Putting Dreams In Driveways</p>
-      </div>
+      </Link>
       <div className="flex items-center gap-3">
-        <div>
+        <Notifications />
+        <div className="fit">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
             Client Deals Dashboard
           </h1>
-          <h1 className="text-base font-semibold text-white text-transparent bg-clip-text">
-            {negotiatorData?.name}
-          </h1>
+          {negotiatorData && (
+            <div className="flex gap-2 w-fit mr-0 ml-auto mt-2">
+              <UserAvatar user={negotiatorData} size="small" />
+              <h1 className="text-base font-semibold text-white text-transparent bg-clip-text mt-auto mb-auto">
+                {negotiatorData?.name}
+              </h1>
+            </div>
+          )}
         </div>
       </div>
     </div>

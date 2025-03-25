@@ -47,43 +47,6 @@ const FilterPopup = ({
       <div className="space-y-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full flex justify-between">
-              Select Stages
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className=" w-auto">
-            <input
-              ref={searchStageInputRef}
-              type="text"
-              placeholder="Search stages..."
-              className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
-              onChange={(e) => setSearchStages(e.target.value.toLowerCase())}
-              autoFocus
-            />
-            <div className="h-56 overflow-scroll">
-              {dealStageOptions
-                .filter((stage) =>
-                  stage.toLowerCase().includes(searchStages.toLowerCase())
-                )
-                .map((stage, index) => (
-                  <DropdownMenuCheckboxItem
-                    key={"stage" + index}
-                    tabIndex={-1}
-                    onFocus={() => searchStageInputRef.current?.focus()}
-                    checked={filters.stages === stage}
-                    onCheckedChange={() => handleFilterChange("stages", stage)}
-                  >
-                    {stage}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="space-y-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-full justify-between">
               Select Makes
               <ChevronDown className="ml-2 h-4 w-4" />

@@ -1,5 +1,5 @@
 "use client";
-import { TeamDashboardViewHeader } from "@/components/base/header";
+import { TeamDashboardViewHeader, TeamHeader } from "@/components/base/header";
 import { Loader } from "@/components/base/loader";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
@@ -133,9 +133,7 @@ const ViewByBrand = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
-      <TeamDashboardViewHeader
-        negotiatorData={negotiatorData as unknown as DealNegotiatorType}
-      />
+      <TeamHeader />
       <div className="flex ml-10 gap-4 items-start">
         <div className="space-y-2">
           <DropDownMenu
