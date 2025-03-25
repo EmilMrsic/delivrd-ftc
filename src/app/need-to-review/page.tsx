@@ -48,14 +48,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import ClientDetailsPopup from "@/components/Team/team-detail-popup";
-import TeamClientDetailsPopup from "@/components/Team/team-client-detail-popup";
-import { statuses } from "@/components/Team/filter-popup";
+import { useRouter } from "next/navigation";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
-import { TeamDashboardViewHeader, TeamHeader } from "@/components/base/header";
+import { TeamHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
 import { dateFormat } from "@/lib/helpers/dates";

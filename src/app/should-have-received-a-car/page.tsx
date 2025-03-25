@@ -44,7 +44,7 @@ import Link from "next/link";
 import { statuses } from "@/components/Team/filter-popup";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
-import { TeamDashboardViewHeader, TeamHeader } from "@/components/base/header";
+import { TeamHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 
 type NegotiationsGroupedType = {

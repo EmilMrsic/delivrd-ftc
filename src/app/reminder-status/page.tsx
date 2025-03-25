@@ -1,5 +1,5 @@
 "use client";
-import { TeamDashboardViewHeader, TeamHeader } from "@/components/base/header";
+import { TeamHeader } from "@/components/base/header";
 import { Loader } from "@/components/base/loader";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
