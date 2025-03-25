@@ -44,6 +44,7 @@ import {
 } from "@/lib/helpers/negotiation";
 import { useRouter } from "next/navigation";
 import { getUserData } from "@/lib/user";
+import { useBackButtonDetector } from "@/hooks/useBackButtonDetector";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -93,9 +94,7 @@ const formatFiltersForNegotiationsEndpoint = (
 };
 
 export default function DealList() {
-  const [isBackNav, setIsBackNav] = useState(false);
-  const router = useRouter();
-  const isPopState = useRef(false);
+  const backButtonDetector = useBackButtonDetector();
   const cachedFilters =
     sessionStorage.getItem("teamDashboardFilters") &&
     JSON.parse(sessionStorage.getItem("teamDashboardFilters") ?? "");
