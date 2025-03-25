@@ -110,7 +110,7 @@ function ProjectProfile() {
       client_name: negotiation?.clientInfo.negotiations_Client ?? "",
       client: negotiation?.clientInfo.negotiations_Client ?? "",
       comment: newComment[bid_id],
-      deal_coordinator: user?.id ?? "",
+      deal_coordinator: user?.deal_coordinator_id ?? "",
       deal_coordinator_name: user?.name ?? "",
       link_status: "Active",
       negotiation_id: negotiationId ?? "",
