@@ -142,11 +142,11 @@ export const TailwindTableExpandedPopover = ({
   expanded: [number, number] | null;
 }) => {
   const Component = cell.config?.expandedComponent;
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current?.contains(event.target)) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
         setExpanded(null);
       }
     }

@@ -381,15 +381,6 @@ export default function DealList() {
             setSortConfig={setSortConfig}
             sortData={sortData}
           />
-          {/* <TeamTablePagination
-            setCurrentDeal={setCurrentDeals}
-            filteredDeal={filteredDeals}
-            totalPages={totalPages}
-            setCurrentPage={setCurrentPage}
-            handleItemsPerPageChange={handleItemsPerPageChange}
-            currentPage={currentPage}
-            itemsPerPage={itemsPerPage}
-          /> */}
         </CardContent>
       </Card>
     </div>

@@ -18,8 +18,10 @@ export const useNegotiations = (
     config.filter ?? {}
   );
 
+  const cacheKey = config.all ? `negotiations` : `negotiation-${id}`;
+
   const negotiationsQuery = useQuery({
-    queryKey: ["negotiations"],
+    queryKey: [cacheKey, filters],
     queryFn: async () => {
       const path = config.all
         ? `negotiation`

@@ -27,15 +27,12 @@ type GroupedBidComments = {
 };
 
 const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
-  const [hasLoaded, setHasLoaded] = useState(false);
-  // const { notificationCount } = useAppSelector((state) => state.notification);
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
   const [user, setUser] = useState<any>();
   const [dealNegotiator, setDealNegotiator] = useState<DealNegotiator>();
 
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
-  // const { notification } = useAppSelector((state) => state.notification);
   const [dealers, setDealers] = useState<DealerData[]>([]);
   const [allDealNegotiator, setAllDealNegotiator] = useState<
     DealNegotiatorType[]
@@ -44,12 +41,13 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     null
   );
 
-  const { negotiations: negotiationsFromUseNegotiations } = useNegotiations({
-    all: true,
-    filter: {
-      id: negotiationId ?? "",
-    },
-  });
+  const { negotiations: negotiationsFromUseNegotiations, isLoading } =
+    useNegotiations({
+      all: true,
+      filter: {
+        id: negotiationId ?? "",
+      },
+    });
 
   useEffect(() => {
     if (negotiationsFromUseNegotiations) {
@@ -132,14 +130,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
       console.log(error);
     }
   };
-
-  // useEffect(() => {
-  //   if (!hasLoaded) {
-  //     setHasLoaded(true);
-  //   } else {
-  //     dispatch(setNotificationCount(notificationCount + 1));
-  //   }
-  // }, [notification]);
 
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
@@ -231,12 +221,11 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     negotiation,
     setNegotiation,
     negotiationId,
-    // notification,
-    // notificationCount,
     incomingBids,
     setIncomingBids,
     bidCommentsByBidId,
     setBidCommentsByBidId,
+    isLoading,
   };
 };
 

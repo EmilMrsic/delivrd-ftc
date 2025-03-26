@@ -35,6 +35,7 @@ import FeatureDetails from "../Feature-details";
 import TradeCard from "../trade-card";
 import { TailwindPlusCard } from "@/components/tailwind-plus/card";
 import EditableTextArea from "@/components/base/editable-textarea";
+import { Loader } from "@/components/base/loader";
 
 export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -50,6 +51,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
     setIncomingBids,
     bidCommentsByBidId,
     setBidCommentsByBidId,
+    isLoading,
   } = useTeamProfile({ negotiationId });
 
   const dispatch = useDispatch();
@@ -332,6 +334,14 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
       setActivityLog(log as ActivityLog);
     });
   }, [negotiationId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader className="w-10 h-10 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-[98%] mx-auto">

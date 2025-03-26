@@ -61,11 +61,7 @@ const TeamDashboardTable = ({
   setSortConfig,
   sortData,
 }: TeamDashboardTableProps) => {
-  const router = useRouter();
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
-  // const [openNoteState, setOpenNoteStates] = useState<Record<string, boolean>>(
-  //   {}
-  // );
 
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
     Record<string, boolean>
@@ -84,13 +80,6 @@ const TeamDashboardTable = ({
       [id]: isOpen,
     }));
   };
-
-  // const toggleInternalNotesDropdown = (id: string, isOpen: boolean) => {
-  //   setOpenNoteStates((prev) => ({
-  //     ...prev,
-  //     [id]: isOpen,
-  //   }));
-  // };
 
   const handleDateChange = async (
     date: string,
@@ -200,27 +189,6 @@ const TeamDashboardTable = ({
       })}
     />
   );
-
-  // return (
-  //   <DashboardTable
-  //     currentDeals={currentDeals}
-  //     handleStageChange={handleStageChange}
-  //     toggleDropdown={toggleDropdown}
-  //     openStates={openStates}
-  //     allDealNegotiator={allDealNegotiator}
-  //     updateDealNegotiator={updateDealNegotiator}
-  //     toggleNegotiatorDropdown={toggleNegotiatorDropdown}
-  //     openNegotiatorState={openNegotiatorState}
-  //     handleDateChange={handleDateChange}
-  //     handleAskForReview={handleAskForReview}
-  //     setStopPropagation={setStopPropagation}
-  //     setCurrentDeals={setCurrentDeals}
-  //     negotiatorData={negotiatorData}
-  //     sortConfig={sortConfig}
-  //     setSortConfig={setSortConfig}
-  //     sortData={sortData}
-  //   />
-  // );
 };
 
 export const DashboardTable = ({
@@ -322,17 +290,17 @@ export const DashboardTable = ({
             },
           },
           {
-            header: "Arrival To Dealer",
-            config: {
-              sortable: true,
-              key: "arrivalToDealer",
-            },
-          },
-          {
             header: "Start Date",
             config: {
               sortable: true,
               key: "dealStartDate",
+            },
+          },
+          {
+            header: "Arrival To Dealer",
+            config: {
+              sortable: true,
+              key: "arrivalToDealer",
             },
           },
           {
@@ -411,6 +379,16 @@ export const DashboardTable = ({
                   ),
                 },
                 {
+                  Component: () => (
+                    <DatePickerCell
+                      initialDate={deal.dealStartDate ?? ""}
+                      onDateChange={(date) =>
+                        handleDateChange(date ?? "", deal.id, "dealStartDate")
+                      }
+                    />
+                  ),
+                },
+                {
                   Component: () =>
                     deal.arrivalToDealer ? (
                       <DatePickerCell
@@ -426,16 +404,6 @@ export const DashboardTable = ({
                     ) : (
                       <>TBD</>
                     ),
-                },
-                {
-                  Component: () => (
-                    <DatePickerCell
-                      initialDate={deal.dealStartDate ?? ""}
-                      onDateChange={(date) =>
-                        handleDateChange(date ?? "", deal.id, "dealStartDate")
-                      }
-                    />
-                  ),
                 },
                 {
                   Component: () =>
