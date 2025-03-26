@@ -3,6 +3,7 @@ import { string } from "zod";
 export interface IUser {
   phone: string;
   trade_details: string;
+  deal_coordinator_id: string[];
   revenue: number;
   is_onboarding_complete: boolean | null;
   dealer_id: string[];

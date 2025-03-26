@@ -399,7 +399,7 @@ function ProjectProfile() {
       client_name: userData?.name ?? "",
       comment_source: "Client",
       comment: newComment[bid_id],
-      deal_coordinator: userData?.deal_negotiator[0] ?? "",
+      deal_coordinator: userData?.deal_coordinator_id[0] ?? "",
       deal_coordinator_name: "N/A",
       link_status: "Active",
       negotiation_id: negotiationData[0].id,
