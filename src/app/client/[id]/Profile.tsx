@@ -467,7 +467,7 @@ function ProjectProfile() {
             >
               <div className="space-y-8">
                 {incomingBids
-                  ?.filter((bid) => bid?.timestamp)
+                  ?.filter((bid) => bid?.timestamp && !bid?.delete)
                   .sort((a, b) => {
                     if (a.client_offer === "accepted") return -1;
                     if (b.client_offer === "accepted") return 1;
