@@ -25,7 +25,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { formatDate, getCurrentTimestamp, uploadFile } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import DealDetailCard from "@/components/Client/DealDetailCard";
 import ClientOverviewCard from "@/components/Client/ClientOverviewCard";
 import IncomingBidsCard from "@/components/Client/IncomingBidsCard/IncomingBidsCard";
@@ -34,8 +34,6 @@ import { Loader } from "@/components/base/loader";
 import { Car, Plus, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import EditableTextArea from "@/components/base/editable-textarea";
-import EditableInput from "@/components/base/input-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import WorkLogSection from "@/components/Client/work-log-section";
@@ -50,7 +48,8 @@ function ProjectProfile() {
   const [negotiationData, setNegotiationData] = useState<NegotiationData[]>([]);
   const [commentingBidId, setCommentingBidId] = useState<string | null>(null);
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
-
+  const params = useSearchParams();
+  const shared = params.get("shared");
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
   const [acceptedBidId, setAcceptedBidId] = useState<string | null>(null);
@@ -219,6 +218,25 @@ function ProjectProfile() {
     toast({
       title:
         "Your deal has been sent to your deal coordinator, who will contact you shortly.",
+    });
+  };
+
+  const cancelOffer = async (bid_id: string) => {
+    // Update the selected bid
+    const bidRef = doc(db, "Incoming Bids", bid_id);
+
+    // Update Firestore
+    await updateDoc(bidRef, {
+      client_offer: "canceled",
+    });
+    const updatedBids = incomingBids.map((bid) =>
+      bid.bid_id === bid_id ? { ...bid, client_offer: "canceled" } : bid
+    );
+
+    setIncomingBids(updatedBids);
+    setAcceptedBidId(bid_id);
+    toast({
+      title: "Your deal has been canceled.",
     });
   };
 
@@ -631,19 +649,24 @@ function ProjectProfile() {
                             </DialogContent>
                           </Dialog>
                           <Button
-                            onClick={() => acceptOffer(item.bid_id)}
+                            onClick={() =>
+                              item.client_offer !== "accepted"
+                                ? acceptOffer(item.bid_id)
+                                : cancelOffer(item.bid_id)
+                            }
                             key={"accept" + index}
                             variant="outline"
                             size="sm"
-                            disabled={item.client_offer === "accepted"}
+                            disabled={shared ? true : false}
                           >
                             {item.client_offer === "accepted"
-                              ? "Offer Accepted"
+                              ? "Cancel Offer"
                               : "Accept Offer"}
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
+                            disabled={shared ? true : false}
                             onClick={() =>
                               setCommentingBidId(
                                 commentingBidId === item.bid_id
@@ -732,6 +755,7 @@ function ProjectProfile() {
             </CardHeader>
             <CardContent className="flex flex-col gap-4 mt-2">
               <textarea
+                disabled={shared ? true : false}
                 className="border rounded-md p-2"
                 value={tradeInInfo}
                 onChange={handleTradeInInfoChange}
@@ -742,6 +766,7 @@ function ProjectProfile() {
                   Trade-In VIN:
                 </label>
                 <Input
+                  disabled={shared ? true : false}
                   id="tradeInVin"
                   value={tradeInVin}
                   onChange={handleTradeInVinChange}
@@ -753,6 +778,7 @@ function ProjectProfile() {
                   Trade-In Mileage:
                 </label>
                 <Input
+                  disabled={shared ? true : false}
                   id="tradeInMileage"
                   value={tradeInMileage}
                   onChange={handleTradeInMileageChange}
@@ -764,6 +790,7 @@ function ProjectProfile() {
                   Trade-In Comments:
                 </label>
                 <Input
+                  disabled={shared ? true : false}
                   id="tradeInComments"
                   value={tradeInComments}
                   onChange={handleTradeInCommentsChange}
@@ -775,6 +802,7 @@ function ProjectProfile() {
                   Upload Files
                 </label>
                 <input
+                  disabled={shared ? true : false}
                   type="file"
                   multiple
                   className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
@@ -819,15 +847,17 @@ function ProjectProfile() {
                           />
                         )}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent opening file when clicking the cross
-                          handleRemoveFile(file);
-                        }}
-                        className="absolute top-[-10px] right-[-10px] bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
-                      >
-                        <X size={16} />
-                      </button>
+                      {!shared && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent opening file when clicking the cross
+                            handleRemoveFile(file);
+                          }}
+                          className="absolute top-[-10px] right-[-10px] bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
