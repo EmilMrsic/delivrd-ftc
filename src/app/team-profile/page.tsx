@@ -262,14 +262,25 @@ function ProjectProfile() {
   const handleReaddBid = async (bidId: string) => {
     const bid_id = bidId;
     const updatedBids = incomingBids.map((bid) =>
-      bid.bid_id === bidId ? { ...bid, delete: false } : bid
+      bid.bid_id === bidId
+        ? {
+            ...bid,
+            delete: false,
+            client_offer: "canceled",
+            accept_offer: false,
+          }
+        : bid
     );
     setIncomingBids(updatedBids);
 
     const bidDocRef = doc(db, "Incoming Bids", bid_id);
 
     try {
-      await updateDoc(bidDocRef, { delete: false });
+      await updateDoc(bidDocRef, {
+        delete: false,
+        client_offer: "canceled",
+        accept_offer: false,
+      });
       console.log("Bid marked as deleted in Firebase");
       toast({ title: "Bid has been Re-Added" });
     } catch (error) {
