@@ -38,6 +38,7 @@ type DeleteBidSectionProps = {
   addComment: (item: string) => void;
   incomingBids: IncomingBid[];
   dealers: DealerData[];
+  handleReaddBid: (item: string) => void;
 };
 
 const DeleteBidSection = ({
@@ -58,6 +59,7 @@ const DeleteBidSection = ({
   addComment,
   incomingBids,
   dealers,
+  handleReaddBid,
 }: DeleteBidSectionProps) => {
   const parseComment = (comment: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -119,6 +121,14 @@ const DeleteBidSection = ({
                           ? `${matchingDealer.Dealership} Offer`
                           : "No Dealership"}
                       </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleReaddBid(bidDetails?.bid_id)}
+                        className={"bg-white text-black"}
+                      >
+                        Re-Add
+                      </Button>
                     </div>
                     <time className="block mb-2 text-sm text-[#202125]">
                       {formatDate(bidDetails?.timestamp)}

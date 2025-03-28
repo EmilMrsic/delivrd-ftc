@@ -54,7 +54,7 @@ export default function BiddingSection() {
   const [filteredBidVehicles, setFilteredBidVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("available");
-  const [subTab, setSubTab] = useState("used");
+  const [subTab, setSubTab] = useState("new");
   const [sortColumn, setSortColumn] = useState<keyof Vehicle>("carMake");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 

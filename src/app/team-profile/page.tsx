@@ -259,6 +259,25 @@ function ProjectProfile() {
     logActivity(user.name, "A bid has been deleted");
   };
 
+  const handleReaddBid = async (bidId: string) => {
+    const bid_id = bidId;
+    const updatedBids = incomingBids.map((bid) =>
+      bid.bid_id === bidId ? { ...bid, delete: false } : bid
+    );
+    setIncomingBids(updatedBids);
+
+    const bidDocRef = doc(db, "Incoming Bids", bid_id);
+
+    try {
+      await updateDoc(bidDocRef, { delete: false });
+      console.log("Bid marked as deleted in Firebase");
+      toast({ title: "Bid has been Re-Added" });
+    } catch (error) {
+      console.error("Error updating bid in Firebase: ", error);
+    }
+    logActivity(user.name, "A bid has been Re-Added");
+  };
+
   const handleBidFileUpload = async (
     changeFiles: FileList | null,
     bidId: string
@@ -396,12 +415,13 @@ function ProjectProfile() {
     try {
       const bidRef = doc(db, "Incoming Bids", acceptedBid.bid_id);
 
-      await updateDoc(bidRef, { accept_offer: false });
+      await updateDoc(bidRef, { accept_offer: false, vote: "neutral" });
 
       setIncomingBids((prevBids) =>
         prevBids.map((bid) => ({
           ...bid,
           accept_offer: bid.bid_id === acceptedBid.bid_id && false,
+          vote: bid.bid_id === acceptedBid.bid_id ? "neutral" : bid.vote,
         }))
       );
 
@@ -994,6 +1014,7 @@ function ProjectProfile() {
           </div>
           {showDeletedBids && (
             <DeleteBidSection
+              handleReaddBid={handleReaddBid}
               dealers={dealers}
               incomingBids={incomingBids}
               setCommentingBidId={setCommentingBidId}
