@@ -77,9 +77,9 @@ function Manager() {
   const [loading, setLoading] = useState(false);
   const {
     allDealNegotiator,
-    setFilteredDeals,
-    setOriginalDeals,
-    negotiatorData,
+    // setFilteredDeals,
+    // setOriginalDeals,
+    // negotiatorData,
     negotiations: negotiationsFromTeamDashboard,
     team: teamFromTeamDashboard,
     refetch,
@@ -493,7 +493,7 @@ const ManagerTable = ({
   openNegotiatorState: Record<string, boolean>;
   toggleNegotiatorDropdown: (id: string, isOpen: boolean) => void;
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
-  allDealNegotiator: DealNegotiator[];
+  allDealNegotiator: DealNegotiatorType[];
 }) => {
   return (
     <TailwindPlusTable
@@ -605,19 +605,21 @@ const ManagerTable = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                {allDealNegotiator.map((negotiator: DealNegotiator, index) => (
-                  <DropdownMenuItem
-                    key={index}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      updateDealNegotiator(deal.id, negotiator.id);
-                      toggleNegotiatorDropdown(deal.id, false);
-                    }}
-                  >
-                    {negotiator.name}
-                  </DropdownMenuItem>
-                ))}
+                {allDealNegotiator.map(
+                  (negotiator: DealNegotiatorType, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        updateDealNegotiator(deal.id, negotiator.id);
+                        toggleNegotiatorDropdown(deal.id, false);
+                      }}
+                    >
+                      {negotiator.name}
+                    </DropdownMenuItem>
+                  )
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           ),

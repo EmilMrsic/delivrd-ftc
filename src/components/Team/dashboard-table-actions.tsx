@@ -15,9 +15,10 @@ export const DashboardTableActions = ({
   deal,
   negotiatorData,
   dateFormat,
-  setCurrentDeals,
-  currentDeals,
+  // setCurrentDeals,
+  // currentDeals,
   handleAskForReview,
+  refetch,
 }: any) => {
   return (
     <DropdownMenu>
@@ -38,8 +39,9 @@ export const DashboardTableActions = ({
             formatDate={dateFormat}
           />
           <ShippingInfoDialog
-            setCurrentDeals={setCurrentDeals}
-            currentDeals={currentDeals}
+            // setCurrentDeals={setCurrentDeals}
+            // currentDeals={currentDeals}
+            refetch={refetch}
             deal={deal}
             setStopPropogation={setStopPropagation}
           />

@@ -138,8 +138,8 @@ function NeedToReview() {
   const [loading, setLoading] = useState(false);
   const {
     allDealNegotiator,
-    setFilteredDeals,
-    setOriginalDeals,
+    // setFilteredDeals,
+    // setOriginalDeals,
     negotiatorData,
     negotiations,
     team,
@@ -311,13 +311,13 @@ function NeedToReview() {
         });
       }
 
-      setFilteredDeals((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id
-            ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-            : deal
-        )
-      );
+      // setFilteredDeals((prevDeals) =>
+      //   prevDeals?.map((deal) =>
+      //     deal.id === id
+      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
+      //       : deal
+      //   )
+      // );
       setDealsWithoutCoordinator((prevDeals) =>
         prevDeals?.filter((deal) => deal.id !== id)
       );
@@ -334,13 +334,13 @@ function NeedToReview() {
         })
       );
 
-      setOriginalDeals((prevDeals) =>
-        prevDeals?.map((deal) =>
-          deal.id === id
-            ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-            : deal
-        )
-      );
+      // setOriginalDeals((prevDeals) =>
+      //   prevDeals?.map((deal) =>
+      //     deal.id === id
+      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
+      //       : deal
+      //   )
+      // );
 
       toast({ title: "Negotiator updated successfully" });
       console.log("Negotiator updated successfully!");
@@ -561,7 +561,7 @@ const ReviewTable = ({
   sortData,
 }: {
   negotiations: NegotiationDataType[];
-  allDealNegotiator: DealNegotiator[];
+  allDealNegotiator: DealNegotiatorType[];
   openDealerNegotiatorState: Record<string, boolean>;
   toggleDealNegotiatorDropdown: (id: string, isOpen: boolean) => void;
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
@@ -738,19 +738,21 @@ const ReviewTable = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                {allDealNegotiator.map((negotiator: DealNegotiator, index) => (
-                  <DropdownMenuItem
-                    key={index}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      updateDealNegotiator(deal.id, negotiator.id);
-                      toggleNegotiatorDropdown(deal.id, false);
-                    }}
-                  >
-                    {negotiator.name}
-                  </DropdownMenuItem>
-                ))}
+                {allDealNegotiator.map(
+                  (negotiator: DealNegotiatorType, index) => (
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        updateDealNegotiator(deal.id, negotiator.id);
+                        toggleNegotiatorDropdown(deal.id, false);
+                      }}
+                    >
+                      {negotiator.name}
+                    </DropdownMenuItem>
+                  )
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           ),

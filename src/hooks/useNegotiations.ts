@@ -25,8 +25,7 @@ export const useNegotiations = (
     queryFn: async () => {
       const path = config.all
         ? `negotiation`
-        : `negotiation/${id || getUserData().deal_coordinator_id}`;
-
+        : `negotiation/${id || getUserData()?.deal_coordinator_id}`;
       const request = await backendRequest(path, "POST", {
         filter: filters,
       });
@@ -37,8 +36,14 @@ export const useNegotiations = (
 
   const handleIdChange = (
     newId?: string,
-    newFilters?: { [key: string]: string | string[] }
+    newFilters?: { [key: string]: string | string[] },
+    reset?: boolean
   ) => {
+    if (reset) {
+      setId(getUserData().deal_coordinator_id);
+      setFilters({});
+    }
+
     if (newId) {
       setId(newId);
     }

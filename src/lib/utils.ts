@@ -798,17 +798,27 @@ export const getReviewDealsWithoutCoordinator = async () => {
 
 export const getStatusStyles = (status: string) => {
   const statusColors: Record<string, string> = {
-    "Actively Negotiating": "#9AE095",
-    "Deal Started": "#E0DAFD",
-    Paid: "#CFF5D1",
-    "Delivery Scheduled": "#068A16",
-    "Deal Complete- Long Distance": "#02640D",
-    "Long Term Order": "#FFD4E0",
-    Shipping: "#FFA6C1",
-    "Needs To Review": "#FAD2FC",
-    "Ask for Review": "#C4ECFE",
-    "Follow Up Issue": "#04DDD5",
-    "Follow Up": "#C1F5F0",
+    Paid: "#cff5d1",
+    "Actively Negotiating": "#9ae095",
+    "Long Term Order": "#ffd4e0",
+    "Delivery Scheduled": "#048a0e",
+    "Follow Up Issue": "#01ddd5",
+    "Needs To Review": "#fad2fc",
+    "Ask for Review": "#c4ecff",
+    Shipping: "#ffa6c1",
+    "Deal Complete - Long Distance": "#006400",
+    "Paid Holding": "#7c37ef",
+    // "Actively Negotiating": "#9AE095",
+    // "Deal Started": "#E0DAFD",
+    // Paid: "#CFF5D1",
+    // "Delivery Scheduled": "#068A16",
+    // "Deal Complete- Long Distance": "#02640D",
+    // "Long Term Order": "#FFD4E0",
+    // Shipping: "#FFA6C1",
+    // "Needs To Review": "#FAD2FC",
+    // "Ask for Review": "#C4ECFE",
+    // "Follow Up Issue": "#04DDD5",
+    // "Follow Up": "#C1F5F0",
   };
 
   const backgroundColor = statusColors[status] || "#E5E7EB"; // Default gray
@@ -828,4 +838,30 @@ export const isDarkColor = (hex: string) => {
   // Calculate luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance < 0.5; // Dark if luminance is low
+};
+
+export const getActivityLogsByNegotiationId = async (negotiationId: string) => {
+  try {
+    const id = negotiationId;
+    const logsRef = collection(db, "activity log");
+
+    const q = query(logsRef, where("negotiationId", "==", id));
+
+    // Get the query snapshot
+    const querySnapshot = await getDocs(q);
+
+    // Extract the documents (activity logs) from the snapshot
+    const activityLogs = querySnapshot.docs.map((doc) => doc.data());
+
+    if (activityLogs.length > 0) {
+      console.log("Found Activity Logs:", activityLogs);
+      return activityLogs;
+    } else {
+      console.log("No activity logs found for this negotiationId.");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error getting activity logs:", error);
+    return [];
+  }
 };

@@ -89,6 +89,10 @@ export const InternalNotesModel = z.object({
   text: z.string(),
 });
 
-export type DealNegotiatorType = z.infer<typeof DealNegotiatorModel>;
 export type NegotiationDataType = z.infer<typeof NegotiationDataModel>;
+export type DealNegotiatorType = z.infer<typeof DealNegotiatorModel> & {
+  negotiationsGrouped?: {
+    [key: string]: NegotiationDataType[];
+  };
+};
 export type InternalNotesType = z.infer<typeof InternalNotesModel>;

@@ -37,7 +37,7 @@ type AddNoteSectionProps = {
   dealNegotiator?: DealNegotiator;
   // negotiationId: string;
   setNegotiation: (negotiation: NegotiationDataType) => void;
-  incomingBids: IncomingBid[];
+  incomingBids?: IncomingBid[];
   allDealNegotiator: DealNegotiatorType[];
 };
 

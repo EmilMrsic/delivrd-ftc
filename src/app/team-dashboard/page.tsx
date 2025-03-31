@@ -80,68 +80,40 @@ export default function DealList() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
-  const [negotiationsByColumn, setNegotiationsByColumn] = useState<
-    Record<string, NegotiationDataType[]>
-  >({});
 
   const {
-    filteredDeals,
-    originalDeals,
+    allNegotiations,
     allDealNegotiator,
-    allInternalNotes,
     negotiatorData,
-    setFilteredDeals,
-    setOriginalDeals,
     loading,
-    setLoading,
-    itemsPerPage,
-    setItemsPerPage,
-    currentDeals,
-    currentPage,
-    setCurrentPage,
-    setCurrentDeals,
     refetch,
     negotiations,
+    searchAll,
+    setSearchAll,
   } = useTeamDashboard({
     id: formattedCachedFilters?.dealCoordinatorId,
     filter: formattedCachedFilters ?? {},
   });
-
-  // const totalPages = Math.ceil(filteredDeals?.length / itemsPerPage);
-
-  // const handleItemsPerPageChange = (
-  //   e: React.ChangeEvent<HTMLSelectElement>
-  // ) => {
-  //   const newItemsPerPage = Number(e.target.value);
-  //   setItemsPerPage(newItemsPerPage);
-  //   setCurrentPage(1);
-  // };
 
   const [sortConfig, setSortConfig] = useState({
     key: "submittedDate", // default sorting by Submitted Date
     direction: "ascending", // default direction
   });
 
-  const sortData = (key: string, direction: string) => {
-    const sortedData = sortMappedDataHelper(
-      negotiationsByColumn,
-      key,
-      direction
-    );
-    setSortConfig({ key, direction });
-    setNegotiationsByColumn(sortedData);
-  };
-
   useEffect(() => {
     sessionStorage.setItem("teamDashboardFilters", JSON.stringify(filters));
-    setLoading(true);
+    // setLoading(true);
     runFilters();
   }, [filters]);
 
   const runFilters = () => {
     const formattedFilters = formatFiltersForNegotiationsEndpoint(filters);
-    refetch(formattedFilters.dealCoordinatorId as string, formattedFilters);
-    setLoading(false);
+    if (!Object.keys(formattedFilters)?.length) {
+      refetch(undefined, undefined, true);
+    } else {
+      refetch(formattedFilters.dealCoordinatorId as string, formattedFilters);
+    }
+    // setLoading(false);
   };
 
   const handleFilterChange = async (
@@ -195,83 +167,29 @@ export default function DealList() {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value.toLowerCase();
     setSearchTerm(term);
-
-    if (term.length === 0) {
-      setFilteredDeals(originalDeals);
-      return;
-    }
-
-    const filtered = originalDeals?.filter((deal) => {
-      return (
-        deal?.clientNamefull?.toLowerCase().includes(term) ||
-        deal?.brand?.toLowerCase().includes(term) ||
-        deal?.model?.toLowerCase().includes(term) ||
-        deal?.zip?.toLowerCase().includes(term) ||
-        deal?.clientEmail?.toLowerCase().includes(term) ||
-        deal?.clientPhone?.toLowerCase().includes(term)
-      );
-    });
-
-    setFilteredDeals(filtered);
   };
 
   const clearFilters = () => {
-    const userData = localStorage.getItem("user");
-    const parseUserData = JSON.parse(userData ?? "");
-    const id = Array.isArray(parseUserData.deal_coordinator_id)
-      ? parseUserData.deal_coordinator_id[0]
-      : parseUserData.deal_coordinator_id;
-
-    if (!id || typeof id !== "string") {
-      console.error(
-        "Invalid deal_coordinator_id:",
-        parseUserData.deal_coordinator_id
-      );
-      return;
-    }
-
     setFilters(DEFAULT_FILTERS);
-    setFilteredDeals(originalDeals);
-    setCurrentPage(1);
-    setLoading(true);
+    // setLoading(true);
   };
 
   const handleStageChange = async (id: string, newStage: string) => {
     try {
       await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
-        negotiations_Status: newStage,
+        stage: newStage,
       });
 
       if (newStage !== "Closed") {
         await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
           close_date: "",
         });
-
-        refetch(
-          formattedCachedFilters?.dealCoordinatorId as string,
-          formattedCachedFilters
-        );
-
-        // setCurrentDeals((prevDeals) =>
-        //   prevDeals?.map((deal) =>
-        //     deal.id === id
-        //       ? { ...deal, close_date: "", negotiations_Status: newStage }
-        //       : deal
-        //   )
-        // );
-      } else {
-        // setFilteredDeals((prevDeals) =>
-        //   prevDeals?.map((deal) =>
-        //     deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
-        //   )
-        // );
-        // setOriginalDeals((prevDeals) =>
-        //   prevDeals?.map((deal) =>
-        //     deal.id === id ? { ...deal, negotiations_Status: newStage } : deal
-        //   )
-        // );
       }
 
+      refetch(
+        formattedCachedFilters?.dealCoordinatorId as string,
+        formattedCachedFilters
+      );
       toast({ title: "Status updated" });
     } catch (error) {
       console.error("Error updating stage:", error);
@@ -306,22 +224,6 @@ export default function DealList() {
         });
       }
 
-      // setFilteredDeals((prevDeals) =>
-      //   prevDeals?.map((deal) =>
-      //     deal.id === id
-      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-      //       : deal
-      //   )
-      // );
-
-      // setOriginalDeals((prevDeals) =>
-      //   prevDeals?.map((deal) =>
-      //     deal.id === id
-      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-      //       : deal
-      //   )
-      // );
-
       refetch(
         formattedCachedFilters?.dealCoordinatorId as string,
         formattedCachedFilters
@@ -334,21 +236,6 @@ export default function DealList() {
     }
   };
 
-  useEffect(() => {
-    if (negotiations) {
-      const negotiationsByColumn = mapNegotiationsByColumn(
-        negotiations,
-        "stage"
-      );
-      const sortedNegotiationsByColumn = sortMappedDataHelper(
-        negotiationsByColumn,
-        "condition",
-        "ascending"
-      );
-      setNegotiationsByColumn(sortedNegotiationsByColumn);
-    }
-  }, [negotiations]);
-
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
       <TeamHeader />
@@ -359,12 +246,15 @@ export default function DealList() {
             filters={filters}
             handleFilterChange={handleFilterChange}
             clearFilters={clearFilters}
-            setCurrentDeals={setCurrentDeals}
+            // setCurrentDeals={setCurrentDeals}
             searchTerm={searchTerm}
             handleSearch={handleSearch}
+            searchAll={searchAll}
+            setSearchAll={setSearchAll}
           />
           <TeamDashboardTable
-            setCurrentDeals={setCurrentDeals}
+            // setCurrentDeals={setCurrentDeals}
+            allNegotiations={allNegotiations}
             loading={loading}
             setStopPropagation={setStopPropagation}
             stopPropagation={stopPropagation}
@@ -372,15 +262,44 @@ export default function DealList() {
             allDealNegotiator={
               allDealNegotiator as unknown as DealNegotiatorType[]
             }
-            allInternalNotes={allInternalNotes}
-            currentDeals={currentDeals}
+            // allInternalNotes={allInternalNotes}
+            // currentDeals={currentDeals}
             handleStageChange={handleStageChange}
             updateDealNegotiator={updateDealNegotiator}
-            negotiationsByColumn={negotiationsByColumn}
+            // negotiationsByColumn={negotiationsByColumn}
             sortConfig={sortConfig}
             setSortConfig={setSortConfig}
-            sortData={sortData}
+            refetch={refetch}
+            displayAllPaid={!searchAll}
+            negotiations={negotiations}
+            searchTerm={searchTerm}
+            searchAll={searchAll}
           />
+          {searchAll && (
+            <>
+              <div className="border-t border-blue-200 mt-4 border-[4px]"></div>
+              <TeamDashboardTable
+                displayAllPaid={false}
+                allNegotiations={allNegotiations}
+                loading={loading}
+                setStopPropagation={setStopPropagation}
+                stopPropagation={stopPropagation}
+                negotiatorData={negotiatorData as unknown as DealNegotiatorType}
+                allDealNegotiator={
+                  allDealNegotiator as unknown as DealNegotiatorType[]
+                }
+                handleStageChange={handleStageChange}
+                updateDealNegotiator={updateDealNegotiator}
+                // negotiationsByColumn={negotiationsByColumn}
+                negotiations={allNegotiations}
+                sortConfig={sortConfig}
+                setSortConfig={setSortConfig}
+                refetch={refetch}
+                searchTerm={searchTerm}
+                searchAll={searchAll}
+              />
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -4,6 +4,7 @@ import FilterPopup from "./filter-popup";
 import SearchAll from "./search-all";
 import { Input } from "../ui/input";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "../ui/checkbox";
 
 export const TeamDashboardFilters = ({
   allDealNegotiator,
@@ -12,6 +13,8 @@ export const TeamDashboardFilters = ({
   clearFilters,
   searchTerm,
   handleSearch,
+  searchAll,
+  setSearchAll,
 }: any) => {
   const router = useRouter();
   return (
@@ -31,6 +34,16 @@ export const TeamDashboardFilters = ({
               onChange={handleSearch}
               className="pl-8 max-w-[300px] mt-auto mb-auto"
             />
+            <div className="flex gap-2 items-center w-fit">
+              <Checkbox
+                id="search_all"
+                checked={searchAll}
+                onCheckedChange={setSearchAll}
+              />
+              <label htmlFor="search_all" className="text-nowrap">
+                All Deals
+              </label>
+            </div>
             <Button onClick={clearFilters} newDefault={true}>
               <p>Clear filters</p>
             </Button>

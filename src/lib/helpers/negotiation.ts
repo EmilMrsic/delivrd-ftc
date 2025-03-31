@@ -103,10 +103,31 @@ export const sortMappedDataHelper = (
   return sortedMappedNegotiations;
 };
 
+export const orderNegotiationsByColumns = (
+  negotiationsByColumn: Record<string, Record<string, NegotiationDataType[]>>
+) => {
+  const sortedStatuses = Object.keys(negotiationsByColumn).sort((a, b) => {
+    return (
+      negotiationStatusOrder.indexOf(a) - negotiationStatusOrder.indexOf(b)
+    );
+  });
+
+  return sortedStatuses.map((status) => {
+    return {
+      stage: status,
+      deals: negotiationsByColumn[status],
+    };
+  });
+};
+
 export const getActiveDealDocuments = async (dealQuery: {
   dealNegotiatorId?: string;
   filter?: {
     [key: string]: string | string[];
+  };
+  include?: {
+    incomingBids?: boolean;
+    activityLog?: boolean;
   };
 }): Promise<NegotiationDataType[]> => {
   const negotiationsCollectionRef = collection(db, "delivrd_negotiations");
@@ -140,9 +161,14 @@ export const getActiveDealDocuments = async (dealQuery: {
   );
 
   const negotiationsSnapshot = await getDocs(negotiationsQuery);
-  return negotiationsSnapshot.docs.map((doc) => {
+
+  const negotiations = negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();
     return NegotiationDataModel.parse(data);
+  });
+
+  return negotiations.filter((negotiation) => {
+    return negotiationStatusOrder.includes(negotiation.stage);
   });
 };
 
@@ -206,7 +232,8 @@ export const mapNegotiationsToTeam = (
 
 export const mapNegotiationsByColumn = (
   negotiations: NegotiationDataType[],
-  column: string
+  column: string,
+  seachFn?: (deal: NegotiationDataType) => boolean
 ) => {
   const negotiationsByColumn = negotiations.reduce(
     (
@@ -217,7 +244,14 @@ export const mapNegotiationsByColumn = (
       if (!acc[columnValue]) {
         acc[columnValue] = [];
       }
-      acc[columnValue].push(deal);
+
+      if (seachFn) {
+        if (seachFn(deal)) {
+          acc[columnValue].push(deal);
+        }
+      } else {
+        acc[columnValue].push(deal);
+      }
       return acc;
     },
     {} as Record<string, NegotiationDataType[]>

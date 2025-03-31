@@ -51,21 +51,9 @@ type NegotiationsGroupedType = {
   [groupKey: string]: NegotiationDataType[];
 };
 
-type TeamDataType = {
-  activeDeals: string[];
-  deals: string[];
-  email: string;
-  id: string;
-  name: string;
-  profile_pic: string;
-  role: string;
-  video_link: string;
-  negotiationsGrouped: NegotiationsGroupedType;
-};
-
 function ReceivedCar() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [teamData, setTeamData] = useState<TeamDataType[]>([]);
+  const [teamData, setTeamData] = useState<DealNegotiatorType[]>([]);
   const [userData, setUserData] = useState<IUser>();
 
   const [dealsWithoutCoordinator, setDealsWithoutCoordinator] = useState<
@@ -170,7 +158,7 @@ function ReceivedCar() {
       const sortedTeams = teamData.map((team) => {
         const sortedNegotiationsGrouped: NegotiationsGroupedType =
           Object.fromEntries(
-            Object.entries(team.negotiationsGrouped).map(
+            Object.entries(team.negotiationsGrouped ?? {}).map(
               ([groupKey, negotiations]) => {
                 const sortedNegotiations = [...negotiations].sort(
                   (a: any, b: any) => {
@@ -278,17 +266,16 @@ function ReceivedCar() {
                           <p>{team.name}</p>
                           <p className="text-xs text-gray-600">
                             Total Deals:{" "}
-                            {Object.values(team.negotiationsGrouped).reduce(
-                              (acc, curr) => acc + curr.length,
-                              0
-                            )}
+                            {Object.values(
+                              team.negotiationsGrouped ?? {}
+                            ).reduce((acc, curr) => acc + curr.length, 0)}
                           </p>
                         </div>
                       </TableCell>
                     </TableRow>
 
                     {expandedRows.has(team.id) &&
-                      Object.entries(team.negotiationsGrouped).map(
+                      Object.entries(team.negotiationsGrouped ?? {}).map(
                         ([status, deals]) => (
                           <React.Fragment key={status}>
                             <TableRow className="bg-gray-50 hover:bg-gray-100 transition-colors">

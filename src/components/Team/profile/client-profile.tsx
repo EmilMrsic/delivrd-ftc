@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import useTeamProfile from "@/hooks/useTeamProfile";
 import {
   generateRandomId,
+  getActivityLogsByNegotiationId,
   getCurrentTimestamp,
   updateBidInFirebase,
   uploadFile,
@@ -67,7 +68,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
     files: [""],
   });
 
-  const [activityLog, setActivityLog] = useState<ActivityLog>([]);
+  const [activityLog, setActivityLog] = useState<ActivityLog>();
 
   const addComment = async (bid_id: string) => {
     if (!newComment[bid_id]?.trim()) return;
@@ -257,7 +258,9 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
       negotiationId,
     };
 
-    setActivityLog([...activityLog, newActivityLog]);
+    const useableActivityLog = activityLog ?? [];
+
+    setActivityLog([...useableActivityLog, newActivityLog]);
     console.log(activityLog);
     await addDoc(collection(db, "activity log"), newActivityLog);
   };
@@ -304,32 +307,6 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
   };
 
   useEffect(() => {
-    const getActivityLogsByNegotiationId = async (negotiationId: string) => {
-      try {
-        const id = negotiationId;
-        const logsRef = collection(db, "activity log");
-
-        const q = query(logsRef, where("negotiationId", "==", id));
-
-        // Get the query snapshot
-        const querySnapshot = await getDocs(q);
-
-        // Extract the documents (activity logs) from the snapshot
-        const activityLogs = querySnapshot.docs.map((doc) => doc.data());
-
-        if (activityLogs.length > 0) {
-          console.log("Found Activity Logs:", activityLogs);
-          return activityLogs;
-        } else {
-          console.log("No activity logs found for this negotiationId.");
-          return [];
-        }
-      } catch (error) {
-        console.error("Error getting activity logs:", error);
-        return [];
-      }
-    };
-
     getActivityLogsByNegotiationId(negotiationId ?? "").then((log) => {
       setActivityLog(log as ActivityLog);
     });
@@ -429,7 +406,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
             dealNegotiator={dealNegotiator}
           />
 
-          <ActivityLogSection activityLog={activityLog} />
+          <ActivityLogSection activityLog={activityLog ?? []} />
         </div>
       </div>
 

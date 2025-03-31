@@ -131,7 +131,19 @@ const FeatureDetails = ({
           }
           icon={Car}
         />
+        {/* <EditableTextArea
+          value={negotiation?.trim ?? "Trim details not available"}
+          negotiationId={negotiationId ?? ""}
+          field="trimPackageOptions"
+          onChange={(newValue) =>
+            handleChange({
+              key: "trimPackageOptions",
+              newValue: newValue,
+            })
+          }
+        /> */}
         <InputField
+          type="textarea"
           label="Trim"
           value={negotiation?.trim ?? "Trim info not available"}
           negotiationId={negotiationId ?? ""}
@@ -241,21 +253,7 @@ const FeatureDetails = ({
           }
           icon={DollarSign}
         />
-        <Separator className="my-4" />
-        <div className="space-y-2">
-          <h3 className="font-semibold text-lg">Features and Trim Details</h3>
-          <EditableTextArea
-            value={negotiation?.trim ?? "Trim details not available"}
-            negotiationId={negotiationId ?? ""}
-            field="trimPackageOptions"
-            onChange={(newValue) =>
-              handleChange({
-                key: "trimPackageOptions",
-                newValue: newValue,
-              })
-            }
-          />
-        </div>
+        <div className="space-y-2"></div>
         <div className="space-x-2 flex items-center">
           <Calendar className="w-5 h-5 text-gray-400" />
           <h3 className="font-semibold text-[15px]">Date Paid:</h3>

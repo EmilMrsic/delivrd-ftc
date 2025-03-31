@@ -10,15 +10,17 @@ import { toast } from "@/hooks/use-toast";
 type ShippingInfoDialogProps = {
   deal: NegotiationData;
   setStopPropogation: (item: boolean) => void;
-  currentDeals: NegotiationData[];
-  setCurrentDeals: (item: NegotiationData[]) => void;
+  // currentDeals: NegotiationData[];
+  // setCurrentDeals: (item: NegotiationData[]) => void;
+  refetch: (id?: string, filters?: any, reset?: boolean) => void;
 };
 
 const ShippingInfoDialog = ({
   deal,
   setStopPropogation,
-  setCurrentDeals,
-  currentDeals,
+  // setCurrentDeals,
+  // currentDeals,
+  refetch,
 }: ShippingInfoDialogProps) => {
   const [open, setOpen] = useState(false);
   const [shippingInfo, setShippingInfo] = useState<string>(
@@ -34,11 +36,12 @@ const ShippingInfoDialog = ({
         await updateDoc(docRef, { shipping_info: newInfo });
         console.log("Shipping info updated!");
         toast({ title: "Shipping info updated" });
-        const updatedDeals = currentDeals.map((d) =>
-          d.id === deal.id ? updatedDeal : d
-        );
-        setCurrentDeals(updatedDeals);
+        // const updatedDeals = currentDeals.map((d) =>
+        //   d.id === deal.id ? updatedDeal : d
+        // );
+        // setCurrentDeals(updatedDeals);
         setOpen(false);
+        refetch();
       } else {
         toast({ title: "Kindly add new info" });
       }

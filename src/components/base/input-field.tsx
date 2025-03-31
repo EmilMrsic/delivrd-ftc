@@ -20,6 +20,7 @@ import DatePicker from "react-datepicker";
 import clsx from "clsx";
 import { formatDateToLocal } from "@/lib/helpers/dates";
 import { NegotiationDataType } from "@/lib/models/team";
+import EditableTextArea from "./editable-textarea";
 
 interface EditableInputProps {
   label: string;
@@ -102,7 +103,7 @@ export const InputField = (props: {
   lastName?: string;
   options?: string[];
   icon?: React.ComponentType<{ className?: string }>;
-  type?: "text" | "searchableDropdown" | "datePicker";
+  type?: "text" | "searchableDropdown" | "datePicker" | "textarea";
   dateFormat?: string;
   placeholderText?: string;
   selected?: Date | null;
@@ -189,6 +190,10 @@ export const InputField = (props: {
       InputComponent = DatePicker;
       break;
 
+    case "textarea":
+      InputComponent = EditableTextArea;
+      break;
+
     default:
       InputComponent = EditableInput;
   }
@@ -238,7 +243,7 @@ export const InputField = (props: {
 
   return (
     <div className="flex items-center space-x-2 text-[#202125]">
-      {props.type === "datePicker" ? (
+      {props.type === "datePicker" || props.type === "textarea" ? (
         <>
           {Icon && <Icon className="h-5 w-5 text-gray-400" />}
           <Field className="w-full">
