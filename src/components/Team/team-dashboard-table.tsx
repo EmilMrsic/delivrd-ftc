@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import "react-datepicker/dist/react-datepicker.css";
 import { Check, X } from "lucide-react";
-import {
-  dateFormat,
-  dealStageOptions,
-  getElapsedTime,
-  getStatusStyles,
-} from "@/lib/utils";
+import { dateFormat, getElapsedTime, getStatusStyles } from "@/lib/utils";
 
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
@@ -79,7 +74,6 @@ const TeamDashboardTable = ({
   const [paidNegotiations, setPaidNegotiations] = useState<
     NegotiationDataType[]
   >([]);
-  const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
 
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
     Record<string, boolean>
@@ -107,13 +101,6 @@ const TeamDashboardTable = ({
       deal?.clientPhone?.toLowerCase().includes(searchTerm);
 
     return found;
-  };
-
-  const toggleDropdown = (id: string, isOpen: boolean) => {
-    setOpenStates((prev) => ({
-      ...prev,
-      [id]: isOpen,
-    }));
   };
 
   const toggleNegotiatorDropdown = (id: string, isOpen: boolean) => {
@@ -275,8 +262,6 @@ const TeamDashboardTable = ({
                 key={`dashboard-table-${statusIdx}-${conditionIdx}`}
                 currentDeals={deals[condition]}
                 handleStageChange={handleStageChange}
-                toggleDropdown={toggleDropdown}
-                openStates={openStates}
                 allDealNegotiator={allDealNegotiator}
                 updateDealNegotiator={updateDealNegotiator}
                 toggleNegotiatorDropdown={toggleNegotiatorDropdown}
@@ -322,8 +307,6 @@ const TeamDashboardTable = ({
             key={`dashboard-table-paid`}
             currentDeals={paidNegotiations}
             handleStageChange={handleStageChange}
-            toggleDropdown={toggleDropdown}
-            openStates={openStates}
             allDealNegotiator={allDealNegotiator}
             updateDealNegotiator={updateDealNegotiator}
             toggleNegotiatorDropdown={toggleNegotiatorDropdown}
@@ -350,8 +333,6 @@ const TeamDashboardTable = ({
 export const DashboardTable = ({
   currentDeals,
   handleStageChange,
-  toggleDropdown,
-  openStates,
   allDealNegotiator,
   updateDealNegotiator,
   toggleNegotiatorDropdown,
@@ -368,8 +349,6 @@ export const DashboardTable = ({
 }: {
   currentDeals: NegotiationDataType[];
   handleStageChange: (id: string, newStage: string) => void;
-  toggleDropdown: (id: string, isOpen: boolean) => void;
-  openStates: Record<string, boolean>;
   allDealNegotiator: DealNegotiatorType[];
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
   toggleNegotiatorDropdown: (id: string, isOpen: boolean) => void;
@@ -461,8 +440,22 @@ export const DashboardTable = ({
               key: "datePaid",
             },
           },
-          "Actions",
         ]}
+        rowConfigs={
+          currentDeals && currentDeals.length > 0
+            ? currentDeals.map((deal) => {
+                const output: {
+                  backgroundColor?: string;
+                } = {};
+
+                if (deal.onboardingComplete === "NO") {
+                  output.backgroundColor = "bg-red-100";
+                }
+
+                return output;
+              })
+            : []
+        }
         rows={
           currentDeals && currentDeals.length > 0
             ? currentDeals.map((deal) => [
@@ -471,6 +464,11 @@ export const DashboardTable = ({
                     <TeamDashboardClientNameDisplay
                       deal={deal}
                       allDealNegotiator={allDealNegotiator}
+                      refetch={refetch}
+                      setStopPropagation={setStopPropagation}
+                      currentDeals={currentDeals}
+                      handleAskForReview={handleAskForReview}
+                      negotiatorData={negotiatorData}
                     />
                   ),
                   config: {
@@ -490,10 +488,7 @@ export const DashboardTable = ({
                     <StageDropdown
                       deal={deal}
                       handleStageChange={handleStageChange}
-                      dealStageOptions={dealStageOptions}
                       getStatusStyles={getStatusStyles}
-                      toggleDropdown={toggleDropdown}
-                      openStates={openStates}
                     />
                   ),
                 },
@@ -571,20 +566,6 @@ export const DashboardTable = ({
                         {getElapsedTime(deal.datePaid ?? "", NOW)}
                       </div>
                     </>
-                  ),
-                },
-                {
-                  Component: () => (
-                    <DashboardTableActions
-                      refetch={refetch}
-                      setStopPropagation={setStopPropagation}
-                      deal={deal}
-                      negotiatorData={negotiatorData}
-                      dateFormat={dateFormat}
-                      // setCurrentDeals={setCurrentDeals}
-                      currentDeals={currentDeals}
-                      handleAskForReview={handleAskForReview}
-                    />
                   ),
                 },
               ])

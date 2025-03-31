@@ -3,7 +3,7 @@ export const negotiationStatusOrder = [
   "Paid",
   "Actively Negotiating",
   "Paid Holding",
-  "Delivery Scheduled",
+  "Deal Complete- Local",
   "Shipping",
   "Deal Complete- Long Distance", //"Deal Complete - Long Term Order",
   "Needs To Review",

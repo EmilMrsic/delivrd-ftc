@@ -103,14 +103,30 @@ export const sortMappedDataHelper = (
   return sortedMappedNegotiations;
 };
 
+export const sortStatuses = (statuses: string[]) => {
+  return statuses.sort((a, b) => {
+    // return (
+    //   negotiationStatusOrder.indexOf(a) - negotiationStatusOrder.indexOf(b)
+    // );
+    const indexA = negotiationStatusOrder.indexOf(a);
+    const indexB = negotiationStatusOrder.indexOf(b);
+
+    // If neither status is in the order array, maintain original order
+    if (indexA === -1 && indexB === -1) return 0;
+    // If only a is not in the order array, push it to the bottom
+    if (indexA === -1) return 1;
+    // If only b is not in the order array, push it to the bottom
+    if (indexB === -1) return -1;
+
+    // Both statuses are in the order array, sort by their position
+    return indexA - indexB;
+  });
+};
+
 export const orderNegotiationsByColumns = (
   negotiationsByColumn: Record<string, Record<string, NegotiationDataType[]>>
 ) => {
-  const sortedStatuses = Object.keys(negotiationsByColumn).sort((a, b) => {
-    return (
-      negotiationStatusOrder.indexOf(a) - negotiationStatusOrder.indexOf(b)
-    );
-  });
+  const sortedStatuses = sortStatuses(Object.keys(negotiationsByColumn));
 
   return sortedStatuses.map((status) => {
     return {

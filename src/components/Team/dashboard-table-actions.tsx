@@ -14,7 +14,6 @@ export const DashboardTableActions = ({
   setStopPropagation,
   deal,
   negotiatorData,
-  dateFormat,
   // setCurrentDeals,
   // currentDeals,
   handleAskForReview,
@@ -23,12 +22,11 @@ export const DashboardTableActions = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
+        <Button variant="ghost" className="h-4 w-4 p-0">
+          {/* <span className="sr-only">Open menu</span> */}
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      {/* align="end" */}
       <DropdownMenuContent>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <div className="flex flex-col items-start">
@@ -36,7 +34,6 @@ export const DashboardTableActions = ({
             setStopPropogation={setStopPropagation}
             deal={deal}
             dealNegotiator={negotiatorData}
-            formatDate={dateFormat}
           />
           <ShippingInfoDialog
             // setCurrentDeals={setCurrentDeals}

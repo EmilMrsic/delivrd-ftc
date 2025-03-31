@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "run-script": "ts-node -O '{\"module\": \"commonjs\"}' -r tsconfig-paths/register"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -47,6 +48,7 @@
     "server-only": "^0.0.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "ts-node": "^10.9.2",
     "uuid": "^11.1.0",
     "zod": "^3.23.8"
   },

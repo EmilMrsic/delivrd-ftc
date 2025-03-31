@@ -407,6 +407,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
           />
 
           <ActivityLogSection activityLog={activityLog ?? []} />
+          {/* <WorkLogSection negotiationId={negotiationId} /> */}
         </div>
       </div>
 

@@ -3,16 +3,14 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import ProjectProfile from "../base/project-profile";
 import { DealNegotiator, NegotiationData } from "@/types";
 import { Button } from "../ui/button";
-
+import { dateFormat } from "@/lib/helpers/dates";
 type DealNegotiatorDialogProps = {
-  formatDate: (item: string) => string;
   dealNegotiator?: DealNegotiator;
   deal: NegotiationData;
   setStopPropogation: (item: boolean) => void;
 };
 
 const DealNegotiatorDialog = ({
-  formatDate,
   dealNegotiator,
   deal,
   setStopPropogation,
@@ -55,8 +53,8 @@ const DealNegotiatorDialog = ({
             avatar: dealNegotiator?.profile_pic ?? "",
           }}
           team={[{ name: "Test", avatar: "Test Avatar" }]}
-          startDate={formatDate(deal.negotiations_Created ?? "")}
-          endDate={formatDate(deal.negotiations_Status_Updated ?? "")}
+          startDate={dateFormat(deal.negotiations_Created ?? "")}
+          endDate={dateFormat(deal.negotiations_Status_Updated ?? "")}
         />
       </DialogContent>
     </Dialog>

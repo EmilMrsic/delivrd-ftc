@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -5,15 +6,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { dealStageOptions } from "@/lib/utils";
+import { sortStatuses } from "@/lib/helpers/negotiation";
 
 export const StageDropdown = ({
-  toggleDropdown,
-  openStates,
   deal,
   handleStageChange,
-  dealStageOptions,
   getStatusStyles,
 }: any) => {
+  const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
+
+  const toggleDropdown = (id: string, isOpen: boolean) => {
+    setOpenStates((prev) => ({
+      ...prev,
+      [id]: isOpen,
+    }));
+  };
+
+  const stageOptions = useMemo(() => {
+    console.log(sortStatuses(dealStageOptions));
+    return dealStageOptions;
+  }, []);
+
   return (
     <DropdownMenu
       open={openStates[deal.id] || false}
@@ -32,7 +46,7 @@ export const StageDropdown = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-        {dealStageOptions.map((stage: string) => (
+        {stageOptions.map((stage: string) => (
           <DropdownMenuItem
             key={stage}
             onClick={(e) => {

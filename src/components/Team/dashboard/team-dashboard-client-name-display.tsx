@@ -10,13 +10,24 @@ import ActivityLogSection from "../activity-log";
 import { getIncomingBids } from "@/lib/helpers/bids";
 import { IncomingBidCommentType, IncomingBidType } from "@/lib/models/bids";
 import { IncomingBids } from "../profile/incoming-bids";
+import { DashboardTableActions } from "../dashboard-table-actions";
 
 export const TeamDashboardClientNameDisplay = ({
   deal,
   allDealNegotiator,
+  refetch,
+  setStopPropagation,
+  currentDeals,
+  handleAskForReview,
+  negotiatorData,
 }: {
   deal: NegotiationDataType;
   allDealNegotiator: DealNegotiatorType[];
+  refetch: (id?: string, filters?: any, reset?: boolean) => void;
+  setStopPropagation: (item: boolean) => void;
+  currentDeals: NegotiationDataType[];
+  handleAskForReview: (id: string) => void;
+  negotiatorData: DealNegotiatorType;
 }) => {
   const user = useLoggedInUser();
   const [negotiation, setNegotiation] = useState<NegotiationDataType>(deal);
@@ -72,6 +83,15 @@ export const TeamDashboardClientNameDisplay = ({
             onClick={() => {
               setShowModal("bids");
             }}
+          />
+          <DashboardTableActions
+            refetch={refetch}
+            setStopPropagation={setStopPropagation}
+            deal={deal}
+            negotiatorData={negotiatorData}
+            // setCurrentDeals={setCurrentDeals}
+            currentDeals={currentDeals}
+            handleAskForReview={handleAskForReview}
           />
         </div>
       </div>
