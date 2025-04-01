@@ -24,7 +24,6 @@ export const StageDropdown = ({
   };
 
   const stageOptions = useMemo(() => {
-    console.log(sortStatuses(dealStageOptions));
     return dealStageOptions;
   }, []);
 

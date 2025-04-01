@@ -48,6 +48,7 @@ type TeamDashboardTableProps = {
   // sortData: (key: string, direction: string) => void;
   refetch: (id?: string, filters?: any, reset?: boolean) => void;
   searchTerm: string;
+  refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
 };
 
 const TeamDashboardTable = ({
@@ -70,14 +71,11 @@ const TeamDashboardTable = ({
   setSortConfig,
   refetch,
   searchTerm,
+  refetchAll,
 }: TeamDashboardTableProps) => {
   const [paidNegotiations, setPaidNegotiations] = useState<
     NegotiationDataType[]
   >([]);
-
-  const [openNegotiatorState, setOpenNegotiatorState] = useState<
-    Record<string, boolean>
-  >({});
 
   const [negotiationsByColumn, setNegotiationsByColumn] = useState<
     // Record<string, Record<string, NegotiationDataType[]>>
@@ -102,13 +100,11 @@ const TeamDashboardTable = ({
 
     return found;
   };
-
-  const toggleNegotiatorDropdown = (id: string, isOpen: boolean) => {
-    setOpenNegotiatorState((prev) => ({
-      ...prev,
-      [id]: isOpen,
-    }));
-  };
+  //   setOpenNegotiatorState((prev) => ({
+  //     ...prev,
+  //     [id]: isOpen,
+  //   }));
+  // };
 
   const handleDateChange = async (
     date: string,
@@ -117,11 +113,6 @@ const TeamDashboardTable = ({
   ) => {
     const id = dealId;
 
-    // Update the deal in the local state first
-    // const updatedDeals = currentDeals.map((deal) =>
-    //   deal.id === dealId ? { ...deal, [dateType]: date } : deal
-    // );
-
     const negotiationRef = doc(db, "delivrd_negotiations", id);
     const docSnap = await getDoc(negotiationRef);
     if (docSnap.exists()) {
@@ -129,6 +120,7 @@ const TeamDashboardTable = ({
         [dateType]: date,
       });
       refetch();
+      refetchAll();
     }
 
     toast({ title: "Negotiation Updated" });
@@ -187,10 +179,15 @@ const TeamDashboardTable = ({
   useEffect(() => {
     setPaidNegotiations(
       allNegotiations
-        ? allNegotiations.filter((item) => item.stage === "Paid")
+        ? allNegotiations.filter((item) => {
+            if (searchTerm.length > 0) {
+              return item.stage === "Paid" && performSearch(item, searchTerm);
+            }
+            return item.stage === "Paid";
+          })
         : []
     );
-  }, [allNegotiations]);
+  }, [allNegotiations, searchTerm]);
 
   useEffect(() => {
     if (negotiations) {
@@ -238,47 +235,47 @@ const TeamDashboardTable = ({
       expandedComponent: TailwindPlusExpandableTable,
       expandedComponentProps: {
         name: statusIdx.toString(),
-        rows: Object.keys(deals).map((condition, conditionIdx) => {
-          const total = deals[condition].length;
-          return {
-            Component: () => (
-              <>
-                <Button
-                  variant="outline"
-                  style={{
-                    backgroundColor: getStatusStyles(condition ?? "")
-                      .backgroundColor,
-                    color: getStatusStyles(condition ?? "").textColor, // Set dynamic text color
-                  }}
-                  className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
-                >
-                  <p>{condition}</p>
-                </Button>
-                {total}
-              </>
-            ),
-            expandedComponent: () => (
-              <DashboardTable
-                key={`dashboard-table-${statusIdx}-${conditionIdx}`}
-                currentDeals={deals[condition]}
-                handleStageChange={handleStageChange}
-                allDealNegotiator={allDealNegotiator}
-                updateDealNegotiator={updateDealNegotiator}
-                toggleNegotiatorDropdown={toggleNegotiatorDropdown}
-                openNegotiatorState={openNegotiatorState}
-                handleDateChange={handleDateChange}
-                handleAskForReview={handleAskForReview}
-                setStopPropagation={setStopPropagation}
-                // setCurrentDeals={setCurrentDeals}
-                negotiatorData={negotiatorData as DealNegotiatorType}
-                sortConfig={sortConfig}
-                setSortConfig={setSortConfig}
-                sortData={sortData}
-                refetch={refetch}
-              />
-            ),
-          };
-        }),
+        rows: Object.keys(deals)
+          .filter((condition) => ["New", "Used"].includes(condition))
+          .map((condition, conditionIdx) => {
+            const total = deals[condition].length;
+            return {
+              Component: () => (
+                <>
+                  <Button
+                    variant="outline"
+                    style={{
+                      backgroundColor: getStatusStyles(condition ?? "")
+                        .backgroundColor,
+                      color: getStatusStyles(condition ?? "").textColor, // Set dynamic text color
+                    }}
+                    className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
+                  >
+                    <p>{condition}</p>
+                  </Button>
+                  {total}
+                </>
+              ),
+              expandedComponent: () => (
+                <DashboardTable
+                  key={`dashboard-table-${statusIdx}-${conditionIdx}`}
+                  currentDeals={deals[condition]}
+                  handleStageChange={handleStageChange}
+                  allDealNegotiator={allDealNegotiator}
+                  updateDealNegotiator={updateDealNegotiator}
+                  handleDateChange={handleDateChange}
+                  handleAskForReview={handleAskForReview}
+                  setStopPropagation={setStopPropagation}
+                  // setCurrentDeals={setCurrentDeals}
+                  negotiatorData={negotiatorData as DealNegotiatorType}
+                  sortConfig={sortConfig}
+                  setSortConfig={setSortConfig}
+                  sortData={sortData}
+                  refetch={refetch}
+                />
+              ),
+            };
+          }),
       },
     };
   });
@@ -309,8 +306,6 @@ const TeamDashboardTable = ({
             handleStageChange={handleStageChange}
             allDealNegotiator={allDealNegotiator}
             updateDealNegotiator={updateDealNegotiator}
-            toggleNegotiatorDropdown={toggleNegotiatorDropdown}
-            openNegotiatorState={openNegotiatorState}
             handleDateChange={handleDateChange}
             handleAskForReview={handleAskForReview}
             setStopPropagation={setStopPropagation}
@@ -335,8 +330,6 @@ export const DashboardTable = ({
   handleStageChange,
   allDealNegotiator,
   updateDealNegotiator,
-  toggleNegotiatorDropdown,
-  openNegotiatorState,
   handleDateChange,
   handleAskForReview,
   setStopPropagation,
@@ -351,8 +344,6 @@ export const DashboardTable = ({
   handleStageChange: (id: string, newStage: string) => void;
   allDealNegotiator: DealNegotiatorType[];
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
-  toggleNegotiatorDropdown: (id: string, isOpen: boolean) => void;
-  openNegotiatorState: Record<string, boolean>;
   handleDateChange: (date: string, dealId: string, dateType: string) => void;
   handleAskForReview: (id: string) => void;
   setStopPropagation: (item: boolean) => void;
@@ -499,8 +490,6 @@ export const DashboardTable = ({
                       deal={deal}
                       allDealNegotiator={allDealNegotiator}
                       updateDealNegotiator={updateDealNegotiator}
-                      toggleNegotiatorDropdown={toggleNegotiatorDropdown}
-                      openNegotiatorState={openNegotiatorState}
                     />
                   ),
                 },

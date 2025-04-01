@@ -7,24 +7,23 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
+import { useState } from "react";
 
 export const DealNegotiatorDropdown = ({
   deal,
   allDealNegotiator,
-  openNegotiatorState,
-  toggleNegotiatorDropdown,
   updateDealNegotiator,
 }: {
   deal: NegotiationDataType;
   allDealNegotiator: DealNegotiatorType[];
-  openNegotiatorState: { [key: string]: boolean };
-  toggleNegotiatorDropdown: (id: string, isOpen: boolean) => void;
   updateDealNegotiator: (id: string, negotiatorId: string) => void;
 }) => {
+  const [openNegotiatorState, setOpenNegotiatorState] =
+    useState<boolean>(false);
   return (
     <DropdownMenu
-      open={openNegotiatorState[deal.id] || false}
-      onOpenChange={(isOpen) => toggleNegotiatorDropdown(deal.id, isOpen)}
+      open={openNegotiatorState}
+      onOpenChange={(isOpen) => setOpenNegotiatorState(isOpen)}
     >
       <DropdownMenuTrigger asChild>
         <Button
@@ -54,7 +53,7 @@ export const DealNegotiatorDropdown = ({
               e.preventDefault();
               e.stopPropagation();
               updateDealNegotiator(deal.id, negotiator.id);
-              toggleNegotiatorDropdown(deal.id, false);
+              setOpenNegotiatorState(false);
             }}
           >
             {negotiator.name}

@@ -90,6 +90,7 @@ export default function DealList() {
     negotiations,
     searchAll,
     setSearchAll,
+    refetchAll,
   } = useTeamDashboard({
     id: formattedCachedFilters?.dealCoordinatorId,
     filter: formattedCachedFilters ?? {},
@@ -190,6 +191,11 @@ export default function DealList() {
         formattedCachedFilters?.dealCoordinatorId as string,
         formattedCachedFilters
       );
+
+      refetchAll(
+        formattedCachedFilters?.dealCoordinatorId as string,
+        formattedCachedFilters
+      );
       toast({ title: "Status updated" });
     } catch (error) {
       console.error("Error updating stage:", error);
@@ -205,31 +211,20 @@ export default function DealList() {
         throw new Error("Deal not found");
       }
 
-      const oldNegotiatorId = dealSnap.data().negotiations_deal_coordinator;
-
       await updateDoc(dealRef, {
-        negotiations_deal_coordinator: newNegotiatorId ?? "",
+        dealCoordinatorId: newNegotiatorId ?? "",
       });
-
-      const negotiatorRef = doc(db, "team delivrd", newNegotiatorId);
-
-      await updateDoc(negotiatorRef, {
-        active_deals: arrayUnion(id),
-      });
-
-      if (oldNegotiatorId) {
-        const oldNegotiatorRef = doc(db, "team delivrd", oldNegotiatorId);
-        await updateDoc(oldNegotiatorRef, {
-          active_deals: arrayRemove(id),
-        });
-      }
 
       refetch(
         formattedCachedFilters?.dealCoordinatorId as string,
         formattedCachedFilters
       );
 
-      console.log("Negotiator updated successfully!");
+      refetchAll(
+        formattedCachedFilters?.dealCoordinatorId as string,
+        formattedCachedFilters
+      );
+
       toast({ title: "Negotiator updated successfully" });
     } catch (error) {
       console.error("Error updating negotiator: ", error);
@@ -274,6 +269,7 @@ export default function DealList() {
             negotiations={negotiations}
             searchTerm={searchTerm}
             searchAll={searchAll}
+            refetchAll={refetchAll}
           />
           {searchAll && (
             <>
@@ -297,6 +293,7 @@ export default function DealList() {
                 refetch={refetch}
                 searchTerm={searchTerm}
                 searchAll={searchAll}
+                refetchAll={refetchAll}
               />
             </>
           )}
