@@ -33,7 +33,10 @@ export const IncomingBidCard = ({
   bidCommentsByBidId,
   handleSave,
   handleEdit,
-}: any) => {
+  noUserActions,
+}: any & {
+  noUserActions?: boolean;
+}) => {
   const matchingDealer = dealers.find(
     (dealer: DealNegotiatorType) => dealer.id === bidDetails.dealerId
   );
@@ -64,19 +67,23 @@ export const IncomingBidCard = ({
             : "No Dealership"}
         </h3>
         <div className="flex items-center gap-3">
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent opening the dialog
-              handleDeleteBid(bidDetails.bid_id);
-            }}
-            className="text-black rounded-full p-2"
-          >
-            <Trash className="w-5 h-5" />
-          </button>
-          <VoteSection
-            bidDetails={bidDetails}
-            setIncomingBids={setIncomingBids}
-          />
+          {!noUserActions && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent opening the dialog
+                  handleDeleteBid(bidDetails.bid_id);
+                }}
+                className="text-black rounded-full p-2"
+              >
+                <Trash className="w-5 h-5" />
+              </button>
+              <VoteSection
+                bidDetails={bidDetails}
+                setIncomingBids={setIncomingBids}
+              />
+            </>
+          )}
         </div>
       </div>
       <time className="block mb-2 text-sm text-[#202125]">
@@ -308,19 +315,20 @@ export const IncomingBidCard = ({
             </div>
           </DialogContent>
         </Dialog>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            setCommentingBidId(
-              commentingBidId === bidDetails.bid_id ? null : bidDetails.bid_id
-            )
-          }
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Comment
-        </Button>
+        {!noUserActions && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setCommentingBidId(
+                commentingBidId === bidDetails.bid_id ? null : bidDetails.bid_id
+              )
+            }
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Comment
+          </Button>
+        )}
       </div>
       {commentingBidId === bidDetails.bid_id && (
         <div className="mb-4">
@@ -361,13 +369,15 @@ export const IncomingBidCard = ({
               {comment.deal_coordinator_name === "N/A" ? (
                 <p className="pr-2">From Client</p>
               ) : (
-                <Button
-                  variant="outline"
-                  className="border-black"
-                  onClick={() => handleSendComment(comment)}
-                >
-                  Send To Client
-                </Button>
+                !noUserActions && (
+                  <Button
+                    variant="outline"
+                    className="border-black"
+                    onClick={() => handleSendComment(comment)}
+                  >
+                    Send To Client
+                  </Button>
+                )
               )}
             </div>
           )

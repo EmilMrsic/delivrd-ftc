@@ -23,6 +23,7 @@ export const IncomingBids = ({
   bidCommentsByBidId,
   parseComment,
   handleSendComment,
+  noUserActions = false,
 }: {
   incomingBids: IncomingBid[];
   negotiationId: string;
@@ -41,12 +42,16 @@ export const IncomingBids = ({
   bidCommentsByBidId: { [key: string]: BidComments[] };
   parseComment: (comment: string) => React.ReactNode;
   handleSendComment: (data: BidComments) => void;
+  noUserActions?: boolean;
 }) => {
   return (
     <TailwindPlusCard
       title="Incoming Bids"
       icon={FileText}
-      actions={() => <ManualBidUpload id={negotiationId} />}
+      actions={() => {
+        if (noUserActions) return null;
+        return <ManualBidUpload id={negotiationId} />;
+      }}
     >
       <div className="space-y-8">
         {incomingBids.length ? (
@@ -61,6 +66,7 @@ export const IncomingBids = ({
             })
             .map((bidDetails, index) => (
               <IncomingBidCard
+                noUserActions={noUserActions}
                 bidDetails={bidDetails}
                 dealers={dealers}
                 incomingBids={incomingBids}

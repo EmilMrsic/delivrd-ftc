@@ -39,9 +39,11 @@ type AddNoteSectionProps = {
   setNegotiation: (negotiation: NegotiationDataType) => void;
   incomingBids?: IncomingBid[];
   allDealNegotiator: DealNegotiatorType[];
+  noUserActions?: boolean;
 };
 
 const AddNoteSection = ({
+  noUserActions,
   user,
   negotiation,
   dealNegotiator,
@@ -211,37 +213,39 @@ const AddNoteSection = ({
             );
           })}
       </div>
-      <div className="space-x-2">
-        <TailwindPlusTextarea
-          placeholder="Add a note..."
-          value={newInternalNote}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyboardNavigation}
-          // className="flex-grow"
-        />
-        {isMentioning && mentionSuggestions.length > 0 && (
-          <div className="absolute z-10 mt-[50px] w-[250px] bg-white border border-gray-300 rounded-md shadow-lg">
-            <ul className="max-h-40 overflow-y-auto">
-              {mentionSuggestions.map((mention, index) => (
-                <li
-                  key={mention.id}
-                  onClick={() => handleMentionSelect(mention)}
-                  className={`p-2 cursor-pointer ${
-                    index === selectedMentionIndex ? "bg-gray-200" : ""
-                  }`}
-                >
-                  {mention.name}
-                </li>
-              ))}
-            </ul>
+      {!noUserActions && (
+        <div className="space-x-2">
+          <TailwindPlusTextarea
+            placeholder="Add a note..."
+            value={newInternalNote}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyboardNavigation}
+            // className="flex-grow"
+          />
+          {isMentioning && mentionSuggestions.length > 0 && (
+            <div className="absolute z-10 mt-[50px] w-[250px] bg-white border border-gray-300 rounded-md shadow-lg">
+              <ul className="max-h-40 overflow-y-auto">
+                {mentionSuggestions.map((mention, index) => (
+                  <li
+                    key={mention.id}
+                    onClick={() => handleMentionSelect(mention)}
+                    className={`p-2 cursor-pointer ${
+                      index === selectedMentionIndex ? "bg-gray-200" : ""
+                    }`}
+                  >
+                    {mention.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="flex justify-end mt-4">
+            <Button onClick={() => addInternalNote(newInternalNote)}>
+              Add Note
+            </Button>
           </div>
-        )}
-        <div className="flex justify-end mt-4">
-          <Button onClick={() => addInternalNote(newInternalNote)}>
-            Add Note
-          </Button>
         </div>
-      </div>
+      )}
     </TailwindPlusCard>
   );
 };

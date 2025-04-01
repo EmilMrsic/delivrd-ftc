@@ -37,6 +37,7 @@ import TradeCard from "../trade-card";
 import { TailwindPlusCard } from "@/components/tailwind-plus/card";
 import EditableTextArea from "@/components/base/editable-textarea";
 import { Loader } from "@/components/base/loader";
+import WorkLogSection from "../work-log-section";
 
 export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -374,7 +375,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
               {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
             </button>
           </div>
-          {/* {showDeletedBids && (
+          {showDeletedBids && (
             <DeleteBidSection
               incomingBids={incomingBids}
               negotiationId={negotiationId}
@@ -395,7 +396,8 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
               setOpenDialog={setOpenDialog}
               openDialog={openDialog}
             />
-          )} */}
+          )}
+          <WorkLogSection negotiationId={negotiationId} user={user} />
 
           <AddNoteSection
             user={user}
@@ -407,7 +409,6 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
           />
 
           <ActivityLogSection activityLog={activityLog ?? []} />
-          {/* <WorkLogSection negotiationId={negotiationId} /> */}
         </div>
       </div>
 

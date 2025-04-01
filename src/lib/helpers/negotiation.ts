@@ -180,32 +180,18 @@ export const getActiveDealDocuments = async (dealQuery: {
 
   const negotiations = negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();
-    return NegotiationDataModel.parse(data);
+    try {
+      return NegotiationDataModel.parse(data);
+    } catch (error) {
+      console.error("Error parsing negotiation data:", data.id);
+      return null;
+    }
   });
 
-  return negotiations.filter((negotiation) => {
+  return negotiations.filter((negotiation: NegotiationDataType | null) => {
+    if (!negotiation) return false;
     return negotiationStatusOrder.includes(negotiation.stage);
-  });
-};
-
-export const getActiveDealObjects = async (activeDeals: string[]) => {
-  const negotiationsCollectionRef = collection(db, "negotiations");
-  const chunkedIds = chunk(activeDeals, 30);
-  const negotiationData = await Promise.all(
-    chunkedIds.map(async (idChunk) => {
-      const negotiationsQuery = query(
-        negotiationsCollectionRef,
-        where("__name__", "in", idChunk)
-      );
-      const negotiationsSnapshot = await getDocs(negotiationsQuery);
-      return negotiationsSnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return NegotiationDataModel.parse(data);
-      });
-    })
-  );
-
-  return negotiationData.flat();
+  }) as NegotiationDataType[];
 };
 
 export const mapNegotiationsToTeam = (

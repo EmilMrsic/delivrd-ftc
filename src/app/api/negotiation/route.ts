@@ -1,8 +1,5 @@
 import { db } from "@/firebase/config";
-import {
-  getActiveDealDocuments,
-  getActiveDealObjects,
-} from "@/lib/helpers/negotiation";
+import { getActiveDealDocuments } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { collection, getDocs } from "firebase/firestore";
 import { NextResponse } from "next/server";

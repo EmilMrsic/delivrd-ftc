@@ -105,6 +105,7 @@ export const TeamDashboardClientNameDisplay = ({
         >
           {showModal === "notes" && (
             <AddNoteSection
+              noUserActions={true}
               user={user}
               negotiation={negotiation}
               setNegotiation={setNegotiation}
@@ -116,6 +117,7 @@ export const TeamDashboardClientNameDisplay = ({
           )}
           {showModal === "bids" && incomingBids && (
             <IncomingBids
+              noUserActions={true}
               incomingBids={incomingBids as IncomingBid[]}
               negotiationId={negotiation.id}
               dealers={allDealNegotiator}
