@@ -37,9 +37,8 @@ export const UploadFileSection = ({
         },
       });
     }
-    console.log("got here: in uploading 1", negotiation);
+
     if (negotiation !== null) {
-      console.log("got here: in uploading 2");
       setNegotiation({
         ...negotiation,
         tradeDetails: {

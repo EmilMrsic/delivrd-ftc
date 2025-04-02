@@ -45,6 +45,9 @@ import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { TeamHeader } from "@/components/base/header";
+import { DealNegotiatorDropdown } from "@/components/Team/deal-negotiator-dropdown";
+import { updateDealNegotiator } from "@/lib/helpers/dealCoordinator";
+import { StageButton } from "@/components/Team/stage-button";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -100,6 +103,7 @@ function Manager() {
   };
 
   useEffect(() => {
+    console.log("got updated data");
     if (negotiationsFromTeamDashboard) {
       const { team: teamWithNegotiations, dealsWithoutCoordinator } =
         mapNegotiationsToTeam(
@@ -180,77 +184,6 @@ function Manager() {
     };
     fetchUserData();
   }, []);
-
-  const updateDealNegotiator = async (id: string, newNegotiatorId: string) => {
-    try {
-      const dealRef = doc(db, "delivrd_negotiations", id);
-      const negotiatorRef = doc(db, "team delivrd", newNegotiatorId);
-      const dealSnap = await getDoc(dealRef);
-      if (!dealSnap.exists()) {
-        throw new Error("Deal not found");
-      }
-
-      const oldNegotiatorId = dealSnap.data().negotiations_deal_coordinator;
-
-      const movedDeal = dealsWithoutCoordinator?.find(
-        (deal) => deal?.id === id
-      );
-      if (!movedDeal)
-        return console.error("Deal not found in unassigned deals");
-
-      await updateDoc(dealRef, {
-        dealCoordinatorId: newNegotiatorId ?? "",
-      });
-
-      // await updateDoc(negotiatorRef, {
-      //   active_deals: arrayUnion(id),
-      // });
-      // if (oldNegotiatorId) {
-      //   const oldNegotiatorRef = doc(db, "team delivrd", oldNegotiatorId);
-      //   await updateDoc(oldNegotiatorRef, {
-      //     active_deals: arrayRemove(id),
-      //   });
-      // }
-
-      // setFilteredDeals((prevDeals) =>
-      //   prevDeals?.map((deal) =>
-      //     deal.id === id
-      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-      //       : deal
-      //   )
-      // );
-      // setDealsWithoutCoordinator((prevDeals) =>
-      //   prevDeals?.filter((deal) => deal.id !== id)
-      // );
-
-      setTeamData((prevTeams) =>
-        prevTeams.map((team) => {
-          if (team.id === newNegotiatorId) {
-            return {
-              ...team,
-              negotiations: [...(team.negotiations || []), movedDeal],
-            };
-          }
-          return team;
-        })
-      );
-
-      // setOriginalDeals((prevDeals) =>
-      //   prevDeals?.map((deal) =>
-      //     deal.id === id
-      //       ? { ...deal, negotiations_deal_coordinator: newNegotiatorId }
-      //       : deal
-      //   )
-      // );
-
-      refetch();
-
-      toast({ title: "Negotiator updated successfully" });
-      console.log("Negotiator updated successfully!");
-    } catch (error) {
-      console.error("Error updating negotiator: ", error);
-    }
-  };
 
   const toggleNegotiatorDropdown = (id: string, isOpen: boolean) => {
     setOpenNegotiatorState((prev) => ({
@@ -387,7 +320,9 @@ function Manager() {
                             sortData={sortWithoutCoordinatorData}
                             openNegotiatorState={openNegotiatorState}
                             toggleNegotiatorDropdown={toggleNegotiatorDropdown}
-                            updateDealNegotiator={updateDealNegotiator}
+                            updateDealNegotiator={(id, newNegotiatorId) =>
+                              updateDealNegotiator(id, newNegotiatorId, refetch)
+                            }
                             allDealNegotiator={allDealNegotiator}
                           />
                         </div>
@@ -450,7 +385,13 @@ function Manager() {
                                 toggleNegotiatorDropdown={
                                   toggleNegotiatorDropdown
                                 }
-                                updateDealNegotiator={updateDealNegotiator}
+                                updateDealNegotiator={(id, newNegotiatorId) =>
+                                  updateDealNegotiator(
+                                    id,
+                                    newNegotiatorId,
+                                    refetch
+                                  )
+                                }
                                 allDealNegotiator={allDealNegotiator}
                               />
                             </div>
@@ -560,68 +501,16 @@ const ManagerTable = ({
         deal.brand,
         deal.model,
         {
-          Component: () => (
-            <Button
-              variant="outline"
-              style={{
-                backgroundColor: getStatusStyles(deal?.stage ?? "")
-                  .backgroundColor,
-                color: getStatusStyles(deal?.stage ?? "").textColor, // Set dynamic text color
-              }}
-              className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300"
-            >
-              <p>{deal.stage}</p>
-            </Button>
-          ),
+          Component: () => <StageButton stage={deal.stage} />,
         },
         deal.zip,
         {
           Component: () => (
-            <DropdownMenu
-              open={openNegotiatorState[deal.id] || false}
-              onOpenChange={(isOpen) =>
-                toggleNegotiatorDropdown(deal.id, isOpen)
-              }
-            >
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={`cursor-pointer p-1 w-fit h-fit text-xs bg-gray-100 text-gray-800 border-gray-300`}
-                >
-                  {allDealNegotiator.some(
-                    (negotiator) => negotiator.id === deal.dealCoordinatorId
-                  ) ? (
-                    <p>
-                      {
-                        allDealNegotiator.find(
-                          (negotiator) =>
-                            negotiator.id === deal.dealCoordinatorId
-                        )?.name
-                      }
-                    </p>
-                  ) : (
-                    <p>Not Assigned</p>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 h-56 overflow-scroll">
-                {allDealNegotiator.map(
-                  (negotiator: DealNegotiatorType, index) => (
-                    <DropdownMenuItem
-                      key={index}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        updateDealNegotiator(deal.id, negotiator.id);
-                        toggleNegotiatorDropdown(deal.id, false);
-                      }}
-                    >
-                      {negotiator.name}
-                    </DropdownMenuItem>
-                  )
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <DealNegotiatorDropdown
+              deal={deal}
+              allDealNegotiator={allDealNegotiator}
+              updateDealNegotiator={updateDealNegotiator}
+            />
           ),
         },
         {

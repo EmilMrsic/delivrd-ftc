@@ -51,6 +51,10 @@ export const useNegotiations = (
     if (newFilters) {
       setFilters(newFilters);
     }
+
+    if (!newId && !newFilters && !reset) {
+      negotiationsQuery.refetch();
+    }
   };
 
   useEffect(() => {

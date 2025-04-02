@@ -26,6 +26,7 @@ import { StageButton } from "./stage-button";
 import { MakeButton } from "./make-button";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
+const DEFAULT_OPEN_STAGE = "Actively Negotiating";
 
 type TeamDashboardTableProps = {
   searchAll: boolean;
@@ -223,6 +224,10 @@ const TeamDashboardTable = ({
     }
   }, [negotiations, searchTerm, searchAll]);
 
+  let defaultOpenRow = negotiationsByColumn.findIndex((row: any) => {
+    return row.stage === DEFAULT_OPEN_STAGE;
+  });
+
   const scopedRows = negotiationsByColumn.map((row, statusIdx) => {
     const { stage, deals } = row;
     const total = (deals?.New?.length || 0) + (deals?.Used?.length || 0);
@@ -237,6 +242,7 @@ const TeamDashboardTable = ({
       expandedComponent: TailwindPlusExpandableTable,
       expandedComponentProps: {
         name: statusIdx.toString(),
+        defaultExpanded: stage === DEFAULT_OPEN_STAGE ? [0, 1] : [],
         rows: Object.keys(deals)
           .filter((condition) => ["New", "Used"].includes(condition))
           .map((condition, conditionIdx) => {
@@ -322,9 +328,18 @@ const TeamDashboardTable = ({
       },
       ...rows,
     ];
+
+    defaultOpenRow += 1;
   }
 
-  return <TailwindPlusExpandableTable rows={rows} />;
+  return (
+    <TailwindPlusExpandableTable
+      rows={rows}
+      defaultExpanded={
+        defaultOpenRow || defaultOpenRow === 0 ? [defaultOpenRow] : []
+      }
+    />
+  );
 };
 
 export const DashboardTable = ({
