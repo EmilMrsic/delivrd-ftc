@@ -1,7 +1,4 @@
-import {
-  setAllNotifications,
-  setNotificationCount,
-} from "@/app/redux/Slice/notificationSlice";
+import { setAllNotifications } from "@/app/redux/Slice/notificationSlice";
 import { db, messaging } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import useTeamProfile from "@/hooks/useTeamProfile";
@@ -13,15 +10,7 @@ import {
   uploadFile,
 } from "@/lib/utils";
 import { ActivityLog, BidComments } from "@/types";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
 import { onMessage } from "firebase/messaging";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -321,6 +310,8 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
     );
   }
 
+  console.log("clientPhone:", negotiation);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-[98%] mx-auto">
       <div className="md:col-span-2">
@@ -421,8 +412,8 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
           />
           <TradeCard
             negotiation={negotiation}
-            negotiationId={negotiationId}
             handleChange={handleChange}
+            setNegotiation={setNegotiation}
           />
 
           <TailwindPlusCard title="Shipping Info">

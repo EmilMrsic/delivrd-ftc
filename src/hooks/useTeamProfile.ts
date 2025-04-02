@@ -45,10 +45,14 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     useNegotiations({
       all: true,
       filter: {
-        id: negotiationId ?? "",
+        id: negotiationId,
       },
     });
 
+  console.log(
+    "negotiationsFromUseNegotiations:",
+    negotiationsFromUseNegotiations
+  );
   useEffect(() => {
     if (negotiationsFromUseNegotiations) {
       setNegotiation(negotiationsFromUseNegotiations[0]);

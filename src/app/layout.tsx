@@ -7,6 +7,8 @@ import FcmTokenProvider from "@/components/FcmTokenProvider";
 import { ReduxProvider } from "./redux/provider";
 import Script from "next/script";
 import { ContextProviders } from "@/components/context-providers";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

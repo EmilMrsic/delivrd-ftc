@@ -20,10 +20,10 @@ export const NegotiationDataModel = z.object({
   clientPhone: z.string(),
   tradeDetails: z
     .object({
-      mileage: z.string(),
-      fileUrls: z.array(z.string()),
-      comments: z.string(),
-      vin: z.string(),
+      mileage: z.string().optional(),
+      fileUrls: z.array(z.string()).optional(),
+      comments: z.string().optional(),
+      vin: z.string().optional(),
     })
     .optional(),
   userId: z.string(),
@@ -60,11 +60,7 @@ export const NegotiationDataModel = z.object({
 
   // these are subject to change after emil
   tradeInInfo: z.string().optional(),
-  dealInfo: z
-    .object({
-      trade_in_files: z.array(z.string()),
-    })
-    .optional(),
+  // trade_in_files: z.array(z.string()).optional(),
 });
 
 export const DealNegotiatorModel = z.object({

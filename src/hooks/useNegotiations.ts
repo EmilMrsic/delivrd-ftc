@@ -10,9 +10,8 @@ export const useNegotiations = (
     id?: string;
   } = {}
 ) => {
-  const [id, setId] = useState<string>(
-    config.id || getUserData().deal_coordinator_id
-  );
+  const loggedInUserId = getUserData()?.deal_coordinator_id;
+  const [id, setId] = useState<string>(config.id || loggedInUserId);
 
   const [filters, setFilters] = useState<{ [key: string]: string | string[] }>(
     config.filter ?? {}
@@ -25,7 +24,8 @@ export const useNegotiations = (
     queryFn: async () => {
       const path = config.all
         ? `negotiation`
-        : `negotiation/${id || getUserData()?.deal_coordinator_id}`;
+        : `negotiation/${id || loggedInUserId}`;
+
       const request = await backendRequest(path, "POST", {
         filter: filters,
       });
@@ -40,7 +40,7 @@ export const useNegotiations = (
     reset?: boolean
   ) => {
     if (reset) {
-      setId(getUserData().deal_coordinator_id);
+      setId(loggedInUserId);
       setFilters({});
     }
 
