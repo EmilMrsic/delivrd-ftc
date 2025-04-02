@@ -96,7 +96,9 @@ const TeamDashboardTable = ({
       deal?.model?.toLowerCase().includes(searchTerm) ||
       deal?.zip?.toLowerCase().includes(searchTerm) ||
       deal?.clientEmail?.toLowerCase().includes(searchTerm) ||
-      deal?.clientPhone?.toLowerCase().includes(searchTerm);
+      deal?.clientPhone?.toLowerCase().includes(searchTerm) ||
+      deal?.state?.toLowerCase().includes(searchTerm) ||
+      deal?.city?.toLowerCase().includes(searchTerm);
 
     return found;
   };

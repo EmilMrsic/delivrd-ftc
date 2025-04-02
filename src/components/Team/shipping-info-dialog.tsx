@@ -6,9 +6,10 @@ import { NegotiationData } from "@/types";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
+import { NegotiationDataType } from "@/lib/models/team";
 
 type ShippingInfoDialogProps = {
-  deal: NegotiationData;
+  deal: NegotiationDataType;
   setStopPropogation: (item: boolean) => void;
   // currentDeals: NegotiationData[];
   // setCurrentDeals: (item: NegotiationData[]) => void;
@@ -24,16 +25,16 @@ const ShippingInfoDialog = ({
 }: ShippingInfoDialogProps) => {
   const [open, setOpen] = useState(false);
   const [shippingInfo, setShippingInfo] = useState<string>(
-    deal?.shipping_info ?? ""
+    deal?.shippingInfo ?? ""
   );
 
   const handleShippingInfoChange = async (newInfo: string) => {
     try {
       if (newInfo) {
-        const docRef = doc(db, "negotiations", deal.id);
+        const docRef = doc(db, "delivrd_negotiations", deal.id);
         const updatedDeal = { ...deal, shipping_info: shippingInfo };
 
-        await updateDoc(docRef, { shipping_info: newInfo });
+        await updateDoc(docRef, { shippingInfo: newInfo });
         console.log("Shipping info updated!");
         toast({ title: "Shipping info updated" });
         // const updatedDeals = currentDeals.map((d) =>

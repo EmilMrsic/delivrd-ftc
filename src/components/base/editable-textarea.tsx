@@ -63,7 +63,11 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
             [userField]: value,
           });
 
-        const negotiationDocRef = doc(db, "negotiations", negotiationId);
+        const negotiationDocRef = doc(
+          db,
+          "delivrd_negotiations",
+          negotiationId
+        );
 
         await updateDoc(negotiationDocRef, {
           [field]: value,

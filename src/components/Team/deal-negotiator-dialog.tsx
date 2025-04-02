@@ -4,9 +4,10 @@ import ProjectProfile from "../base/project-profile";
 import { DealNegotiator, NegotiationData } from "@/types";
 import { Button } from "../ui/button";
 import { dateFormat } from "@/lib/helpers/dates";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 type DealNegotiatorDialogProps = {
-  dealNegotiator?: DealNegotiator;
-  deal: NegotiationData;
+  dealNegotiator?: DealNegotiatorType;
+  deal: NegotiationDataType;
   setStopPropogation: (item: boolean) => void;
 };
 
@@ -16,6 +17,7 @@ const DealNegotiatorDialog = ({
   setStopPropogation,
 }: DealNegotiatorDialogProps) => {
   const [open, setOpen] = useState(false);
+  console.log(deal.dealStartDate);
   return (
     <Dialog open={open} onOpenChange={() => setOpen(false)}>
       <DialogTrigger
@@ -42,19 +44,19 @@ const DealNegotiatorDialog = ({
           e.preventDefault();
           e.stopPropagation();
         }}
-        className="max-w-7xl"
+        // className="max-w-7xl"
       >
         <ProjectProfile
-          name={deal.negotiations_Client ?? ""}
-          description={deal.negotiations_Travel_Limit ?? ""}
-          status={deal.negotiations_Invoice_Status ?? ""}
+          name={deal.clientNamefull ?? ""}
+          description={deal.travelLimit ?? ""}
+          status={deal.invoiceStatus ?? ""}
           manager={{
             name: dealNegotiator?.name ?? "",
             avatar: dealNegotiator?.profile_pic ?? "",
           }}
           team={[{ name: "Test", avatar: "Test Avatar" }]}
-          startDate={dateFormat(deal.negotiations_Created ?? "")}
-          endDate={dateFormat(deal.negotiations_Status_Updated ?? "")}
+          startDate={dateFormat(deal.dealStartDate ?? "")}
+          endDate={dateFormat(deal.closeDate ?? "")}
         />
       </DialogContent>
     </Dialog>

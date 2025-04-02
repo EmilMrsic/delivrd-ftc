@@ -113,58 +113,58 @@ function Manager() {
     }
   }, [negotiationsFromTeamDashboard]);
 
-  const fetchTeamAndDeals = async () => {
-    try {
-      setLoading(true);
+  // const fetchTeamAndDeals = async () => {
+  //   try {
+  //     setLoading(true);
 
-      // Fetch all team members
-      const teamSnapshot = await getDocs(collection(db, "team delivrd"));
+  //     // Fetch all team members
+  //     const teamSnapshot = await getDocs(collection(db, "team delivrd"));
 
-      // Map teams and fetch negotiations in parallel
-      const teamsWithDeals = await Promise.all(
-        teamSnapshot.docs.map(async (teamDoc) => {
-          const teamMember = { id: teamDoc.id, ...teamDoc.data() } as any;
-          const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
+  //     // Map teams and fetch negotiations in parallel
+  //     const teamsWithDeals = await Promise.all(
+  //       teamSnapshot.docs.map(async (teamDoc) => {
+  //         const teamMember = { id: teamDoc.id, ...teamDoc.data() } as any;
+  //         const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
 
-          if (activeDeals.length === 0) {
-            return { ...teamMember, negotiations: [] };
-          }
+  //         if (activeDeals.length === 0) {
+  //           return { ...teamMember, negotiations: [] };
+  //         }
 
-          // Chunk the activeDeals array to avoid Firestore query limit issues
-          const chunkedDeals = Array.from(
-            { length: Math.ceil(activeDeals.length / 30) },
-            (_, i) => activeDeals.slice(i * 30, i * 30 + 30)
-          );
+  //         // Chunk the activeDeals array to avoid Firestore query limit issues
+  //         const chunkedDeals = Array.from(
+  //           { length: Math.ceil(activeDeals.length / 30) },
+  //           (_, i) => activeDeals.slice(i * 30, i * 30 + 30)
+  //         );
 
-          // Fetch negotiations for each chunk in parallel
-          const negotiations = (
-            await Promise.all(
-              chunkedDeals.map(async (chunk) => {
-                const negotiationsSnapshot = await getDocs(
-                  query(
-                    collection(db, "negotiations"),
-                    where("__name__", "in", chunk)
-                  )
-                );
-                return negotiationsSnapshot.docs.map((doc) => ({
-                  id: doc.id,
-                  ...doc.data(),
-                }));
-              })
-            )
-          ).flat(); // Flatten the results
+  //         // Fetch negotiations for each chunk in parallel
+  //         const negotiations = (
+  //           await Promise.all(
+  //             chunkedDeals.map(async (chunk) => {
+  //               const negotiationsSnapshot = await getDocs(
+  //                 query(
+  //                   collection(db, "negotiations"),
+  //                   where("__name__", "in", chunk)
+  //                 )
+  //               );
+  //               return negotiationsSnapshot.docs.map((doc) => ({
+  //                 id: doc.id,
+  //                 ...doc.data(),
+  //               }));
+  //             })
+  //           )
+  //         ).flat(); // Flatten the results
 
-          return { ...teamMember, negotiations };
-        })
-      );
+  //         return { ...teamMember, negotiations };
+  //       })
+  //     );
 
-      setTeamData(teamsWithDeals);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setTeamData(teamsWithDeals);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -183,7 +183,7 @@ function Manager() {
 
   const updateDealNegotiator = async (id: string, newNegotiatorId: string) => {
     try {
-      const dealRef = doc(db, "negotiations", id);
+      const dealRef = doc(db, "delivrd_negotiations", id);
       const negotiatorRef = doc(db, "team delivrd", newNegotiatorId);
       const dealSnap = await getDoc(dealRef);
       if (!dealSnap.exists()) {
@@ -199,18 +199,18 @@ function Manager() {
         return console.error("Deal not found in unassigned deals");
 
       await updateDoc(dealRef, {
-        negotiations_deal_coordinator: newNegotiatorId ?? "",
+        dealCoordinatorId: newNegotiatorId ?? "",
       });
 
-      await updateDoc(negotiatorRef, {
-        active_deals: arrayUnion(id),
-      });
-      if (oldNegotiatorId) {
-        const oldNegotiatorRef = doc(db, "team delivrd", oldNegotiatorId);
-        await updateDoc(oldNegotiatorRef, {
-          active_deals: arrayRemove(id),
-        });
-      }
+      // await updateDoc(negotiatorRef, {
+      //   active_deals: arrayUnion(id),
+      // });
+      // if (oldNegotiatorId) {
+      //   const oldNegotiatorRef = doc(db, "team delivrd", oldNegotiatorId);
+      //   await updateDoc(oldNegotiatorRef, {
+      //     active_deals: arrayRemove(id),
+      //   });
+      // }
 
       // setFilteredDeals((prevDeals) =>
       //   prevDeals?.map((deal) =>
@@ -219,9 +219,9 @@ function Manager() {
       //       : deal
       //   )
       // );
-      setDealsWithoutCoordinator((prevDeals) =>
-        prevDeals?.filter((deal) => deal.id !== id)
-      );
+      // setDealsWithoutCoordinator((prevDeals) =>
+      //   prevDeals?.filter((deal) => deal.id !== id)
+      // );
 
       setTeamData((prevTeams) =>
         prevTeams.map((team) => {

@@ -47,7 +47,7 @@ export default function ClientDetailsPopup({
   };
 
   const handleBlur = async (field: keyof NegotiationDataType) => {
-    const dealRef = doc(db, "negotiations", deal.id);
+    const dealRef = doc(db, "delivrd_negotiations", deal.id);
     try {
       await updateDoc(dealRef, { [field]: formData[field] });
       if (field === "clientFirstName" || field === "clientLastName") {
@@ -56,7 +56,7 @@ export default function ClientDetailsPopup({
             d.id === deal.id
               ? {
                   ...d,
-                  negotiations_Client:
+                  clientNamefull:
                     formData["clientFirstName"] +
                     " " +
                     formData["clientLastName"],

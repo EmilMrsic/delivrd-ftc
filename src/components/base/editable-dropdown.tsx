@@ -55,7 +55,11 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
         }
 
         const userDoc = userSnapshot.docs[0];
-        const negotiationDocRef = doc(db, "negotiations", negotiationId);
+        const negotiationDocRef = doc(
+          db,
+          "delivrd_negotiations",
+          negotiationId
+        );
 
         await updateDoc(negotiationDocRef, {
           [field]: newValue,

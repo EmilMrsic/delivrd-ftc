@@ -7,10 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { dealStageOptions } from "@/lib/utils";
+import { NegotiationDataType } from "@/lib/models/team";
 
 type FieldConfig = {
   label: string;
-  field: keyof NegotiationData;
+  field: keyof NegotiationDataType;
   icon?: JSX.Element;
   type?: "input" | "textarea";
 };
@@ -18,7 +19,7 @@ type FieldConfig = {
 type ClientDetailsPopupProps = {
   open: boolean;
   onClose: () => void;
-  deal: NegotiationData;
+  deal: NegotiationDataType;
   fields: FieldConfig[];
   setTeamData: React.Dispatch<React.SetStateAction<any[]>>; // ✅ Update team data
 };
@@ -33,33 +34,33 @@ export default function TeamClientDetailsPopup({
   const [formData, setFormData] = useState(deal);
   const { allDealNegotiator } = useTeamDashboard();
 
-  const handleInputChange = (field: keyof NegotiationData, value: string) => {
+  const handleInputChange = (
+    field: keyof NegotiationDataType,
+    value: string
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleBlur = async (field: keyof NegotiationData) => {
-    const dealRef = doc(db, "negotiations", deal.id);
+  const handleBlur = async (field: keyof NegotiationDataType) => {
+    const dealRef = doc(db, "delivrd_negotiations", deal.id);
     try {
       await updateDoc(dealRef, { [field]: formData[field] });
 
       setTeamData((prevTeams) =>
         prevTeams.map((team) => ({
           ...team,
-          negotiations: team.negotiations.map((n: NegotiationData) =>
+          negotiations: team.negotiations.map((n: NegotiationDataType) =>
             n.id === deal.id
               ? {
                   ...n,
-                  ...(field === "negotiations_First_Name" ||
-                  field === "negotiations_Last_Name"
+                  ...(field === "clientFirstName" || field === "clientLastName"
                     ? {
-                        negotiations_First_Name:
-                          formData["negotiations_First_Name"],
-                        negotiations_Last_Name:
-                          formData["negotiations_Last_Name"],
-                        negotiations_Client:
-                          formData["negotiations_First_Name"] +
+                        clientFirstName: formData["clientFirstName"],
+                        clientLastName: formData["clientLastName"],
+                        clientNamefull:
+                          formData["clientFirstName"] +
                           " " +
-                          formData["negotiations_Last_Name"],
+                          formData["clientLastName"],
                       }
                     : { [field]: formData[field] }),
                 }
@@ -78,7 +79,7 @@ export default function TeamClientDetailsPopup({
         <DialogHeader className="flex justify-between items-start">
           <p>Client</p>
           <DialogTitle className="text-2xl font-semibold">
-            {formData.negotiations_Client}
+            {formData.clientNamefull}
           </DialogTitle>
         </DialogHeader>
 
@@ -88,8 +89,7 @@ export default function TeamClientDetailsPopup({
               <label className="w-40 text-sm font-medium flex items-center gap-1">
                 {icon} {label}
               </label>
-              {field === "negotiations_deal_coordinator" ||
-              field === "negotiations_Status" ? (
+              {field === "dealCoordinatorId" || field === "stage" ? (
                 <select
                   className="w-full border rounded p-2"
                   value={formData[field] || ""}
@@ -100,13 +100,10 @@ export default function TeamClientDetailsPopup({
                   onBlur={() => handleBlur(field)}
                 >
                   <option value={""}>
-                    Select{" "}
-                    {field === "negotiations_Status"
-                      ? "Stage"
-                      : "Deal Coordinator"}
+                    Select {field === "stage" ? "Stage" : "Deal Coordinator"}
                   </option>
 
-                  {field === "negotiations_deal_coordinator"
+                  {field === "dealCoordinatorId"
                     ? allDealNegotiator.map((negotiator) => (
                         <option key={negotiator.id} value={negotiator.id}>
                           {negotiator.name}

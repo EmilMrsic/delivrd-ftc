@@ -177,7 +177,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
       } else {
         await addDoc(bidRef, bidData);
       }
-      const negotiationRef = doc(db, "negotiations", id ?? "");
+      const negotiationRef = doc(db, "delivrd_negotiations", id ?? "");
       await updateDoc(negotiationRef, {
         incomingBids: arrayUnion(bid_id),
       });

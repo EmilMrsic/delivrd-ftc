@@ -143,6 +143,7 @@ function NeedToReview() {
     negotiatorData,
     negotiations,
     team,
+    refetch,
   } = useTeamDashboard({
     all: true,
     filter: {
@@ -283,7 +284,7 @@ function NeedToReview() {
 
   const updateDealNegotiator = async (id: string, newNegotiatorId: string) => {
     try {
-      const dealRef = doc(db, "negotiations", id);
+      const dealRef = doc(db, "delivrd_negotiations", id);
       const dealSnap = await getDoc(dealRef);
       if (!dealSnap.exists()) {
         throw new Error("Deal not found");
@@ -297,18 +298,18 @@ function NeedToReview() {
         return console.error("Deal not found in unassigned deals");
 
       await updateDoc(dealRef, {
-        negotiations_deal_coordinator: newNegotiatorId ?? "",
+        dealCoordinatorId: newNegotiatorId ?? "",
       });
 
-      await updateDoc(negotiatorRef, {
-        active_deals: arrayUnion(id),
-      });
+      // await updateDoc(negotiatorRef, {
+      //   active_deals: arrayUnion(id),
+      // });
 
       if (oldNegotiatorId) {
         const oldNegotiatorRef = doc(db, "team delivrd", oldNegotiatorId);
-        await updateDoc(oldNegotiatorRef, {
-          active_deals: arrayRemove(id),
-        });
+        // await updateDoc(oldNegotiatorRef, {
+        //   active_deals: arrayRemove(id),
+        // });
       }
 
       // setFilteredDeals((prevDeals) =>
@@ -318,9 +319,11 @@ function NeedToReview() {
       //       : deal
       //   )
       // );
-      setDealsWithoutCoordinator((prevDeals) =>
-        prevDeals?.filter((deal) => deal.id !== id)
-      );
+      // setDealsWithoutCoordinator((prevDeals) =>
+      //   prevDeals?.filter((deal) => deal.id !== id)
+      // );
+
+      refetch();
 
       setTeamData((prevTeams) =>
         prevTeams.map((team) => {
