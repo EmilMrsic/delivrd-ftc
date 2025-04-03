@@ -76,7 +76,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
       <TailwindPlusInput
         ref={inputRef}
         type="text"
-        value={isFocused ? value : truncateValue(value as string)}
+        value={value} // : truncateValue(value as string)}
         onChange={(e) => {
           onChange(e.target.value);
         }}

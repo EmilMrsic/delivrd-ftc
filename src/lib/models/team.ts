@@ -57,7 +57,8 @@ export const NegotiationDataModel = z.object({
   vehicleOfinterest: z.string(),
   trim: z.string(),
   consultNotes: z.string(),
-
+  city_state: z.string().optional(),
+  address: z.string().optional(),
   // these are subject to change after emil
   tradeInInfo: z.string().optional(),
   // trade_in_files: z.array(z.string()).optional(),
