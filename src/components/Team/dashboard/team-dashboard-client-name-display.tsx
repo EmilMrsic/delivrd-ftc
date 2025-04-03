@@ -136,6 +136,7 @@ export const TeamDashboardClientNameDisplay = ({
               handleSave={() => {}}
               openDialog={""}
               newComment={{}}
+              setIncomingBids={setIncomingBids}
             />
           )}
         </TailwindPlusModal>

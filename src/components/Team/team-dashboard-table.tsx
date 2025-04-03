@@ -496,7 +496,6 @@ export const DashboardTable = ({
                     <StageDropdown
                       deal={deal}
                       handleStageChange={handleStageChange}
-                      getStatusStyles={getStatusStyles}
                     />
                   ),
                 },

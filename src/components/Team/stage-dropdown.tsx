@@ -6,15 +6,39 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { dealStageOptions } from "@/lib/utils";
+import { dealStageOptions, getStatusStyles } from "@/lib/utils";
 import { sortStatuses } from "@/lib/helpers/negotiation";
+import { NegotiationDataType } from "@/lib/models/team";
+import { toast } from "@/hooks/use-toast";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
 
 export const StageDropdown = ({
   deal,
   handleStageChange,
-  getStatusStyles,
-}: any) => {
+  setNegotiation,
+}: {
+  deal: NegotiationDataType;
+  handleStageChange?: (id: string, stage: string) => void;
+  setNegotiation?: (negotiation: NegotiationDataType) => void;
+}) => {
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
+
+  const updateStatus = async (stage: string) => {
+    try {
+      await updateDoc(doc(db, "delivrd_negotiations", deal.id), {
+        stage: stage,
+      });
+
+      if (setNegotiation) {
+        setNegotiation({ ...deal, stage: stage });
+      }
+
+      toast({ title: "Status updated" });
+    } catch (error) {
+      console.error("Error updating stage:", error);
+    }
+  };
 
   const toggleDropdown = (id: string, isOpen: boolean) => {
     setOpenStates((prev) => ({
@@ -24,7 +48,7 @@ export const StageDropdown = ({
   };
 
   const stageOptions = useMemo(() => {
-    return dealStageOptions;
+    return sortStatuses(dealStageOptions);
   }, []);
 
   return (
@@ -51,7 +75,11 @@ export const StageDropdown = ({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleStageChange(deal.id, stage); // Update stage
+              if (handleStageChange) {
+                handleStageChange(deal.id, stage); // Update stage
+              } else {
+                updateStatus(stage);
+              }
               toggleDropdown(deal.id, false);
             }}
           >

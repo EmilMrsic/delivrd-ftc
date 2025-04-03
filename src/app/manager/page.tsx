@@ -41,13 +41,19 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
-import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
+import {
+  mapNegotiationsToTeam,
+  sortDataHelper,
+} from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { TeamHeader } from "@/components/base/header";
 import { DealNegotiatorDropdown } from "@/components/Team/deal-negotiator-dropdown";
 import { updateDealNegotiator } from "@/lib/helpers/dealCoordinator";
 import { StageButton } from "@/components/Team/stage-button";
+import { MakeButton } from "@/components/Team/make-button";
+import { StageDropdown } from "@/components/Team/stage-dropdown";
+import { ClientProfile } from "@/components/Team/profile/client-profile";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -64,6 +70,7 @@ type TeamDataType = {
 function Manager() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [teamData, setTeamData] = useState<DealNegotiatorType[]>([]);
+  const [unpaidExpanded, setUnpaidExpanded] = useState<boolean>(true);
   const router = useRouter();
   const [userData, setUserData] = useState<IUser>();
   const [sortConfig, setSortConfig] = useState({
@@ -192,35 +199,12 @@ function Manager() {
     }));
   };
 
-  const sortData = (key: string) => {
+  const sortData = (key: string, direction: string) => {
     setSortConfig((prevConfig) => {
-      const newDirection =
-        prevConfig.key === key && prevConfig.direction === "ascending"
-          ? "descending"
-          : "ascending";
-
       const sortedTeams = [...teamData].map((team) => {
-        const sortedNegotiations = [...(team.negotiations ?? [])].sort(
-          (a: any, b: any) => {
-            let aValue = a[key];
-            let bValue = b[key];
-
-            if (typeof aValue === "string") aValue = aValue.toLowerCase();
-            if (typeof bValue === "string") bValue = bValue.toLowerCase();
-
-            if (aValue == null) return newDirection === "ascending" ? 1 : -1;
-            if (bValue == null) return newDirection === "ascending" ? -1 : 1;
-
-            if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-              return newDirection === "ascending"
-                ? Number(aValue) - Number(bValue)
-                : Number(bValue) - Number(aValue);
-            }
-
-            if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
-            if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
-            return 0;
-          }
+        const sortedNegotiations = sortDataHelper(team.negotiations ?? [])(
+          key,
+          direction
         );
 
         return { ...team, negotiations: sortedNegotiations };
@@ -228,43 +212,20 @@ function Manager() {
 
       setTeamData(sortedTeams);
 
-      return { key, direction: newDirection };
+      return { key, direction: direction };
     });
   };
 
-  const sortWithoutCoordinatorData = (key: string) => {
+  const sortWithoutCoordinatorData = (key: string, direction: string) => {
     setSortConfig((prevConfig) => {
-      const newDirection =
-        prevConfig.key === key && prevConfig.direction === "ascending"
-          ? "descending"
-          : "ascending";
-
-      const sortedNegotiations = [...dealsWithoutCoordinator].sort(
-        (a: any, b: any) => {
-          let aValue = a[key];
-          let bValue = b[key];
-
-          if (typeof aValue === "string") aValue = aValue.toLowerCase();
-          if (typeof bValue === "string") bValue = bValue.toLowerCase();
-
-          if (aValue == null) return newDirection === "ascending" ? 1 : -1;
-          if (bValue == null) return newDirection === "ascending" ? -1 : 1;
-
-          if (!isNaN(Number(aValue)) && !isNaN(Number(bValue))) {
-            return newDirection === "ascending"
-              ? Number(aValue) - Number(bValue)
-              : Number(bValue) - Number(aValue);
-          }
-
-          if (aValue < bValue) return newDirection === "ascending" ? -1 : 1;
-          if (aValue > bValue) return newDirection === "ascending" ? 1 : -1;
-          return 0;
-        }
+      const sortedNegotiations = sortDataHelper(dealsWithoutCoordinator)(
+        key,
+        direction
       );
 
-      setDealsWithoutCoordinator(sortedNegotiations);
+      setDealsWithoutCoordinator(sortedNegotiations as NegotiationDataType[]);
 
-      return { key, direction: newDirection };
+      return { key, direction: direction };
     });
   };
 
@@ -295,8 +256,16 @@ function Manager() {
                   <React.Fragment>
                     <TableRow>
                       <TableCell className="w-[50px]">
-                        <Button variant="ghost" size="sm">
-                          <ChevronDown className="h-4 w-4" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setUnpaidExpanded(!unpaidExpanded)}
+                        >
+                          {unpaidExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
                         </Button>
                       </TableCell>
                       <TableCell>
@@ -310,24 +279,33 @@ function Manager() {
                       <TableCell></TableCell>
                     </TableRow>
 
-                    <TableRow>
-                      <TableCell colSpan={2} className="p-0">
-                        <div className="w-full px-5 overflow-x-auto">
-                          <ManagerTable
-                            deals={dealsWithoutCoordinator}
-                            sortConfig={sortConfig}
-                            setSortConfig={setSortConfig}
-                            sortData={sortWithoutCoordinatorData}
-                            openNegotiatorState={openNegotiatorState}
-                            toggleNegotiatorDropdown={toggleNegotiatorDropdown}
-                            updateDealNegotiator={(id, newNegotiatorId) =>
-                              updateDealNegotiator(id, newNegotiatorId, refetch)
-                            }
-                            allDealNegotiator={allDealNegotiator}
-                          />
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    {unpaidExpanded && (
+                      <TableRow>
+                        <TableCell colSpan={2} className="p-0">
+                          <div className="w-full px-5 overflow-x-auto">
+                            <ManagerTable
+                              deals={dealsWithoutCoordinator}
+                              sortConfig={sortConfig}
+                              setSortConfig={setSortConfig}
+                              sortData={sortWithoutCoordinatorData}
+                              openNegotiatorState={openNegotiatorState}
+                              toggleNegotiatorDropdown={
+                                toggleNegotiatorDropdown
+                              }
+                              updateDealNegotiator={(id, newNegotiatorId) =>
+                                updateDealNegotiator(
+                                  id,
+                                  newNegotiatorId,
+                                  refetch
+                                )
+                              }
+                              allDealNegotiator={allDealNegotiator}
+                              refetch={refetch}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </React.Fragment>
                 )}
                 {/* Mapping Team Deals */}
@@ -393,6 +371,7 @@ function Manager() {
                                   )
                                 }
                                 allDealNegotiator={allDealNegotiator}
+                                refetch={refetch}
                               />
                             </div>
                           </TableCell>
@@ -426,6 +405,7 @@ const ManagerTable = ({
   toggleNegotiatorDropdown,
   updateDealNegotiator,
   allDealNegotiator,
+  refetch,
 }: {
   deals: NegotiationDataType[];
   sortConfig: { key: string; direction: string };
@@ -435,6 +415,7 @@ const ManagerTable = ({
   toggleNegotiatorDropdown: (id: string, isOpen: boolean) => void;
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
   allDealNegotiator: DealNegotiatorType[];
+  refetch: () => void;
 }) => {
   return (
     <TailwindPlusTable
@@ -497,11 +478,27 @@ const ManagerTable = ({
         },
       ]}
       rows={deals.map((deal, idx) => [
-        deal.clientNamefull,
-        deal.brand,
+        {
+          text: deal.clientNamefull,
+          config: {
+            expandable: true,
+            expandedComponent: () => <ClientProfile negotiationId={deal.id} />,
+            expandedSize: "full",
+          },
+        },
+        {
+          Component: () => <MakeButton make={deal.brand} />,
+        },
         deal.model,
         {
-          Component: () => <StageButton stage={deal.stage} />,
+          Component: () => (
+            <StageDropdown
+              deal={deal}
+              setNegotiation={(negotiation) => {
+                refetch();
+              }}
+            />
+          ),
         },
         deal.zip,
         {
