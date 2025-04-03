@@ -7,6 +7,9 @@ import VoteSection from "../vote-section";
 import { Textarea } from "@/components/ui/textarea";
 import { DealNegotiatorType } from "@/lib/models/team";
 import { BidComments, IncomingBid } from "@/types";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { toast } from "@/hooks/use-toast";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -44,6 +47,69 @@ export const IncomingBidCard = ({
   const hasAcceptedOffer = incomingBids.find(
     (bid: IncomingBid) => bid.client_offer === "accepted"
   );
+
+  const handleAcceptOffer = async (acceptedBid: IncomingBid) => {
+    try {
+      const bidRef = doc(db, "Incoming Bids", acceptedBid.bid_id);
+
+      await updateDoc(bidRef, { accept_offer: true, vote: "like" });
+
+      setIncomingBids(
+        incomingBids.map((bid: IncomingBid) => ({
+          ...bid,
+          accept_offer: bid.bid_id === acceptedBid.bid_id,
+          vote: bid.bid_id === acceptedBid.bid_id ? "like" : bid.vote,
+        }))
+      );
+
+      const updatedBid = {
+        ...acceptedBid,
+        accept_offer: true,
+      };
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_ACCEPT_OFFER_URL ?? "",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedBid),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({ title: "Offer accepted", variant: "default" });
+      } else {
+        console.error("Failed to accept offer:", result.error);
+        toast({
+          title: "Failed to accept offer",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+    }
+  };
+
+  const handleCancelOffer = async (acceptedBid: IncomingBid) => {
+    try {
+      const bidRef = doc(db, "Incoming Bids", acceptedBid.bid_id);
+
+      await updateDoc(bidRef, { accept_offer: false, vote: "neutral" });
+
+      setIncomingBids(
+        incomingBids.map((bid: IncomingBid) => ({
+          ...bid,
+          accept_offer: bid.bid_id === acceptedBid.bid_id && false,
+          vote: bid.bid_id === acceptedBid.bid_id ? "neutral" : bid.vote,
+        }))
+      );
+
+      toast({ title: "Offer canceled" });
+    } catch (error) {
+      console.error("Error accepting offer:", error);
+    }
+  };
 
   return (
     <div
