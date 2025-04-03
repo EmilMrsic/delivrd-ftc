@@ -73,7 +73,8 @@ const TeamDashboardTable = ({
     Record<string, boolean>
   >({});
 
-  const { setIncomingBids, incomingBids } = useTeamProfile();
+  const { setIncomingBids, incomingBids, setDealers, dealers } =
+    useTeamProfile();
 
   const [sortConfig, setSortConfig] = useState({
     key: "submittedDate", // default sorting by Submitted Date
@@ -682,6 +683,8 @@ const TeamDashboardTable = ({
                         Ask For Review
                       </p>
                       <ManualBidUpload
+                        setDealers={setDealers}
+                        dealers={dealers}
                         setIncomingBids={setIncomingBids}
                         incomingBids={incomingBids}
                         setStopPropagation={setStopPropagation}
