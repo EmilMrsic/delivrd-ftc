@@ -120,6 +120,8 @@ export const IncomingBidCard = ({
     <div
       key={index}
       className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
+          ${isDisabled ? "opacity-45 pointer-events-none" : ""}
+      
         ${
           hasAcceptedOffer && bidDetails.client_offer !== "accepted"
             ? "opacity-45"

@@ -62,6 +62,8 @@ export const IncomingBids = ({
             .sort((a, b) => {
               if (a.client_offer === "accepted") return -1;
               if (b.client_offer === "accepted") return 1;
+              if (a.accept_offer) return -1;
+              if (b.accept_offer) return 1;
               const dateA = new Date(a?.timestamp || 0).getTime();
               const dateB = new Date(b?.timestamp || 0).getTime();
               return dateB - dateA; // Newest bids first
