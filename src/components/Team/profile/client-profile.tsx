@@ -333,6 +333,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
           />
 
           <IncomingBids
+            setIncomingBids={setIncomingBids}
             incomingBids={incomingBids}
             negotiationId={negotiationId ?? ""}
             dealers={dealers as unknown as DealNegotiatorType[]}

@@ -24,8 +24,10 @@ export const IncomingBids = ({
   parseComment,
   handleSendComment,
   noUserActions = false,
+  setIncomingBids,
 }: {
   incomingBids: IncomingBid[];
+  setIncomingBids: (item: IncomingBid[]) => void;
   negotiationId: string;
   dealers: DealNegotiatorType[];
   handleDeleteBid: (bidId: string) => void;
@@ -66,7 +68,9 @@ export const IncomingBids = ({
             })
             .map((bidDetails, index) => (
               <IncomingBidCard
+                negotiationId={negotiationId}
                 noUserActions={noUserActions}
+                setIncomingBids={setIncomingBids}
                 bidDetails={bidDetails}
                 dealers={dealers}
                 incomingBids={incomingBids}

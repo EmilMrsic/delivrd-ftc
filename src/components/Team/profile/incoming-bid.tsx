@@ -34,6 +34,7 @@ export const IncomingBidCard = ({
   handleSave,
   handleEdit,
   noUserActions,
+  negotiationId,
 }: any & {
   noUserActions?: boolean;
 }) => {
@@ -79,8 +80,9 @@ export const IncomingBidCard = ({
                 <Trash className="w-5 h-5" />
               </button>
               <VoteSection
+                incomingBid={incomingBids}
+                setIncomingBid={setIncomingBids}
                 bidDetails={bidDetails}
-                setIncomingBids={setIncomingBids}
               />
             </>
           )}

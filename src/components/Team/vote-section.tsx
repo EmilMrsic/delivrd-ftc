@@ -12,13 +12,19 @@ import {
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { IncomingBid } from "@/types";
+import useTeamProfile from "@/hooks/useTeamProfile";
 
 type VoteSectionProps = {
   bidDetails: IncomingBid;
-  setIncomingBids: React.Dispatch<React.SetStateAction<IncomingBid[]>>;
+  setIncomingBid: (item: IncomingBid[]) => void;
+  incomingBid: IncomingBid[];
 };
 
-const VoteSection = ({ bidDetails, setIncomingBids }: VoteSectionProps) => {
+const VoteSection = ({
+  bidDetails,
+  setIncomingBid,
+  incomingBid,
+}: VoteSectionProps) => {
   const handleVote = async (bid_id: string, value: number) => {
     try {
       const bidsQuery = query(
@@ -60,8 +66,8 @@ const VoteSection = ({ bidDetails, setIncomingBids }: VoteSectionProps) => {
         { merge: true }
       );
 
-      setIncomingBids((prevState: IncomingBid[]) =>
-        prevState.map((bid: IncomingBid) =>
+      setIncomingBid(
+        incomingBid.map((bid: IncomingBid) =>
           bid.bid_id === bid_id ? { ...bid, vote: voteType } : bid
         )
       );
