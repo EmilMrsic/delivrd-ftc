@@ -106,6 +106,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
             ? {
                 ...log,
                 content: editContent,
+                timestamp: new Date().toISOString(),
                 attachments: [...log.attachments, ...newFileUrls],
               }
             : log
@@ -115,6 +116,8 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
       // Update Firestore after UI state is updated
       await updateDoc(logRef, {
         content: editContent,
+        timestamp: new Date().toISOString(),
+
         attachments: [
           ...(workLogs.find((log) => log.id === logId)?.attachments || []),
           ...newFileUrls,
@@ -280,7 +283,14 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <p className="font-semibold">{log.user}</p>
                   <p className="text-xs text-gray-500">
-                    {new Date(log.timestamp).toLocaleString()}
+                    {new Date(log.timestamp).toLocaleString("en-US", {
+                      hour12: false,
+                      minute: "2-digit",
+                      hour: "2-digit",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </p>
                 </div>
                 {editingLog === log.id ? (
