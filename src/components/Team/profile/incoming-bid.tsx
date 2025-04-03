@@ -47,6 +47,11 @@ export const IncomingBidCard = ({
   const hasAcceptedOffer = incomingBids.find(
     (bid: IncomingBid) => bid.client_offer === "accepted"
   );
+  const hasAcceptedBid = incomingBids.some(
+    (bid: IncomingBid) => bid.accept_offer === true
+  );
+  const isAcceptedBid = bidDetails.accept_offer === true;
+  const isDisabled = hasAcceptedBid && !isAcceptedBid;
 
   const handleAcceptOffer = async (acceptedBid: IncomingBid) => {
     try {
@@ -150,6 +155,27 @@ export const IncomingBidCard = ({
                 setIncomingBid={setIncomingBids}
                 bidDetails={bidDetails}
               />
+              {bidDetails.accept_offer ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCancelOffer(bidDetails)}
+                  className={
+                    "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
+                  }
+                >
+                  Cancel Offer
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAcceptOffer(bidDetails)}
+                  className={"bg-white text-black"}
+                >
+                  Accept Offer
+                </Button>
+              )}
             </>
           )}
         </div>

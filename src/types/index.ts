@@ -264,6 +264,7 @@ export interface IncomingBid {
   client_offer: string;
   vote?: "like" | "dislike" | "neutral";
   delete: boolean;
+  accept_offer: boolean;
 }
 
 export type Color = {
