@@ -50,6 +50,7 @@ const useTeamProfile = () => {
     const dealersData = [];
 
     for (const bid of incomingBids) {
+      console.log("hello", bid.dealerId);
       const id = bid.dealerId;
       if (id !== "N/A" && id)
         try {

@@ -82,6 +82,7 @@ function ProjectProfile() {
     setIncomingBids,
     bidCommentsByBidId,
     setBidCommentsByBidId,
+    setDealers,
   } = useTeamProfile();
 
   const dispatch = useDispatch();
@@ -474,8 +475,6 @@ function ProjectProfile() {
     });
   }, [negotiationId]);
 
-  console.log({ incomingBids });
-
   return (
     <div className="container mx-auto p-4 space-y-6 bg-[#E4E5E9] min-h-screen">
       <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -565,7 +564,13 @@ function ProjectProfile() {
                   Incoming Bids
                 </div>
                 <div className="flex items-center">
-                  <ManualBidUpload id={negotiationId} />
+                  <ManualBidUpload
+                    setDealers={setDealers}
+                    dealers={dealers}
+                    incomingBids={incomingBids}
+                    setIncomingBids={setIncomingBids}
+                    id={negotiationId}
+                  />
                 </div>
               </CardTitle>
             </CardHeader>

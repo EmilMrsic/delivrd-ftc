@@ -34,6 +34,7 @@ import { toast } from "@/hooks/use-toast";
 import DatePickerCell from "./datepicker-cell";
 import ShippingInfoDialog from "./shipping-info-dialog";
 import ManualBidUpload from "./Manual-bid-upload-modal";
+import useTeamProfile from "@/hooks/useTeamProfile";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 
@@ -71,6 +72,8 @@ const TeamDashboardTable = ({
   const [openNegotiatorState, setOpenNegotiatorState] = useState<
     Record<string, boolean>
   >({});
+
+  const { setIncomingBids, incomingBids } = useTeamProfile();
 
   const [sortConfig, setSortConfig] = useState({
     key: "submittedDate", // default sorting by Submitted Date
@@ -679,6 +682,8 @@ const TeamDashboardTable = ({
                         Ask For Review
                       </p>
                       <ManualBidUpload
+                        setIncomingBids={setIncomingBids}
+                        incomingBids={incomingBids}
                         setStopPropagation={setStopPropagation}
                         id={deal?.id}
                       />

@@ -254,11 +254,12 @@ export interface InternalNotes {
 }
 
 export interface IncomingBid {
+  negotiationId: string | null;
   bid_id: string;
   clientId: string;
   comments: string;
   dealerId: string;
-  discountPrice: string;
+  discountPrice: string | number;
   files: string[];
   inventoryStatus: string;
   price: number;
