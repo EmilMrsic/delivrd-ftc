@@ -185,7 +185,9 @@ const ClientDetails = ({
                 </div>
                 <div className="mt-1 text-sm text-[#202125]">
                   <p>Contact Delivrd (text messages preferred)</p>
-                  <p className="font-semibold">(386) 270-3530</p>
+                  <p className={cn(`font-semibold`, isBlur && `blur-sm`)}>
+                    (386) 270-3530
+                  </p>
                 </div>
               </div>
             </div>
