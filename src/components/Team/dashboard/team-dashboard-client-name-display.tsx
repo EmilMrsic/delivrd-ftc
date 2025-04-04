@@ -85,6 +85,7 @@ export const TeamDashboardClientNameDisplay = ({
             }}
           />
           <DashboardTableActions
+            id={negotiation.id}
             refetch={refetch}
             setStopPropagation={setStopPropagation}
             deal={deal}
@@ -120,7 +121,7 @@ export const TeamDashboardClientNameDisplay = ({
               noUserActions={true}
               incomingBids={incomingBids as IncomingBid[]}
               negotiationId={negotiation.id}
-              dealers={allDealNegotiator}
+              dealers={allDealNegotiator as any}
               handleDeleteBid={() => {}}
               handleEdit={() => {}}
               bidCommentsByBidId={bidCommentsById}

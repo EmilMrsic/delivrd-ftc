@@ -51,7 +51,7 @@ type ManualBidUploadType = {
   id: string | null;
   setStopPropagation?: (item: boolean) => void;
   dealers: DealerData[];
-  setDealers: (item: DealerData[]) => void;
+  setDealers?: (item: DealerData[]) => void;
   setIncomingBids: (item: IncomingBid[]) => void;
   incomingBids: IncomingBid[];
 };
@@ -187,7 +187,7 @@ const ManualBidUpload = ({
           id: dealerId,
         };
         await setDoc(dealerRef, newDealer);
-        setDealers([...dealers, newDealer]);
+        setDealers && setDealers([...dealers, newDealer]);
       }
 
       // Create Bid Data Object

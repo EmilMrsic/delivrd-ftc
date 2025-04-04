@@ -8,6 +8,8 @@ import {
 import ManualBidUpload from "./Manual-bid-upload-modal";
 import ShippingInfoDialog from "./shipping-info-dialog";
 import { Button } from "../ui/button";
+import { useSearchParams } from "next/navigation";
+import useTeamProfile from "@/hooks/useTeamProfile";
 
 export const DashboardTableActions = ({
   setStopPropagation,
@@ -17,7 +19,12 @@ export const DashboardTableActions = ({
   // currentDeals,
   handleAskForReview,
   refetch,
+  id,
 }: any) => {
+  const { setIncomingBids, incomingBids, setDealers, dealers } = useTeamProfile(
+    { negotiationId: id }
+  );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -51,6 +58,10 @@ export const DashboardTableActions = ({
             Ask For Review
           </p>
           <ManualBidUpload
+            incomingBids={incomingBids}
+            setDealers={setDealers}
+            setIncomingBids={setIncomingBids}
+            dealers={dealers}
             setStopPropagation={setStopPropagation}
             id={deal?.id}
           />
