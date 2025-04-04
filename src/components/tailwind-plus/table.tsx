@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Expand } from "lucide-react";
 import Link from "next/link";
+import { TailwindPlusModal } from "./modal";
 
 interface HeaderConfig {
   sortable?: boolean;
@@ -57,6 +58,7 @@ export const TailwindPlusTable = ({
   rowConfigs?: RowConfig[];
 }) => {
   const [expanded, setExpanded] = useState<null | [number, number]>(null);
+
   const table = useReactTable({
     data: rows,
     columns: headers.map((header) => {
@@ -156,44 +158,19 @@ export const TailwindTableExpandedPopover = ({
   expanded: [number, number] | null;
 }) => {
   const Component = cell.config?.expandedComponent;
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setExpanded(null);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div
-        className={cn(
-          "bg-white rounded-lg shadow-lg max-w-md w-full p-4 overflow-y-auto",
-          cell.config?.expandedSize === "full"
-            ? "max-h-[90vh]"
-            : "max-h-[60vh]",
-          cell.config?.expandedSize === "full" ? "max-w-[90vw]" : ""
-        )}
-        ref={ref}
-      >
-        {Component && (
-          <Component setExpanded={setExpanded} expanded={expanded} />
-        )}
-        <div className="text-right mt-4">
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            onClick={() => setExpanded(null)}
-          >
-            Close
-          </button>
-        </div>
+    <TailwindPlusModal close={() => setExpanded(null)} width={90} height={90}>
+      {Component && <Component setExpanded={setExpanded} expanded={expanded} />}
+      <div className="text-right mt-4">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => setExpanded(null)}
+        >
+          Close
+        </button>
       </div>
-    </div>
+    </TailwindPlusModal>
   );
 };
 

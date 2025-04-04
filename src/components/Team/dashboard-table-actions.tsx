@@ -5,7 +5,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import DealNegotiatorDialog from "./deal-negotiator-dialog";
 import ManualBidUpload from "./Manual-bid-upload-modal";
 import ShippingInfoDialog from "./shipping-info-dialog";
 import { Button } from "../ui/button";
@@ -30,11 +29,11 @@ export const DashboardTableActions = ({
       <DropdownMenuContent>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <div className="flex flex-col items-start">
-          <DealNegotiatorDialog
+          {/* <DealNegotiatorDialog
             setStopPropogation={setStopPropagation}
             deal={deal}
             dealNegotiator={negotiatorData}
-          />
+          /> */}
           <ShippingInfoDialog
             // setCurrentDeals={setCurrentDeals}
             // currentDeals={currentDeals}
