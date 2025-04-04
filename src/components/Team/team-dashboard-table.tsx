@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 import "react-datepicker/dist/react-datepicker.css";
-import { Check, X } from "lucide-react";
 import { dateFormat, getElapsedTime, getStatusStyles } from "@/lib/utils";
 
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -11,7 +10,6 @@ import DatePickerCell from "./datepicker-cell";
 import { TailwindPlusTable } from "../tailwind-plus/table";
 import { StageDropdown } from "./stage-dropdown";
 import { DealNegotiatorDropdown } from "./deal-negotiator-dropdown";
-import { DashboardTableActions } from "./dashboard-table-actions";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusExpandableTable } from "../tailwind-plus/expandable-table";
 import { Button } from "../ui/button";
@@ -91,6 +89,10 @@ const TeamDashboardTable = ({
       return true;
     }
 
+    const searchableWorkLog = deal.workLogs
+      ? deal.workLogs.map((log) => log.comments).join(" ")
+      : "";
+
     const found =
       deal?.clientNamefull?.toLowerCase().includes(searchTerm) ||
       deal?.brand?.toLowerCase().includes(searchTerm) ||
@@ -99,7 +101,8 @@ const TeamDashboardTable = ({
       deal?.clientEmail?.toLowerCase().includes(searchTerm) ||
       deal?.clientPhone?.toLowerCase().includes(searchTerm) ||
       deal?.state?.toLowerCase().includes(searchTerm) ||
-      deal?.city?.toLowerCase().includes(searchTerm);
+      deal?.city?.toLowerCase().includes(searchTerm) ||
+      searchableWorkLog.toLowerCase().includes(searchTerm);
 
     return found;
   };

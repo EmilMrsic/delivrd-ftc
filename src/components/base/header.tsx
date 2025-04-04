@@ -73,6 +73,11 @@ export const TeamHeader = ({
 }: {
   negotiatorData?: DealNegotiatorType;
 }) => {
+  const user = useLoggedInUser();
+  const negotiatorDataToUser = negotiatorData ? negotiatorData : user;
+
+  console.log("header:", negotiatorDataToUser);
+
   return (
     <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
       <Link href={"/team-dashboard"}>
@@ -86,16 +91,18 @@ export const TeamHeader = ({
         </div>
       </Link>
       <div className="flex items-center gap-3">
-        <Notifications />
         <div className="fit">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-            Client Deals Dashboard
-          </h1>
-          {negotiatorData && (
+          <div className="flex items-center gap-2">
+            <Notifications />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text mt-0">
+              Client Deals Dashboard
+            </h1>
+          </div>
+          {negotiatorDataToUser && (
             <div className="flex gap-2 w-fit mr-0 ml-auto mt-2">
-              <UserAvatar user={negotiatorData} size="small" />
+              <UserAvatar user={negotiatorDataToUser} size="small" />
               <h1 className="text-base font-semibold text-white text-transparent bg-clip-text mt-auto mb-auto">
-                {negotiatorData?.name}
+                {negotiatorDataToUser?.name}
               </h1>
             </div>
           )}
