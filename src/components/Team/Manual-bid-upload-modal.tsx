@@ -171,7 +171,8 @@ const ManualBidUpload = ({
       let dealerId = selectedDealership?.data?.id ?? generateRandomId();
       const dealerRef = doc(db, "Dealers", dealerId);
       // Create New Dealer Entry If Needed
-      if (!selectedDealership?.data) {
+      console.log(selectedDealership);
+      if (!selectedDealership?.data && !selectedDealership?.label) {
         const newDealer = {
           Brand: [""],
           Dealership: formData.dealerName,
