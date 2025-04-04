@@ -43,6 +43,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
     bidCommentsByBidId,
     setBidCommentsByBidId,
     isLoading,
+    setDealers,
   } = useTeamProfile({ negotiationId });
 
   const dispatch = useDispatch();
@@ -336,7 +337,8 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
             setIncomingBids={setIncomingBids}
             incomingBids={incomingBids}
             negotiationId={negotiationId ?? ""}
-            dealers={dealers as unknown as DealNegotiatorType[]}
+            dealers={dealers}
+            setDealers={setDealers}
             handleDeleteBid={handleDeleteBid}
             handleEdit={handleEdit}
             handleSave={handleSave}

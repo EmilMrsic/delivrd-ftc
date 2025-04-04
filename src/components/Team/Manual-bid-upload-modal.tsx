@@ -11,6 +11,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import { db, storage } from "@/firebase/config";
@@ -18,7 +19,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { generateRandomId } from "@/lib/utils";
-import { EditNegotiationData } from "@/types";
+import { DealerData, EditNegotiationData, IncomingBid } from "@/types";
 import { TailwindPlusButton } from "../tailwind-plus/button";
 import { TailwindPlusInput } from "../tailwind-plus/input";
 import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
@@ -49,9 +50,20 @@ interface Errors {
 type ManualBidUploadType = {
   id: string | null;
   setStopPropagation?: (item: boolean) => void;
+  dealers: DealerData[];
+  setDealers: (item: DealerData[]) => void;
+  setIncomingBids: (item: IncomingBid[]) => void;
+  incomingBids: IncomingBid[];
 };
 
-const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
+const ManualBidUpload = ({
+  id,
+  setStopPropagation,
+  setDealers,
+  dealers,
+  incomingBids,
+  setIncomingBids,
+}: ManualBidUploadType) => {
   const [formData, setFormData] = useState<FormData>({
     dealerName: "",
     dealerNumber: "",
@@ -72,7 +84,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dealerships, setDealerships] = useState<any[]>([]);
-  const [selectedDealership, setSelectedDealership] = useState("");
+  const [selectedDealership, setSelectedDealership] = useState<any>();
 
   const closeDialog = () => setIsDialogOpen(false);
 
@@ -117,90 +129,125 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    let formErrors: Errors = {};
 
-    if (!formData.dealerName) formErrors.dealerName = "Dealer Name is required";
-    if (!formData.dealerNumber)
-      formErrors.dealerNumber = "Dealer Number is required";
-    if (!formData.priceExcludingTax)
-      formErrors.priceExcludingTax = "Price is required";
-    if (!formData.discountAmount)
-      formErrors.discountAmount = "Discount Amount is required";
+    // Validate Form Fields
+    const requiredFields = {
+      dealerName: "Dealer Name is required",
+      dealerNumber: "Dealer Number is required",
+      priceExcludingTax: "Price is required",
+      discountAmount: "Discount Amount is required",
+    };
 
-    if (
-      formErrors.dealerName?.length ||
-      formErrors.dealerNumber?.length ||
-      formErrors.discountAmount?.length ||
-      formErrors.priceExcludingTax?.length
-    ) {
+    const formErrors: Errors = Object.entries(requiredFields).reduce(
+      (errors: any, [key, message]) => {
+        if (!formData[key as keyof typeof formData]) errors[key] = message;
+        return errors;
+      },
+      {} as Errors
+    );
+
+    if (Object.keys(formErrors).length) {
       setErrors(formErrors);
       return;
     }
 
     setLoader(true);
 
-    let fileUrls: string[] = [];
-
-    if (formData.files && formData.files.length > 0) {
-      const fileArray = Array.from(formData.files);
-      const uploadPromises = fileArray.map((file) => uploadFile(file));
-      fileUrls = (await Promise.all(uploadPromises)).filter(
-        Boolean
-      ) as string[];
-    }
-    const bid_id = generateRandomId();
-    const bidData = {
-      bid_id,
-      negotiationId: id,
-      clientId: "N/A",
-      dealerId: "N/A",
-      dealerName: formData.dealerName,
-      dealerNumber: formData.dealerNumber,
-      salesPersonName: formData.salesPersonName ?? "",
-      salesPersonEmail: formData.salesPersonEmail ?? "",
-      city: formData.city ?? "",
-      state: formData.state ?? "",
-      price: Number(formData.priceExcludingTax),
-      discountPrice: Number(formData.discountAmount),
-      inventoryStatus: formData.inventoryStatus,
-      comments: formData.additionalComments ?? "",
-      files: fileUrls ?? [],
-      manual_add: true,
-      timestamps: new Date(),
-    };
-
     try {
-      const bidRef = collection(db, "manual bids");
-      const incomingRef = collection(db, "Incoming Bids");
-      if (selectedDealership) {
-        await addDoc(incomingRef, bidData);
-      } else {
-        await addDoc(bidRef, bidData);
+      // Upload Files
+      let fileUrls: string[] = [];
+      if (formData.files?.length) {
+        const fileArray = Array.from(formData.files);
+        const uploadResults = await Promise.allSettled(
+          fileArray.map(uploadFile)
+        );
+        fileUrls = uploadResults
+          .filter((result) => result.status === "fulfilled")
+          .map((result) => (result as PromiseFulfilledResult<string>).value);
       }
-      const negotiationRef = doc(db, "delivrd_negotiations", id ?? "");
-      await updateDoc(negotiationRef, {
-        incomingBids: arrayUnion(bid_id),
+
+      // Generate Unique IDs
+      const bid_id = generateRandomId();
+      let dealerId = selectedDealership?.data?.id ?? generateRandomId();
+      const dealerRef = doc(db, "Dealers", dealerId);
+      // Create New Dealer Entry If Needed
+      console.log(selectedDealership);
+      if (!selectedDealership?.data && !selectedDealership?.label) {
+        const newDealer = {
+          Brand: [""],
+          Dealership: formData.dealerName,
+          City: formData.city || "",
+          Position: "",
+          SalesPersonPhone: formData.dealerNumber,
+          SalesPersonName: formData.salesPersonName || "",
+          SalesPersonEmail: formData.salesPersonEmail || "",
+          State: formData.state || "",
+          YourEmail: "",
+          YourWebsite: "",
+          id: dealerId,
+        };
+        await setDoc(dealerRef, newDealer);
+        setDealers([...dealers, newDealer]);
+      }
+
+      // Create Bid Data Object
+      const bidData: any = {
+        bid_id,
+        negotiationId: id,
+        clientId: "N/A",
+        dealerId,
+        dealerName: formData.dealerName,
+        dealerNumber: formData.dealerNumber,
+        salesPersonName: formData.salesPersonName || "",
+        salesPersonEmail: formData.salesPersonEmail || "",
+        city: formData.city || "",
+        state: formData.state || "",
+        price: Number(formData.priceExcludingTax),
+        discountPrice: Number(formData.discountAmount),
+        inventoryStatus: formData.inventoryStatus,
+        comments: formData.additionalComments || "",
+        files: fileUrls,
+        manual_add: true,
+        timestamp: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
+      };
+      const bidRef = doc(db, "Incoming Bids", bid_id);
+
+      await setDoc(bidRef, { ...bidData, bid_id });
+      setIncomingBids([...incomingBids, bidData]);
+
+      await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
+        incoming_bids: arrayUnion(bid_id),
       });
-      setLoader(false);
-      setFormData({
-        dealerName: "",
-        dealerNumber: "",
-        salesPersonName: "",
-        city: "",
-        state: "",
-        priceExcludingTax: "",
-        discountAmount: "",
-        inventoryStatus: "In Stock",
-        additionalComments: "",
-        salesPersonEmail: "",
-        files: null,
-      });
+
+      resetForm();
       toast({ title: "Bid created successfully" });
       closeDialog();
-      window.location.reload();
     } catch (error) {
       console.error("Error uploading bid: ", error);
+    } finally {
+      setLoader(false);
     }
+  };
+
+  // Reset Form Function
+  const resetForm = () => {
+    setFormData({
+      dealerName: "",
+      dealerNumber: "",
+      salesPersonName: "",
+      city: "",
+      state: "",
+      priceExcludingTax: "",
+      discountAmount: "",
+      inventoryStatus: "In Stock",
+      additionalComments: "",
+      salesPersonEmail: "",
+      files: null,
+    });
   };
 
   useEffect(() => {
@@ -242,7 +289,11 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
   }));
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
+    <Dialog
+      open={isDialogOpen}
+      onOpenChange={() => setIsDialogOpen(false)}
+      modal={false}
+    >
       <>
         <DialogTrigger
           onClick={(e) => {
@@ -262,7 +313,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
           </TailwindPlusButton>
         </DialogTrigger>
 
-        <TailwindPlusDialogContent>
+        <TailwindPlusDialogContent onClick={(e) => e.stopPropagation()}>
           <div
             onClick={(e) => {
               e.stopPropagation();
@@ -290,7 +341,7 @@ const ManualBidUpload = ({ id, setStopPropagation }: ManualBidUploadType) => {
                 options={dealershipOptions}
                 onChange={(selectedOption, a) => {
                   const selected = selectedOption?.data;
-                  setSelectedDealership(selectedOption?.value || "");
+                  setSelectedDealership(selectedOption || "");
                   if (selected) {
                     setFormData((prev) => ({
                       ...prev,
