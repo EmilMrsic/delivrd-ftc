@@ -12,6 +12,8 @@ import {
   where,
   updateDoc,
   doc,
+  arrayUnion,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import dynamic from "next/dynamic";
@@ -48,18 +50,25 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   const [editContent, setEditContent] = useState<string>("");
   const [editFiles, setEditFiles] = useState<File[]>([]);
 
-  const fetchWorkLogs = async () => {
-    if (!negotiationId) return;
-    const logsRef = collection(db, "work_log");
-    const logsQuery = query(
-      logsRef,
-      where("negotiation_id", "==", negotiationId)
-    );
-    const logsSnap = await getDocs(logsQuery);
-    const logsData = logsSnap.docs.map(
-      (doc) => ({ id: doc.id, ...doc.data() } as WorkLog)
-    );
-    setWorkLogs(logsData);
+  const fetchWorkLogs = async (id: string | null) => {
+    if (!id) return;
+
+    try {
+      const negotiationRef = doc(db, "delivrd_negotiations", id);
+      const negotiationSnap = await getDoc(negotiationRef);
+
+      if (negotiationSnap.exists()) {
+        const data = negotiationSnap.data();
+        const logsData = (data.workLogs || []) as WorkLog[];
+        setWorkLogs(logsData);
+      } else {
+        console.warn("Negotiation not found with id:", id);
+        setWorkLogs([]);
+      }
+    } catch (error) {
+      console.error("Error fetching work logs:", error);
+      setWorkLogs([]);
+    }
   };
 
   const startEditing = (log: WorkLog) => {
@@ -69,22 +78,39 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
     setEditFiles([]);
   };
 
-  const saveEdit = async (logId: string) => {
+  const saveEdit = async (negotiationId: string | null, logId: string) => {
     try {
-      // Query Firestore to find the document where "id" matches logId
-      const q = query(collection(db, "work_log"), where("id", "==", logId));
-      const querySnapshot = await getDocs(q);
+      // Step 1: Fetch the negotiation document from Firestore
+      const negotiationRef = doc(
+        db,
+        "delivrd_negotiations",
+        negotiationId ?? ""
+      );
+      const negotiationSnap = await getDoc(negotiationRef);
 
-      if (querySnapshot.empty) {
-        console.error("No document found with ID:", logId);
+      if (!negotiationSnap.exists()) {
+        console.error("No negotiation found with ID:", negotiationId);
+        toast({
+          title: "Error: Negotiation not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const negotiationData = negotiationSnap.data();
+      const existingWorkLogs = negotiationData.workLogs || [];
+
+      // Step 2: Find the specific work log inside the workLogs array
+      const workLogIndex = existingWorkLogs.findIndex(
+        (log: any) => log.id === logId
+      );
+      if (workLogIndex === -1) {
+        console.error("No work log found with ID:", logId);
         toast({ title: "Error: Work log not found", variant: "destructive" });
         return;
       }
 
-      // Get the first matching document reference
-      const logRef = querySnapshot.docs[0].ref;
-
-      // Upload new files and get URLs
+      // Step 3: Upload new files and get URLs
       const uploadedFiles = await Promise.all(
         editFiles.map(async (file) => {
           try {
@@ -96,10 +122,9 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         })
       );
 
-      // Remove null values
       const newFileUrls = uploadedFiles.filter(Boolean) as string[];
 
-      // Update workLogs state instantly for UI smoothness
+      // Step 4: Update the work log in the local state for instant UI updates
       setWorkLogs((prevLogs) =>
         prevLogs.map((log) =>
           log.id === logId
@@ -113,18 +138,21 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         )
       );
 
-      // Update Firestore after UI state is updated
-      await updateDoc(logRef, {
+      // Step 5: Update Firestore with the modified workLogs array
+      const updatedWorkLogs = [...existingWorkLogs];
+      updatedWorkLogs[workLogIndex] = {
+        ...updatedWorkLogs[workLogIndex],
         content: editContent,
         timestamp: new Date().toISOString(),
-
         attachments: [
-          ...(workLogs.find((log) => log.id === logId)?.attachments || []),
+          ...updatedWorkLogs[workLogIndex].attachments,
           ...newFileUrls,
         ],
-      });
+      };
 
-      // Reset editing state
+      await updateDoc(negotiationRef, { workLogs: updatedWorkLogs });
+
+      // Step 6: Reset editing state
       cancelEditing();
       toast({ title: "Work log updated successfully" });
     } catch (error) {
@@ -144,7 +172,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
     setLocalFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const addWorkLog = async () => {
+  const addWorkLog = async (id: string | null) => {
     if (!newWorkLog.trim() && localFiles.length === 0) return;
 
     try {
@@ -174,12 +202,15 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
 
       console.log("Adding WorkLog to Firestore:", logEntry);
 
-      await addDoc(collection(db, "work_log"), logEntry);
+      const negotiationRef = doc(db, "delivrd_negotiations", id ?? "");
 
+      await updateDoc(negotiationRef, {
+        workLogs: arrayUnion(logEntry),
+      });
       // Reset fields
       setNewWorkLog("");
       setLocalFiles([]);
-      fetchWorkLogs();
+      fetchWorkLogs(negotiationId);
       toast({ title: "Work log added successfully" });
     } catch (error) {
       console.error("Error adding work log:", error);
@@ -241,7 +272,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   };
 
   useEffect(() => {
-    fetchWorkLogs();
+    fetchWorkLogs(negotiationId);
   }, [negotiationId]);
 
   const makeLinksClickable = (content: string) => {
@@ -307,7 +338,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                       onChange={setEditContent}
                     />
                     <div className="flex gap-2 mt-2">
-                      <Button onClick={() => saveEdit(log.id)}>
+                      <Button onClick={() => saveEdit(negotiationId, log.id)}>
                         <Save className="w-4 h-4 mr-1" /> Save
                       </Button>
                       <Button variant="destructive" onClick={cancelEditing}>
@@ -441,7 +472,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
             multiple
           />
         </label>
-        <Button onClick={addWorkLog}>Add Log</Button>
+        <Button onClick={() => addWorkLog(negotiationId)}>Add Log</Button>
       </div>
     </TailwindPlusCard>
   );
