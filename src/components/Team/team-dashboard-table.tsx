@@ -235,6 +235,15 @@ const TeamDashboardTable = ({
     const { stage, deals } = row;
     const total = (deals?.New?.length || 0) + (deals?.Used?.length || 0);
 
+    // ensure order of New, Used
+    const rowKeys: string[] = [];
+    if (deals?.New) {
+      rowKeys.push("New");
+    }
+    if (deals?.Used) {
+      rowKeys.push("Used");
+    }
+
     return {
       Component: () => (
         <>
@@ -246,47 +255,46 @@ const TeamDashboardTable = ({
       expandedComponentProps: {
         name: statusIdx.toString(),
         defaultExpanded: stage === DEFAULT_OPEN_STAGE ? [0, 1] : [],
-        rows: Object.keys(deals)
-          .filter((condition) => ["New", "Used"].includes(condition))
-          .map((condition, conditionIdx) => {
-            const total = deals[condition].length;
-            return {
-              Component: () => (
-                <>
-                  <Button
-                    variant="outline"
-                    style={{
-                      backgroundColor: getStatusStyles(condition ?? "")
-                        .backgroundColor,
-                      color: getStatusStyles(condition ?? "").textColor, // Set dynamic text color
-                    }}
-                    className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
-                  >
-                    <p>{condition}</p>
-                  </Button>
-                  {total}
-                </>
-              ),
-              expandedComponent: () => (
-                <DashboardTable
-                  key={`dashboard-table-${statusIdx}-${conditionIdx}`}
-                  currentDeals={deals[condition]}
-                  handleStageChange={handleStageChange}
-                  allDealNegotiator={allDealNegotiator}
-                  updateDealNegotiator={updateDealNegotiator}
-                  handleDateChange={handleDateChange}
-                  handleAskForReview={handleAskForReview}
-                  setStopPropagation={setStopPropagation}
-                  // setCurrentDeals={setCurrentDeals}
-                  negotiatorData={negotiatorData as DealNegotiatorType}
-                  sortConfig={sortConfig}
-                  setSortConfig={setSortConfig}
-                  sortData={sortData}
-                  refetch={refetch}
-                />
-              ),
-            };
-          }),
+        rows: rowKeys.map((condition, conditionIdx) => {
+          const total = deals[condition].length;
+          return {
+            Component: () => (
+              <>
+                <Button
+                  variant="outline"
+                  style={{
+                    backgroundColor: getStatusStyles(condition ?? "")
+                      .backgroundColor,
+                    color: getStatusStyles(condition ?? "").textColor, // Set dynamic text color
+                  }}
+                  className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
+                >
+                  <p>{condition}</p>
+                </Button>
+                {total}
+              </>
+            ),
+            expandedComponent: () => (
+              <DashboardTable
+                key={`dashboard-table-${statusIdx}-${conditionIdx}`}
+                currentDeals={deals[condition]}
+                handleStageChange={handleStageChange}
+                allDealNegotiator={allDealNegotiator}
+                updateDealNegotiator={updateDealNegotiator}
+                handleDateChange={handleDateChange}
+                handleAskForReview={handleAskForReview}
+                setStopPropagation={setStopPropagation}
+                // setCurrentDeals={setCurrentDeals}
+                negotiatorData={negotiatorData as DealNegotiatorType}
+                sortConfig={sortConfig}
+                setSortConfig={setSortConfig}
+                sortData={sortData}
+                refetch={refetch}
+                refetchAll={refetchAll}
+              />
+            ),
+          };
+        }),
       },
     };
   });
@@ -326,6 +334,7 @@ const TeamDashboardTable = ({
             setSortConfig={setSortConfig}
             sortData={sortData}
             refetch={refetch}
+            refetchAll={refetchAll}
           />
         ),
       },
@@ -359,6 +368,7 @@ export const DashboardTable = ({
   setSortConfig,
   sortData,
   refetch,
+  refetchAll,
 }: {
   currentDeals: NegotiationDataType[];
   handleStageChange: (id: string, newStage: string) => void;
@@ -373,6 +383,7 @@ export const DashboardTable = ({
   setSortConfig: (config: { key: string; direction: string }) => void;
   sortData: (key: string, direction: string) => void;
   refetch: (id?: string, filters?: any, reset?: boolean) => void;
+  refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
 }) => {
   return (
     <>
@@ -487,6 +498,10 @@ export const DashboardTable = ({
                     expandedComponent: () => (
                       <ClientProfile negotiationId={deal.id} />
                     ),
+                    onExpandedClose: () => {
+                      refetch();
+                      refetchAll();
+                    },
                     expandedSize: "full",
                   },
                 },
@@ -523,38 +538,24 @@ export const DashboardTable = ({
                   ),
                 },
                 {
-                  Component: () =>
-                    deal.arrivalToDealer ? (
-                      <DatePickerCell
-                        initialDate={deal.arrivalToDealer}
-                        onDateChange={(date) =>
-                          handleDateChange(
-                            date ?? "",
-                            deal.id,
-                            "arrivalToDealer"
-                          )
-                        }
-                      />
-                    ) : (
-                      <>TBD</>
-                    ),
+                  Component: () => (
+                    <DatePickerCell
+                      initialDate={deal.arrivalToDealer}
+                      onDateChange={(date) =>
+                        handleDateChange(date ?? "", deal.id, "arrivalToDealer")
+                      }
+                    />
+                  ),
                 },
                 {
-                  Component: () =>
-                    deal.arrivalToClient ? (
-                      <DatePickerCell
-                        initialDate={deal.arrivalToClient ?? ""}
-                        onDateChange={(date) =>
-                          handleDateChange(
-                            date ?? "",
-                            deal.id,
-                            "arrivalToClient"
-                          )
-                        }
-                      />
-                    ) : (
-                      <>TBD</>
-                    ),
+                  Component: () => (
+                    <DatePickerCell
+                      initialDate={deal.arrivalToClient ?? ""}
+                      onDateChange={(date) =>
+                        handleDateChange(date ?? "", deal.id, "arrivalToClient")
+                      }
+                    />
+                  ),
                 },
                 {
                   Component: () => (

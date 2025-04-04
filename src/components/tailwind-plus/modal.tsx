@@ -6,12 +6,14 @@ export const TailwindPlusModal = ({
   transparent = false,
   width,
   height,
+  onCloseTrigger,
 }: {
   children: React.ReactNode;
   close: () => void;
   transparent?: boolean;
   width?: number;
   height?: number;
+  onCloseTrigger?: () => void;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -19,6 +21,7 @@ export const TailwindPlusModal = ({
     function handleClickOutside(event: MouseEvent) {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         close();
+        onCloseTrigger?.();
       }
     }
 

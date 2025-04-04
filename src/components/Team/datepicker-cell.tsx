@@ -51,7 +51,7 @@ const DatePickerCell = ({ initialDate, onDateChange }: DatePickerCellProps) => {
               setIsEditing(!isEditing); // Toggle dropdown visibility
             }}
           >
-            {formatDateToLocal(selectedDate) || "Select Date"}
+            {formatDateToLocal(selectedDate) || "TBD"}
           </button>
         </DropdownMenuTrigger>
 
