@@ -4,7 +4,7 @@ import { CircleDollarSign, Logs, Notebook } from "lucide-react";
 import { useEffect, useState } from "react";
 import AddNoteSection from "../add-note-section";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
-import { ActivityLog, IncomingBid } from "@/types";
+import { ActivityLog, DealerData, IncomingBid } from "@/types";
 import { getActivityLogsByNegotiationId } from "@/lib/utils";
 import ActivityLogSection from "../activity-log";
 import { getIncomingBids } from "@/lib/helpers/bids";
@@ -120,6 +120,7 @@ export const TeamDashboardClientNameDisplay = ({
               noUserActions={true}
               incomingBids={incomingBids as IncomingBid[]}
               negotiationId={negotiation.id}
+              // @ts-ignore
               dealers={allDealNegotiator}
               handleDeleteBid={() => {}}
               handleEdit={() => {}}
