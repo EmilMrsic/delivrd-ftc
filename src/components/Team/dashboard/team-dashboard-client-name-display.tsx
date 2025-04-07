@@ -47,6 +47,7 @@ export const TeamDashboardClientNameDisplay = ({
   const [bidCommentsById, setBidCommentsById] = useState<
     Record<string, IncomingBidCommentType[]>
   >({});
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
 
   const handleShippingInfoChange = async (newInfo: string) => {
     try {
@@ -163,12 +164,13 @@ export const TeamDashboardClientNameDisplay = ({
               negotiationId={negotiation.id}
               // @ts-ignore
               dealers={allDealNegotiator}
+              setOpenDialog={setOpenDialog}
+              openDialog={openDialog}
               handleDeleteBid={() => {}}
               handleEdit={() => {}}
               bidCommentsByBidId={bidCommentsById}
               parseComment={(c: string) => c}
               handleSendComment={() => {}}
-              setOpenDialog={() => {}}
               setEditingBidId={() => {}}
               setCommentingBidId={() => {}}
               commentingBidId={""}
@@ -176,7 +178,6 @@ export const TeamDashboardClientNameDisplay = ({
               setNewComment={() => {}}
               addComment={() => {}}
               handleSave={() => {}}
-              openDialog={""}
               newComment={{}}
               setIncomingBids={setIncomingBids}
             />
