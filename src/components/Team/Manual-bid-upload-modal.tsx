@@ -171,7 +171,6 @@ const ManualBidUpload = ({
       let dealerId = selectedDealership?.data?.id ?? generateRandomId();
       const dealerRef = doc(db, "Dealers", dealerId);
       // Create New Dealer Entry If Needed
-      console.log(selectedDealership);
       if (!selectedDealership?.data && !selectedDealership?.label) {
         const newDealer = {
           Brand: [""],
@@ -187,7 +186,7 @@ const ManualBidUpload = ({
           id: dealerId,
         };
         await setDoc(dealerRef, newDealer);
-        setDealers && setDealers([...dealers, newDealer]);
+        setDealers && dealers && setDealers([...dealers, newDealer]);
       }
 
       // Create Bid Data Object
@@ -217,7 +216,9 @@ const ManualBidUpload = ({
       const bidRef = doc(db, "Incoming Bids", bid_id);
 
       await setDoc(bidRef, { ...bidData, bid_id });
-      setIncomingBids([...incomingBids, bidData]);
+      setIncomingBids &&
+        incomingBids &&
+        setIncomingBids([...incomingBids, bidData]);
 
       await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
         incoming_bids: arrayUnion(bid_id),
@@ -289,11 +290,7 @@ const ManualBidUpload = ({
   }));
 
   return (
-    <Dialog
-      open={isDialogOpen}
-      onOpenChange={() => setIsDialogOpen(false)}
-      modal={false}
-    >
+    <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
       <>
         <DialogTrigger
           onClick={(e) => {
