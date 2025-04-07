@@ -105,11 +105,10 @@ const ManualBidUpload = ({
         }));
       }
     } else {
-      console.log("isOpen", name, value);
-      setFormData((prevData) => ({
-        ...prevData,
+      setFormData({
+        ...formData,
         [name]: value,
-      }));
+      });
     }
   };
 
@@ -221,7 +220,7 @@ const ManualBidUpload = ({
         setIncomingBids([...incomingBids, bidData]);
 
       await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
-        incoming_bids: arrayUnion(bid_id),
+        incomingBids: arrayUnion(bid_id),
       });
 
       resetForm();
@@ -263,19 +262,19 @@ const ManualBidUpload = ({
       fetchDealerships();
     } else {
       setSelectedDealership("");
-      setFormData({
-        dealerName: "",
-        dealerNumber: "",
-        salesPersonName: "",
-        salesPersonEmail: "",
-        city: "",
-        state: "",
-        priceExcludingTax: "",
-        discountAmount: "",
-        inventoryStatus: "In Stock",
-        additionalComments: "",
-        files: null,
-      });
+      // setFormData({
+      //   dealerName: "",
+      //   dealerNumber: "",
+      //   salesPersonName: "",
+      //   salesPersonEmail: "",
+      //   city: "",
+      //   state: "",
+      //   priceExcludingTax: "",
+      //   discountAmount: "",
+      //   inventoryStatus: "In Stock",
+      //   additionalComments: "",
+      //   files: null,
+      // });
     }
   }, [isDialogOpen]);
 
@@ -532,7 +531,12 @@ const ManualBidUpload = ({
                 <TailwindPlusTextarea
                   name="additionalComments"
                   value={formData.additionalComments}
-                  onChange={handleChange}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      additionalComments: e.target.value,
+                    }));
+                  }}
                   className="mt-1 resize-none p-2 w-full border border-gray-300 rounded-md"
                   rows={3}
                 />

@@ -123,6 +123,9 @@ export const TeamDashboardClientNameDisplay = ({
             currentDeals={currentDeals}
             handleAskForReview={handleAskForReview}
             setShowModal={setShowModal}
+            incomingBids={incomingBids}
+            setIncomingBids={setIncomingBids}
+            dealers={allDealNegotiator}
           />
         </div>
       </div>

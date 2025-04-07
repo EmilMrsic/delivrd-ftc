@@ -38,8 +38,10 @@ export const IncomingBidCard = ({
   handleEdit,
   noUserActions,
   negotiationId,
+  allowUndelete,
 }: any & {
   noUserActions?: boolean;
+  allowUndelete?: boolean;
 }) => {
   const matchingDealer = dealers.find(
     (dealer: DealNegotiatorType) => dealer.id === bidDetails.dealerId
@@ -116,6 +118,23 @@ export const IncomingBidCard = ({
     }
   };
 
+  const restoreBid = async () => {
+    console.log("restoreBid");
+    try {
+      const bidRef = doc(db, "Incoming Bids", bidDetails.bid_id);
+      await updateDoc(bidRef, { delete: false });
+      setIncomingBids(
+        incomingBids.map((bid: IncomingBid) => ({
+          ...bid,
+          delete: bid.bid_id === bidDetails.bid_id && false,
+        }))
+      );
+      toast({ title: "Bid restored" });
+    } catch (error) {
+      console.error("Error restoring bid:", error);
+    }
+  };
+
   return (
     <div
       key={index}
@@ -179,6 +198,11 @@ export const IncomingBidCard = ({
                 </Button>
               )}
             </>
+          )}
+          {allowUndelete && (
+            <Button variant="outline" size="sm" onClick={() => restoreBid()}>
+              Restore
+            </Button>
           )}
         </div>
       </div>

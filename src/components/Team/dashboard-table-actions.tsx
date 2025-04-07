@@ -19,6 +19,9 @@ export const DashboardTableActions = ({
   // currentDeals,
   handleAskForReview,
   setShowModal,
+  incomingBids,
+  setIncomingBids,
+  dealers,
 }: any) => {
   // const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
@@ -56,10 +59,12 @@ export const DashboardTableActions = ({
           >
             Ask For Review
           </p>
-          {/* @ts-ignore */}
           <ManualBidUpload
             setStopPropagation={setStopPropagation}
             id={deal?.id}
+            incomingBids={incomingBids}
+            setIncomingBids={setIncomingBids}
+            dealers={dealers}
           />
         </div>
       </DropdownMenuContent>
