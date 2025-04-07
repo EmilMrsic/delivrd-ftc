@@ -57,11 +57,8 @@ export const DashboardTableActions = ({
           >
             Ask For Review
           </p>
+          {/* @ts-ignore */}
           <ManualBidUpload
-            incomingBids={incomingBids}
-            setDealers={setDealers}
-            setIncomingBids={setIncomingBids}
-            dealers={dealers}
             setStopPropagation={setStopPropagation}
             id={deal?.id}
           />

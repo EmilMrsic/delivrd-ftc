@@ -26,6 +26,7 @@ interface CellConfig {
   expandable?: boolean;
   expandedComponent?: React.ComponentType<any>;
   expandedSize?: "full" | "normal";
+  onExpandedClose?: () => void;
   link?: string;
 }
 
@@ -160,12 +161,19 @@ export const TailwindTableExpandedPopover = ({
   const Component = cell.config?.expandedComponent;
 
   return (
-    <TailwindPlusModal close={() => setExpanded(null)} width={90} height={90}>
+    <TailwindPlusModal
+      close={() => setExpanded(null)}
+      width={90}
+      height={90}
+      onCloseTrigger={cell.config?.onExpandedClose}
+    >
       {Component && <Component setExpanded={setExpanded} expanded={expanded} />}
       <div className="text-right mt-4">
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => setExpanded(null)}
+          onClick={() => {
+            setExpanded(null);
+          }}
         >
           Close
         </button>
