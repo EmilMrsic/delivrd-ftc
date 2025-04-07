@@ -430,7 +430,7 @@ export const IncomingBidCard = ({
 
               <div className="border-t pt-4 flex flex-col ">
                 <p className="font-semibold">Additional Comments</p>
-                {/* {parseComment(bidDetails.comments)} */}
+                {parseComment(bidDetails.comments)}
               </div>
             </div>
           </DialogContent>
