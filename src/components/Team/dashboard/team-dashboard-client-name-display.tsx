@@ -16,6 +16,7 @@ import { TailwindPlusCard } from "@/components/tailwind-plus/card";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
+import WorkLogSection from "../work-log-section";
 
 export const TeamDashboardClientNameDisplay = ({
   deal,
@@ -145,7 +146,12 @@ export const TeamDashboardClientNameDisplay = ({
             />
           )}
           {showModal === "logs" && activityLog && (
-            <ActivityLogSection activityLog={activityLog} />
+            <WorkLogSection
+              negotiationId={negotiation.id}
+              user={user}
+              noActions={true}
+            />
+            // <ActivityLogSection activityLog={activityLog} />
           )}
           {showModal === "bids" && incomingBids && (
             <IncomingBids
@@ -190,16 +196,5 @@ export const TeamDashboardClientNameDisplay = ({
         </TailwindPlusModal>
       )}
     </>
-  );
-};
-
-export const TestComponent = () => {
-  return (
-    <TailwindPlusCard title="Test Component">
-      <div>
-        <p>This is a test component with simple static content.</p>
-        <p>Let's see if this one keeps propagation from happening.</p>
-      </div>
-    </TailwindPlusCard>
   );
 };

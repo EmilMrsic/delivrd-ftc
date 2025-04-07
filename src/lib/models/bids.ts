@@ -16,15 +16,24 @@ export const IncomingBidCommentModel = z.object({
 });
 
 export const IncomingBidModel = z.object({
-  bid_id: z.string(),
-  clientId: z.string(),
-  comments: z.string(),
-  dealerId: z.string(),
-  discountPrice: z.string(),
-  files: z.array(z.string()),
-  inventoryStatus: z.string(),
-  price: z.union([z.number(), z.string()]),
-  timestamp: z.string(),
+  bid_id: z.string().optional(),
+  clientId: z.string().optional(),
+  comments: z.string().optional(),
+  dealerId: z.string().optional(),
+  discountPrice: z.union([z.number(), z.string()]).optional(),
+  files: z.array(z.string()).optional(),
+  inventoryStatus: z.string().optional(),
+  price: z.union([z.number(), z.string(), z.nan()]).optional(),
+  timestamp: z
+    .union([
+      z.string(),
+      z.number(),
+      z.object({
+        nanoseconds: z.number(),
+        seconds: z.number(),
+      }),
+    ])
+    .optional(),
   client_offer: z.string().optional(),
   vote: z.enum(["like", "dislike", "neutral"]).optional(),
   delete: z.boolean().optional(),
