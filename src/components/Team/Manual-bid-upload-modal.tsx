@@ -291,8 +291,10 @@ const ManualBidUpload = ({
   return (
     <Dialog
       open={isDialogOpen}
-      onOpenChange={() => setIsDialogOpen(false)}
-      modal={false}
+      onOpenChange={() => {
+        setIsDialogOpen(false);
+      }}
+      // modal={false}
     >
       <>
         <DialogTrigger
@@ -313,7 +315,11 @@ const ManualBidUpload = ({
           </TailwindPlusButton>
         </DialogTrigger>
 
-        <TailwindPlusDialogContent onClick={(e) => e.stopPropagation()}>
+        <TailwindPlusDialogContent
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <div
             onClick={(e) => {
               e.stopPropagation();
@@ -328,6 +334,7 @@ const ManualBidUpload = ({
             </DialogTitle>
             <div
               onClick={(e) => {
+                console.log("isDialogOpen clicked");
                 e.preventDefault();
                 e.stopPropagation();
                 setStopPropagation && setStopPropagation(true);

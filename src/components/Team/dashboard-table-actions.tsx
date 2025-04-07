@@ -8,6 +8,7 @@ import {
 import ManualBidUpload from "./Manual-bid-upload-modal";
 import ShippingInfoDialog from "./shipping-info-dialog";
 import { Button } from "../ui/button";
+import { useState } from "react";
 
 export const DashboardTableActions = ({
   setStopPropagation,
@@ -18,10 +19,17 @@ export const DashboardTableActions = ({
   handleAskForReview,
   refetch,
 }: any) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-4 w-4 p-0">
+        <Button
+          variant="ghost"
+          className="h-4 w-4 p-0"
+          onClick={() => {
+            setIsDialogOpen(true);
+          }}
+        >
           {/* <span className="sr-only">Open menu</span> */}
           <MoreHorizontal className="h-4 w-4" />
         </Button>
