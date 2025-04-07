@@ -31,7 +31,7 @@ export const IncomingBids = ({
   setIncomingBids: (item: IncomingBid[]) => void;
   negotiationId: string;
   dealers: DealerData[];
-  setDealers: (item: DealerData[]) => void;
+  setDealers?: (item: DealerData[]) => void;
   handleDeleteBid: (bidId: string) => void;
   handleEdit: (bid: any) => void;
   handleSave: (bidId: string) => void;

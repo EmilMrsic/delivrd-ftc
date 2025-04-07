@@ -7,6 +7,8 @@ import {
 } from "../ui/dropdown-menu";
 import ManualBidUpload from "./Manual-bid-upload-modal";
 import { Button } from "../ui/button";
+import { useSearchParams } from "next/navigation";
+import useTeamProfile from "@/hooks/useTeamProfile";
 import { useState } from "react";
 
 export const DashboardTableActions = ({
@@ -18,16 +20,16 @@ export const DashboardTableActions = ({
   handleAskForReview,
   setShowModal,
 }: any) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           className="h-4 w-4 p-0"
-          onClick={() => {
-            setIsDialogOpen(true);
-          }}
+          // onClick={() => {
+          //   setIsDialogOpen(true);
+          // }}
         >
           {/* <span className="sr-only">Open menu</span> */}
           <MoreHorizontal className="h-4 w-4" />

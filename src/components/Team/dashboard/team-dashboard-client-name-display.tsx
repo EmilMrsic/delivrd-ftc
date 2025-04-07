@@ -113,6 +113,7 @@ export const TeamDashboardClientNameDisplay = ({
             }}
           />
           <DashboardTableActions
+            id={negotiation.id}
             refetch={refetch}
             setStopPropagation={setStopPropagation}
             deal={deal}
