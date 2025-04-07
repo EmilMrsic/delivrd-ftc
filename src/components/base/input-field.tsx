@@ -131,7 +131,7 @@ export const InputField = (props: {
     if (negotiationId && field) {
       try {
         const usersQuery = query(
-          collection(db, "users"),
+          collection(db, "delivrd_users"),
           where("negotiation_id", "array-contains", negotiationId)
         );
 

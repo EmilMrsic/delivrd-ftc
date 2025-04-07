@@ -6,7 +6,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import ManualBidUpload from "./Manual-bid-upload-modal";
-import ShippingInfoDialog from "./shipping-info-dialog";
 import { Button } from "../ui/button";
 import { useState } from "react";
 
@@ -17,7 +16,7 @@ export const DashboardTableActions = ({
   // setCurrentDeals,
   // currentDeals,
   handleAskForReview,
-  refetch,
+  setShowModal,
 }: any) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
@@ -37,18 +36,15 @@ export const DashboardTableActions = ({
       <DropdownMenuContent>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <div className="flex flex-col items-start">
-          {/* <DealNegotiatorDialog
-            setStopPropogation={setStopPropagation}
-            deal={deal}
-            dealNegotiator={negotiatorData}
-          /> */}
-          <ShippingInfoDialog
-            // setCurrentDeals={setCurrentDeals}
-            // currentDeals={currentDeals}
-            refetch={refetch}
-            deal={deal}
-            setStopPropogation={setStopPropagation}
-          />
+          <Button
+            variant="outline"
+            className="bg-white text-black border-none hover:bg-transparent shadow-none"
+            onClick={(e) => {
+              setShowModal("shipping");
+            }}
+          >
+            Shipping Info
+          </Button>
           <p
             onClick={(e) => {
               e.stopPropagation();

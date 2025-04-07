@@ -7,18 +7,23 @@ export const TailwindPlusCard = ({
   title,
   icon,
   actions,
+  onClick,
 }: {
   children: React.ReactNode;
   className?: string;
   title?: string;
   icon?: React.ComponentType<{ className?: string }>;
   actions?: React.ComponentType;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }) => {
   const Icon = icon;
   const Action = actions;
   return (
     <>
-      <div className="-m-2 grid grid-cols-1 rounded-3xl ring-1 shadow-[inset_0_0_2px_1px_#ffffff4d] ring-black/5 max-lg:mx-auto max-lg:w-full max-lg:max-w-md mb-4">
+      <div
+        className="-m-2 grid grid-cols-1 rounded-3xl ring-1 shadow-[inset_0_0_2px_1px_#ffffff4d] ring-black/5 max-lg:mx-auto max-lg:w-full max-lg:max-w-md mb-4"
+        onClick={onClick}
+      >
         <div className="grid grid-cols-1 rounded-3xl p-2 shadow-md shadow-black/5">
           <div
             className={cn(

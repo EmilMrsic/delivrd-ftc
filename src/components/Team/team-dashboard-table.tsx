@@ -251,80 +251,82 @@ const TeamDashboardTable = ({
     return row.stage === DEFAULT_OPEN_STAGE;
   });
 
-  const useableRows = useMemo(() => {
-    const scopedRows = negotiationsByColumn.map((row, statusIdx) =>
-      dashboardTableRowParser({
-        row,
-        statusIdx,
-        handleStageChange,
-        allDealNegotiator,
-        updateDealNegotiator,
-        handleDateChange,
-        handleAskForReview,
-        setStopPropagation,
-        negotiatorData: negotiatorData as DealNegotiatorType,
-        sortConfig,
-        setSortConfig,
-        sortData,
-        refetch,
-        refetchAll,
-      })
-    );
+  if (displayAllPaid && paidNegotiations.length > 0) {
+    defaultOpenRow += 1;
+  }
 
-    let rows: any = [...scopedRows];
-    if (displayAllPaid && paidNegotiations.length > 0) {
-      rows = [
-        {
-          Component: () => (
-            <>
-              <Button
-                variant="outline"
-                style={{
-                  backgroundColor: getStatusStyles("Paid").backgroundColor,
-                  color: getStatusStyles("Paid").textColor, // Set dynamic text color
-                }}
-                className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
-              >
-                <p>Paid</p>
-              </Button>
-              {paidNegotiations.length}
-            </>
-          ),
-          expandedComponent: () => (
-            <DashboardTable
-              key={`dashboard-table-paid`}
-              currentDeals={paidNegotiations}
-              handleStageChange={handleStageChange}
-              allDealNegotiator={allDealNegotiator}
-              updateDealNegotiator={updateDealNegotiator}
-              handleDateChange={handleDateChange}
-              handleAskForReview={handleAskForReview}
-              setStopPropagation={setStopPropagation}
-              // setCurrentDeals={setCurrentDeals}
-              negotiatorData={negotiatorData as DealNegotiatorType}
-              sortConfig={sortConfig}
-              setSortConfig={setSortConfig}
-              sortData={sortData}
-              refetch={refetch}
-              refetchAll={refetchAll}
-            />
-          ),
-        },
-        ...rows,
-      ];
+  // const useableRows = useMemo(() => {
+  const scopedRows = negotiationsByColumn.map((row, statusIdx) =>
+    dashboardTableRowParser({
+      row,
+      statusIdx,
+      handleStageChange,
+      allDealNegotiator,
+      updateDealNegotiator,
+      handleDateChange,
+      handleAskForReview,
+      setStopPropagation,
+      negotiatorData: negotiatorData as DealNegotiatorType,
+      sortConfig,
+      setSortConfig,
+      sortData,
+      refetch,
+      refetchAll,
+    })
+  );
 
-      defaultOpenRow += 1;
-    }
+  let rows: any = [...scopedRows];
+  if (displayAllPaid && paidNegotiations.length > 0) {
+    rows = [
+      {
+        Component: () => (
+          <>
+            <Button
+              variant="outline"
+              style={{
+                backgroundColor: getStatusStyles("Paid").backgroundColor,
+                color: getStatusStyles("Paid").textColor, // Set dynamic text color
+              }}
+              className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
+            >
+              <p>Paid</p>
+            </Button>
+            {paidNegotiations.length}
+          </>
+        ),
+        expandedComponent: () => (
+          <DashboardTable
+            key={`dashboard-table-paid`}
+            currentDeals={paidNegotiations}
+            handleStageChange={handleStageChange}
+            allDealNegotiator={allDealNegotiator}
+            updateDealNegotiator={updateDealNegotiator}
+            handleDateChange={handleDateChange}
+            handleAskForReview={handleAskForReview}
+            setStopPropagation={setStopPropagation}
+            // setCurrentDeals={setCurrentDeals}
+            negotiatorData={negotiatorData as DealNegotiatorType}
+            sortConfig={sortConfig}
+            setSortConfig={setSortConfig}
+            sortData={sortData}
+            refetch={refetch}
+            refetchAll={refetchAll}
+          />
+        ),
+      },
+      ...rows,
+    ];
+  }
 
-    return rows;
-  }, [negotiationsByColumn, loading]);
+  //   return rows;
+  // }, [negotiationsByColumn, loading]);
 
   return loading ? (
     <div>Loading...</div>
   ) : (
     <TailwindPlusExpandableTable
       name={name}
-      rows={useableRows}
+      rows={rows}
       defaultExpanded={
         defaultOpenRow || defaultOpenRow === 0 ? [defaultOpenRow] : []
       }

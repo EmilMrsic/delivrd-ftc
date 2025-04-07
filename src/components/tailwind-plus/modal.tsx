@@ -7,6 +7,7 @@ export const TailwindPlusModal = ({
   width,
   height,
   onCloseTrigger,
+  noClose,
 }: {
   children: React.ReactNode;
   close: () => void;
@@ -14,15 +15,27 @@ export const TailwindPlusModal = ({
   width?: number;
   height?: number;
   onCloseTrigger?: () => void;
+  noClose?: boolean;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // console.log("Modal showModal value:", showModal); // Add this if you can access showModal here
+
       if (ref.current && !ref.current.contains(event.target as Node)) {
-        close();
-        onCloseTrigger?.();
+        if (!noClose) {
+          close();
+          onCloseTrigger?.();
+        }
+      } else {
+        console.log("NOT closing modal: clicked inside");
       }
+      // if (ref.current && !ref.current.contains(event.target as Node)) {
+      //   console.log("closing modal: clicked outside");
+      //   close();
+      //   onCloseTrigger?.();
+      // }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -37,7 +50,10 @@ export const TailwindPlusModal = ({
   }, [width, height]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <div
         className={cn(
           "rounded-lg shadow-lg p-4 overflow-y-auto",

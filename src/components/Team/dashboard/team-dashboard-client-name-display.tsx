@@ -11,6 +11,11 @@ import { getIncomingBids } from "@/lib/helpers/bids";
 import { IncomingBidCommentType, IncomingBidType } from "@/lib/models/bids";
 import { IncomingBids } from "../profile/incoming-bids";
 import { DashboardTableActions } from "../dashboard-table-actions";
+import { ShippingInfoModule } from "../shipping-info-dialog";
+import { TailwindPlusCard } from "@/components/tailwind-plus/card";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { toast } from "@/hooks/use-toast";
 
 export const TeamDashboardClientNameDisplay = ({
   deal,
@@ -31,9 +36,9 @@ export const TeamDashboardClientNameDisplay = ({
 }) => {
   const user = useLoggedInUser();
   const [negotiation, setNegotiation] = useState<NegotiationDataType>(deal);
-  const [showModal, setShowModal] = useState<"notes" | "logs" | "bids" | null>(
-    null
-  );
+  const [showModal, setShowModal] = useState<
+    "notes" | "logs" | "bids" | "shipping" | null
+  >(null);
   const [activityLog, setActivityLog] = useState<ActivityLog | null>(null);
   const [incomingBids, setIncomingBids] = useState<IncomingBidType[] | null>(
     null
@@ -41,6 +46,24 @@ export const TeamDashboardClientNameDisplay = ({
   const [bidCommentsById, setBidCommentsById] = useState<
     Record<string, IncomingBidCommentType[]>
   >({});
+
+  const handleShippingInfoChange = async (newInfo: string) => {
+    try {
+      if (newInfo) {
+        const docRef = doc(db, "delivrd_negotiations", deal.id);
+        const updatedDeal = { ...deal, shipping_info: newInfo };
+
+        await updateDoc(docRef, { shippingInfo: newInfo });
+        console.log("Shipping info updated!");
+        toast({ title: "Shipping info updated" });
+        refetch();
+      } else {
+        toast({ title: "Kindly add new info" });
+      }
+    } catch (error) {
+      console.error("Error updating shipping info:", error);
+    }
+  };
 
   useEffect(() => {
     // TODO: this is hacky, would be better to refactor backend to include activity and incoming bids
@@ -60,6 +83,11 @@ export const TeamDashboardClientNameDisplay = ({
       }
     }
   }, [showModal]);
+
+  useEffect(() => {
+    console.log("resetting negotiation");
+    setNegotiation(deal);
+  }, [deal]);
 
   return (
     <>
@@ -92,6 +120,7 @@ export const TeamDashboardClientNameDisplay = ({
             // setCurrentDeals={setCurrentDeals}
             currentDeals={currentDeals}
             handleAskForReview={handleAskForReview}
+            setShowModal={setShowModal}
           />
         </div>
       </div>
@@ -99,9 +128,11 @@ export const TeamDashboardClientNameDisplay = ({
         <TailwindPlusModal
           close={() => {
             setShowModal(null);
+            refetch();
           }}
           transparent={true}
           width={60}
+          noClose={showModal === "shipping"}
         >
           {showModal === "notes" && (
             <AddNoteSection
@@ -140,8 +171,34 @@ export const TeamDashboardClientNameDisplay = ({
               setIncomingBids={setIncomingBids}
             />
           )}
+          {showModal === "shipping" && (
+            <ShippingInfoModule
+              deal={negotiation}
+              handleChange={({ key, newValue }) => {
+                setNegotiation({ ...negotiation, [key]: newValue });
+              }}
+              close={() => {
+                setShowModal(null);
+                refetch();
+              }}
+              onBlur={() => {
+                handleShippingInfoChange(negotiation.shippingInfo);
+              }}
+            />
+          )}
         </TailwindPlusModal>
       )}
     </>
+  );
+};
+
+export const TestComponent = () => {
+  return (
+    <TailwindPlusCard title="Test Component">
+      <div>
+        <p>This is a test component with simple static content.</p>
+        <p>Let's see if this one keeps propagation from happening.</p>
+      </div>
+    </TailwindPlusCard>
   );
 };

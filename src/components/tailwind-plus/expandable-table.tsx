@@ -30,7 +30,7 @@ export const TailwindPlusExpandableTable = ({
 
   useEffect(() => {
     if (name === "team-dashboard-all") {
-      console.log("expanded:", defaultExpanded, expanded);
+      setExpanded(new Set(defaultExpanded ?? []));
     }
   }, []);
 
