@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import "react-datepicker/dist/react-datepicker.css";
 import { dateFormat, getElapsedTime, getStatusStyles } from "@/lib/utils";
@@ -18,6 +18,7 @@ import { TeamDashboardClientNameDisplay } from "./dashboard/team-dashboard-clien
 import {
   mapNegotiationsByColumn,
   orderNegotiationsByColumns,
+  sortDataHelper,
   sortMappedDataHelper,
 } from "@/lib/helpers/negotiation";
 import { StageButton } from "./stage-button";
@@ -48,6 +49,7 @@ type TeamDashboardTableProps = {
   refetch: (id?: string, filters?: any, reset?: boolean) => void;
   searchTerm: string;
   refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
+  name: string;
 };
 
 const TeamDashboardTable = ({
@@ -71,6 +73,7 @@ const TeamDashboardTable = ({
   refetch,
   searchTerm,
   refetchAll,
+  name,
 }: TeamDashboardTableProps) => {
   const [paidNegotiations, setPaidNegotiations] = useState<
     NegotiationDataType[]
@@ -80,7 +83,7 @@ const TeamDashboardTable = ({
     // Record<string, Record<string, NegotiationDataType[]>>
     {
       stage: string;
-      deals: Record<string, NegotiationDataType[]>;
+      deals: NegotiationDataType[] | Record<string, NegotiationDataType[]>;
     }[]
   >([]);
 
@@ -175,8 +178,20 @@ const TeamDashboardTable = ({
     setNegotiationsByColumn((prevState) => {
       const newState = [...prevState];
       newState.forEach((status) => {
-        const sortedData = sortMappedDataHelper(status.deals, key, direction);
-        status.deals = sortedData;
+        const isGrouped = !Array.isArray(status.deals);
+        if (isGrouped) {
+          const sortedData = sortMappedDataHelper(
+            status.deals as Record<string, NegotiationDataType[]>,
+            key,
+            direction
+          );
+          status.deals = sortedData;
+        } else {
+          const sortedData = sortDataHelper(
+            status.deals as NegotiationDataType[]
+          )(key, direction) as NegotiationDataType[];
+          status.deals = sortedData;
+        }
       });
       return newState;
     });
@@ -209,20 +224,25 @@ const TeamDashboardTable = ({
         "ascending"
       );
 
-      const groupedByNewAndUsed: Record<
+      const finalNegotiationGrouping: Record<
         string,
-        Record<string, NegotiationDataType[]>
+        NegotiationDataType[] | Record<string, NegotiationDataType[]>
       > = {};
       for (const key of Object.keys(negotiationsByColumn)) {
-        const groupedByCondition = mapNegotiationsByColumn(
-          sortedNegotiationsByColumn[key],
-          "condition"
-        );
-
-        groupedByNewAndUsed[key] = groupedByCondition;
+        if (["Paid", "Actively Negotiating"].includes(key)) {
+          const groupedByCondition = mapNegotiationsByColumn(
+            sortedNegotiationsByColumn[key],
+            "condition"
+          );
+          finalNegotiationGrouping[key] = groupedByCondition;
+        } else {
+          finalNegotiationGrouping[key] = sortedNegotiationsByColumn[key];
+        }
       }
 
-      const sortedColumns = orderNegotiationsByColumns(groupedByNewAndUsed);
+      const sortedColumns = orderNegotiationsByColumns(
+        finalNegotiationGrouping
+      );
       setNegotiationsByColumn(sortedColumns);
     }
   }, [negotiations, searchTerm, searchAll]);
@@ -231,122 +251,80 @@ const TeamDashboardTable = ({
     return row.stage === DEFAULT_OPEN_STAGE;
   });
 
-  const scopedRows = negotiationsByColumn.map((row, statusIdx) => {
-    const { stage, deals } = row;
-    const total = (deals?.New?.length || 0) + (deals?.Used?.length || 0);
+  const useableRows = useMemo(() => {
+    const scopedRows = negotiationsByColumn.map((row, statusIdx) =>
+      dashboardTableRowParser({
+        row,
+        statusIdx,
+        handleStageChange,
+        allDealNegotiator,
+        updateDealNegotiator,
+        handleDateChange,
+        handleAskForReview,
+        setStopPropagation,
+        negotiatorData: negotiatorData as DealNegotiatorType,
+        sortConfig,
+        setSortConfig,
+        sortData,
+        refetch,
+        refetchAll,
+      })
+    );
 
-    // ensure order of New, Used
-    const rowKeys: string[] = [];
-    if (deals?.New) {
-      rowKeys.push("New");
+    let rows: any = [...scopedRows];
+    if (displayAllPaid && paidNegotiations.length > 0) {
+      rows = [
+        {
+          Component: () => (
+            <>
+              <Button
+                variant="outline"
+                style={{
+                  backgroundColor: getStatusStyles("Paid").backgroundColor,
+                  color: getStatusStyles("Paid").textColor, // Set dynamic text color
+                }}
+                className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
+              >
+                <p>Paid</p>
+              </Button>
+              {paidNegotiations.length}
+            </>
+          ),
+          expandedComponent: () => (
+            <DashboardTable
+              key={`dashboard-table-paid`}
+              currentDeals={paidNegotiations}
+              handleStageChange={handleStageChange}
+              allDealNegotiator={allDealNegotiator}
+              updateDealNegotiator={updateDealNegotiator}
+              handleDateChange={handleDateChange}
+              handleAskForReview={handleAskForReview}
+              setStopPropagation={setStopPropagation}
+              // setCurrentDeals={setCurrentDeals}
+              negotiatorData={negotiatorData as DealNegotiatorType}
+              sortConfig={sortConfig}
+              setSortConfig={setSortConfig}
+              sortData={sortData}
+              refetch={refetch}
+              refetchAll={refetchAll}
+            />
+          ),
+        },
+        ...rows,
+      ];
+
+      defaultOpenRow += 1;
     }
-    if (deals?.Used) {
-      rowKeys.push("Used");
-    }
 
-    return {
-      Component: () => (
-        <>
-          <StageButton stage={stage} />
-          {total}
-        </>
-      ),
-      expandedComponent: TailwindPlusExpandableTable,
-      expandedComponentProps: {
-        name: statusIdx.toString(),
-        defaultExpanded: stage === DEFAULT_OPEN_STAGE ? [0, 1] : [],
-        rows: rowKeys.map((condition, conditionIdx) => {
-          const total = deals[condition].length;
-          return {
-            Component: () => (
-              <>
-                <Button
-                  variant="outline"
-                  style={{
-                    backgroundColor: getStatusStyles(condition ?? "")
-                      .backgroundColor,
-                    color: getStatusStyles(condition ?? "").textColor, // Set dynamic text color
-                  }}
-                  className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
-                >
-                  <p>{condition}</p>
-                </Button>
-                {total}
-              </>
-            ),
-            expandedComponent: () => (
-              <DashboardTable
-                key={`dashboard-table-${statusIdx}-${conditionIdx}`}
-                currentDeals={deals[condition]}
-                handleStageChange={handleStageChange}
-                allDealNegotiator={allDealNegotiator}
-                updateDealNegotiator={updateDealNegotiator}
-                handleDateChange={handleDateChange}
-                handleAskForReview={handleAskForReview}
-                setStopPropagation={setStopPropagation}
-                // setCurrentDeals={setCurrentDeals}
-                negotiatorData={negotiatorData as DealNegotiatorType}
-                sortConfig={sortConfig}
-                setSortConfig={setSortConfig}
-                sortData={sortData}
-                refetch={refetch}
-                refetchAll={refetchAll}
-              />
-            ),
-          };
-        }),
-      },
-    };
-  });
+    return rows;
+  }, [negotiationsByColumn, loading]);
 
-  let rows: any = [...scopedRows];
-  if (displayAllPaid && paidNegotiations.length > 0) {
-    rows = [
-      {
-        Component: () => (
-          <>
-            <Button
-              variant="outline"
-              style={{
-                backgroundColor: getStatusStyles("Paid").backgroundColor,
-                color: getStatusStyles("Paid").textColor, // Set dynamic text color
-              }}
-              className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
-            >
-              <p>Paid</p>
-            </Button>
-            {paidNegotiations.length}
-          </>
-        ),
-        expandedComponent: () => (
-          <DashboardTable
-            key={`dashboard-table-paid`}
-            currentDeals={paidNegotiations}
-            handleStageChange={handleStageChange}
-            allDealNegotiator={allDealNegotiator}
-            updateDealNegotiator={updateDealNegotiator}
-            handleDateChange={handleDateChange}
-            handleAskForReview={handleAskForReview}
-            setStopPropagation={setStopPropagation}
-            // setCurrentDeals={setCurrentDeals}
-            negotiatorData={negotiatorData as DealNegotiatorType}
-            sortConfig={sortConfig}
-            setSortConfig={setSortConfig}
-            sortData={sortData}
-            refetch={refetch}
-            refetchAll={refetchAll}
-          />
-        ),
-      },
-      ...rows,
-    ];
-
-    defaultOpenRow += 1;
-  }
-
-  return (
+  return loading ? (
+    <div>Loading...</div>
+  ) : (
     <TailwindPlusExpandableTable
-      rows={rows}
+      name={name}
+      rows={useableRows}
       defaultExpanded={
         defaultOpenRow || defaultOpenRow === 0 ? [defaultOpenRow] : []
       }
@@ -586,6 +564,249 @@ export const DashboardTable = ({
       />
     </>
   );
+};
+
+export const dashboardTableRowParser = ({
+  row,
+  statusIdx,
+  handleStageChange,
+  allDealNegotiator,
+  updateDealNegotiator,
+  handleDateChange,
+  handleAskForReview,
+  setStopPropagation,
+  negotiatorData,
+  sortConfig,
+  setSortConfig,
+  sortData,
+  refetch,
+  refetchAll,
+}: {
+  row: {
+    stage: string;
+    deals: NegotiationDataType[] | Record<string, NegotiationDataType[]>;
+  };
+  statusIdx: number;
+  handleStageChange: (id: string, newStage: string) => void;
+  allDealNegotiator: DealNegotiatorType[];
+  updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  handleDateChange: (date: string, dealId: string, dateType: string) => void;
+  handleAskForReview: (id: string) => void;
+  setStopPropagation: (item: boolean) => void;
+  negotiatorData: DealNegotiatorType;
+  sortConfig: { key: string; direction: string };
+  setSortConfig: (config: { key: string; direction: string }) => void;
+  sortData: (key: string, direction: string) => void;
+  refetch: (id?: string, filters?: any, reset?: boolean) => void;
+  refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
+}) => {
+  const isGrouped = !Array.isArray(row.deals); // if not an array, its grouped by New/Used
+  return isGrouped
+    ? dashbaordTableRowGrouped({
+        row: row as {
+          stage: string;
+          deals: Record<string, NegotiationDataType[]>;
+        },
+        statusIdx,
+        handleStageChange,
+        allDealNegotiator,
+        updateDealNegotiator,
+        handleDateChange,
+        handleAskForReview,
+        setStopPropagation,
+        negotiatorData,
+        sortConfig,
+        setSortConfig,
+        sortData,
+        refetch,
+        refetchAll,
+      })
+    : dashbaordTableRowUngrouped({
+        row: row as {
+          stage: string;
+          deals: NegotiationDataType[];
+        },
+        statusIdx,
+        handleStageChange,
+        allDealNegotiator,
+        updateDealNegotiator,
+        handleDateChange,
+        handleAskForReview,
+        setStopPropagation,
+        negotiatorData,
+        sortConfig,
+        setSortConfig,
+        sortData,
+        refetch,
+        refetchAll,
+      });
+};
+
+export const dashbaordTableRowGrouped = ({
+  row,
+  statusIdx,
+  handleStageChange,
+  allDealNegotiator,
+  updateDealNegotiator,
+  handleDateChange,
+  handleAskForReview,
+  setStopPropagation,
+  negotiatorData,
+  sortConfig,
+  setSortConfig,
+  sortData,
+  refetch,
+  refetchAll,
+}: {
+  row: {
+    stage: string;
+    deals: Record<string, NegotiationDataType[]>;
+  };
+  statusIdx: number;
+  handleStageChange: (id: string, newStage: string) => void;
+  allDealNegotiator: DealNegotiatorType[];
+  updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  handleDateChange: (date: string, dealId: string, dateType: string) => void;
+  handleAskForReview: (id: string) => void;
+  setStopPropagation: (item: boolean) => void;
+  negotiatorData: DealNegotiatorType;
+  sortConfig: { key: string; direction: string };
+  setSortConfig: (config: { key: string; direction: string }) => void;
+  sortData: (key: string, direction: string) => void;
+  refetch: (id?: string, filters?: any, reset?: boolean) => void;
+  refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
+}) => {
+  const { stage, deals } = row;
+  const total = (deals?.New?.length || 0) + (deals?.Used?.length || 0);
+
+  // ensure order of New, Used
+  const rowKeys: string[] = [];
+  if (deals?.New) {
+    rowKeys.push("New");
+  }
+  if (deals?.Used) {
+    rowKeys.push("Used");
+  }
+
+  return {
+    Component: () => (
+      <>
+        <StageButton stage={stage} />
+        {total}
+      </>
+    ),
+    expandedComponent: TailwindPlusExpandableTable,
+    expandedComponentProps: {
+      name: statusIdx.toString(),
+      defaultExpanded: stage === DEFAULT_OPEN_STAGE ? [0, 1] : [],
+      rows: rowKeys.map((condition, conditionIdx) => {
+        const total = deals[condition].length;
+        return {
+          Component: () => (
+            <>
+              <Button
+                variant="outline"
+                style={{
+                  backgroundColor: getStatusStyles(condition ?? "")
+                    .backgroundColor,
+                  color: getStatusStyles(condition ?? "").textColor, // Set dynamic text color
+                }}
+                className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
+              >
+                <p>{condition}</p>
+              </Button>
+              {total}
+            </>
+          ),
+          expandedComponent: () => (
+            <DashboardTable
+              key={`dashboard-table-${statusIdx}-${conditionIdx}`}
+              currentDeals={deals[condition]}
+              handleStageChange={handleStageChange}
+              allDealNegotiator={allDealNegotiator}
+              updateDealNegotiator={updateDealNegotiator}
+              handleDateChange={handleDateChange}
+              handleAskForReview={handleAskForReview}
+              setStopPropagation={setStopPropagation}
+              // setCurrentDeals={setCurrentDeals}
+              negotiatorData={negotiatorData as DealNegotiatorType}
+              sortConfig={sortConfig}
+              setSortConfig={setSortConfig}
+              sortData={sortData}
+              refetch={refetch}
+              refetchAll={refetchAll}
+            />
+          ),
+        };
+      }),
+    },
+  };
+};
+
+export const dashbaordTableRowUngrouped = ({
+  row,
+  statusIdx,
+  handleStageChange,
+  allDealNegotiator,
+  updateDealNegotiator,
+  handleDateChange,
+  handleAskForReview,
+  setStopPropagation,
+  negotiatorData,
+  sortConfig,
+  setSortConfig,
+  sortData,
+  refetch,
+  refetchAll,
+}: {
+  row: {
+    stage: string;
+    deals: NegotiationDataType[];
+  };
+  statusIdx: number;
+  handleStageChange: (id: string, newStage: string) => void;
+  allDealNegotiator: DealNegotiatorType[];
+  updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  handleDateChange: (date: string, dealId: string, dateType: string) => void;
+  handleAskForReview: (id: string) => void;
+  setStopPropagation: (item: boolean) => void;
+  negotiatorData: DealNegotiatorType;
+  sortConfig: { key: string; direction: string };
+  setSortConfig: (config: { key: string; direction: string }) => void;
+  sortData: (key: string, direction: string) => void;
+  refetch: (id?: string, filters?: any, reset?: boolean) => void;
+  refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
+}) => {
+  const { stage, deals } = row;
+  const total = deals.length;
+
+  return {
+    name: `status-${statusIdx}`,
+    Component: () => (
+      <>
+        <StageButton stage={stage} />
+        {total}
+      </>
+    ),
+    expandedComponent: DashboardTable,
+    expandedComponentProps: {
+      key: `dashboard-table-${statusIdx}`,
+      currentDeals: deals,
+      handleStageChange: handleStageChange,
+      allDealNegotiator: allDealNegotiator,
+      updateDealNegotiator: updateDealNegotiator,
+      handleDateChange: handleDateChange,
+      handleAskForReview: handleAskForReview,
+      setStopPropagation: setStopPropagation,
+      // setCurrentDeals={setCurrentDeals}
+      negotiatorData: negotiatorData as DealNegotiatorType,
+      sortConfig: sortConfig,
+      setSortConfig: setSortConfig,
+      sortData: sortData,
+      refetch: refetch,
+      refetchAll: refetchAll,
+    },
+  };
 };
 
 export default TeamDashboardTable;

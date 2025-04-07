@@ -76,8 +76,6 @@ export const TeamHeader = ({
   const user = useLoggedInUser();
   const negotiatorDataToUser = negotiatorData ? negotiatorData : user;
 
-  console.log("header:", negotiatorDataToUser);
-
   return (
     <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
       <Link href={"/team-dashboard"}>

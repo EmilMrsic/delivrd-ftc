@@ -124,7 +124,10 @@ export const sortStatuses = (statuses: string[]) => {
 };
 
 export const orderNegotiationsByColumns = (
-  negotiationsByColumn: Record<string, Record<string, NegotiationDataType[]>>
+  negotiationsByColumn: Record<
+    string,
+    NegotiationDataType[] | Record<string, NegotiationDataType[]>
+  >
 ) => {
   const sortedStatuses = sortStatuses(Object.keys(negotiationsByColumn));
 

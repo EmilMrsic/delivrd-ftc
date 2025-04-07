@@ -9,6 +9,35 @@ import {
   TableRow,
 } from "../ui/table";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { create } from "zustand";
+
+const useStore = create((set, get) => ({
+  values: {},
+  setValue: (name: string, value: any) =>
+    set((state: any) => ({
+      values: {
+        ...state.values,
+        [name]: value,
+      },
+    })),
+}));
+
+export const useNamedState = (name: string, initialValue: any) => {
+  const value = useStore((state: any) =>
+    state.values[name] !== undefined ? state.values[name] : initialValue
+  );
+  const setValue = useStore(
+    (state: any) => (val: any) =>
+      state.setValue(
+        name,
+        typeof val === "function"
+          ? val(state.values[name] ?? initialValue)
+          : val
+      )
+  );
+
+  return [value, setValue];
+};
 
 export const TailwindPlusExpandableTable = ({
   name,
@@ -24,16 +53,15 @@ export const TailwindPlusExpandableTable = ({
     expandedComponentProps?: Record<string, any>;
   }[];
 }) => {
-  const uniqueId = useState(() => Math.random().toString(36).substring(2, 9));
-  const [expanded, setExpanded] = useState<Set<number>>(
-    new Set(defaultExpanded ?? [])
-  );
+  const [expanded, setExpanded] = useState<Set<number>>(() => {
+    return new Set(defaultExpanded ?? []);
+  });
 
   useEffect(() => {
-    if (defaultExpanded || defaultExpanded === 0) {
-      setExpanded(new Set(defaultExpanded));
+    if (name === "team-dashboard-all") {
+      console.log("expanded:", defaultExpanded, expanded);
     }
-  }, [defaultExpanded]);
+  }, []);
 
   return (
     <Table>
@@ -46,7 +74,7 @@ export const TailwindPlusExpandableTable = ({
       <TableBody>
         {rows.map((row, idx) => (
           <ExpandableTableRow
-            key={`${idx}-${row.title}-${uniqueId}`}
+            key={`${idx}-${row.title}-${name}`}
             row={row}
             idx={idx}
             setExpanded={setExpanded}
