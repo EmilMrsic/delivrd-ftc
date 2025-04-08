@@ -7,7 +7,7 @@ import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { ActivityLog, DealerData, IncomingBid } from "@/types";
 import { getActivityLogsByNegotiationId } from "@/lib/utils";
 import ActivityLogSection from "../activity-log";
-import { getIncomingBids } from "@/lib/helpers/bids";
+import { fetchDealers, getIncomingBids } from "@/lib/helpers/bids";
 import { IncomingBidCommentType, IncomingBidType } from "@/lib/models/bids";
 import { IncomingBids } from "../profile/incoming-bids";
 import { DashboardTableActions } from "../dashboard-table-actions";
@@ -48,6 +48,7 @@ export const TeamDashboardClientNameDisplay = ({
     Record<string, IncomingBidCommentType[]>
   >({});
   const [openDialog, setOpenDialog] = useState<string | null>(null);
+  const [dealers, setDealers] = useState<DealerData[]>([]);
 
   const handleShippingInfoChange = async (newInfo: string) => {
     try {
@@ -79,6 +80,9 @@ export const TeamDashboardClientNameDisplay = ({
       if (showModal === "bids" && !incomingBids && deal.incomingBids) {
         getIncomingBids(deal.incomingBids).then((result) => {
           const { bids, commentsById } = result;
+          fetchDealers(bids as IncomingBidType[]).then((result) => {
+            setDealers(result as DealerData[]);
+          });
           setIncomingBids(bids);
           setBidCommentsById(commentsById);
         });
@@ -162,8 +166,7 @@ export const TeamDashboardClientNameDisplay = ({
               noUserActions={true}
               incomingBids={incomingBids as IncomingBid[]}
               negotiationId={negotiation.id}
-              // @ts-ignore
-              dealers={allDealNegotiator}
+              dealers={dealers}
               setOpenDialog={setOpenDialog}
               openDialog={openDialog}
               handleDeleteBid={() => {}}

@@ -327,9 +327,6 @@ const TeamDashboardTable = ({
     ];
   }
 
-  //   return rows;
-  // }, [negotiationsByColumn, loading]);
-
   return loading ? (
     <div>Loading...</div>
   ) : (

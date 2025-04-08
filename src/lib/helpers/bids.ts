@@ -1,9 +1,17 @@
 import { db } from "@/firebase/config";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import {
   IncomingBidCommentModel,
   IncomingBidCommentType,
   IncomingBidModel,
+  IncomingBidType,
 } from "../models/bids";
 
 export const getIncomingBids = async (incomingBidIds: string[]) => {
@@ -75,4 +83,28 @@ export const getBidComments = async (incomingBidIds: string[]) => {
   });
 
   return result;
+};
+
+export const fetchDealers = async (incomingBids: IncomingBidType[]) => {
+  const dealersData = [];
+
+  for (const bid of incomingBids) {
+    const id = bid.dealerId;
+    console.log("maching dealer: bid", bid);
+    if (id !== "N/A" && id)
+      try {
+        const dealerRef = doc(db, "Dealers", id);
+        const dealerSnap = await getDoc(dealerRef);
+
+        if (dealerSnap.exists()) {
+          dealersData.push(dealerSnap.data());
+        } else {
+          console.warn(`Dealer with ID ${id} not found`);
+        }
+      } catch (error) {
+        console.error(`Error fetching dealer data for ID ${id}:`, error);
+      }
+  }
+
+  return dealersData;
 };

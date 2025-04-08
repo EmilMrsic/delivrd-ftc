@@ -43,9 +43,12 @@ export const IncomingBidCard = ({
   noUserActions?: boolean;
   allowUndelete?: boolean;
 }) => {
-  const matchingDealer = dealers.find(
-    (dealer: DealNegotiatorType) => dealer.id === bidDetails.dealerId
-  );
+  const matchingDealer = dealers.find((dealer: DealNegotiatorType) => {
+    console.log("maching dealer: 2:", dealer.id, bidDetails.dealerId);
+    return dealer.id === bidDetails.dealerId;
+  });
+  console.log("matching dealer: ", dealers);
+
   const hasAcceptedOffer = incomingBids.find(
     (bid: IncomingBid) => bid.client_offer === "accepted"
   );

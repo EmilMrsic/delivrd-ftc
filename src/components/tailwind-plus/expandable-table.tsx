@@ -34,6 +34,17 @@ export const TailwindPlusExpandableTable = ({
     }
   }, []);
 
+  // useEffect(() => {
+  //   if (defaultExpanded || defaultExpanded === 0) {
+  //     setExpanded((prevState) => {
+  //       let newState = Array.from(prevState);
+  //       newState = [...defaultExpanded, ...newState];
+  //       return new Set(newState);
+  //       // new Set(defaultExpanded ?? []);
+  //     });
+  //   }
+  // }, [defaultExpanded]);
+
   return (
     <Table>
       <TableHeader>
