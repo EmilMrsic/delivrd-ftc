@@ -255,25 +255,34 @@ const TeamDashboardTable = ({
     defaultOpenRow += 1;
   }
 
-  // const useableRows = useMemo(() => {
-  const scopedRows = negotiationsByColumn.map((row, statusIdx) =>
-    dashboardTableRowParser({
-      row,
-      statusIdx,
-      handleStageChange,
-      allDealNegotiator,
-      updateDealNegotiator,
-      handleDateChange,
-      handleAskForReview,
-      setStopPropagation,
-      negotiatorData: negotiatorData as DealNegotiatorType,
-      sortConfig,
-      setSortConfig,
-      sortData,
-      refetch,
-      refetchAll,
-    })
-  );
+  const scopedRows: any[] = [];
+  for (const statusIdx in negotiationsByColumn) {
+    const row: any = negotiationsByColumn[statusIdx];
+    if (
+      row?.deals?.length ||
+      row?.deals?.New?.length ||
+      row?.deals?.Used?.length
+    ) {
+      scopedRows.push(
+        dashboardTableRowParser({
+          row,
+          statusIdx: parseInt(statusIdx),
+          handleStageChange,
+          allDealNegotiator,
+          updateDealNegotiator,
+          handleDateChange,
+          handleAskForReview,
+          setStopPropagation,
+          negotiatorData: negotiatorData as DealNegotiatorType,
+          sortConfig,
+          setSortConfig,
+          sortData,
+          refetch,
+          refetchAll,
+        })
+      );
+    }
+  }
 
   let rows: any = [...scopedRows];
   if (displayAllPaid && paidNegotiations.length > 0) {
