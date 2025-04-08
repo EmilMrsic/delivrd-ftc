@@ -35,6 +35,17 @@ const ClientDetails = ({
   const isVimeoLink = (url: string): boolean => {
     return url.includes("vimeo.com");
   };
+
+  const formatPhoneNumber = (val: string) => {
+    const cleaned = val.replace(/\D/g, "");
+    if (cleaned.length > 7) {
+      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(
+        6
+      )}`;
+    }
+    return val;
+  };
+
   const isYouTubeLink = (url: string): boolean => {
     return url.includes("youtube.com") || url.includes("youtu.be");
   };
@@ -59,14 +70,17 @@ const ClientDetails = ({
           <div className={cn(`space-y-4`, isBlur && `blur-sm`)}>
             <InputField
               label="Phone"
-              value={negotiation?.clientPhone ?? ""}
+              value={
+                formatPhoneNumber(negotiation?.clientPhone ?? ("" as string)) ??
+                ""
+              }
               userField="phone"
               field="clientPhone"
               negotiationId={negotiationId ?? ""}
               onChange={(newValue) =>
                 handleChange({
                   key: "clientPhone",
-                  newValue: newValue,
+                  newValue: formatPhoneNumber(newValue),
                 })
               }
               icon={Phone}

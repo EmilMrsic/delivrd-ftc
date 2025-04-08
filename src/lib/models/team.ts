@@ -79,7 +79,8 @@ export const DealNegotiatorModel = z.object({
 });
 
 export const InternalNotesModel = z.object({
-  authorId: z.string(),
+  author: z.record(z.any()),
+
   createdAt: z.string(),
   mentionedTeammember: z.string(),
   noteId: z.string(),
