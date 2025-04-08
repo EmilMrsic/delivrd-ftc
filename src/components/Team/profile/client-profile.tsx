@@ -311,8 +311,6 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
     );
   }
 
-  console.log("clientPhone:", negotiation);
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-[98%] mx-auto">
       <div className="md:col-span-2">

@@ -146,7 +146,7 @@ const AddNoteSection = ({
       const teamMembers = await getUsersWithTeamPrivilege();
       if (negotiation && dealNegotiator) {
         const newNote: InternalNotesType = {
-          authorId: user.id,
+          author: user,
           mentionedTeammember: mentionedUsers.map((user) => user.id).join(","),
           createdAt: getCurrentDateTime(),
           text: newInternalNote,
@@ -157,6 +157,8 @@ const AddNoteSection = ({
           ...negotiation,
           internalNotes: [...(negotiation.internalNotes ?? []), newNote],
         });
+
+        console.log(negotiation.id);
 
         const notesRef = doc(db, "delivrd_negotiations", negotiation.id);
         await updateDoc(notesRef, {
@@ -186,7 +188,10 @@ const AddNoteSection = ({
             return (
               <div key={index} className="flex items-start space-x-3">
                 <UserAvatar
-                  user={{ name: user.name[0], profile_pic: user[0] }}
+                  user={{
+                    name: (note?.author?.name && note.author.name[0]) ?? "",
+                    profile_pic: note.author?.profile_pic ?? "",
+                  }}
                 />
                 {/* <Avatar className="h-10 w-10">
                   <AvatarImage
@@ -198,13 +203,13 @@ const AddNoteSection = ({
                 </Avatar> */}
                 <div
                   className={`p-3 rounded-lg flex-grow ${
-                    negotiation?.userId === user.name
+                    negotiation?.userId === note.author?.name
                       ? "bg-blue-100"
                       : "bg-gray-100"
                   }`}
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <p className="font-semibold">{user.name}</p>
+                    <p className="font-semibold">{note.author.name}</p>
                     <p className="text-xs text-gray-500">{note.createdAt}</p>
                   </div>
                   <p>{note.text}</p>

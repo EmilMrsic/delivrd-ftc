@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "run-script": "ts-node -O '{\"module\": \"commonjs\"}' -r tsconfig-paths/register",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "echo \"Tests go here 🚧\""
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
