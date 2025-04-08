@@ -24,16 +24,15 @@ export const TailwindPlusExpandableTable = ({
     expandedComponentProps?: Record<string, any>;
   }[];
 }) => {
-  const uniqueId = useState(() => Math.random().toString(36).substring(2, 9));
-  const [expanded, setExpanded] = useState<Set<number>>(
-    new Set(defaultExpanded ?? [])
-  );
+  const [expanded, setExpanded] = useState<Set<number>>(() => {
+    return new Set(defaultExpanded ?? []);
+  });
 
   useEffect(() => {
-    if (defaultExpanded || defaultExpanded === 0) {
-      setExpanded(new Set(defaultExpanded));
+    if (name === "team-dashboard-all") {
+      setExpanded(new Set(defaultExpanded ?? []));
     }
-  }, [defaultExpanded]);
+  }, []);
 
   return (
     <Table>
@@ -46,7 +45,7 @@ export const TailwindPlusExpandableTable = ({
       <TableBody>
         {rows.map((row, idx) => (
           <ExpandableTableRow
-            key={`${idx}-${row.title}-${uniqueId}`}
+            key={`${idx}-${row.title}-${name}`}
             row={row}
             idx={idx}
             setExpanded={setExpanded}

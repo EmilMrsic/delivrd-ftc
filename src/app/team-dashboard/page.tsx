@@ -91,6 +91,7 @@ export default function DealList() {
     searchAll,
     setSearchAll,
     refetchAll,
+    loadingAll,
   } = useTeamDashboard({
     id: formattedCachedFilters?.dealCoordinatorId,
     filter: formattedCachedFilters ?? {},
@@ -270,6 +271,7 @@ export default function DealList() {
             searchTerm={searchTerm}
             searchAll={searchAll}
             refetchAll={refetchAll}
+            name="team-dashboard-negotiator"
           />
           {searchAll && (
             <>
@@ -277,7 +279,7 @@ export default function DealList() {
               <TeamDashboardTable
                 displayAllPaid={false}
                 allNegotiations={allNegotiations}
-                loading={loading}
+                loading={loadingAll}
                 setStopPropagation={setStopPropagation}
                 stopPropagation={stopPropagation}
                 negotiatorData={negotiatorData as unknown as DealNegotiatorType}
@@ -294,6 +296,7 @@ export default function DealList() {
                 searchTerm={searchTerm}
                 searchAll={searchAll}
                 refetchAll={refetchAll}
+                name="team-dashboard-all"
               />
             </>
           )}

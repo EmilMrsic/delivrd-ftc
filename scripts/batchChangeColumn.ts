@@ -12,8 +12,8 @@ import {
 import { deleteApp, getApps } from "firebase-admin/app";
 
 const COLUMN_NAME = "stage";
-const FIND_VALUE = "Delivery Scheduled";
-const REPLACE_VALUE = "Deal Complete- Local";
+const FIND_VALUE = "Long Term Order ";
+const REPLACE_VALUE = "Long Term Order";
 
 export const batchChangeColumn = async () => {
   const table = collection(db, "delivrd_negotiations");

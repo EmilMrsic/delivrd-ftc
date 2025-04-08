@@ -20,11 +20,12 @@ const useTeamDashboard = (
   allDealNegotiator: DealNegotiatorType[];
   negotiatorData: DealNegotiatorType;
   setNegotiatorData: (negotiatorData: DealNegotiatorType) => void;
-  loading: boolean;
   refetch: (id?: string, filters?: any, reset?: boolean) => void;
   searchAll: boolean;
   setSearchAll: (searchAll: boolean) => void;
   refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
+  loading: boolean;
+  loadingAll: boolean;
 } => {
   const [searchAll, setSearchAll] = useState(false);
   const [userFilters, allFilters] = useMemo(() => {
@@ -36,15 +37,18 @@ const useTeamDashboard = (
 
     return [userFilters, allFilters];
   }, [config, searchAll]);
-  const { negotiations, refetch, team } = useNegotiations({
+  const { negotiations, refetch, team, isLoading } = useNegotiations({
     ...userFilters,
   });
 
-  const { negotiations: allNegotiations, refetch: refetchAll } =
-    useNegotiations({
-      all: true,
-      ...allFilters,
-    });
+  const {
+    negotiations: allNegotiations,
+    refetch: refetchAll,
+    isLoading: isLoadingAll,
+  } = useNegotiations({
+    all: true,
+    ...allFilters,
+  });
 
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiatorType>();
   const [allDealNegotiator, setAllDealNegotiator] = useState<
@@ -82,8 +86,8 @@ const useTeamDashboard = (
     // @ts-ignore
     negotiatorData: negotiatorData,
     setNegotiatorData,
-    loading,
-    setLoading,
+    loading: isLoading,
+    loadingAll: isLoadingAll,
     refetch: refetch,
     searchAll,
     setSearchAll,

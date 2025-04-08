@@ -16,6 +16,7 @@ interface EditableTextAreaProps {
   negotiationId: string;
   field: string;
   userField?: string;
+  onBlur?: () => void;
 }
 
 const EditableTextArea: React.FC<EditableTextAreaProps> = ({
@@ -24,6 +25,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   negotiationId,
   field,
   userField,
+  onBlur,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -40,28 +42,28 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   const handleBlur = async () => {
     if (negotiationId && field) {
       try {
-        const usersQuery = query(
-          collection(db, "users"),
-          where("negotiation_id", "array-contains", negotiationId)
-        );
+        // const usersQuery = query(
+        //   collection(db, "users"),
+        //   where("negotiation_id", "array-contains", negotiationId)
+        // );
 
-        const userSnapshot = await getDocs(usersQuery);
+        // const userSnapshot = await getDocs(usersQuery);
 
-        if (userSnapshot.empty) {
-          console.error(
-            "No user found with this negotiationId:",
-            negotiationId
-          );
-          return;
-        }
+        // if (userSnapshot.empty) {
+        //   console.error(
+        //     "No user found with this negotiationId:",
+        //     negotiationId
+        //   );
+        //   return;
+        // }
 
-        const userDoc = userSnapshot.docs[0];
-        console.log("User found:", userDoc.id, userDoc.data());
-        const userDocRef = doc(db, "users", userDoc.id);
-        if (userField)
-          await updateDoc(userDocRef, {
-            [userField]: value,
-          });
+        // const userDoc = userSnapshot.docs[0];
+        // console.log("User found:", userDoc.id, userDoc.data());
+        // const userDocRef = doc(db, "users", userDoc.id);
+        // if (userField)
+        //   await updateDoc(userDocRef, {
+        //     [userField]: value,
+        //   });
 
         const negotiationDocRef = doc(
           db,
@@ -88,7 +90,8 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
       const isTruncated = value.length > 20 && !isFocused;
-      inputRef.current.value = isTruncated ? value.slice(0, 20) : value;
+      // inputRef.current.value = isTruncated ? value.slice(0, 20) : value;
+      inputRef.current.value = value;
       inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
     }
   }, [value, isFocused]);
@@ -105,6 +108,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
         onBlur={() => {
           setIsFocused(false);
           handleBlur();
+          onBlur?.();
         }}
         className={` resize-none ${
           isFocused

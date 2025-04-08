@@ -7,7 +7,7 @@ export const negotiationStatusOrder = [
   "Shipping",
   "Deal Complete- Long Distance", //"Deal Complete - Long Term Order",
   "Needs To Review",
-  "Long Term Order ", // this has a space at the end in db :/, a bit annoying
+  "Long Term Order", // this has a space at the end in db :/, a bit annoying
   "Ask for Review",
 ];
 

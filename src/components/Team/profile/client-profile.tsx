@@ -387,6 +387,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
               handleSave={handleSave}
               setOpenDialog={setOpenDialog}
               openDialog={openDialog}
+              setIncomingBids={setIncomingBids}
             />
           )}
           <WorkLogSection negotiationId={negotiationId} user={user} />

@@ -6,10 +6,10 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import ManualBidUpload from "./Manual-bid-upload-modal";
-import ShippingInfoDialog from "./shipping-info-dialog";
 import { Button } from "../ui/button";
 import { useSearchParams } from "next/navigation";
 import useTeamProfile from "@/hooks/useTeamProfile";
+import { useState } from "react";
 
 export const DashboardTableActions = ({
   setStopPropagation,
@@ -18,17 +18,22 @@ export const DashboardTableActions = ({
   // setCurrentDeals,
   // currentDeals,
   handleAskForReview,
-  refetch,
-  id,
+  setShowModal,
+  incomingBids,
+  setIncomingBids,
+  dealers,
 }: any) => {
-  const { setIncomingBids, incomingBids, setDealers, dealers } = useTeamProfile(
-    { negotiationId: id }
-  );
-
+  // const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-4 w-4 p-0">
+        <Button
+          variant="ghost"
+          className="h-4 w-4 p-0"
+          // onClick={() => {
+          //   setIsDialogOpen(true);
+          // }}
+        >
           {/* <span className="sr-only">Open menu</span> */}
           <MoreHorizontal className="h-4 w-4" />
         </Button>
@@ -36,18 +41,15 @@ export const DashboardTableActions = ({
       <DropdownMenuContent>
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <div className="flex flex-col items-start">
-          {/* <DealNegotiatorDialog
-            setStopPropogation={setStopPropagation}
-            deal={deal}
-            dealNegotiator={negotiatorData}
-          /> */}
-          <ShippingInfoDialog
-            // setCurrentDeals={setCurrentDeals}
-            // currentDeals={currentDeals}
-            refetch={refetch}
-            deal={deal}
-            setStopPropogation={setStopPropagation}
-          />
+          <Button
+            variant="outline"
+            className="bg-white text-black border-none hover:bg-transparent shadow-none"
+            onClick={(e) => {
+              setShowModal("shipping");
+            }}
+          >
+            Shipping Info
+          </Button>
           <p
             onClick={(e) => {
               e.stopPropagation();
@@ -57,10 +59,12 @@ export const DashboardTableActions = ({
           >
             Ask For Review
           </p>
-          {/* @ts-ignore */}
           <ManualBidUpload
             setStopPropagation={setStopPropagation}
             id={deal?.id}
+            incomingBids={incomingBids}
+            setIncomingBids={setIncomingBids}
+            dealers={dealers}
           />
         </div>
       </DropdownMenuContent>

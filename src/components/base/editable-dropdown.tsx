@@ -39,22 +39,22 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
   const handleSelect = async (newValue: string) => {
     if (negotiationId && field) {
       try {
-        const usersQuery = query(
-          collection(db, "users"),
-          where("negotiation_id", "array-contains", negotiationId)
-        );
+        // const usersQuery = query(
+        //   collection(db, "users"),
+        //   where("negotiation_id", "array-contains", negotiationId)
+        // );
 
-        const userSnapshot = await getDocs(usersQuery);
+        // const userSnapshot = await getDocs(usersQuery);
 
-        if (userSnapshot.empty) {
-          console.error(
-            "No user found with this negotiationId:",
-            negotiationId
-          );
-          return;
-        }
+        // if (userSnapshot.empty) {
+        //   console.error(
+        //     "No user found with this negotiationId:",
+        //     negotiationId
+        //   );
+        //   return;
+        // }
 
-        const userDoc = userSnapshot.docs[0];
+        // const userDoc = userSnapshot.docs[0];
         const negotiationDocRef = doc(
           db,
           "delivrd_negotiations",
@@ -65,11 +65,11 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
           [field]: newValue,
         });
 
-        const userDocRef = doc(db, "users", userDoc.id);
-        if (userField)
-          await updateDoc(userDocRef, {
-            [userField]: value,
-          });
+        // const userDocRef = doc(db, "users", userDoc.id);
+        // if (userField)
+        //   await updateDoc(userDocRef, {
+        //     [userField]: value,
+        //   });
 
         console.log(
           "Updated negotiation field:",

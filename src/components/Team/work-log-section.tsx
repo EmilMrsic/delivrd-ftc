@@ -36,11 +36,13 @@ interface WorkLog {
 interface WorkLogSectionProps {
   user: any;
   negotiationId: string | null;
+  noActions?: boolean;
 }
 
 const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   user,
   negotiationId,
+  noActions = false,
 }) => {
   const [workLogs, setWorkLogs] = useState<WorkLog[]>([]);
   const [newWorkLog, setNewWorkLog] = useState<string>("");
@@ -365,13 +367,15 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                         __html: makeLinksClickable(log.content),
                       }}
                     ></div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => startEditing(log)}
-                    >
-                      <Edit3 className="w-4 h-4 mr-1" /> Edit
-                    </Button>
+                    {!noActions && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => startEditing(log)}
+                      >
+                        <Edit3 className="w-4 h-4 mr-1" /> Edit
+                      </Button>
+                    )}
                   </div>
                 )}
                 <div className="flex space-x-4 mt-2">
@@ -425,11 +429,13 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
             </div>
           ))}
       </div>
-      <ReactQuill
-        value={newWorkLog}
-        onChange={setNewWorkLog}
-        className="mb-4"
-      />
+      {!noActions && (
+        <ReactQuill
+          value={newWorkLog}
+          onChange={setNewWorkLog}
+          className="mb-4"
+        />
+      )}
       <div className="flex space-x-4 mt-2">
         {localFiles.map((file, index) => {
           const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].some(
@@ -452,28 +458,32 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                   <span>{file.name}</span>
                 )}
               </div>
-              <button
-                onClick={() => removeAttachment(index)}
-                className="absolute top-[-5px] right-[-5px] bg-red-600 text-white rounded-full p-1"
-              >
-                <X size={12} />
-              </button>
+              {!noActions && (
+                <button
+                  onClick={() => removeAttachment(index)}
+                  className="absolute top-[-5px] right-[-5px] bg-red-600 text-white rounded-full p-1"
+                >
+                  <X size={12} />
+                </button>
+              )}
             </div>
           );
         })}
       </div>
-      <div className="flex space-x-2 items-center mt-4">
-        <label className="cursor-pointer">
-          <Paperclip className="w-5 h-5" />
-          <input
-            type="file"
-            onChange={handleFileUpload}
-            className="hidden"
-            multiple
-          />
-        </label>
-        <Button onClick={() => addWorkLog(negotiationId)}>Add Log</Button>
-      </div>
+      {!noActions && (
+        <div className="flex space-x-2 items-center mt-4">
+          <label className="cursor-pointer">
+            <Paperclip className="w-5 h-5" />
+            <input
+              type="file"
+              onChange={handleFileUpload}
+              className="hidden"
+              multiple
+            />
+          </label>
+          <Button onClick={() => addWorkLog(negotiationId)}>Add Log</Button>
+        </div>
+      )}
     </TailwindPlusCard>
   );
 };

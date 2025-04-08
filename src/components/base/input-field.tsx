@@ -130,35 +130,35 @@ export const InputField = (props: {
 
     if (negotiationId && field) {
       try {
-        const usersQuery = query(
-          collection(db, "users"),
-          where("negotiation_id", "array-contains", negotiationId)
-        );
+        // const usersQuery = query(
+        //   collection(db, "delivrd_users"),
+        //   where("negotiation_id", "array-contains", negotiationId)
+        // );
 
-        const userSnapshot = await getDocs(usersQuery);
+        // const userSnapshot = await getDocs(usersQuery);
 
-        if (userSnapshot.empty) {
-          console.error(
-            "No user found with this negotiationId:",
-            negotiationId
-          );
-          return;
-        }
+        // if (userSnapshot.empty) {
+        //   console.error(
+        //     "No user found with this negotiationId:",
+        //     negotiationId
+        //   );
+        //   return;
+        // }
 
-        const userDoc = userSnapshot.docs[0];
-        const userDocRef = doc(db, "users", userDoc.id);
+        // const userDoc = userSnapshot.docs[0];
+        // const userDocRef = doc(db, "users", userDoc.id);
 
-        if (userField) {
-          let newValue = "";
+        // if (userField) {
+        //   let newValue = "";
 
-          if (userField === "firstName" || userField === "lastName") {
-            newValue = firstName + " " + lastName;
-          }
+        //   if (userField === "firstName" || userField === "lastName") {
+        //     newValue = firstName + " " + lastName;
+        //   }
 
-          await updateDoc(userDocRef, {
-            clientNamefull: newValue,
-          });
-        }
+        //   await updateDoc(userDocRef, {
+        //     clientNamefull: newValue,
+        //   });
+        // }
 
         const negotiationDocRef = doc(
           db,

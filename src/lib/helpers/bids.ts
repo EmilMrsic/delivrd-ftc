@@ -33,7 +33,9 @@ export const getIncomingBids = async (incomingBidIds: string[]) => {
 
   const bidComments = await getBidComments(incomingBidIds);
   const finalBids = allBids.map((bid) => {
-    bid.bidComments = bidComments[bid.bid_id];
+    if (bid.bid_id) {
+      bid.bidComments = bidComments[bid.bid_id];
+    }
     return bid;
   });
 
