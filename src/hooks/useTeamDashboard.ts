@@ -26,7 +26,10 @@ const useTeamDashboard = (
   refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
   loading: boolean;
   loadingAll: boolean;
+  archive: boolean;
+  setArchive: (archive: boolean) => void;
 } => {
+  const [archive, setArchive] = useState(false);
   const [searchAll, setSearchAll] = useState(false);
   const [userFilters, allFilters] = useMemo(() => {
     const userFilters = { ...config };
@@ -38,6 +41,7 @@ const useTeamDashboard = (
     return [userFilters, allFilters];
   }, [config, searchAll]);
   const { negotiations, refetch, team, isLoading } = useNegotiations({
+    archive: archive,
     ...userFilters,
   });
 
@@ -46,6 +50,7 @@ const useTeamDashboard = (
     refetch: refetchAll,
     isLoading: isLoadingAll,
   } = useNegotiations({
+    archive: archive,
     all: true,
     ...allFilters,
   });
@@ -92,6 +97,8 @@ const useTeamDashboard = (
     searchAll,
     setSearchAll,
     refetchAll,
+    archive,
+    setArchive,
   };
 };
 

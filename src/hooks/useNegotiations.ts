@@ -8,6 +8,7 @@ export const useNegotiations = (
     all?: boolean;
     filter?: { [key: string]: string | string[] };
     id?: string;
+    archive?: boolean;
   } = {}
 ) => {
   const loggedInUserId = getUserData()?.deal_coordinator_id;
@@ -27,6 +28,7 @@ export const useNegotiations = (
         : `negotiation/${id || loggedInUserId}`;
 
       const request = await backendRequest(path, "POST", {
+        archive: config.archive,
         filter: filters,
       });
 
@@ -59,7 +61,7 @@ export const useNegotiations = (
 
   useEffect(() => {
     negotiationsQuery.refetch();
-  }, [id, filters]);
+  }, [id, filters, config.archive]);
 
   return {
     negotiations: negotiationsQuery.data?.negotiations,

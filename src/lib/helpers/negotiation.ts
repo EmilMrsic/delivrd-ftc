@@ -141,6 +141,7 @@ export const orderNegotiationsByColumns = (
 
 export const getActiveDealDocuments = async (dealQuery: {
   dealNegotiatorId?: string;
+  archive?: boolean;
   filter?: {
     [key: string]: string | string[];
   };
@@ -149,6 +150,7 @@ export const getActiveDealDocuments = async (dealQuery: {
     activityLog?: boolean;
   };
 }): Promise<NegotiationDataType[]> => {
+  console.log("archive:", dealQuery.archive);
   const negotiationsCollectionRef = collection(db, "delivrd_negotiations");
   const queryConditions: QueryConstraint[] = [
     // where("dealCoordinatorId", "!=", null),

@@ -15,6 +15,8 @@ export const TeamDashboardFilters = ({
   handleSearch,
   searchAll,
   setSearchAll,
+  archive,
+  setArchive,
 }: any) => {
   const router = useRouter();
   return (
@@ -26,27 +28,41 @@ export const TeamDashboardFilters = ({
           </Button>
         </div>
         <div className="flex gap-3 mt-4">
-          <div className="w-fit mr-0 ml-auto flex gap-2">
-            <Input
-              type="text"
-              placeholder="Search deals..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="pl-8 max-w-[300px] mt-auto mb-auto"
-            />
-            <div className="flex gap-2 items-center w-fit">
-              <Checkbox
-                id="search_all"
-                checked={searchAll}
-                onCheckedChange={setSearchAll}
+          <div className="w-fit mr-0 ml-auto gap-2">
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Search deals..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="pl-8 max-w-[300px] mt-auto mb-auto"
               />
-              <label htmlFor="search_all" className="text-nowrap">
-                All Deals
-              </label>
+              <div className="flex gap-2 items-center w-fit">
+                <Checkbox
+                  id="search_all"
+                  checked={searchAll}
+                  onCheckedChange={setSearchAll}
+                />
+                <label htmlFor="search_all" className="text-nowrap">
+                  All Deals
+                </label>
+              </div>
+              <div className="flex gap-2 items-center w-fit">
+                <Checkbox
+                  id="search_all"
+                  checked={archive}
+                  onCheckedChange={setArchive}
+                />
+                <label htmlFor="search_all" className="text-nowrap">
+                  Archive
+                </label>
+              </div>
             </div>
-            <Button onClick={clearFilters} newDefault={true}>
-              <p>Clear filters</p>
-            </Button>
+            <div className="mt-2 mr-0 ml-auto w-fit">
+              <Button onClick={clearFilters} newDefault={true}>
+                <p>Clear filters</p>
+              </Button>
+            </div>
           </div>
         </div>
         <div className="w-fit ml-auto mr-auto mt-4 flex">

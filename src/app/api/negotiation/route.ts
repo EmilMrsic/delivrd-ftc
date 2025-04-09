@@ -8,7 +8,6 @@ export const POST = async (request: Request) => {
   const teamQuery = collection(db, "team delivrd");
   const teamSnapshot = await getDocs(teamQuery);
   const teamData: DealNegotiatorType[] = [];
-  const allActiveDeals: string[] = [];
   teamSnapshot.docs.map((doc) => {
     const document = doc.data();
     teamData.push(document as DealNegotiatorType);
@@ -22,10 +21,11 @@ export const POST = async (request: Request) => {
     team: teamData,
   };
 
-  const { filter } = await request.json();
+  const { filter, archive } = await request.json();
 
   const deals = await getActiveDealDocuments({
     filter,
+    archive,
   });
 
   if (deals) {

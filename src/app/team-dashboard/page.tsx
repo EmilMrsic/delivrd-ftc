@@ -92,6 +92,8 @@ export default function DealList() {
     setSearchAll,
     refetchAll,
     loadingAll,
+    archive,
+    setArchive,
   } = useTeamDashboard({
     id: formattedCachedFilters?.dealCoordinatorId,
     filter: formattedCachedFilters ?? {},
@@ -247,6 +249,8 @@ export default function DealList() {
             handleSearch={handleSearch}
             searchAll={searchAll}
             setSearchAll={setSearchAll}
+            archive={archive}
+            setArchive={setArchive}
           />
           <TeamDashboardTable
             // setCurrentDeals={setCurrentDeals}
