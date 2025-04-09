@@ -29,12 +29,10 @@ export async function generateMetadata({ params }: { params: any }) {
   };
 }
 
-export const ClientPage = () => {
+export default function ClientPage() {
   return (
     <>
       <Profile />
     </>
   );
-};
-
-export default ClientPage;
+}
