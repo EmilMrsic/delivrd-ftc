@@ -23,15 +23,7 @@ import "react-quill/dist/quill.snow.css";
 import { toast } from "@/hooks/use-toast";
 import { generateRandomId, uploadFile } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
-
-interface WorkLog {
-  id: string;
-  user: string;
-  content: string;
-  attachments: string[];
-  negotiation_id: string;
-  timestamp: string;
-}
+import { WorkLogType } from "@/lib/models/team";
 
 interface WorkLogSectionProps {
   user: any;
@@ -44,7 +36,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   negotiationId,
   noActions = false,
 }) => {
-  const [workLogs, setWorkLogs] = useState<WorkLog[]>([]);
+  const [workLogs, setWorkLogs] = useState<WorkLogType[]>([]);
   const [newWorkLog, setNewWorkLog] = useState<string>("");
   const [editAttachments, setEditAttachments] = useState<string[]>([]);
   const [localFiles, setLocalFiles] = useState<File[]>([]);
@@ -61,7 +53,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
 
       if (negotiationSnap.exists()) {
         const data = negotiationSnap.data();
-        const logsData = (data.workLogs || []) as WorkLog[];
+        const logsData = (data.workLogs || []) as WorkLogType[];
         setWorkLogs(logsData);
       } else {
         console.warn("Negotiation not found with id:", id);
@@ -73,10 +65,10 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
     }
   };
 
-  const startEditing = (log: WorkLog) => {
+  const startEditing = (log: WorkLogType) => {
     setEditingLog(log.id);
     setEditContent(log.content);
-    setEditAttachments([...log.attachments]);
+    setEditAttachments([...(log?.attachments || [])]);
     setEditFiles([]);
   };
 
@@ -134,7 +126,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                 ...log,
                 content: editContent,
                 timestamp: new Date().toISOString(),
-                attachments: [...log.attachments, ...newFileUrls],
+                attachments: [...(log?.attachments || []), ...newFileUrls],
               }
             : log
         )
@@ -235,7 +227,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         log.id === logId
           ? {
               ...log,
-              attachments: log.attachments.filter((_, i) => i !== index),
+              attachments: log?.attachments?.filter((_, i) => i !== index),
             }
           : log
       )
@@ -267,7 +259,10 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
     setWorkLogs((prevLogs) =>
       prevLogs.map((log) =>
         log.id === logId
-          ? { ...log, attachments: [...log.attachments, ...newAttachments] }
+          ? {
+              ...log,
+              attachments: [...(log?.attachments || []), ...newAttachments],
+            }
           : log
       )
     );
@@ -364,7 +359,9 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                         whiteSpace: "normal",
                       }}
                       dangerouslySetInnerHTML={{
-                        __html: makeLinksClickable(log.content),
+                        __html: log?.content
+                          ? makeLinksClickable(log.content)
+                          : "",
                       }}
                     ></div>
                     {!noActions && (
@@ -379,7 +376,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                   </div>
                 )}
                 <div className="flex space-x-4 mt-2">
-                  {log.attachments.map((file, i) => {
+                  {log?.attachments?.map((file, i) => {
                     const isImage = [
                       "jpg",
                       "jpeg",
