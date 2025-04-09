@@ -150,8 +150,10 @@ export const getActiveDealDocuments = async (dealQuery: {
     activityLog?: boolean;
   };
 }): Promise<NegotiationDataType[]> => {
-  console.log("archive:", dealQuery.archive);
-  const negotiationsCollectionRef = collection(db, "delivrd_negotiations");
+  const negotiationsCollectionRef = collection(
+    db,
+    dealQuery.archive ? "delivrd_archive" : "delivrd_negotiations"
+  );
   const queryConditions: QueryConstraint[] = [
     // where("dealCoordinatorId", "!=", null),
   ];
@@ -189,14 +191,17 @@ export const getActiveDealDocuments = async (dealQuery: {
       return NegotiationDataModel.parse(data);
     } catch (error) {
       console.error("Error parsing negotiation data:", data.id);
-      console.error("Error:", error);
       return null;
     }
   });
 
   return negotiations.filter((negotiation: NegotiationDataType | null) => {
     if (!negotiation) return false;
-    return negotiationStatusOrder.includes(negotiation.stage);
+    if (dealQuery.archive) {
+      return ["Closed", "Closed No Review"].includes(negotiation.stage);
+    } else {
+      return negotiationStatusOrder.includes(negotiation.stage);
+    }
   }) as NegotiationDataType[];
 };
 

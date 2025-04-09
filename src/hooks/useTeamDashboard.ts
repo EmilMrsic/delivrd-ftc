@@ -59,7 +59,6 @@ const useTeamDashboard = (
   const [allDealNegotiator, setAllDealNegotiator] = useState<
     DealNegotiatorType[]
   >([]);
-  const [loading, setLoading] = useState(true);
 
   const getAllDealNegotiator = async () => {
     try {
@@ -81,6 +80,9 @@ const useTeamDashboard = (
   useEffect(() => {
     getAllDealNegotiator().then((res) => setAllDealNegotiator(res ?? []));
   }, []);
+
+  console.log("all negotiations:", allNegotiations);
+  console.log("negotiations:", negotiations);
 
   return {
     allNegotiations: allNegotiations,

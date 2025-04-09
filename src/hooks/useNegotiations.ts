@@ -32,6 +32,10 @@ export const useNegotiations = (
         filter: filters,
       });
 
+      if (!config.all) {
+        console.log("in use negotiation:", request);
+      }
+
       return request;
     },
   });

@@ -7,7 +7,7 @@ export const POST = async (
   { params }: { params: { nid: string } }
 ) => {
   const postData = await request.json();
-  const { filter } = postData;
+  const { filter, archive } = postData;
   const output: {
     negotiations: NegotiationDataType[];
   } = {
@@ -18,6 +18,7 @@ export const POST = async (
   const deals = await getActiveDealDocuments({
     dealNegotiatorId: nid,
     filter: filter,
+    archive: archive,
   });
 
   if (deals.length > 0) {
