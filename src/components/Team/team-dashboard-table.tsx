@@ -93,7 +93,7 @@ const TeamDashboardTable = ({
     }
 
     const searchableWorkLog = deal.workLogs
-      ? deal.workLogs.map((log) => log.comments).join(" ")
+      ? deal.workLogs.map((log) => log.content).join(" ")
       : "";
 
     const found =
