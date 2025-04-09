@@ -8,6 +8,7 @@ export const WorkLogModel = z.object({
   user: z.string(),
   negotiation_id: z.string(),
   deal_coordinator_id: z.string(),
+  userAvatar: z.string().optional(),
 });
 
 export const NegotiationDataModel = z.object({

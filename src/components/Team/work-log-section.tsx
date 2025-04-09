@@ -188,6 +188,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         id: generateRandomId(),
         deal_coordinator_id: user.deal_coordinator_id,
         user: user.name,
+        userAvatar: user.profile_pic,
         content: newWorkLog,
         attachments: validFileUrls,
         negotiation_id: negotiationId!,
@@ -300,11 +301,11 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
             <div key={log.id} className="flex items-start space-x-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage
-                  src={user.profile_pic}
-                  alt={user?.name !== null ? user?.name[0] : ""}
+                  src={log?.userAvatar}
+                  alt={log?.user !== null ? log?.user[0] : ""}
                 />
                 <AvatarFallback>
-                  {user?.name !== null ? user?.name[0] : ""}
+                  {log?.user !== null ? log?.user[0] : ""}
                 </AvatarFallback>
               </Avatar>
               <div className="p-3 rounded-lg bg-gray-100 flex-grow">
