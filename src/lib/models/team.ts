@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+export const WorkLogModel = z.object({
+  id: z.string(),
+  timestamp: z.string(),
+  content: z.string(),
+  attachments: z.array(z.string()).optional(),
+  user: z.string(),
+  negotiation_id: z.string(),
+  deal_coordinator_id: z.string(),
+});
+
 export const NegotiationDataModel = z.object({
   arrivalToClient: z.string(),
   arrivalToDealer: z.string(),
@@ -9,7 +19,7 @@ export const NegotiationDataModel = z.object({
   dealCoordinatorId: z.string(),
   howToPay: z.string(),
   prefix: z.string().optional(),
-  workLogs: z.array(z.any()).optional(),
+  workLogs: z.array(WorkLogModel).optional(),
   closeDate: z.string(),
   desiredExterior: z.string(),
   clientFirstName: z.string(),
@@ -94,3 +104,4 @@ export type DealNegotiatorType = z.infer<typeof DealNegotiatorModel> & {
   };
 };
 export type InternalNotesType = z.infer<typeof InternalNotesModel>;
+export type WorkLogType = z.infer<typeof WorkLogModel>;
