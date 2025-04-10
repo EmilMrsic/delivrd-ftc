@@ -51,8 +51,8 @@ export const IncomingBids = ({
   handleSendComment: (data: BidComments) => void;
   noUserActions?: boolean;
   editingBidId: string | null;
-  editedBid: IncomingBid | null;
-  setEditedBid: (editedBid: IncomingBid | null) => void;
+  editedBid: any | null;
+  setEditedBid: (editedBid: any | null) => void;
 }) => {
   return (
     <TailwindPlusCard
