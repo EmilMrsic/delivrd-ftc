@@ -25,15 +25,15 @@ export const negotiationStatusOrder = [
   "Follow Up",
   "Follow Up Issue",
   "Paid Lost Contact",
-  "Refunded",
-  // non sorted statuses
   "Contacted",
-  "Scheduled",
-  "Proposal Sent",
   "Unqualified",
   "Lost",
   "No Show",
   "Canceled",
+  // for consult mode
+  // "Refunded",
+  // "Scheduled",
+  // "Proposal Sent",
 ];
 
 export const statusColors: Record<string, string> = {
