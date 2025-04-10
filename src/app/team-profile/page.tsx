@@ -84,7 +84,10 @@ function Profile() {
           />
 
           {/* {showStickyHeader && <StickyHeader negotiation={negotiation} />} */}
-          <ClientProfile negotiationId={negotiationId} />
+          <ClientProfile
+            negotiationId={negotiationId}
+            allowClientModeToggle={true}
+          />
         </div>
       )}
     </Suspense>

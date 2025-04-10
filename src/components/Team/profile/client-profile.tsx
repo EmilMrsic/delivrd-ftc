@@ -33,11 +33,16 @@ import { useSearchParams } from "next/navigation";
 
 export const ClientProfile = ({
   negotiationId,
-  clientMode,
+  clientMode: clientModeProp,
+  allowClientModeToggle,
 }: {
   negotiationId: string;
   clientMode?: boolean;
+  allowClientModeToggle?: boolean;
 }) => {
+  const [clientMode, setClientMode] = useState<boolean>(
+    clientModeProp ?? false
+  );
   const [openDialog, setOpenDialog] = useState<string | null>(null);
 
   const {
@@ -352,6 +357,8 @@ export const ClientProfile = ({
             dealNegotiator={dealNegotiator}
             negotiationId={negotiationId}
             clientMode={clientMode}
+            setClientMode={setClientMode}
+            allowClientModeToggle={allowClientModeToggle}
           />
 
           <IncomingBids
@@ -445,7 +452,7 @@ export const ClientProfile = ({
             clientMode={clientMode}
           />
 
-          {!shared && (
+          {clientMode && !shared && (
             <Button
               onClick={shareProgress}
               className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"

@@ -1,13 +1,10 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { FileText, Mail, Phone, User } from "lucide-react";
-import EditableInput, { InputField } from "../base/input-field";
-import SearchableDropdown from "../base/searchable-dropdown";
-import { Separator } from "@radix-ui/react-separator";
+import { InputField } from "../base/input-field";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
-import { DealNegotiator, EditNegotiationData } from "@/types";
-import { cn, dealStageOptions } from "@/lib/utils";
+import { DealNegotiator } from "@/types";
+import { cn } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusToggle } from "../tailwind-plus/toggle";
@@ -23,6 +20,8 @@ type ClientDetailsProps = {
   }) => void;
   dealNegotiator?: DealNegotiator;
   clientMode?: boolean;
+  setClientMode: (clientMode: boolean) => void;
+  allowClientModeToggle?: boolean;
 };
 
 const ClientDetails = ({
@@ -31,6 +30,8 @@ const ClientDetails = ({
   handleChange,
   dealNegotiator,
   clientMode,
+  setClientMode,
+  allowClientModeToggle,
 }: ClientDetailsProps) => {
   const [isBlur, setIsBlur] = useState(
     localStorage.getItem("streamMode") === "true"
@@ -53,22 +54,33 @@ const ClientDetails = ({
     return url.includes("youtube.com") || url.includes("youtu.be");
   };
 
+  console.log("client mode toggle:", allowClientModeToggle);
+
   return (
     <TailwindPlusCard
       title="Client Overview"
       icon={User}
-      actions={() =>
-        !clientMode && (
-          <TailwindPlusToggle
-            checked={isBlur}
-            label="Stream mode"
-            onToggle={(toggle) => {
-              localStorage.setItem("streamMode", toggle.toString());
-              setIsBlur(toggle);
-            }}
-          />
-        )
-      }
+      actions={() => (
+        <div className="flex items-center gap-2">
+          {!clientMode && (
+            <TailwindPlusToggle
+              checked={isBlur}
+              label="Stream mode"
+              onToggle={(toggle) => {
+                localStorage.setItem("streamMode", toggle.toString());
+                setIsBlur(toggle);
+              }}
+            />
+          )}
+          {allowClientModeToggle && (
+            <TailwindPlusToggle
+              checked={clientMode}
+              label="Client mode"
+              onToggle={() => setClientMode(!clientMode)}
+            />
+          )}
+        </div>
+      )}
     >
       <div className={cn(`grid grid-cols-1 md:grid-cols-2 gap-4`)}>
         <div className="space-y-4">

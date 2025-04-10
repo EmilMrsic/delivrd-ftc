@@ -489,7 +489,10 @@ export const DashboardTable = ({
                   config: {
                     expandable: true,
                     expandedComponent: () => (
-                      <ClientProfile negotiationId={deal.id} />
+                      <ClientProfile
+                        negotiationId={deal.id}
+                        allowClientModeToggle={true}
+                      />
                     ),
                     onExpandedClose: () => {
                       refetch();
