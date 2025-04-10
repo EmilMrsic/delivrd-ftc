@@ -183,6 +183,9 @@ export const TeamDashboardClientNameDisplay = ({
               handleSave={() => {}}
               newComment={{}}
               setIncomingBids={setIncomingBids}
+              editingBidId={null}
+              editedBid={null}
+              setEditedBid={() => {}}
             />
           )}
           {showModal === "shipping" && (
