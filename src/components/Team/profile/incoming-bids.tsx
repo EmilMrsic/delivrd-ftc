@@ -26,6 +26,9 @@ export const IncomingBids = ({
   noUserActions = false,
   setIncomingBids,
   setDealers,
+  editingBidId,
+  editedBid,
+  setEditedBid,
 }: {
   incomingBids: IncomingBid[];
   setIncomingBids: (item: IncomingBid[]) => void;
@@ -47,6 +50,9 @@ export const IncomingBids = ({
   parseComment: (comment: string) => React.ReactNode;
   handleSendComment: (data: BidComments) => void;
   noUserActions?: boolean;
+  editingBidId: string | null;
+  editedBid: IncomingBid | null;
+  setEditedBid: (editedBid: IncomingBid | null) => void;
 }) => {
   return (
     <TailwindPlusCard
@@ -101,6 +107,9 @@ export const IncomingBids = ({
                 handleSendComment={handleSendComment}
                 handleSave={handleSave}
                 handleEdit={handleEdit}
+                editingBidId={editingBidId}
+                editedBid={editedBid}
+                setEditedBid={setEditedBid}
               />
             ))
         ) : (

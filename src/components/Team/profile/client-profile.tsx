@@ -351,6 +351,9 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
             bidCommentsByBidId={bidCommentsByBidId}
             parseComment={parseComment}
             handleSendComment={handleSendComment}
+            editingBidId={editingBidId}
+            editedBid={editedBid}
+            setEditedBid={setEditedBid}
           />
 
           <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">

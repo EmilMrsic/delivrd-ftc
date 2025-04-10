@@ -6,7 +6,7 @@ import { FileText, Pencil, Plus, Save, Trash, Upload, X } from "lucide-react";
 import VoteSection from "../vote-section";
 import { Textarea } from "@/components/ui/textarea";
 import { DealNegotiatorType } from "@/lib/models/team";
-import { BidComments, IncomingBid } from "@/types";
+import { BidComments, DealerData, IncomingBid } from "@/types";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
@@ -44,10 +44,8 @@ export const IncomingBidCard = ({
   allowUndelete?: boolean;
 }) => {
   const matchingDealer = dealers.find((dealer: DealNegotiatorType) => {
-    console.log("maching dealer: 2:", dealer.id, bidDetails.dealerId);
     return dealer.id === bidDetails.dealerId;
   });
-  console.log("matching dealer: ", dealers);
 
   const hasAcceptedOffer = incomingBids.find(
     (bid: IncomingBid) => bid.client_offer === "accepted"
@@ -216,228 +214,21 @@ export const IncomingBidCard = ({
         Price: ${bidDetails?.price ? bidDetails?.price : "No price available"}
       </p>
       <div className="flex space-x-2 mb-4">
-        <Dialog
-          open={openDialog === bidDetails.bid_id}
-          onOpenChange={(isOpen) => {
-            if (!isOpen) {
-              setEditingBidId(null); // Reset editedBid when closing
-            }
-            setOpenDialog(isOpen ? bidDetails.bid_id ?? "" : null);
-          }}
-        >
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <FileText className="mr-2 h-4 w-4" />
-              View Offer
-            </Button>
-          </DialogTrigger>
-          <DialogContent style={{ background: "white" }}>
-            <div className="text-[#202125] space-y-4">
-              <div className="flex items-center gap-3">
-                <p className="text-2xl font-bold">
-                  {matchingDealer?.Dealership} Detail
-                </p>
-                {editingBidId === bidDetails.bid_id ? (
-                  <Button
-                    size="sm"
-                    onClick={() => handleSave(bidDetails.bid_id)}
-                  >
-                    <Save className="h-4 w-4 mr-2" /> Save
-                  </Button>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(bidDetails)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-
-              {/* Files Section */}
-              <div className="flex flex-wrap h-[150px] overflow-y-scroll gap-4 mt-4">
-                {bidDetails.files.map((file: string, index: number) => {
-                  const isImage = [
-                    "jpg",
-                    "jpeg",
-                    "png",
-                    "gif",
-                    "bmp",
-                    "webp",
-                  ].some((ext) => file.toLowerCase().includes(ext));
-
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => window.open(file, "_blank")}
-                      className="relative cursor-pointer w-20 h-20 flex items-center justify-center rounded-md "
-                    >
-                      <div className="absolute top-0 right-0 z-[99]">
-                        {editingBidId === bidDetails.bid_id && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent opening file when clicking the cross
-                              handleDeleteFile(file, bidDetails.bid_id);
-                            }}
-                            className="absolute top-0 right-0 bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
-                          >
-                            <X size={16} />
-                          </button>
-                        )}
-                      </div>
-                      {isImage ? (
-                        <img
-                          onClick={() => window.open(file, "_blank")}
-                          src={file}
-                          alt="Uploaded file"
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <embed
-                          onClick={() => window.open(file, "_blank")}
-                          type="application/pdf"
-                          width="100%"
-                          height="100%"
-                          src={file}
-                          style={{ zIndex: -1 }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-                {editingBidId === bidDetails.bid_id && (
-                  <div className="flex items-center justify-center w-20 h-20 bg-gray-200 rounded-md cursor-pointer">
-                    <label
-                      htmlFor="file-upload"
-                      className="text-center flex flex-col items-center text-gray-600"
-                    >
-                      <input
-                        type="file"
-                        id="file-upload"
-                        onChange={(e) =>
-                          handleBidFileUpload(e.target.files, bidDetails.bid_id)
-                        }
-                        className="hidden cursor-pointer"
-                        multiple
-                      />
-                      <Upload className="w-8 h-8 text-gray-600" />
-                      <p>Upload</p>
-                    </label>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-1 mt-4">
-                <p className="font-semibold text-lg">
-                  {matchingDealer?.SalesPersonName}
-                </p>
-                <p>
-                  {matchingDealer?.City}
-                  <br />
-                  {matchingDealer?.State}
-                </p>
-                <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 rounded-full">
-                  {editingBidId === bidDetails.bid_id ? (
-                    <div className="space-x-2 flex">
-                      <label className="flex p-2 rounded-full bg-green-100 items-center space-x-2">
-                        <input
-                          type="radio"
-                          name="inventoryStatus"
-                          value="In Stock"
-                          checked={editedBid.inventoryStatus === "In Stock"}
-                          onChange={() =>
-                            setEditedBid({
-                              ...editedBid,
-                              inventoryStatus: "In Stock",
-                            })
-                          }
-                          className="w-4 h-4"
-                        />
-                        <span>In Stock</span>
-                      </label>
-
-                      <label className="flex p-2 rounded-full bg-yellow-100 items-center space-x-2">
-                        <input
-                          type="radio"
-                          name="inventoryStatus"
-                          value="In Transit"
-                          checked={editedBid.inventoryStatus === "In Transit"}
-                          onChange={() =>
-                            setEditedBid({
-                              ...editedBid,
-                              inventoryStatus: "In Transit",
-                            })
-                          }
-                          className="w-4 h-4"
-                        />
-                        <span>In Transit</span>
-                      </label>
-                    </div>
-                  ) : (
-                    <p
-                      className={`p-2 rounded-full ${
-                        bidDetails.inventoryStatus === "In Stock"
-                          ? "bg-green-100"
-                          : "bg-yellow-100"
-                      }`}
-                    >
-                      {bidDetails?.inventoryStatus}
-                    </p>
-                  )}
-                </span>
-              </div>
-
-              <div className="flex justify-between mt-4 border-t pt-4">
-                <div>
-                  <p className="text-gray-500">Date Submitted</p>
-                  <p>{formatDate(bidDetails.timestamp)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Price</p>
-                  {editingBidId === bidDetails.bid_id ? (
-                    <Input
-                      type="number"
-                      value={editedBid.price}
-                      onChange={(e) =>
-                        setEditedBid({
-                          ...editedBid,
-                          price: e.target.value,
-                        })
-                      }
-                    />
-                  ) : (
-                    <p className="text-2xl font-semibold">
-                      ${bidDetails.price}
-                    </p>
-                  )}
-                  <p className="text-gray-500">
-                    Total Discount: $
-                    {editingBidId === bidDetails.bid_id ? (
-                      <Input
-                        type="number"
-                        value={editedBid.discountPrice}
-                        onChange={(e) =>
-                          setEditedBid({
-                            ...editedBid,
-                            discountPrice: e.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      bidDetails.discountPrice
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className="border-t pt-4 flex flex-col ">
-                <p className="font-semibold">Additional Comments</p>
-                {parseComment(bidDetails.comments)}
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <BidDetailsDialog
+          openDialog={openDialog}
+          setEditingBidId={setEditingBidId}
+          setOpenDialog={setOpenDialog}
+          bidDetails={bidDetails}
+          matchingDealer={matchingDealer}
+          editingBidId={editingBidId}
+          handleSave={handleSave}
+          handleEdit={handleEdit}
+          handleDeleteFile={handleDeleteFile}
+          handleBidFileUpload={handleBidFileUpload}
+          editedBid={editedBid}
+          setEditedBid={setEditedBid}
+          parseComment={parseComment}
+        />
         {!noUserActions && (
           <Button
             variant="outline"
@@ -511,5 +302,254 @@ export const IncomingBidCard = ({
         </p>
       )}
     </div>
+  );
+};
+
+export const BidDetailsDialog = ({
+  openDialog,
+  setEditingBidId,
+  setOpenDialog,
+  bidDetails,
+  matchingDealer,
+  editingBidId,
+  handleSave,
+  handleEdit,
+  handleDeleteFile,
+  handleBidFileUpload,
+  editedBid,
+  setEditedBid,
+  parseComment,
+}: {
+  openDialog: string;
+  setEditingBidId: (id: string | null) => void;
+  setOpenDialog: (id: string | null) => void;
+  bidDetails: IncomingBid;
+  matchingDealer: DealerData;
+  editedBid: IncomingBid;
+  editingBidId: string | null;
+  setEditedBid: (bid: IncomingBid) => void;
+  handleSave: (bidId: string) => void;
+  handleEdit: (bid: IncomingBid) => void;
+  handleDeleteFile: (file: string, bidId: string) => void;
+  handleBidFileUpload: (files: FileList, bidId: string) => void;
+  parseComment: (comment: string) => React.ReactNode;
+}) => {
+  console.log("got here:", editingBidId);
+  return (
+    <Dialog
+      open={openDialog === bidDetails.bid_id}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setEditingBidId(null); // Reset editedBid when closing
+        }
+        setOpenDialog(isOpen ? bidDetails.bid_id ?? "" : null);
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <FileText className="mr-2 h-4 w-4" />
+          View Offer
+        </Button>
+      </DialogTrigger>
+      <DialogContent style={{ background: "white" }}>
+        <div className="text-[#202125] space-y-4">
+          <div className="flex items-center gap-3">
+            <p className="text-2xl font-bold">
+              {matchingDealer?.Dealership} Detail
+            </p>
+            {editingBidId === bidDetails.bid_id ? (
+              <Button size="sm" onClick={() => handleSave(bidDetails.bid_id)}>
+                <Save className="h-4 w-4 mr-2" /> Save
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleEdit(bidDetails)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Files Section */}
+          <div className="flex flex-wrap h-[150px] overflow-y-scroll gap-4 mt-4">
+            {bidDetails.files.map((file: string, index: number) => {
+              const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].some(
+                (ext) => file.toLowerCase().includes(ext)
+              );
+
+              return (
+                <div
+                  key={index}
+                  onClick={() => window.open(file, "_blank")}
+                  className="relative cursor-pointer w-20 h-20 flex items-center justify-center rounded-md "
+                >
+                  <div className="absolute top-0 right-0 z-[99]">
+                    {editingBidId === bidDetails.bid_id && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent opening file when clicking the cross
+                          handleDeleteFile(file, bidDetails.bid_id);
+                        }}
+                        className="absolute top-0 right-0 bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                  {isImage ? (
+                    <img
+                      onClick={() => window.open(file, "_blank")}
+                      src={file}
+                      alt="Uploaded file"
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <embed
+                      onClick={() => window.open(file, "_blank")}
+                      type="application/pdf"
+                      width="100%"
+                      height="100%"
+                      src={file}
+                      style={{ zIndex: -1 }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+            {editingBidId === bidDetails.bid_id && (
+              <div className="flex items-center justify-center w-20 h-20 bg-gray-200 rounded-md cursor-pointer">
+                <label
+                  htmlFor="file-upload"
+                  className="text-center flex flex-col items-center text-gray-600"
+                >
+                  <input
+                    type="file"
+                    id="file-upload"
+                    onChange={(e) =>
+                      handleBidFileUpload(
+                        e.target.files ?? new FileList(),
+                        bidDetails.bid_id
+                      )
+                    }
+                    className="hidden cursor-pointer"
+                    multiple
+                  />
+                  <Upload className="w-8 h-8 text-gray-600" />
+                  <p>Upload</p>
+                </label>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1 mt-4">
+            <p className="font-semibold text-lg">
+              {matchingDealer?.SalesPersonName}
+            </p>
+            <p>
+              {matchingDealer?.City}
+              <br />
+              {matchingDealer?.State}
+            </p>
+            <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 rounded-full">
+              {editingBidId === bidDetails.bid_id ? (
+                <div className="space-x-2 flex">
+                  <label className="flex p-2 rounded-full bg-green-100 items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="inventoryStatus"
+                      value="In Stock"
+                      checked={editedBid.inventoryStatus === "In Stock"}
+                      onChange={() =>
+                        setEditedBid({
+                          ...editedBid,
+                          inventoryStatus: "In Stock",
+                        })
+                      }
+                      className="w-4 h-4"
+                    />
+                    <span>In Stock</span>
+                  </label>
+
+                  <label className="flex p-2 rounded-full bg-yellow-100 items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="inventoryStatus"
+                      value="In Transit"
+                      checked={editedBid.inventoryStatus === "In Transit"}
+                      onChange={() =>
+                        setEditedBid({
+                          ...editedBid,
+                          inventoryStatus: "In Transit",
+                        })
+                      }
+                      className="w-4 h-4"
+                    />
+                    <span>In Transit</span>
+                  </label>
+                </div>
+              ) : (
+                <p
+                  className={`p-2 rounded-full ${
+                    bidDetails.inventoryStatus === "In Stock"
+                      ? "bg-green-100"
+                      : "bg-yellow-100"
+                  }`}
+                >
+                  {bidDetails?.inventoryStatus}
+                </p>
+              )}
+            </span>
+          </div>
+
+          <div className="flex justify-between mt-4 border-t pt-4">
+            <div>
+              <p className="text-gray-500">Date Submitted</p>
+              <p>{formatDate(bidDetails.timestamp)}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Price</p>
+              {editingBidId === bidDetails.bid_id ? (
+                <Input
+                  type="number"
+                  value={editedBid.price}
+                  onChange={(e) =>
+                    setEditedBid({
+                      ...editedBid,
+                      price: parseFloat(e.target.value),
+                    })
+                  }
+                />
+              ) : (
+                <p className="text-2xl font-semibold">${bidDetails.price}</p>
+              )}
+              <p className="text-gray-500">
+                Total Discount: $
+                {editingBidId === bidDetails.bid_id ? (
+                  <Input
+                    type="number"
+                    value={editedBid.discountPrice}
+                    onChange={(e) =>
+                      setEditedBid({
+                        ...editedBid,
+                        discountPrice: e.target.value,
+                      })
+                    }
+                  />
+                ) : (
+                  bidDetails.discountPrice
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t pt-4 flex flex-col ">
+            <p className="font-semibold">Additional Comments</p>
+            {parseComment(bidDetails.comments)}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
