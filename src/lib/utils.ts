@@ -20,6 +20,7 @@ import {
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { twMerge } from "tailwind-merge";
 import { dateFormat } from "./helpers/dates";
+import { statusColors } from "./constants/negotiations";
 
 export { dateFormat };
 
@@ -797,30 +798,6 @@ export const getReviewDealsWithoutCoordinator = async () => {
 };
 
 export const getStatusStyles = (status: string) => {
-  const statusColors: Record<string, string> = {
-    Paid: "#cff5d1",
-    "Actively Negotiating": "#9ae095",
-    "Long Term Order": "#ffd4e0",
-    "Delivery Scheduled": "#048a0e",
-    "Follow Up Issue": "#01ddd5",
-    "Needs To Review": "#fad2fc",
-    "Ask for Review": "#c4ecff",
-    Shipping: "#ffa6c1",
-    "Deal Complete - Long Distance": "#006400",
-    "Paid Holding": "#7c37ef",
-    // "Actively Negotiating": "#9AE095",
-    // "Deal Started": "#E0DAFD",
-    // Paid: "#CFF5D1",
-    // "Delivery Scheduled": "#068A16",
-    // "Deal Complete- Long Distance": "#02640D",
-    // "Long Term Order": "#FFD4E0",
-    // Shipping: "#FFA6C1",
-    // "Needs To Review": "#FAD2FC",
-    // "Ask for Review": "#C4ECFE",
-    // "Follow Up Issue": "#04DDD5",
-    // "Follow Up": "#C1F5F0",
-  };
-
   const backgroundColor = statusColors[status] || "#E5E7EB"; // Default gray
   const isDark = isDarkColor(backgroundColor);
   const textColor = isDark ? "#FFFFFF" : "#000000"; // White for dark, black for light

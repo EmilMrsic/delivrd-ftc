@@ -164,8 +164,6 @@ export const getActiveDealDocuments = async (dealQuery: {
     );
   }
 
-  console.log("dealQuery: ", dealQuery);
-
   if (dealQuery?.filter) {
     Object.keys(dealQuery.filter).forEach((key) => {
       if (dealQuery?.filter?.[key]) {

@@ -284,6 +284,13 @@ const TeamDashboardTable = ({
     }
   }
 
+  // if (name === "team-dashboard-all") {
+  //   console.log(
+  //     ":negotiations:",
+  //     negotiations.find((negotiation) => negotiation.id === "recaQ1jmRlqiSfVaG")
+  //   );
+  // }
+
   let rows: any = [...scopedRows];
   if (displayAllPaid && paidNegotiations.length > 0) {
     rows = [

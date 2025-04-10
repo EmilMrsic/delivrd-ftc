@@ -11,6 +11,7 @@ import { cn, dealStageOptions } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusToggle } from "../tailwind-plus/toggle";
+import { negotiationStatusOrder } from "@/lib/constants/negotiations";
 
 type ClientDetailsProps = {
   negotiation: NegotiationDataType | null;
@@ -213,7 +214,7 @@ const ClientDetails = ({
           <div className={cn(`space-y-4`, isBlur && `blur-sm`)}>
             <InputField
               type="searchableDropdown"
-              options={dealStageOptions}
+              options={negotiationStatusOrder}
               field="stage"
               negotiationId={negotiationId ?? ""}
               label="Deal Stage"
