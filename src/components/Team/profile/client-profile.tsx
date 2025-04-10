@@ -36,7 +36,7 @@ export const ClientProfile = ({
   clientMode,
 }: {
   negotiationId: string;
-  clientMode: boolean;
+  clientMode?: boolean;
 }) => {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
 
