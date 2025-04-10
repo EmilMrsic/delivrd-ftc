@@ -25,7 +25,7 @@ type FeatureDetailsProps = {
     parentKey?: string;
   }) => void;
   setShowStickyHeader?: (item: boolean) => void;
-  clientMode: boolean;
+  clientMode?: boolean;
 };
 
 const FeatureDetails = ({

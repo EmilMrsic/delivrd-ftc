@@ -54,7 +54,7 @@ export const IncomingBids = ({
   editingBidId: string | null;
   editedBid: any | null;
   setEditedBid: (editedBid: any | null) => void;
-  clientMode: boolean;
+  clientMode?: boolean;
 }) => {
   return (
     <TailwindPlusCard

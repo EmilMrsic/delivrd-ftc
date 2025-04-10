@@ -22,7 +22,7 @@ type ClientDetailsProps = {
     parentKey?: string;
   }) => void;
   dealNegotiator?: DealNegotiator;
-  clientMode: boolean;
+  clientMode?: boolean;
 };
 
 const ClientDetails = ({

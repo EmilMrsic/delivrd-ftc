@@ -374,9 +374,8 @@ export const BidDetailsDialog = ({
   handleDeleteFile: (file: string, bidId: string) => void;
   handleBidFileUpload: (files: FileList, bidId: string) => void;
   parseComment: (comment: string) => React.ReactNode;
-  clientMode: boolean;
+  clientMode?: boolean;
 }) => {
-  console.log("got here:", editingBidId);
   return (
     <Dialog
       open={openDialog === bidDetails.bid_id}
