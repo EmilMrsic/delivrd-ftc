@@ -8,6 +8,8 @@ import {
 import {
   collection,
   getDocs,
+  limit,
+  orderBy,
   query,
   QueryConstraint,
   where,
@@ -201,6 +203,21 @@ export const getActiveDealDocuments = async (dealQuery: {
       return negotiationStatusOrder.includes(negotiation.stage);
     }
   }) as NegotiationDataType[];
+};
+
+export const getNegotiationsByClientId = async (clientId: string) => {
+  const negotiationsCollectionRef = collection(db, "delivrd_negotiations");
+  const queryConditions: QueryConstraint[] = [where("userId", "==", clientId)];
+  queryConditions.push(orderBy("createdAt", "desc"));
+  queryConditions.push(limit(1));
+
+  const negotiationsQuery = query(
+    negotiationsCollectionRef,
+    ...queryConditions
+  );
+
+  const negotiationsSnapshot = await getDocs(negotiationsQuery);
+  return negotiationsSnapshot.docs.map((doc) => doc.data());
 };
 
 export const mapNegotiationsToTeam = (

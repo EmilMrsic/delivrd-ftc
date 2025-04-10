@@ -1,10 +1,11 @@
 // "use client";
 import { getUserFromFirebase } from "@/lib/user";
 import Profile from "./Profile";
+import { useEffect } from "react";
+import { ClientSideProfileScreen } from "@/components/screens/client-side-profile-screen";
 
 export async function generateMetadata({ params }: { params: any }) {
   const user: any = await getUserFromFirebase(params.id);
-  console.log("got here 2:", user);
 
   const title = user?.name || "Title";
   const description = "Active vehicle negotiation";
@@ -30,9 +31,6 @@ export async function generateMetadata({ params }: { params: any }) {
 }
 
 export default function ClientPage() {
-  return (
-    <>
-      <Profile />
-    </>
-  );
+  return <ClientSideProfileScreen />;
+  // return <>{/* <Profile /> */}</>;
 }

@@ -18,12 +18,14 @@ type VoteSectionProps = {
   bidDetails: IncomingBid;
   setIncomingBid: (item: IncomingBid[]) => void;
   incomingBid: IncomingBid[];
+  clientMode?: boolean;
 };
 
 const VoteSection = ({
   bidDetails,
   setIncomingBid,
   incomingBid,
+  clientMode,
 }: VoteSectionProps) => {
   const handleVote = async (bid_id: string, value: number) => {
     try {
@@ -83,30 +85,40 @@ const VoteSection = ({
   };
   return (
     <div className="flex space-x-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleVote(bidDetails.bid_id, 1)}
-        className={
-          bidDetails.vote && bidDetails.vote === "like"
-            ? "bg-green-500 text-white"
-            : ""
-        }
-      >
-        <ThumbsUp className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleVote(bidDetails.bid_id, -1)}
-        className={
-          bidDetails.vote && bidDetails.vote === "dislike"
-            ? "bg-yellow-500 text-white"
-            : ""
-        }
-      >
-        <ThumbsDown className="h-4 w-4" />
-      </Button>
+      {!clientMode ||
+        (clientMode && bidDetails.vote === "like" && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (!clientMode) {
+                handleVote(bidDetails.bid_id, 1);
+              }
+            }}
+            className={
+              bidDetails.vote && bidDetails.vote === "like"
+                ? "bg-green-500 text-white"
+                : ""
+            }
+            disabled={clientMode}
+          >
+            <ThumbsUp className="h-4 w-4" />
+          </Button>
+        ))}
+      {!clientMode && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleVote(bidDetails.bid_id, -1)}
+          className={
+            bidDetails.vote && bidDetails.vote === "dislike"
+              ? "bg-yellow-500 text-white"
+              : ""
+          }
+        >
+          <ThumbsDown className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 };

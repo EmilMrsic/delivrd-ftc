@@ -22,6 +22,7 @@ type ClientDetailsProps = {
     parentKey?: string;
   }) => void;
   dealNegotiator?: DealNegotiator;
+  clientMode: boolean;
 };
 
 const ClientDetails = ({
@@ -29,6 +30,7 @@ const ClientDetails = ({
   negotiationId,
   handleChange,
   dealNegotiator,
+  clientMode,
 }: ClientDetailsProps) => {
   const [isBlur, setIsBlur] = useState(
     localStorage.getItem("streamMode") === "true"
@@ -55,16 +57,18 @@ const ClientDetails = ({
     <TailwindPlusCard
       title="Client Overview"
       icon={User}
-      actions={() => (
-        <TailwindPlusToggle
-          checked={isBlur}
-          label="Stream mode"
-          onToggle={(toggle) => {
-            localStorage.setItem("streamMode", toggle.toString());
-            setIsBlur(toggle);
-          }}
-        />
-      )}
+      actions={() =>
+        !clientMode && (
+          <TailwindPlusToggle
+            checked={isBlur}
+            label="Stream mode"
+            onToggle={(toggle) => {
+              localStorage.setItem("streamMode", toggle.toString());
+              setIsBlur(toggle);
+            }}
+          />
+        )
+      }
     >
       <div className={cn(`grid grid-cols-1 md:grid-cols-2 gap-4`)}>
         <div className="space-y-4">
@@ -85,6 +89,7 @@ const ClientDetails = ({
                 })
               }
               icon={Phone}
+              readOnly={clientMode}
             />
             <InputField
               label="Prefix"
@@ -100,6 +105,7 @@ const ClientDetails = ({
                 })
               }
               icon={User}
+              readOnly={clientMode}
             />
             <InputField
               label="First Name"
@@ -116,6 +122,7 @@ const ClientDetails = ({
                 })
               }
               icon={User}
+              readOnly={clientMode}
             />
             <InputField
               label="Last Name"
@@ -132,6 +139,7 @@ const ClientDetails = ({
                 })
               }
               icon={User}
+              readOnly={clientMode}
             />
             <InputField
               label="Email"
@@ -146,6 +154,7 @@ const ClientDetails = ({
                 })
               }
               icon={Mail}
+              readOnly={clientMode}
             />
             <InputField
               field="zip"
@@ -172,6 +181,7 @@ const ClientDetails = ({
                   />
                 </svg>
               )}
+              readOnly={clientMode}
             />
           </div>
           {dealNegotiator ? (
@@ -220,6 +230,7 @@ const ClientDetails = ({
               label="Deal Stage"
               value={negotiation?.stage ?? ""}
               icon={FileText}
+              readOnly={clientMode}
             />
             <InputField
               field="address"
@@ -246,6 +257,7 @@ const ClientDetails = ({
                   />
                 </svg>
               )}
+              readOnly={clientMode}
             />
             <InputField
               field="city_state"
@@ -272,6 +284,7 @@ const ClientDetails = ({
                   />
                 </svg>
               )}
+              readOnly={clientMode}
             />
           </div>
           {dealNegotiator && (

@@ -22,7 +22,6 @@ export const getUserFromFirebase = async (id: string) => {
 
     const userRef = collection(db, "users");
     const snapshot = await getDocs(query(userRef, where("id", "==", id)));
-    console.log("got here:", snapshot.docs[0]);
 
     if (!snapshot.empty) {
       const userData = snapshot.docs[0].data();

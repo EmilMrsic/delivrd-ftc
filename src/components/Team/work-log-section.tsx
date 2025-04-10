@@ -302,10 +302,10 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
               <Avatar className="h-10 w-10">
                 <AvatarImage
                   src={log?.userAvatar}
-                  alt={log?.user !== null ? log?.user[0] : ""}
+                  alt={log?.user !== null ? log?.user?.[0] : ""}
                 />
                 <AvatarFallback>
-                  {log?.user !== null ? log?.user[0] : ""}
+                  {log?.user !== null ? log?.user?.[0] : ""}
                 </AvatarFallback>
               </Avatar>
               <div className="p-3 rounded-lg bg-gray-100 flex-grow">

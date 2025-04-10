@@ -39,9 +39,11 @@ export const IncomingBidCard = ({
   noUserActions,
   negotiationId,
   allowUndelete,
+  clientMode,
 }: any & {
   noUserActions?: boolean;
   allowUndelete?: boolean;
+  clientMode?: boolean;
 }) => {
   const matchingDealer = dealers.find((dealer: DealNegotiatorType) => {
     return dealer.id === bidDetails.dealerId;
@@ -161,7 +163,7 @@ export const IncomingBidCard = ({
             : "No Dealership"}
         </h3>
         <div className="flex items-center gap-3">
-          {!noUserActions && (
+          {!(noUserActions || clientMode) && (
             <>
               <button
                 onClick={(e) => {
@@ -200,6 +202,14 @@ export const IncomingBidCard = ({
               )}
             </>
           )}
+          {clientMode && (
+            <VoteSection
+              incomingBid={incomingBids}
+              setIncomingBid={setIncomingBids}
+              bidDetails={bidDetails}
+              clientMode={clientMode}
+            />
+          )}
           {allowUndelete && (
             <Button variant="outline" size="sm" onClick={() => restoreBid()}>
               Restore
@@ -228,7 +238,33 @@ export const IncomingBidCard = ({
           editedBid={editedBid}
           setEditedBid={setEditedBid}
           parseComment={parseComment}
+          clientMode={clientMode}
         />
+        {clientMode && (
+          <>
+            {bidDetails.accept_offer ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleCancelOffer(bidDetails)}
+                className={
+                  "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
+                }
+              >
+                Cancel Offer
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleAcceptOffer(bidDetails)}
+                className={"bg-transparent text-black"}
+              >
+                Accept Offer
+              </Button>
+            )}
+          </>
+        )}
         {!noUserActions && (
           <Button
             variant="outline"
@@ -280,18 +316,22 @@ export const IncomingBidCard = ({
                 </p>
                 <p className="text-sm text-gray-500">{comment.time}</p>
               </div>
-              {comment.deal_coordinator_name === "N/A" ? (
-                <p className="pr-2">From Client</p>
-              ) : (
-                !noUserActions && (
-                  <Button
-                    variant="outline"
-                    className="border-black"
-                    onClick={() => handleSendComment(comment)}
-                  >
-                    Send To Client
-                  </Button>
-                )
+              {!clientMode && (
+                <>
+                  {comment.deal_coordinator_name === "N/A" ? (
+                    <p className="pr-2">From Client</p>
+                  ) : (
+                    !noUserActions && (
+                      <Button
+                        variant="outline"
+                        className="border-black"
+                        onClick={() => handleSendComment(comment)}
+                      >
+                        Send To Client
+                      </Button>
+                    )
+                  )}
+                </>
               )}
             </div>
           )
@@ -319,6 +359,7 @@ export const BidDetailsDialog = ({
   editedBid,
   setEditedBid,
   parseComment,
+  clientMode,
 }: {
   openDialog: string;
   setEditingBidId: (id: string | null) => void;
@@ -333,6 +374,7 @@ export const BidDetailsDialog = ({
   handleDeleteFile: (file: string, bidId: string) => void;
   handleBidFileUpload: (files: FileList, bidId: string) => void;
   parseComment: (comment: string) => React.ReactNode;
+  clientMode: boolean;
 }) => {
   console.log("got here:", editingBidId);
   return (
@@ -357,18 +399,25 @@ export const BidDetailsDialog = ({
             <p className="text-2xl font-bold">
               {matchingDealer?.Dealership} Detail
             </p>
-            {editingBidId === bidDetails.bid_id ? (
-              <Button size="sm" onClick={() => handleSave(bidDetails.bid_id)}>
-                <Save className="h-4 w-4 mr-2" /> Save
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEdit(bidDetails)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
+            {!clientMode && (
+              <>
+                {editingBidId === bidDetails.bid_id ? (
+                  <Button
+                    size="sm"
+                    onClick={() => handleSave(bidDetails.bid_id)}
+                  >
+                    <Save className="h-4 w-4 mr-2" /> Save
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(bidDetails)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+              </>
             )}
           </div>
 

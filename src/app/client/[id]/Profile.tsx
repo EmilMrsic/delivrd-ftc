@@ -99,6 +99,7 @@ function ProjectProfile() {
     const dealNegotiatorData = querySnapshot.docs[0]?.data();
     setDealNegotiatorData(dealNegotiatorData as DealNegotiator);
   };
+
   const fetchBidComments = async () => {
     const groupedBidComments: GroupedBidComments = {};
     const bidCommentsRef = collection(db, "bid comment");

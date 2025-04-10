@@ -25,6 +25,7 @@ type FeatureDetailsProps = {
     parentKey?: string;
   }) => void;
   setShowStickyHeader?: (item: boolean) => void;
+  clientMode: boolean;
 };
 
 const FeatureDetails = ({
@@ -32,6 +33,7 @@ const FeatureDetails = ({
   negotiationId,
   handleChange,
   setShowStickyHeader,
+  clientMode,
 }: FeatureDetailsProps) => {
   const dealDetailsRef = useRef(null);
   const [dealStartDate, setDealStartDate] = useState<Date | null>();
@@ -102,6 +104,7 @@ const FeatureDetails = ({
             })
           }
           icon={Car}
+          readOnly={clientMode}
         />
         <InputField
           options={vehicleOfInterest}
@@ -117,6 +120,7 @@ const FeatureDetails = ({
           }
           type="searchableDropdown"
           icon={Car}
+          readOnly={clientMode}
         />
         <InputField
           label="Model"
@@ -130,6 +134,7 @@ const FeatureDetails = ({
             })
           }
           icon={Car}
+          readOnly={clientMode}
         />
         {/* <EditableTextArea
           value={negotiation?.trim ?? "Trim details not available"}
@@ -168,6 +173,7 @@ const FeatureDetails = ({
               />
             </svg>
           )}
+          readOnly={clientMode}
         />
         <InputField
           options={[
@@ -188,6 +194,7 @@ const FeatureDetails = ({
           }
           type="searchableDropdown"
           icon={Car}
+          readOnly={clientMode}
         />
 
         <InputField
@@ -211,6 +218,7 @@ const FeatureDetails = ({
               <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
             </svg>
           )}
+          readOnly={clientMode}
         />
         <InputField
           options={["Lease", "Cash", "Finance", "Need to Discuss"]}
@@ -226,6 +234,7 @@ const FeatureDetails = ({
           }
           icon={DollarSign}
           type="searchableDropdown"
+          readOnly={clientMode}
         />
         <InputField
           label="Budget"
@@ -239,6 +248,7 @@ const FeatureDetails = ({
             })
           }
           icon={DollarSign}
+          readOnly={clientMode}
         />
         <InputField
           label="Monthly Budget"
@@ -252,6 +262,7 @@ const FeatureDetails = ({
             })
           }
           icon={DollarSign}
+          readOnly={clientMode}
         />
         <div className="space-y-2"></div>
         <div className="space-x-2 flex items-center">
@@ -271,6 +282,7 @@ const FeatureDetails = ({
           placeholderText="Select a date"
           type="datePicker"
           icon={Calendar}
+          readOnly={clientMode}
         />
         <InputField
           label="Arrival To Dealer"
@@ -283,6 +295,7 @@ const FeatureDetails = ({
           placeholderText="Select a date"
           type="datePicker"
           icon={Calendar}
+          readOnly={clientMode}
         />
 
         <InputField
@@ -296,6 +309,7 @@ const FeatureDetails = ({
           placeholderText="Select a date"
           type="datePicker"
           icon={Calendar}
+          readOnly={clientMode}
         />
 
         <InputField
@@ -310,6 +324,7 @@ const FeatureDetails = ({
           // className="border border-gray-300 rounded-md px-2 py-1"
           type="datePicker"
           icon={Calendar}
+          readOnly={clientMode}
         />
 
         <h3 className="font-semibold text-lg">Colors</h3>
@@ -326,6 +341,7 @@ const FeatureDetails = ({
             })
           }
           icon={ThumbsUp}
+          readOnly={clientMode}
         />
 
         <InputField
@@ -341,6 +357,7 @@ const FeatureDetails = ({
             })
           }
           icon={ThumbsUp}
+          readOnly={clientMode}
         />
 
         <InputField
@@ -356,6 +373,7 @@ const FeatureDetails = ({
             })
           }
           icon={X}
+          readOnly={clientMode}
         />
         <InputField
           negotiations={negotiation}
@@ -370,6 +388,7 @@ const FeatureDetails = ({
             })
           }
           icon={X}
+          readOnly={clientMode}
         />
       </div>
     </TailwindPlusCard>

@@ -27,8 +27,17 @@ import { TailwindPlusCard } from "@/components/tailwind-plus/card";
 import EditableTextArea from "@/components/base/editable-textarea";
 import { Loader } from "@/components/base/loader";
 import WorkLogSection from "../work-log-section";
+import { Button } from "@/components/ui/button";
+import { Share2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
-export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
+export const ClientProfile = ({
+  negotiationId,
+  clientMode,
+}: {
+  negotiationId: string;
+  clientMode: boolean;
+}) => {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
 
   const {
@@ -58,6 +67,8 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
     inventoryStatus: "In Stock",
     files: [""],
   });
+  const params = useSearchParams();
+  const shared = params.get("shared");
 
   const [activityLog, setActivityLog] = useState<ActivityLog>();
 
@@ -297,6 +308,17 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
     }
   };
 
+  const shareProgress = () => {
+    if (typeof window !== "undefined" && navigator) {
+      window.navigator.clipboard.writeText(
+        `${window.location.href}?shared=true`
+      );
+    }
+    toast({
+      title: "Link copied to clipboard",
+    });
+  };
+
   useEffect(() => {
     getActivityLogsByNegotiationId(negotiationId ?? "").then((log) => {
       setActivityLog(log as ActivityLog);
@@ -329,6 +351,7 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
             negotiation={negotiation}
             dealNegotiator={dealNegotiator}
             negotiationId={negotiationId}
+            clientMode={clientMode}
           />
 
           <IncomingBids
@@ -354,57 +377,62 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
             editingBidId={editingBidId}
             editedBid={editedBid}
             setEditedBid={setEditedBid}
+            clientMode={clientMode}
           />
 
-          <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
-            <div>
-              <p className="text-xl font-bold">Delivrd</p>
-              <p className="text-sm mt-1 opacity-75">
-                Click on the button to show or hide deleted bids
-              </p>
-            </div>
-            <button
-              onClick={() => setShowDeletedBids(!showDeletedBids)}
-              className="px-6 py-3 bg-white text-black hover:bg-black hover:text-white  rounded-full shadow-lg transition duration-300 transform hover:scale-105"
-            >
-              {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
-            </button>
-          </div>
-          {showDeletedBids && (
-            <DeleteBidSection
-              incomingBids={incomingBids}
-              negotiationId={negotiationId}
-              dealers={dealers}
-              setCommentingBidId={setCommentingBidId}
-              setEditedBid={setEditedBid}
-              setEditingBidId={setEditingBidId}
-              editedBid={editedBid}
-              editingBidId={editingBidId}
-              commentingBidId={commentingBidId}
-              setNewComment={setNewComment}
-              newComment={newComment}
-              addComment={addComment}
-              handleBidFileUpload={handleBidFileUpload}
-              handleDeleteFile={handleDeleteFile}
-              handleEdit={handleEdit}
-              handleSave={handleSave}
-              setOpenDialog={setOpenDialog}
-              openDialog={openDialog}
-              setIncomingBids={setIncomingBids}
-            />
+          {!clientMode && (
+            <>
+              <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
+                <div>
+                  <p className="text-xl font-bold">Delivrd</p>
+                  <p className="text-sm mt-1 opacity-75">
+                    Click on the button to show or hide deleted bids
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowDeletedBids(!showDeletedBids)}
+                  className="px-6 py-3 bg-white text-black hover:bg-black hover:text-white  rounded-full shadow-lg transition duration-300 transform hover:scale-105"
+                >
+                  {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
+                </button>
+              </div>
+              {showDeletedBids && (
+                <DeleteBidSection
+                  incomingBids={incomingBids}
+                  negotiationId={negotiationId}
+                  dealers={dealers}
+                  setCommentingBidId={setCommentingBidId}
+                  setEditedBid={setEditedBid}
+                  setEditingBidId={setEditingBidId}
+                  editedBid={editedBid}
+                  editingBidId={editingBidId}
+                  commentingBidId={commentingBidId}
+                  setNewComment={setNewComment}
+                  newComment={newComment}
+                  addComment={addComment}
+                  handleBidFileUpload={handleBidFileUpload}
+                  handleDeleteFile={handleDeleteFile}
+                  handleEdit={handleEdit}
+                  handleSave={handleSave}
+                  setOpenDialog={setOpenDialog}
+                  openDialog={openDialog}
+                  setIncomingBids={setIncomingBids}
+                />
+              )}
+              <WorkLogSection negotiationId={negotiationId} user={user} />
+
+              <AddNoteSection
+                user={user}
+                setNegotiation={setNegotiation}
+                negotiation={negotiation}
+                incomingBids={incomingBids}
+                allDealNegotiator={allDealNegotiator}
+                dealNegotiator={dealNegotiator}
+              />
+
+              <ActivityLogSection activityLog={activityLog ?? []} />
+            </>
           )}
-          <WorkLogSection negotiationId={negotiationId} user={user} />
-
-          <AddNoteSection
-            user={user}
-            setNegotiation={setNegotiation}
-            negotiation={negotiation}
-            incomingBids={incomingBids}
-            allDealNegotiator={allDealNegotiator}
-            dealNegotiator={dealNegotiator}
-          />
-
-          <ActivityLogSection activityLog={activityLog ?? []} />
         </div>
       </div>
 
@@ -414,28 +442,60 @@ export const ClientProfile = ({ negotiationId }: { negotiationId: string }) => {
             negotiation={negotiation}
             negotiationId={negotiationId}
             handleChange={handleChange}
+            clientMode={clientMode}
           />
+
+          {!shared && (
+            <Button
+              onClick={shareProgress}
+              className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
+            >
+              <Share2 className="mr-2 h-4 w-4" />
+              Share Your Deal Progress
+            </Button>
+          )}
+
+          {clientMode && (
+            <TailwindPlusCard title="Consult Notes">
+              <EditableTextArea
+                value={
+                  negotiation?.consultNotes ?? "No consult notes at the moment"
+                }
+                negotiationId={negotiationId ?? ""}
+                field="consultNotes"
+                onChange={(newValue) =>
+                  handleChange({
+                    key: "consultNotes",
+                    newValue: newValue,
+                  })
+                }
+              />
+            </TailwindPlusCard>
+          )}
+
           <TradeCard
             negotiation={negotiation}
             handleChange={handleChange}
             setNegotiation={setNegotiation}
           />
 
-          <TailwindPlusCard title="Shipping Info">
-            <EditableTextArea
-              value={
-                negotiation?.shippingInfo ?? "No shipping info at the moment"
-              }
-              negotiationId={negotiationId ?? ""}
-              field="shippingInfo"
-              onChange={(newValue) =>
-                handleChange({
-                  key: "shippingInfo",
-                  newValue: newValue,
-                })
-              }
-            />
-          </TailwindPlusCard>
+          {!clientMode && (
+            <TailwindPlusCard title="Shipping Info">
+              <EditableTextArea
+                value={
+                  negotiation?.shippingInfo ?? "No shipping info at the moment"
+                }
+                negotiationId={negotiationId ?? ""}
+                field="shippingInfo"
+                onChange={(newValue) =>
+                  handleChange({
+                    key: "shippingInfo",
+                    newValue: newValue,
+                  })
+                }
+              />
+            </TailwindPlusCard>
+          )}
         </div>
       </div>
     </div>

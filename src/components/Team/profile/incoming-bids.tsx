@@ -29,6 +29,7 @@ export const IncomingBids = ({
   editingBidId,
   editedBid,
   setEditedBid,
+  clientMode,
 }: {
   incomingBids: IncomingBid[];
   setIncomingBids: (item: IncomingBid[]) => void;
@@ -53,13 +54,14 @@ export const IncomingBids = ({
   editingBidId: string | null;
   editedBid: any | null;
   setEditedBid: (editedBid: any | null) => void;
+  clientMode: boolean;
 }) => {
   return (
     <TailwindPlusCard
       title="Incoming Bids"
       icon={FileText}
       actions={() => {
-        if (noUserActions) return null;
+        if (noUserActions || clientMode) return null;
         return (
           <ManualBidUpload
             dealers={dealers}
@@ -110,6 +112,7 @@ export const IncomingBids = ({
                 editingBidId={editingBidId}
                 editedBid={editedBid}
                 setEditedBid={setEditedBid}
+                clientMode={clientMode}
               />
             ))
         ) : (

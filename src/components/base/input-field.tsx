@@ -108,6 +108,7 @@ export const InputField = (props: {
   placeholderText?: string;
   selected?: Date | null;
   parentKey?: string;
+  readOnly?: boolean;
 }) => {
   const { toast } = useToast();
 
@@ -182,6 +183,18 @@ export const InputField = (props: {
       }
     }
   };
+
+  if (props.readOnly) {
+    return (
+      <div className="flex items-start space-x-2 text-[#202125]">
+        {props.icon && <props.icon className="h-5 w-5 text-gray-400" />}
+        <div className="font-bold text-[15px] whitespace-nowrap">
+          {props.label}:
+        </div>
+        <div className="text-[15px] ">{props.value}</div>
+      </div>
+    );
+  }
 
   const Icon = props.icon;
 
