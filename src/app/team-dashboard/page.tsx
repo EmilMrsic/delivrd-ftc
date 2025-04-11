@@ -57,6 +57,7 @@ export default function DealList() {
     currentPage,
     setCurrentPage,
     setCurrentDeals,
+    user,
   } = useTeamDashboard();
 
   const { notification } = useAppSelector((state) => state.notification);
@@ -106,6 +107,12 @@ export default function DealList() {
 
     setFilteredDeals(filtered);
   };
+
+  useEffect(() => {
+    if (user && (user.privilege === "Client" || user.privilege === "Dealer")) {
+      router.back();
+    }
+  }, [currentDeals]);
 
   const handleFilterChange = async (
     filterType: keyof typeof filters,

@@ -134,6 +134,12 @@ function ProjectProfile() {
     toast({ title: "Comment added successfully" });
   };
 
+  useEffect(() => {
+    if (user && (user.privilege === "Client" || user.privilege === "Dealer")) {
+      router.back();
+    }
+  }, [negotiation]);
+
   const handleChange = (
     parentKey: string,
     childKey: string,

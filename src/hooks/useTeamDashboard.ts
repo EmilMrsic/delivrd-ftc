@@ -23,6 +23,8 @@ const useTeamDashboard = () => {
     []
   );
 
+  const [user, setUser] = useState<any>();
+
   const [itemsPerPage, setItemsPerPage] = useState(100);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,6 +43,7 @@ const useTeamDashboard = () => {
       }
 
       const parseUserData = JSON.parse(userData);
+      setUser(parseUserData);
       const id = Array.isArray(parseUserData.deal_coordinator_id)
         ? parseUserData.deal_coordinator_id[0]
         : parseUserData.deal_coordinator_id;
@@ -225,6 +228,7 @@ const useTeamDashboard = () => {
     itemsPerPage,
     currentPage,
     setCurrentPage,
+    user,
   };
 };
 
