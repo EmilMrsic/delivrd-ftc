@@ -10,7 +10,14 @@ import {
   uploadFile,
 } from "@/lib/utils";
 import { ActivityLog, BidComments } from "@/types";
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { onMessage } from "firebase/messaging";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -29,7 +36,9 @@ import { Loader } from "@/components/base/loader";
 import WorkLogSection from "../work-log-section";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import useCheckClientShareExpiry from "@/hooks/useCheckExpiration";
+import useClientShareExpired from "@/hooks/useCheckExpiration";
 
 export const ClientProfile = ({
   negotiationId,
@@ -61,6 +70,7 @@ export const ClientProfile = ({
   } = useTeamProfile({ negotiationId });
 
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
   const [commentingBidId, setCommentingBidId] = useState<string | null>(null);
@@ -75,6 +85,7 @@ export const ClientProfile = ({
   const params = useSearchParams();
   const shared = params.get("shared");
 
+  const { isExpired, data } = useClientShareExpired(shared);
   const [activityLog, setActivityLog] = useState<ActivityLog>();
 
   const addComment = async (bid_id: string) => {
@@ -313,16 +324,45 @@ export const ClientProfile = ({
     }
   };
 
-  const shareProgress = () => {
+  const shareProgress = async () => {
     if (typeof window !== "undefined" && navigator) {
+      const id = generateRandomId();
       window.navigator.clipboard.writeText(
-        `${window.location.href}?shared=true`
+        `${window.location.href}?shared=${id}`
       );
+
+      await setDoc(doc(db, "delivrd_client_share", id), {
+        id,
+        createdAt: serverTimestamp(),
+        clientId: user.id,
+      });
     }
     toast({
       title: "Link copied to clipboard",
     });
   };
+
+  useEffect(() => {
+    if (
+      shared?.length &&
+      user?.id &&
+      data &&
+      user?.privilege !== "Team" &&
+      (shared !== data.id || user.id !== data.clientId)
+    ) {
+      router.push("/");
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      if (data === null && shared?.length) {
+        console.warn("No data received within time limit — redirecting");
+        router.push("/");
+      }
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [data, user, shared, router]);
 
   useEffect(() => {
     getActivityLogsByNegotiationId(negotiationId ?? "").then((log) => {

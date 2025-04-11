@@ -20,6 +20,7 @@ import {
   mapNegotiationsByColumn,
   sortMappedDataHelper,
 } from "@/lib/helpers/negotiation";
+import { useRouter } from "next/navigation";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -78,6 +79,7 @@ export default function DealList() {
     cachedFilters && formatFiltersForNegotiationsEndpoint(cachedFilters);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
 
@@ -177,6 +179,17 @@ export default function DealList() {
     setFilters(DEFAULT_FILTERS);
     // setLoading(true);
   };
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    const parseUserData = JSON.parse(userData ?? "");
+    if (
+      parseUserData.privilege === "Client" ||
+      parseUserData.privilege === "Dealer"
+    ) {
+      router.push("/");
+    }
+  }, []);
 
   const handleStageChange = async (id: string, newStage: string) => {
     try {
