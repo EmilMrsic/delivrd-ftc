@@ -7,8 +7,9 @@ import FcmTokenProvider from "@/components/FcmTokenProvider";
 import { ReduxProvider } from "./redux/provider";
 import Script from "next/script";
 import { ContextProviders } from "@/components/context-providers";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import ProtectedRoute from "@/components/ProtectedRoutes/ProtectedRoute";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -44,9 +45,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ContextProviders>
-          <FcmTokenProvider />
-          <Toaster />
-          {children}
+          <ProtectedRoute>
+            <FcmTokenProvider />
+            <Toaster />
+            {children}
+          </ProtectedRoute>
         </ContextProviders>
       </body>
     </html>
