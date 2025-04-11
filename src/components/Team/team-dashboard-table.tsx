@@ -206,6 +206,10 @@ const TeamDashboardTable = ({
     const { key, direction } = sortConfig;
     const filtered = allNegotiations
       ? allNegotiations.filter((item) => {
+          if (item.dealCoordinatorId || item.dealCoordinatorId !== "") {
+            return false;
+          }
+
           if (searchTerm.length > 0) {
             return item.stage === "Paid" && performSearch(item, searchTerm);
           }

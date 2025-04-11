@@ -12,6 +12,7 @@ import { NegotiationDataType } from "@/lib/models/team";
 import { toast } from "@/hooks/use-toast";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { negotiationStatusOrder } from "@/lib/constants/negotiations";
 
 export const StageDropdown = ({
   deal,
@@ -48,7 +49,7 @@ export const StageDropdown = ({
   };
 
   const stageOptions = useMemo(() => {
-    return sortStatuses(dealStageOptions);
+    return sortStatuses(negotiationStatusOrder);
   }, []);
 
   return (

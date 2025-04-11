@@ -357,7 +357,7 @@ export const ClientProfile = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-[98%] mx-auto">
       <div className="md:col-span-2">
-        <div className="md:sticky md:top-4 space-y-6">
+        <div className="md:sticky space-y-6">
           {/* <div className="md:hidden">
                 <FeatureDetails
                   setShowStickyHeader={setShowStickyHeader}
@@ -460,7 +460,7 @@ export const ClientProfile = ({
       </div>
 
       <div className="md:col-span-1">
-        <div className="md:sticky md:top-4 space-y-6">
+        <div className="md:sticky space-y-6">
           <FeatureDetails
             negotiation={negotiation}
             negotiationId={negotiationId}
@@ -468,7 +468,7 @@ export const ClientProfile = ({
             clientMode={clientMode}
           />
 
-          {clientMode && !shared && (
+          {/* {clientMode && !shared && (
             <Button
               onClick={shareProgress}
               className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
@@ -476,7 +476,7 @@ export const ClientProfile = ({
               <Share2 className="mr-2 h-4 w-4" />
               Share Your Deal Progress
             </Button>
-          )}
+          )} */}
 
           {!clientMode && (
             <TailwindPlusCard title="Consult Notes">
