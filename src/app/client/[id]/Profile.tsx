@@ -25,7 +25,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { formatDate, getCurrentTimestamp, uploadFile } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import DealDetailCard from "@/components/Client/DealDetailCard";
 import ClientOverviewCard from "@/components/Client/ClientOverviewCard";
 import IncomingBidsCard from "@/components/Client/IncomingBidsCard/IncomingBidsCard";
@@ -38,6 +38,7 @@ import EditableTextArea from "@/components/base/editable-textarea";
 import EditableInput from "@/components/base/input-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import useClientShareStatus from "@/hooks/useCheckExpiration";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -48,10 +49,16 @@ function ProjectProfile() {
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [negotiationData, setNegotiationData] = useState<NegotiationData[]>([]);
   const [commentingBidId, setCommentingBidId] = useState<string | null>(null);
-  const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
+  const params = useSearchParams();
+  const shared = params.get("shared");
 
+  const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
+  const { isExpired, data } = useClientShareStatus(shared);
+  const logUser = localStorage.getItem("user");
+  const user = JSON.parse(logUser ?? "");
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
+  const router = useRouter();
   const [acceptedBidId, setAcceptedBidId] = useState<string | null>(null);
   const [dealerData, setDealerData] = useState<DealerData[]>([]);
   const [dealNegotiatorData, setDealNegotiatorData] =
@@ -420,6 +427,28 @@ function ProjectProfile() {
     await addDoc(commentRef, newCommentData);
     toast({ title: "Comment added successfully" });
   };
+
+  useEffect(() => {
+    if (
+      shared?.length &&
+      user?.id &&
+      data &&
+      user?.privilege !== "Team" &&
+      (shared !== data.id || user.id !== data.clientId)
+    ) {
+      router.push("/");
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      if (data === null && shared?.length) {
+        console.warn("No data received within time limit — redirecting");
+        router.push("/");
+      }
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [data, user, shared, router]);
 
   return userData && incomingBids && dealerData && negotiationData ? (
     <>

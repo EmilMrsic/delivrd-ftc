@@ -71,7 +71,8 @@ export const ClientProfile = ({
 
   const dispatch = useDispatch();
   const router = useRouter();
-
+  const params = useSearchParams();
+  const shared = params.get("shared");
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
   const [commentingBidId, setCommentingBidId] = useState<string | null>(null);
   const [editingBidId, setEditingBidId] = useState<string | null>(null);
@@ -82,10 +83,7 @@ export const ClientProfile = ({
     inventoryStatus: "In Stock",
     files: [""],
   });
-  const params = useSearchParams();
-  const shared = params.get("shared");
 
-  const { isExpired, data } = useClientShareExpired(shared);
   const [activityLog, setActivityLog] = useState<ActivityLog>();
 
   const addComment = async (bid_id: string) => {
@@ -341,28 +339,6 @@ export const ClientProfile = ({
       title: "Link copied to clipboard",
     });
   };
-
-  useEffect(() => {
-    if (
-      shared?.length &&
-      user?.id &&
-      data &&
-      user?.privilege !== "Team" &&
-      (shared !== data.id || user.id !== data.clientId)
-    ) {
-      router.push("/");
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      if (data === null && shared?.length) {
-        console.warn("No data received within time limit — redirecting");
-        router.push("/");
-      }
-    }, 3000);
-
-    return () => clearTimeout(timeout);
-  }, [data, user, shared, router]);
 
   useEffect(() => {
     getActivityLogsByNegotiationId(negotiationId ?? "").then((log) => {
