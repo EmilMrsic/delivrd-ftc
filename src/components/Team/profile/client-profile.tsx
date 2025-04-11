@@ -478,7 +478,7 @@ export const ClientProfile = ({
             </Button>
           )}
 
-          {clientMode && (
+          {!clientMode && (
             <TailwindPlusCard title="Consult Notes">
               <EditableTextArea
                 value={

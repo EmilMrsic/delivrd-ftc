@@ -75,19 +75,30 @@ export const TeamHeader = ({
 }) => {
   const user = useLoggedInUser();
   const negotiatorDataToUser = negotiatorData ? negotiatorData : user;
+  console.log(
+    "got here:",
+    negotiatorDataToUser?.privilege,
+    negotiatorDataToUser
+  );
+
+  const banner = (
+    <div className="flex flex-col items-start">
+      <img
+        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
+        alt="DELIVRD Logo"
+        className="h-8 mb-2"
+      />
+      <p className="text-white text-sm">Putting Dreams In Driveways</p>
+    </div>
+  );
 
   return (
     <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
-      <Link href={"/team-dashboard"}>
-        <div className="flex flex-col items-start">
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
-            alt="DELIVRD Logo"
-            className="h-8 mb-2"
-          />
-          <p className="text-white text-sm">Putting Dreams In Driveways</p>
-        </div>
-      </Link>
+      {negotiatorDataToUser?.privilege === "Team" ? (
+        <Link href={"/team-dashboard"}>{banner}</Link>
+      ) : (
+        banner
+      )}
       <div className="flex items-center gap-3">
         <div className="fit">
           <div className="flex items-center gap-2">

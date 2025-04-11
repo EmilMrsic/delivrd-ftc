@@ -9,6 +9,7 @@ import { ClientProfile } from "../Team/profile/client-profile";
 import Profile from "@/app/client/[id]/Profile";
 import useClientShareStatus from "@/hooks/useCheckExpiration";
 import { useRouter } from "next/navigation";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 export const ClientSideProfileScreen = () => {
   const { id } = useParams();
@@ -16,8 +17,7 @@ export const ClientSideProfileScreen = () => {
   const params = useSearchParams();
   const shared = params.get("shared");
   const { isExpired, data } = useClientShareStatus(shared);
-  const logUser = localStorage.getItem("user");
-  const user = JSON.parse(logUser ?? "");
+  const user = useLoggedInUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -26,30 +26,22 @@ export const ClientSideProfileScreen = () => {
     });
   }, [id]);
 
-  //   return <Profile />;
-
   useEffect(() => {
-    console.log("you even here");
-    if (
-      shared?.length &&
-      user?.id &&
-      data &&
-      user?.privilege !== "Team" &&
-      (shared !== data.id || user.id !== data.clientId)
-    ) {
-      router.push("/");
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      if (data === null && shared?.length) {
-        console.warn("No data received within time limit — redirecting");
-        router.push("/");
+    console.log("user:", user, user?.id, id);
+    if (user) {
+      if (user?.privilege !== "Team") {
+        if (user?.id !== id) {
+          if (!shared || shared !== data?.id || user.id !== data?.clientId) {
+            console.log("user: pushing to home");
+            router.push("/");
+            return;
+          }
+        }
       }
-    }, 3000);
+    }
+  }, [id, user, data, shared]);
 
-    return () => clearTimeout(timeout);
-  }, [data, user, shared, router]);
+  if (!user) return null;
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">

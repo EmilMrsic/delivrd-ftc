@@ -87,6 +87,7 @@ export const DealNegotiatorModel = z.object({
   video_link: z.string().nullable(),
   source: z.string(),
   visible: z.boolean().default(true),
+  privilege: z.string().optional(),
 });
 
 export const InternalNotesModel = z.object({
