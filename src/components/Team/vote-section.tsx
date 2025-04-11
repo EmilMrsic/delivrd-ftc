@@ -85,26 +85,25 @@ const VoteSection = ({
   };
   return (
     <div className="flex space-x-2">
-      {!clientMode ||
-        (clientMode && bidDetails.vote === "like" && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (!clientMode) {
-                handleVote(bidDetails.bid_id, 1);
-              }
-            }}
-            className={
-              bidDetails.vote && bidDetails.vote === "like"
-                ? "bg-green-500 text-white"
-                : ""
+      {!(clientMode || (clientMode && bidDetails.vote === "like")) && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            if (!clientMode) {
+              handleVote(bidDetails.bid_id, 1);
             }
-            disabled={clientMode}
-          >
-            <ThumbsUp className="h-4 w-4" />
-          </Button>
-        ))}
+          }}
+          className={
+            bidDetails.vote && bidDetails.vote === "like"
+              ? "bg-green-500 text-white"
+              : ""
+          }
+          disabled={clientMode}
+        >
+          <ThumbsUp className="h-4 w-4" />
+        </Button>
+      )}
       {!clientMode && (
         <Button
           variant="outline"

@@ -75,12 +75,6 @@ export const TeamHeader = ({
 }) => {
   const user = useLoggedInUser();
   const negotiatorDataToUser = negotiatorData ? negotiatorData : user;
-  console.log(
-    "got here:",
-    negotiatorDataToUser?.privilege,
-    negotiatorDataToUser
-  );
-
   const banner = (
     <div className="flex flex-col items-start">
       <img

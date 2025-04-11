@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
+import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
 import { sortDataHelper } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { fetchAllPaidHoldingNegotiations, getStatusStyles } from "@/lib/utils";
@@ -92,7 +93,7 @@ const PaidHolding = () => {
   //   null
   // );
   const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate", // default sorting by Submitted Date
+    key: DEFAULT_SORTED_COLUMN, // default sorting by Submitted Date
     direction: "ascending", // default direction
   });
 

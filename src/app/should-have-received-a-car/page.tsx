@@ -46,6 +46,7 @@ import { TailwindPlusTable } from "@/components/tailwind-plus/table";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TeamHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
+import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
 
 type NegotiationsGroupedType = {
   [groupKey: string]: NegotiationDataType[];
@@ -77,7 +78,7 @@ function ReceivedCar() {
   }>({});
 
   const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate",
+    key: DEFAULT_SORTED_COLUMN,
     direction: "ascending",
   });
 

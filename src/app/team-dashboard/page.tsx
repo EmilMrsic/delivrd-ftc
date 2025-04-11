@@ -21,6 +21,7 @@ import {
   sortMappedDataHelper,
 } from "@/lib/helpers/negotiation";
 import { useRouter } from "next/navigation";
+import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -102,7 +103,7 @@ export default function DealList() {
   });
 
   const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate", // default sorting by Submitted Date
+    key: DEFAULT_SORTED_COLUMN, // default sorting by Submitted Date
     direction: "ascending", // default direction
   });
 

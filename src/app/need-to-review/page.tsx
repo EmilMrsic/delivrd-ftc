@@ -55,6 +55,7 @@ import { TeamHeader } from "@/components/base/header";
 import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dashboard-view-selector";
 import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
 import { dateFormat } from "@/lib/helpers/dates";
+import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
 
 // type TeamDataType = {
 //   activeDeals: string[];
@@ -152,7 +153,7 @@ function NeedToReview() {
   });
 
   const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate", // default sorting by Submitted Date
+    key: DEFAULT_SORTED_COLUMN, // default sorting by Submitted Date
     direction: "ascending", // default direction
   });
 

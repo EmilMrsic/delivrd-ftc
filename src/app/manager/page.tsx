@@ -54,6 +54,7 @@ import { StageButton } from "@/components/Team/stage-button";
 import { MakeButton } from "@/components/Team/make-button";
 import { StageDropdown } from "@/components/Team/stage-dropdown";
 import { ClientProfile } from "@/components/Team/profile/client-profile";
+import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -74,7 +75,7 @@ function Manager() {
   const router = useRouter();
   const [userData, setUserData] = useState<IUser>();
   const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate", // default sorting by Submitted Date
+    key: DEFAULT_SORTED_COLUMN, // default sorting by Submitted Date
     direction: "ascending", // default direction
   });
 

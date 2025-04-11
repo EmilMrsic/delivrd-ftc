@@ -91,7 +91,6 @@ export const TeamDashboardClientNameDisplay = ({
   }, [showModal]);
 
   useEffect(() => {
-    console.log("resetting negotiation");
     setNegotiation(deal);
   }, [deal]);
 

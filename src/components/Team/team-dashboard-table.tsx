@@ -195,19 +195,30 @@ const TeamDashboardTable = ({
       });
       return newState;
     });
+
+    setPaidNegotiations((prevState) => {
+      const newState = [...prevState];
+      return sortDataHelper(newState)(key, direction) as NegotiationDataType[];
+    });
   };
 
   useEffect(() => {
-    setPaidNegotiations(
-      allNegotiations
-        ? allNegotiations.filter((item) => {
-            if (searchTerm.length > 0) {
-              return item.stage === "Paid" && performSearch(item, searchTerm);
-            }
-            return item.stage === "Paid";
-          })
-        : []
-    );
+    const { key, direction } = sortConfig;
+    const filtered = allNegotiations
+      ? allNegotiations.filter((item) => {
+          if (searchTerm.length > 0) {
+            return item.stage === "Paid" && performSearch(item, searchTerm);
+          }
+          return item.stage === "Paid";
+        })
+      : [];
+
+    console.log("running sort for paid:", key, direction);
+    const sorted = sortDataHelper(filtered)(
+      key || "brand",
+      direction || "ascending"
+    ) as NegotiationDataType[];
+    setPaidNegotiations(sorted);
   }, [allNegotiations, searchTerm]);
 
   useEffect(() => {
@@ -218,10 +229,12 @@ const TeamDashboardTable = ({
         (deal) => performSearch(deal, searchTerm)
       );
 
+      const { key, direction } = sortConfig;
+
       const sortedNegotiationsByColumn = sortMappedDataHelper(
         negotiationsByColumn,
-        "clientNameFull",
-        "ascending"
+        key || "brand",
+        direction || "ascending"
       );
 
       const finalNegotiationGrouping: Record<

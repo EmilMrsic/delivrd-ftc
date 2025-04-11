@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropDownMenu } from "@/components/ui/dropdown-menu";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
+import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
 import { sortDataHelper } from "@/lib/helpers/negotiation";
 import { NegotiationDataType } from "@/lib/models/team";
 import { getStatusStyles, vehicleOfInterest } from "@/lib/utils";
@@ -71,7 +72,7 @@ const ViewByBrand = () => {
   });
 
   const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate",
+    key: DEFAULT_SORTED_COLUMN,
     direction: "ascending",
   });
 

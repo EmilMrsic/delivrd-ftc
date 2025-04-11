@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import useTeamDashboard from "@/hooks/useTeamDashboard";
+import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
 import { dateFormat } from "@/lib/helpers/dates";
 import { sortDataHelper } from "@/lib/helpers/negotiation";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
@@ -66,7 +67,7 @@ const OldDeals = () => {
   const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);
 
   const [sortConfig, setSortConfig] = useState({
-    key: "submittedDate",
+    key: DEFAULT_SORTED_COLUMN,
     direction: "ascending",
   });
 

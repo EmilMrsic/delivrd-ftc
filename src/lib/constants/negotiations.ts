@@ -1,3 +1,5 @@
+export const DEFAULT_SORTED_COLUMN = "brand";
+
 export const negotiationStatusOrder = [
   // "Deal Started",
   // "Paid",
@@ -89,7 +91,7 @@ export const negotiationMakeColors: Record<string, string> = {
   Lamborghini: "#01ddd5", // Fixed typo in name
   "Land Rover": "#048a0e",
   Lexus: "#ffba05",
-  Lincoln: "#d6404",
+  Lincoln: "#d64040",
   Lotus: "#dc073d",
   Maserati: "#dd04a8",
   Mazda: "#7c37ef",
