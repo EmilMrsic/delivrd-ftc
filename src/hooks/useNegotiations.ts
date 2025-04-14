@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 export const useNegotiations = (
   config: {
     all?: boolean;
+    mode?: "consult" | "standard";
     filter?: { [key: string]: string | string[] };
     id?: string;
     archive?: boolean;
@@ -30,6 +31,7 @@ export const useNegotiations = (
       const request = await backendRequest(path, "POST", {
         archive: config.archive,
         filter: filters,
+        mode: config.mode,
       });
 
       return request;

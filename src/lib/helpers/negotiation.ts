@@ -144,6 +144,7 @@ export const orderNegotiationsByColumns = (
 export const getActiveDealDocuments = async (dealQuery: {
   dealNegotiatorId?: string;
   archive?: boolean;
+  mode?: "consult" | "standard";
   filter?: {
     [key: string]: string | string[];
   };
@@ -168,11 +169,21 @@ export const getActiveDealDocuments = async (dealQuery: {
 
   if (dealQuery?.filter) {
     Object.keys(dealQuery.filter).forEach((key) => {
-      if (dealQuery?.filter?.[key]) {
-        if (Array.isArray(dealQuery.filter[key])) {
-          queryConditions.push(where(key, "in", dealQuery.filter[key]));
-        } else {
-          queryConditions.push(where(key, "==", dealQuery.filter[key]));
+      if (key === "createdAt") {
+        if (dealQuery?.filter?.[key]) {
+          const day = dealQuery.filter[key];
+          const start = `${day}T00:00:00.000Z`;
+          const end = `${day}T23:59:59.999Z`;
+          queryConditions.push(where("createdAt", ">=", start));
+          queryConditions.push(where("createdAt", "<=", end));
+        }
+      } else {
+        if (dealQuery?.filter?.[key]) {
+          if (Array.isArray(dealQuery.filter[key])) {
+            queryConditions.push(where(key, "in", dealQuery.filter[key]));
+          } else {
+            queryConditions.push(where(key, "==", dealQuery.filter[key]));
+          }
         }
       }
     });
@@ -199,6 +210,10 @@ export const getActiveDealDocuments = async (dealQuery: {
     if (!negotiation) return false;
     if (dealQuery.archive) {
       return ["Closed", "Closed No Review"].includes(negotiation.stage);
+    } else if (dealQuery.mode === "consult") {
+      return ["Refunded", "Scheduled", "Proposal Sent"].includes(
+        negotiation.stage
+      );
     } else {
       return negotiationStatusOrder.includes(negotiation.stage);
     }

@@ -21,11 +21,12 @@ export const POST = async (request: Request) => {
     team: teamData,
   };
 
-  const { filter, archive } = await request.json();
+  const { filter, archive, mode } = await request.json();
 
   const deals = await getActiveDealDocuments({
     filter,
     archive,
+    mode,
   });
 
   if (deals) {
