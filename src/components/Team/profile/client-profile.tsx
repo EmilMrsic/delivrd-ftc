@@ -468,7 +468,7 @@ export const ClientProfile = ({
             clientMode={clientMode}
           />
 
-          {/* {clientMode && !shared && (
+          {clientMode && !shared && (
             <Button
               onClick={shareProgress}
               className="w-full bg-gradient-to-r from-orange-400 to-red-500 text-white hover:from-orange-500 hover:to-red-600"
@@ -476,7 +476,7 @@ export const ClientProfile = ({
               <Share2 className="mr-2 h-4 w-4" />
               Share Your Deal Progress
             </Button>
-          )} */}
+          )}
 
           {!clientMode && (
             <TailwindPlusCard title="Consult Notes">
