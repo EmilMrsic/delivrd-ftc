@@ -236,7 +236,7 @@ const ClientDetails = ({
           <div className={cn(`space-y-4`, isBlur && `blur-sm`)}>
             <InputField
               type="searchableDropdown"
-              options={negotiationStatusOrder}
+              options={[...negotiationStatusOrder, "Refunded"]}
               field="stage"
               negotiationId={negotiationId ?? ""}
               label="Deal Stage"
