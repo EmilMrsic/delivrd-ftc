@@ -8,7 +8,7 @@ export const WorkLogModel = z.object({
   user: z.string(),
   negotiation_id: z.string(),
   deal_coordinator_id: z.string(),
-  userAvatar: z.string().optional(),
+  userAvatar: z.union([z.string(), z.null()]).optional(),
 });
 
 export const NegotiationDataModel = z.object({
@@ -73,6 +73,8 @@ export const NegotiationDataModel = z.object({
   // these are subject to change after emil
   tradeInInfo: z.string().optional(),
   // trade_in_files: z.array(z.string()).optional(),
+  purchaseTimeline: z.string().optional(),
+  dealershipExperience: z.string().optional(),
 });
 
 export const DealNegotiatorModel = z.object({

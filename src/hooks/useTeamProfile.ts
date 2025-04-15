@@ -44,6 +44,7 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   const { negotiations: negotiationsFromUseNegotiations, isLoading } =
     useNegotiations({
       all: true,
+      profile: true,
       filter: {
         id: negotiationId,
       },

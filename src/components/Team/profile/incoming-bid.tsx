@@ -7,7 +7,14 @@ import VoteSection from "../vote-section";
 import { Textarea } from "@/components/ui/textarea";
 import { DealNegotiatorType } from "@/lib/models/team";
 import { BidComments, DealerData, IncomingBid } from "@/types";
-import { doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 
@@ -60,7 +67,13 @@ export const IncomingBidCard = ({
 
   const handleAcceptOffer = async (acceptedBid: IncomingBid) => {
     try {
-      const bidRef = doc(db, "Incoming Bids", acceptedBid.bid_id);
+      const bidCollectionRef = collection(db, "Incoming Bids");
+      const q = query(
+        bidCollectionRef,
+        where("bid_id", "==", acceptedBid.bid_id)
+      );
+      const querySnapshot = await getDocs(q);
+      const bidRef = querySnapshot.docs[0].ref;
 
       await updateDoc(bidRef, { accept_offer: true, vote: "like" });
 

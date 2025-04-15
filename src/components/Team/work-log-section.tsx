@@ -301,7 +301,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
             <div key={log.id} className="flex items-start space-x-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage
-                  src={log?.userAvatar}
+                  src={log?.userAvatar ?? ""}
                   alt={log?.user !== null ? log?.user?.[0] : ""}
                 />
                 <AvatarFallback>

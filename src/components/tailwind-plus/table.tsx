@@ -6,7 +6,7 @@ import {
   flexRender,
   Header,
 } from "@tanstack/react-table";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Expand } from "lucide-react";
 import Link from "next/link";
 import { TailwindPlusModal } from "./modal";
@@ -50,12 +50,12 @@ export const TailwindPlusTable = ({
 }: {
   headers: (string | HeaderWithConfig)[];
   rows: (Cell | string | undefined | null)[][];
-  sortConfig: {
+  sortConfig?: {
     key: string;
     direction: string;
   };
-  setSortConfig: (config: { key: string; direction: string }) => void;
-  sortData: (key: string, direction: string) => void;
+  setSortConfig?: (config: { key: string; direction: string }) => void;
+  sortData?: (key: string, direction: string) => void;
   rowConfigs?: RowConfig[];
 }) => {
   const [expanded, setExpanded] = useState<null | [number, number]>(null);
@@ -192,12 +192,12 @@ export const TailwindTableHeader = ({
   // header: string | HeaderWithConfig;
   header: Header<any, any>;
   headerConfig: HeaderWithConfig | string;
-  sortConfig: {
+  sortConfig?: {
     key: string;
     direction: string;
   };
-  setSortConfig: (config: { key: string; direction: string }) => void;
-  sortData: (key: string, direction: string) => void;
+  setSortConfig?: (config: { key: string; direction: string }) => void;
+  sortData?: (key: string, direction: string) => void;
 }) => {
   return (
     <th
@@ -216,13 +216,16 @@ export const TailwindTableHeader = ({
           onClick={() => {
             if (headerConfig?.config?.sortable && headerConfig?.config?.key) {
               const direction =
-                sortConfig.key === headerConfig?.config?.key &&
-                sortConfig.direction === "ascending"
+                sortConfig?.key === headerConfig?.config?.key &&
+                sortConfig?.direction === "ascending"
                   ? "descending"
                   : "ascending";
 
-              setSortConfig({ key: headerConfig?.config?.key, direction });
-              sortData(headerConfig?.config?.key, direction);
+              setSortConfig?.({
+                key: headerConfig?.config?.key,
+                direction,
+              });
+              sortData?.(headerConfig?.config?.key, direction);
             }
           }}
         >
@@ -231,8 +234,8 @@ export const TailwindTableHeader = ({
             headerConfig?.config?.sortable && (
               <TableSortButton
                 direction={
-                  sortConfig.key === headerConfig?.config?.key &&
-                  sortConfig.direction === "ascending"
+                  sortConfig?.key === headerConfig?.config?.key &&
+                  sortConfig?.direction === "ascending"
                     ? "descending"
                     : "ascending"
                 }

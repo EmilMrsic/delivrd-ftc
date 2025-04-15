@@ -18,10 +18,12 @@ export const StageDropdown = ({
   deal,
   handleStageChange,
   setNegotiation,
+  onStageChange,
 }: {
   deal: NegotiationDataType;
   handleStageChange?: (id: string, stage: string) => void;
   setNegotiation?: (negotiation: NegotiationDataType) => void;
+  onStageChange?: (stage: string) => void;
 }) => {
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
 
@@ -33,6 +35,10 @@ export const StageDropdown = ({
 
       if (setNegotiation) {
         setNegotiation({ ...deal, stage: stage });
+      }
+
+      if (onStageChange) {
+        onStageChange(stage);
       }
 
       toast({ title: "Status updated" });

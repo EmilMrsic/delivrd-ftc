@@ -21,13 +21,16 @@ export const POST = async (request: Request) => {
     team: teamData,
   };
 
-  const { filter, archive, mode } = await request.json();
-
+  const { filter, archive, mode, profile } = await request.json();
+  // console.log("looking up", filter, archive, mode);
   const deals = await getActiveDealDocuments({
     filter,
     archive,
     mode,
+    profile,
   });
+
+  console.log("got deals:", deals);
 
   if (deals) {
     output.negotiations = deals;

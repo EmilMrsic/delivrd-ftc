@@ -145,6 +145,7 @@ export const getActiveDealDocuments = async (dealQuery: {
   dealNegotiatorId?: string;
   archive?: boolean;
   mode?: "consult" | "standard";
+  profile?: boolean;
   filter?: {
     [key: string]: string | string[];
   };
@@ -202,12 +203,14 @@ export const getActiveDealDocuments = async (dealQuery: {
       return NegotiationDataModel.parse(data);
     } catch (error) {
       console.error("Error parsing negotiation data:", data.id);
+      // console.error(error);
       return null;
     }
   });
 
   return negotiations.filter((negotiation: NegotiationDataType | null) => {
     if (!negotiation) return false;
+    if (dealQuery.profile) return true;
     if (dealQuery.archive) {
       return ["Closed", "Closed No Review"].includes(negotiation.stage);
     } else if (dealQuery.mode === "consult") {
