@@ -9,6 +9,7 @@ import {
   mapNegotiationsByColumn,
   sortDataHelper,
   sortMappedDataHelper,
+  sortStatuses,
 } from "@/lib/helpers/negotiation";
 import { NegotiationDataType } from "@/lib/models/team";
 import { useEffect, useMemo, useState } from "react";
@@ -47,8 +48,11 @@ export default function ConsultMode() {
   }, [dayToSort]);
 
   const [negotiationsByColumn, setNegotiationsByColumn] = useState<
-    Record<string, NegotiationDataType[]>
-  >({});
+    {
+      status: string;
+      negotiations: NegotiationDataType[];
+    }[]
+  >([]);
 
   useEffect(() => {
     if (negotiations) {
@@ -56,7 +60,14 @@ export default function ConsultMode() {
         negotiations,
         "stage"
       );
-      setNegotiationsByColumn(negotiationsByColumn);
+      const sortedStatuses = sortStatuses(Object.keys(negotiationsByColumn));
+      const sortedNegotiations = sortedStatuses.map((status) => {
+        return {
+          status,
+          negotiations: negotiationsByColumn[status],
+        };
+      });
+      setNegotiationsByColumn(sortedNegotiations);
     }
   }, [negotiations]);
 
@@ -71,12 +82,19 @@ export default function ConsultMode() {
   const sortData = (key: string, direction: string) => {
     setSortConfig({ key, direction });
     setNegotiationsByColumn((prevState) => {
-      const newState = { ...prevState };
-      Object.keys(newState).forEach((status) => {
-        const data = newState[status];
-        const sortedData = sortDataHelper(data)(key, direction);
-        newState[status] = sortedData as NegotiationDataType[];
-      });
+      const newState = [...prevState];
+      for (const idx in newState) {
+        const { status, negotiations } = newState[idx];
+        const sortedData = sortDataHelper(negotiations)(key, direction);
+        newState[idx] = {
+          status,
+          negotiations: sortedData as NegotiationDataType[],
+        };
+      }
+      // const data = newState[status];
+      // const sortedData = sortDataHelper(data)(key, direction);
+      // newState[status] = sortedData as NegotiationDataType[];
+
       return newState;
     });
   };

@@ -1,5 +1,8 @@
 import { NegotiationData } from "@/types";
-import { negotiationStatusOrder } from "../constants/negotiations";
+import {
+  consultModeStatusOrder,
+  negotiationStatusOrder,
+} from "../constants/negotiations";
 import {
   DealNegotiatorType,
   NegotiationDataModel,
@@ -106,12 +109,13 @@ export const sortMappedDataHelper = (
 };
 
 export const sortStatuses = (statuses: string[]) => {
+  const orderList = [...negotiationStatusOrder, ...consultModeStatusOrder];
   return statuses.sort((a, b) => {
     // return (
     //   negotiationStatusOrder.indexOf(a) - negotiationStatusOrder.indexOf(b)
     // );
-    const indexA = negotiationStatusOrder.indexOf(a);
-    const indexB = negotiationStatusOrder.indexOf(b);
+    const indexA = orderList.indexOf(a);
+    const indexB = orderList.indexOf(b);
 
     // If neither status is in the order array, maintain original order
     if (indexA === -1 && indexB === -1) return 0;
@@ -214,9 +218,7 @@ export const getActiveDealDocuments = async (dealQuery: {
     if (dealQuery.archive) {
       return ["Closed", "Closed No Review"].includes(negotiation.stage);
     } else if (dealQuery.mode === "consult") {
-      return ["Refunded", "Scheduled", "Proposal Sent"].includes(
-        negotiation.stage
-      );
+      return consultModeStatusOrder.includes(negotiation.stage);
     } else {
       return negotiationStatusOrder.includes(negotiation.stage);
     }

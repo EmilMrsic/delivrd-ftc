@@ -30,12 +30,18 @@ export const negotiationStatusOrder = [
   "Contacted",
   "Unqualified",
   "Lost",
-  "No Show",
   "Canceled",
   // for consult mode
   // "Refunded",
   // "Scheduled",
   // "Proposal Sent",
+];
+
+export const consultModeStatusOrder = [
+  "Scheduled",
+  "Contacted",
+  "Proposal Sent",
+  "No Show",
 ];
 
 export const statusColors: Record<string, string> = {
@@ -55,13 +61,13 @@ export const statusColors: Record<string, string> = {
   "Follow Up Issue": "#54e2e2",
   "Paid Lost Contact": "#00c8c8",
   Refunded: "#d476e5",
-  Contacted: "#d5c8fc",
-  Scheduled: "#c5ebf7",
-  "Proposal Sent": "#f7c5f3",
   Unqualified: "#d3d3d3",
   Lost: "#f24822",
-  "No Show": "#d3d3d3",
   Canceled: "#f8dce8",
+  Scheduled: "#E3F2FD", // light blue
+  Contacted: "#F3E5F5", // light purple
+  "Proposal Sent": "#E8F5E9", // light green
+  "No Show": "#FFEBEE", // light red
 };
 
 export const negotiationMakeColors: Record<string, string> = {

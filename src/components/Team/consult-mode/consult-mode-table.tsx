@@ -5,6 +5,7 @@ import { StageDropdown } from "../stage-dropdown";
 import { formatDateToLocal } from "@/lib/helpers/dates";
 import { Button } from "@/components/ui/button";
 import { ClientProfile } from "../profile/client-profile";
+import { getStatusStyles } from "@/lib/utils";
 
 // Parit: recAV4HHDm
 
@@ -15,7 +16,10 @@ export const ConsultModeTable = ({
   sortConfig,
   setSortConfig,
 }: {
-  negotiationsByColumn: Record<string, NegotiationDataType[]>;
+  negotiationsByColumn: {
+    status: string;
+    negotiations: NegotiationDataType[];
+  }[];
   refetch: () => void;
   sortData: (key: string, direction: string) => void;
   sortConfig: { key: string; direction: string };
@@ -24,9 +28,25 @@ export const ConsultModeTable = ({
   return (
     <TailwindPlusExpandableTable
       defaultExpanded={[0]}
-      rows={Object.keys(negotiationsByColumn).map((key) => {
+      rows={negotiationsByColumn.map((node, idx) => {
+        const { status, negotiations } = node;
         return {
-          title: key,
+          title: status,
+          Component: () => (
+            <>
+              <Button
+                variant="outline"
+                style={{
+                  backgroundColor: getStatusStyles(status).backgroundColor,
+                  color: getStatusStyles(status).textColor, // Set dynamic text color
+                }}
+                className="cursor-pointer p-1 w-fit h-fit text-xs border-gray-300 mr-[10px]"
+              >
+                <p>{status}</p>
+              </Button>
+              {negotiations.length}
+            </>
+          ),
           expandedComponent: () => (
             <TailwindPlusTable
               headers={[
@@ -97,8 +117,7 @@ export const ConsultModeTable = ({
                   },
                 },
               ]}
-              rows={negotiationsByColumn[key].map((negotiation) => {
-                console.log("negotiation", negotiation);
+              rows={negotiations.map((negotiation) => {
                 return [
                   {
                     Component: () => (
@@ -139,6 +158,7 @@ export const ConsultModeTable = ({
                         onStageChange={(stage) => {
                           refetch();
                         }}
+                        all={true}
                         // handleStageChange={handleStageChange}
                       />
                     ),

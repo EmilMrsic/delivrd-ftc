@@ -12,18 +12,23 @@ import { NegotiationDataType } from "@/lib/models/team";
 import { toast } from "@/hooks/use-toast";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { negotiationStatusOrder } from "@/lib/constants/negotiations";
+import {
+  consultModeStatusOrder,
+  negotiationStatusOrder,
+} from "@/lib/constants/negotiations";
 
 export const StageDropdown = ({
   deal,
   handleStageChange,
   setNegotiation,
   onStageChange,
+  all,
 }: {
   deal: NegotiationDataType;
   handleStageChange?: (id: string, stage: string) => void;
   setNegotiation?: (negotiation: NegotiationDataType) => void;
   onStageChange?: (stage: string) => void;
+  all?: boolean;
 }) => {
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
 
@@ -55,7 +60,10 @@ export const StageDropdown = ({
   };
 
   const stageOptions = useMemo(() => {
-    return sortStatuses(negotiationStatusOrder);
+    const statusesToUse = all
+      ? [...negotiationStatusOrder, ...consultModeStatusOrder]
+      : negotiationStatusOrder;
+    return sortStatuses(statusesToUse);
   }, []);
 
   return (
