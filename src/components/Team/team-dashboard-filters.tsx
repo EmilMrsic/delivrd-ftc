@@ -22,9 +22,15 @@ export const TeamDashboardFilters = ({
   return (
     <>
       <div className="items-center mb-4 mt-4">
-        <div>
+        <div className="flex gap-3">
           <Button onClick={() => router.push("/manager")} newDefault={true}>
             <p>Manager View</p>
+          </Button>
+          <Button
+            onClick={() => router.push("/mode/consult")}
+            newDefault={true}
+          >
+            <p>Consult Mode</p>
           </Button>
         </div>
         <div className="flex gap-3 mt-4">

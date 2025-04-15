@@ -75,6 +75,7 @@ export const NegotiationDataModel = z.object({
   // trade_in_files: z.array(z.string()).optional(),
   purchaseTimeline: z.string().optional(),
   dealershipExperience: z.string().optional(),
+  trade: z.boolean().optional(),
 });
 
 export const DealNegotiatorModel = z.object({

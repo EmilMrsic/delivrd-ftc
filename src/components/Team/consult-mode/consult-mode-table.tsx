@@ -169,7 +169,7 @@ export const ConsultModeTable = ({
                     ),
                   },
                   negotiation.clientEmail,
-                  negotiation.tradeInInfo,
+                  negotiation.trade ? (negotiation.trade ? "Yes" : "No") : "",
                   negotiation.consultNotes,
                   {
                     Component: () =>
