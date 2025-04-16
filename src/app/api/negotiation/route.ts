@@ -30,8 +30,6 @@ export const POST = async (request: Request) => {
     profile,
   });
 
-  console.log("got deals:", deals);
-
   if (deals) {
     output.negotiations = deals;
   }
