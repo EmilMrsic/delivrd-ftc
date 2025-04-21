@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const { to } = await req.json();
+  const receiverEmail = process.env.TESTING_EMAIL || to;
   // const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const protocol = req.headers.get("x-forwarded-proto") || "http";
   const host = req.headers.get("host");
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
       "from",
       `Delivrd <postmaster@${process.env.NEXT_PUBLIC_MAILGUN_DOMAIN_NAME}>`
     );
-    emailData.append("to", to);
+    emailData.append("to", receiverEmail);
     emailData.append("subject", subject);
     emailData.append("html", html);
 

@@ -2,7 +2,8 @@ import axios from "axios";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { to } = await req.json();
+  let { to } = await req.json();
+  const receiverEmail = process.env.TESTING_EMAIL || to;
   const subject = "Sign up for Delivrd";
   const html = `<!DOCTYPE html>
   <html>
@@ -22,9 +23,10 @@ export async function POST(req: Request) {
     const emailData = new URLSearchParams();
     emailData.append(
       "from",
-      `Delivrd <postmaster@${process.env.NEXT_PUBLIC_MAILGUN_DOMAIN_NAME}>`,
+      `Delivrd <postmaster@${process.env.NEXT_PUBLIC_MAILGUN_DOMAIN_NAME}>`
     );
-    emailData.append("to", to);
+
+    emailData.append("to", receiverEmail);
     emailData.append("subject", subject);
     emailData.append("html", html);
 
@@ -39,12 +41,15 @@ export async function POST(req: Request) {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      },
+      }
     );
     console.log(response.data);
     return NextResponse.json({ message: "Email sent successfully!" });
   } catch (error: any) {
     console.error("Error sending email:", error);
-    return NextResponse.json({ message: "Error sending email", error }, { status: error?.status || 500 });
+    return NextResponse.json(
+      { message: "Error sending email", error },
+      { status: error?.status || 500 }
+    );
   }
 }

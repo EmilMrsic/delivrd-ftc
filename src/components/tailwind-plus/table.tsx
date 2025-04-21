@@ -6,7 +6,7 @@ import {
   flexRender,
   Header,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Expand } from "lucide-react";
 import Link from "next/link";
 import { TailwindPlusModal } from "./modal";

@@ -33,11 +33,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       path.includes("apiKey") ||
       path === "/";
 
-    if (
-      (privilege === "Client" && !isValidClientPath) ||
-      privilege === "Dealer"
-    ) {
-      router.push("/");
+    if (!isValidClientPath) {
+      if (privilege === "Client") {
+        router.push("/");
+      }
     }
   }, [path, router]);
 

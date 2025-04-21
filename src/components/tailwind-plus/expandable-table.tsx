@@ -24,6 +24,9 @@ export const TailwindPlusExpandableTable = ({
     expandedComponentProps?: Record<string, any>;
   }[];
 }) => {
+  useEffect(() => {
+    console.log("starting from scratch:");
+  }, []);
   const [expanded, setExpanded] = useState<Set<number>>(() => {
     return new Set(defaultExpanded ?? []);
   });
