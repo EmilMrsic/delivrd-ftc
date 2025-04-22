@@ -54,7 +54,7 @@ export const ConsultModeTable = ({
                   header: "Consult Date",
                   config: {
                     sortable: true,
-                    key: "createdAt",
+                    key: "consultDate",
                   },
                 },
                 {
@@ -113,7 +113,7 @@ export const ConsultModeTable = ({
                   header: "Source",
                   config: {
                     sortable: true,
-                    key: "source",
+                    key: "client_source",
                   },
                 },
               ]}
@@ -130,7 +130,8 @@ export const ConsultModeTable = ({
                         }}
                         className="p-1 w-fit h-fit text-xs border-gray-300"
                       >
-                        {formatDateToLocal(new Date(negotiation.createdAt))}
+                        {negotiation.consultDate &&
+                          formatDateToLocal(new Date(negotiation.consultDate))}
                       </Button>
                     ),
                   },
@@ -199,7 +200,7 @@ export const ConsultModeTable = ({
                         </Button>
                       ),
                   },
-                  negotiation.source,
+                  negotiation.client_source,
                 ];
               })}
               sortData={sortData}
