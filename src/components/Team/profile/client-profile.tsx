@@ -449,8 +449,15 @@ export const ClientProfile = ({
                   setIncomingBids={setIncomingBids}
                 />
               )}
-              <WorkLogSection negotiationId={negotiationId} user={user} />
-
+            </>
+          )}
+          <WorkLogSection
+            negotiationId={negotiationId}
+            user={user}
+            noActions={clientMode}
+          />
+          {!clientMode && (
+            <>
               <AddNoteSection
                 user={user}
                 setNegotiation={setNegotiation}

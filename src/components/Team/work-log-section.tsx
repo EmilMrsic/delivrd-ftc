@@ -29,12 +29,14 @@ interface WorkLogSectionProps {
   user: any;
   negotiationId: string | null;
   noActions?: boolean;
+  clientMode?: boolean;
 }
 
 const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   user,
   negotiationId,
   noActions = false,
+  clientMode = false,
 }) => {
   const [workLogs, setWorkLogs] = useState<WorkLogType[]>([]);
   const [newWorkLog, setNewWorkLog] = useState<string>("");
