@@ -185,6 +185,8 @@ export const TeamDashboardClientNameDisplay = ({
               editingBidId={null}
               editedBid={null}
               setEditedBid={() => {}}
+              handleBidFileUpload={() => {}}
+              handleDeleteFile={() => {}}
             />
           )}
           {showModal === "shipping" && (
