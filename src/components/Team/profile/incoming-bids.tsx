@@ -30,6 +30,8 @@ export const IncomingBids = ({
   editedBid,
   setEditedBid,
   clientMode,
+  handleBidFileUpload,
+  handleDeleteFile,
 }: {
   incomingBids: IncomingBid[];
   setIncomingBids: (item: IncomingBid[]) => void;
@@ -55,6 +57,8 @@ export const IncomingBids = ({
   editedBid: any | null;
   setEditedBid: (editedBid: any | null) => void;
   clientMode?: boolean;
+  handleBidFileUpload: (files: FileList, bidId: string) => void;
+  handleDeleteFile: (file: string, bidId: string) => void;
 }) => {
   return (
     <TailwindPlusCard
@@ -113,6 +117,8 @@ export const IncomingBids = ({
                 editedBid={editedBid}
                 setEditedBid={setEditedBid}
                 clientMode={clientMode}
+                handleBidFileUpload={handleBidFileUpload}
+                handleDeleteFile={handleDeleteFile}
               />
             ))
         ) : (

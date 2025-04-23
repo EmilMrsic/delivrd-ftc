@@ -248,6 +248,10 @@ export const ClientProfile = ({
       files: [...editedBid.files, ...fileUrls],
     });
 
+    updateBidInFirebase(bidId, {
+      files: [...editedBid.files, ...fileUrls],
+    });
+
     setIncomingBids((incomingBids) => {
       return incomingBids.map((bid) => {
         if (bid.bid_id === bidId) {
@@ -288,6 +292,10 @@ export const ClientProfile = ({
       ...prevEditedBid,
       files: prevEditedBid.files.filter((file) => file !== fileToDelete),
     }));
+
+    updateBidInFirebase(bidId, {
+      files: editedBid.files.filter((file) => file !== fileToDelete),
+    });
 
     setIncomingBids((incomingBids) => {
       return incomingBids.map((bid) => {
@@ -408,6 +416,8 @@ export const ClientProfile = ({
             editedBid={editedBid}
             setEditedBid={setEditedBid}
             clientMode={clientMode}
+            handleBidFileUpload={handleBidFileUpload}
+            handleDeleteFile={handleDeleteFile}
           />
 
           {!clientMode && (

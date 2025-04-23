@@ -59,6 +59,7 @@ const SignInContent = ({
         where("email", "==", parsedEmail)
       );
       const querySnapshot = await getDocs(q);
+
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
         console.log({ userData });
@@ -67,6 +68,7 @@ const SignInContent = ({
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("emailForSignIn", userData.email);
         toast({ title: "Logged in" });
+        console.log("got here in signup", userData);
         if (userData.privilege === "Dealer") {
           router.push("/bid");
         } else if (userData.privilege === "Client") {
