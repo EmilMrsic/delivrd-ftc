@@ -16,6 +16,8 @@ import {
   query,
   QueryConstraint,
   where,
+  doc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { chunk } from "lodash";
@@ -204,10 +206,10 @@ export const getActiveDealDocuments = async (dealQuery: {
   const negotiations = negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();
     try {
-      return NegotiationDataModel.parse(data);
+      const parsed = NegotiationDataModel.parse(data);
+      return parsed;
     } catch (error) {
       console.error("Error parsing negotiation data:", data.id);
-      // console.error(error);
       return null;
     }
   });
@@ -305,4 +307,26 @@ export const mapNegotiationsByColumn = (
     {} as Record<string, NegotiationDataType[]>
   );
   return negotiationsByColumn;
+};
+
+export const removeNegotiatorFromNegotiations = async (
+  negotiationId: string,
+  refetch?: () => void
+) => {
+  try {
+    const negotiationRef = doc(db, "delivrd_negotiations", negotiationId);
+    await updateDoc(negotiationRef, {
+      dealCoordinatorId: "",
+      stage: "Paid",
+    });
+
+    if (refetch) {
+      refetch();
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error removing negotiator:", error);
+    return false;
+  }
 };
