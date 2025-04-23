@@ -381,6 +381,7 @@ export const ClientProfile = ({
             clientMode={clientMode}
             setClientMode={setClientMode}
             allowClientModeToggle={allowClientModeToggle}
+            allDealNegotiator={allDealNegotiator}
           />
 
           <IncomingBids

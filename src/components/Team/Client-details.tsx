@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { FileText, Mail, Phone, User } from "lucide-react";
+import { FileText, Mail, Phone, User, User2 } from "lucide-react";
 import { InputField } from "../base/input-field";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
 import { DealNegotiator } from "@/types";
 import { cn } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
-import { NegotiationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusToggle } from "../tailwind-plus/toggle";
 import { negotiationStatusOrder } from "@/lib/constants/negotiations";
+import { DealNegotiatorDropdown } from "./deal-negotiator-dropdown";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
+import { removeNegotiatorFromNegotiations } from "@/lib/helpers/negotiation";
 
 type ClientDetailsProps = {
   negotiation: NegotiationDataType | null;
@@ -22,6 +26,7 @@ type ClientDetailsProps = {
   clientMode?: boolean;
   setClientMode: (clientMode: boolean) => void;
   allowClientModeToggle?: boolean;
+  allDealNegotiator: DealNegotiatorType[];
 };
 
 const ClientDetails = ({
@@ -32,6 +37,7 @@ const ClientDetails = ({
   clientMode,
   setClientMode,
   allowClientModeToggle,
+  allDealNegotiator,
 }: ClientDetailsProps) => {
   const [isBlur, setIsBlur] = useState(
     localStorage.getItem("streamMode") === "true"
@@ -196,7 +202,7 @@ const ClientDetails = ({
               readOnly={clientMode}
             />
           </div>
-          {dealNegotiator ? (
+          {negotiation?.dealCoordinatorId && dealNegotiator ? (
             <div className="flex items-center space-x-4 w-full">
               <Avatar className="h-16 w-16">
                 <AvatarImage
@@ -303,8 +309,46 @@ const ClientDetails = ({
               )}
               readOnly={clientMode}
             />
+            <InputField
+              field="dealCoordinatorId"
+              negotiationId={negotiationId ?? ""}
+              label="Deal Negotiator"
+              value={negotiation?.dealCoordinatorId}
+              onChange={(newValue) => {
+                console.log("got new value:", newValue);
+              }}
+              icon={User2}
+              as={() => (
+                <DealNegotiatorDropdown
+                  deal={negotiation as NegotiationDataType}
+                  allDealNegotiator={allDealNegotiator}
+                  updateDealNegotiator={async (id, negotiatorId) => {
+                    const negotiationRef = doc(
+                      db,
+                      "delivrd_negotiations",
+                      negotiationId ?? ""
+                    );
+                    await updateDoc(negotiationRef, {
+                      dealCoordinatorId: negotiatorId,
+                    });
+
+                    handleChange({
+                      key: "dealCoordinatorId",
+                      newValue: negotiatorId,
+                    });
+                  }}
+                  onRemoveNegotiator={async (id) => {
+                    // removeNegotiatorFromNegotiations(id);
+                    handleChange({
+                      key: "dealCoordinatorId",
+                      newValue: "",
+                    });
+                  }}
+                />
+              )}
+            />
           </div>
-          {dealNegotiator && (
+          {negotiation?.dealCoordinatorId && dealNegotiator && (
             <div className="flex space-x-2 ml-auto mt-[20px]">
               <>
                 {dealNegotiator?.video_link && (

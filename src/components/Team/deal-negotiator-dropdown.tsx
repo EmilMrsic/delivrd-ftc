@@ -23,6 +23,9 @@ export const DealNegotiatorDropdown = ({
 }) => {
   const [openNegotiatorState, setOpenNegotiatorState] =
     useState<boolean>(false);
+
+  if (!deal) return null;
+
   return (
     <>
       {onRemoveNegotiator && (

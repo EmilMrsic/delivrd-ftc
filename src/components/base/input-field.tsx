@@ -109,8 +109,10 @@ export const InputField = (props: {
   selected?: Date | null;
   parentKey?: string;
   readOnly?: boolean;
+  as?: React.ComponentType<any>;
 }) => {
   const { toast } = useToast();
+  const { as: AsComponent } = props;
 
   if (props.field === "clientPhone") {
     console.log("clientPhone", props);
@@ -215,6 +217,10 @@ export const InputField = (props: {
       InputComponent = EditableInput;
   }
 
+  if (AsComponent) {
+    InputComponent = AsComponent;
+  }
+
   const ComponentDisplay =
     props.type === "datePicker" ? (
       <DatePicker
@@ -232,7 +238,7 @@ export const InputField = (props: {
       <InputComponent
         label={props.label}
         value={(props.value ?? "") as string}
-        onChange={(value) => {
+        onChange={(value: any) => {
           if (props.type === "datePicker") {
             props.onDateChange?.(value as Date | null);
           } else {
