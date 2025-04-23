@@ -144,7 +144,7 @@ const AddNoteSection = ({
   const addInternalNote = async (newInternalNote: string) => {
     if (newInternalNote.trim()) {
       const teamMembers = await getUsersWithTeamPrivilege();
-      if (negotiation && dealNegotiator) {
+      if (negotiation) {
         const newNote: InternalNotesType = {
           author: user,
           mentionedTeammember: mentionedUsers.map((user) => user.id).join(","),
