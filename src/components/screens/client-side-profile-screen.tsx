@@ -32,7 +32,6 @@ export const ClientSideProfileScreen = () => {
       if (user?.privilege !== "Team") {
         if (user?.id !== id) {
           if (!shared || shared !== data?.id || user.id !== data?.clientId) {
-            console.log("user: pushing to home");
             router.push("/");
             return;
           }

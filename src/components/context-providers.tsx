@@ -26,14 +26,15 @@ export const ContextProviders = ({
   const path = usePathname();
   const router = useRouter();
 
-  useEffect(() => {
-    if (path !== "/" && path !== "/complete-signin") {
-      const loggedInUserData = getUserData()?.deal_coordinator_id;
-      if (!loggedInUserData) {
-        router.push("/");
-      }
-    }
-  }, [path]);
+  // useEffect(() => {
+  //   if (path !== "/" && path !== "/complete-signin") {
+  //     const loggedInUserData = getUserData()?.deal_coordinator_id;
+  //     if (!loggedInUserData) {
+  //       console.log("found it");
+  //       // router.push("/");
+  //     }
+  //   }
+  // }, [path]);
 
   return (
     <>

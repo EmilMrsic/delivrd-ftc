@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
-
+    console.log("got userData:", userData);
     if (!userData) {
       router.push("/");
       return;
