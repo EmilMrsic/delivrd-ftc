@@ -40,6 +40,7 @@ const useTeamDashboard = (
 
     return [userFilters, allFilters];
   }, [config, searchAll]);
+
   const { negotiations, refetch, team, isLoading } = useNegotiations({
     archive: archive,
     ...userFilters,

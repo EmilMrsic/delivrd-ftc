@@ -218,11 +218,11 @@ const TeamDashboardTable = ({
         })
       : [];
 
-    console.log("running sort for paid:", key, direction);
     const sorted = sortDataHelper(filtered)(
       key || "brand",
       direction || "ascending"
     ) as NegotiationDataType[];
+
     setPaidNegotiations(sorted);
   }, [allNegotiations, searchTerm]);
 
@@ -307,6 +307,10 @@ const TeamDashboardTable = ({
   //     ":negotiations:",
   //     negotiations.find((negotiation) => negotiation.id === "recaQ1jmRlqiSfVaG")
   //   );
+  // }
+
+  // if (name === "team-dashboard-negotiator") {
+  //   console.log("paid negotiations:", paidNegotiations);
   // }
 
   let rows: any = [...scopedRows];

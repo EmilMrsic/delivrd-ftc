@@ -237,16 +237,19 @@ export default function DealList() {
         formattedCachedFilters
       );
 
-      refetchAll(
-        formattedCachedFilters?.dealCoordinatorId as string,
-        formattedCachedFilters
-      );
+      const allFormattedFilters = {
+        ...formattedCachedFilters,
+      };
+      delete allFormattedFilters.dealCoordinatorId;
+      refetchAll(undefined, allFormattedFilters);
 
       toast({ title: "Negotiator updated successfully" });
     } catch (error) {
       console.error("Error updating negotiator: ", error);
     }
   };
+
+  console.log("allNegotiations:", allNegotiations);
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
