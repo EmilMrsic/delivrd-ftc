@@ -39,12 +39,12 @@ export default function ConsultMode() {
     all: true,
     mode: "consult",
     filter: {
-      createdAt: dayToSort,
+      consultDate: dayToSort,
     },
   });
 
   useEffect(() => {
-    refetch(undefined, { createdAt: dayToSort });
+    refetch(undefined, { consultDate: dayToSort });
   }, [dayToSort]);
 
   const [negotiationsByColumn, setNegotiationsByColumn] = useState<

@@ -176,13 +176,14 @@ export const getActiveDealDocuments = async (dealQuery: {
 
   if (dealQuery?.filter) {
     Object.keys(dealQuery.filter).forEach((key) => {
-      if (key === "createdAt") {
+      if (key === "createdAt" || key === "consultDate") {
+        console.log("key:", key);
         if (dealQuery?.filter?.[key]) {
           const day = dealQuery.filter[key];
           const start = `${day}T00:00:00.000Z`;
           const end = `${day}T23:59:59.999Z`;
-          queryConditions.push(where("createdAt", ">=", start));
-          queryConditions.push(where("createdAt", "<=", end));
+          queryConditions.push(where(key, ">=", start));
+          queryConditions.push(where(key, "<=", end));
         }
       } else {
         if (dealQuery?.filter?.[key]) {
