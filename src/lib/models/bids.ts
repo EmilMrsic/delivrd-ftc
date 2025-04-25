@@ -1,6 +1,15 @@
 import { z } from "zod";
 
 export const IncomingBidCommentModel = z.object({
+  author: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      email: z.string(),
+      phone: z.string(),
+      profile_pic: z.string(),
+    })
+    .optional(),
   bid_id: z.string(),
   client: z.string(),
   client_id: z.string(),

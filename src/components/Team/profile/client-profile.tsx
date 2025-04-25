@@ -39,6 +39,8 @@ import { Share2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import useCheckClientShareExpiry from "@/hooks/useCheckExpiration";
 import useClientShareExpired from "@/hooks/useCheckExpiration";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { IncomingBidCommentType } from "@/lib/models/bids";
 
 export const ClientProfile = ({
   negotiationId,
@@ -91,7 +93,7 @@ export const ClientProfile = ({
   const addComment = async (bid_id: string) => {
     if (!newComment[bid_id]?.trim()) return;
 
-    const newCommentData: BidComments = {
+    const newCommentData: IncomingBidCommentType = {
       client_phone_number: negotiation?.clientPhone ?? "",
       bid_id,
       client_name: negotiation?.clientNamefull ?? "",
@@ -104,6 +106,7 @@ export const ClientProfile = ({
       time: getCurrentTimestamp(),
       client_id: "N/A",
       comment_source: "Team",
+      author: user,
     };
 
     setBidCommentsByBidId((prev) => ({
@@ -115,8 +118,10 @@ export const ClientProfile = ({
       ...prev,
       [bid_id]: "",
     }));
+
     const commentRef = collection(db, "bid comment");
     await addDoc(commentRef, newCommentData);
+    handleSendComment(newCommentData);
     toast({ title: "Comment added successfully" });
   };
 
@@ -310,7 +315,7 @@ export const ClientProfile = ({
     });
   };
 
-  const handleSendComment = async (data: BidComments) => {
+  const handleSendComment = async (data: IncomingBidCommentType) => {
     try {
       const response = await fetch(
         process.env.NEXT_PUBLIC_COMMENT_FUNC_URL ?? "",

@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
+import { IncomingBidCommentType } from "@/lib/models/bids";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -315,12 +316,13 @@ export const IncomingBidCard = ({
       {bidCommentsByBidId[bidDetails.bid_id] &&
       bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
         bidCommentsByBidId[bidDetails.bid_id].map(
-          (comment: BidComments, index: number) => (
+          (comment: IncomingBidCommentType, index: number) => (
             <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
               <div key={index} className="p-2 flex flex-col  mt-1">
                 <p>
                   <strong>
-                    {comment.deal_coordinator_name === "N/A"
+                    {comment?.author?.name ||
+                    comment.deal_coordinator_name === "N/A"
                       ? comment.client_name
                       : comment.deal_coordinator_name}
                     :
