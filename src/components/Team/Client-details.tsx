@@ -309,44 +309,46 @@ const ClientDetails = ({
               )}
               readOnly={clientMode}
             />
-            <InputField
-              field="dealCoordinatorId"
-              negotiationId={negotiationId ?? ""}
-              label="Deal Negotiator"
-              value={negotiation?.dealCoordinatorId}
-              onChange={(newValue) => {
-                console.log("got new value:", newValue);
-              }}
-              icon={User2}
-              as={() => (
-                <DealNegotiatorDropdown
-                  deal={negotiation as NegotiationDataType}
-                  allDealNegotiator={allDealNegotiator}
-                  updateDealNegotiator={async (id, negotiatorId) => {
-                    const negotiationRef = doc(
-                      db,
-                      "delivrd_negotiations",
-                      negotiationId ?? ""
-                    );
-                    await updateDoc(negotiationRef, {
-                      dealCoordinatorId: negotiatorId,
-                    });
+            {!clientMode && (
+              <InputField
+                field="dealCoordinatorId"
+                negotiationId={negotiationId ?? ""}
+                label="Deal Negotiator"
+                value={negotiation?.dealCoordinatorId}
+                onChange={(newValue) => {
+                  console.log("got new value:", newValue);
+                }}
+                icon={User2}
+                as={() => (
+                  <DealNegotiatorDropdown
+                    deal={negotiation as NegotiationDataType}
+                    allDealNegotiator={allDealNegotiator}
+                    updateDealNegotiator={async (id, negotiatorId) => {
+                      const negotiationRef = doc(
+                        db,
+                        "delivrd_negotiations",
+                        negotiationId ?? ""
+                      );
+                      await updateDoc(negotiationRef, {
+                        dealCoordinatorId: negotiatorId,
+                      });
 
-                    handleChange({
-                      key: "dealCoordinatorId",
-                      newValue: negotiatorId,
-                    });
-                  }}
-                  onRemoveNegotiator={async (id) => {
-                    // removeNegotiatorFromNegotiations(id);
-                    handleChange({
-                      key: "dealCoordinatorId",
-                      newValue: "",
-                    });
-                  }}
-                />
-              )}
-            />
+                      handleChange({
+                        key: "dealCoordinatorId",
+                        newValue: negotiatorId,
+                      });
+                    }}
+                    onRemoveNegotiator={async (id) => {
+                      // removeNegotiatorFromNegotiations(id);
+                      handleChange({
+                        key: "dealCoordinatorId",
+                        newValue: "",
+                      });
+                    }}
+                  />
+                )}
+              />
+            )}
           </div>
           {negotiation?.dealCoordinatorId && dealNegotiator && (
             <div className="flex space-x-2 ml-auto mt-[20px]">
