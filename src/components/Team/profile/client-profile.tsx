@@ -105,7 +105,7 @@ export const ClientProfile = ({
       negotiation_id: negotiationId ?? "",
       time: getCurrentTimestamp(),
       client_id: "N/A",
-      comment_source: user.privilege === "Client" ? "Client" : "Team",
+      source: user.privilege === "Client" ? "Client" : "Team",
       author: user,
     };
 

@@ -16,7 +16,7 @@ export const IncomingBidCommentModel = z.object({
   client_name: z.string(),
   client_phone_number: z.string(),
   comment: z.string(),
-  comment_source: z.string(),
+  source: z.string(),
   deal_coordinator: z.string(),
   deal_coordinator_name: z.string(),
   link_status: z.string(),
