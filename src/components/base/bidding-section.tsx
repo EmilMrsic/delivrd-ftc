@@ -135,7 +135,8 @@ export default function BiddingSection() {
         city: "N/A",
         state: "N/A",
         salesPersonEmail: "N/A",
-        source: "firebase",
+        // source: "firebase",
+        bid_source: "FTC",
       });
 
       toast({

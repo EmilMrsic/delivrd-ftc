@@ -105,7 +105,7 @@ export const ClientProfile = ({
       negotiation_id: negotiationId ?? "",
       time: getCurrentTimestamp(),
       client_id: "N/A",
-      comment_source: "Team",
+      comment_source: user.privilege === "Client" ? "Client" : "Team",
       author: user,
     };
 
@@ -329,10 +329,11 @@ export const ClientProfile = ({
       );
 
       const result = await response.json();
+      console.log("result", result);
       if (result.success) {
         toast({ title: "Comment sent to client" });
       } else {
-        console.error("Failed to send comment:", result.error);
+        console.error("Failed to send comment:", result);
       }
     } catch (error) {
       console.error("Error:", error);

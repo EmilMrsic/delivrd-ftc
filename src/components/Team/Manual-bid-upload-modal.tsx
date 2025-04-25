@@ -211,6 +211,7 @@ const ManualBidUpload = ({
           day: "2-digit",
           year: "numeric",
         }),
+        bid_source: "manual",
       };
       const bidRef = doc(db, "Incoming Bids", bid_id);
 
