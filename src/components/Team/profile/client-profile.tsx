@@ -121,7 +121,9 @@ export const ClientProfile = ({
 
     const commentRef = collection(db, "bid comment");
     await addDoc(commentRef, newCommentData);
-    handleSendComment(newCommentData);
+    if (user.privilege === "Client") {
+      handleSendComment(newCommentData);
+    }
     toast({ title: "Comment added successfully" });
   };
 
