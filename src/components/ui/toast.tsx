@@ -84,9 +84,19 @@ const ToastClose = React.forwardRef<
       className
     )}
     toast-close=""
+    onClick={(e) => {
+      e.stopPropagation();
+    }}
+    onMouseDown={(e) => e.stopPropagation()}
     {...props}
   >
-    <Cross2Icon className="h-4 w-4" />
+    <Cross2Icon
+      className="h-4 w-4"
+      // onMouseDown={(e) => e.stopPropagation()}
+      // onClick={(e) => {
+      //   e.stopPropagation();
+      // }}
+    />
   </ToastPrimitives.Close>
 ));
 ToastClose.displayName = ToastPrimitives.Close.displayName;
