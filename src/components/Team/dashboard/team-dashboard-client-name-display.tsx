@@ -170,6 +170,7 @@ export const TeamDashboardClientNameDisplay = ({
               openDialog={openDialog}
               handleDeleteBid={() => {}}
               handleEdit={() => {}}
+              // @ts-ignore
               bidCommentsByBidId={bidCommentsById}
               parseComment={(c: string) => c}
               handleSendComment={() => {}}

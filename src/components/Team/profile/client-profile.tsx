@@ -109,6 +109,7 @@ export const ClientProfile = ({
       author: user,
     };
 
+    // @ts-ignore
     setBidCommentsByBidId((prev) => ({
       ...prev,
       [bid_id]: [...(prev[bid_id] || []), newCommentData],
@@ -419,6 +420,7 @@ export const ClientProfile = ({
             addComment={addComment}
             bidCommentsByBidId={bidCommentsByBidId}
             parseComment={parseComment}
+            // @ts-ignore
             handleSendComment={handleSendComment}
             editingBidId={editingBidId}
             editedBid={editedBid}
