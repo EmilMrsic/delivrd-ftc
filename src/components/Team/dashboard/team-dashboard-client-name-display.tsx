@@ -17,6 +17,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import WorkLogSection from "../work-log-section";
+import Link from "next/link";
 
 export const TeamDashboardClientNameDisplay = ({
   deal,
@@ -97,7 +98,11 @@ export const TeamDashboardClientNameDisplay = ({
   return (
     <>
       <div>
-        <div>{deal.clientNamefull}</div>
+        <div>
+          <Link href={`/team-profile?id=${deal.id}`} target="_blank">
+            {deal.clientNamefull}
+          </Link>
+        </div>
         <div className="flex gap-2">
           <Notebook
             className="w-4 h-4 text-gray-500 hover:text-black cursor-pointer"
