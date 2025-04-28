@@ -10,6 +10,9 @@ import {
   serverTimestamp,
   where,
   addDoc,
+  updateDoc,
+  doc,
+  arrayUnion,
 } from "firebase/firestore";
 import VehicleCard from "./vehicle-card";
 import { db, storage } from "@/firebase/config";
@@ -96,7 +99,8 @@ export default function BiddingSection() {
     message: string,
     discountPrice: string,
     inventoryStatus: string,
-    files: FileList | null
+    files: FileList | null,
+    negotiationId: string
   ) => {
     if (!user) {
       toast({
@@ -117,12 +121,12 @@ export default function BiddingSection() {
       }
       // Change this line to use addDoc instead of setDoc
       const bidRef = collection(db, "Incoming Bids");
-      await addDoc(bidRef, {
+      const newBid = {
         bid_id: generateRandomId(),
         dealerId: user.dealer_id[0],
         price: parseFloat(price),
-        dealerName: "N/A",
-        dealerNumber: "N/A",
+        dealerName: user.name || "N/A",
+        dealerNumber: user.phone || "N/A",
         manual_add: false,
         comments: message,
         files: fileUrls,
@@ -130,12 +134,17 @@ export default function BiddingSection() {
         discountPrice: discountPrice,
         inventoryStatus: inventoryStatus,
         salesPersonName: "N/A",
-        negotiationId: "N/A",
+        negotiationId: negotiationId,
         city: "N/A",
         state: "N/A",
         salesPersonEmail: "N/A",
         // source: "firebase",
         bid_source: "FTC",
+      };
+
+      await addDoc(bidRef, newBid);
+      await updateDoc(doc(db, "delivrd_negotiations", negotiationId ?? ""), {
+        incomingBids: arrayUnion(newBid.bid_id),
       });
 
       toast({
@@ -176,7 +185,10 @@ export default function BiddingSection() {
     try {
       if (parsedUser) {
         setLoading(true);
-        const clientQuery = query(collection(db, "Clients"));
+        const clientQuery = query(
+          collection(db, "Clients")
+          // where("negotiation_Id", "==", "rechGSd56lVxxJYcs")
+        );
         const dealerQuery = query(
           collection(db, "Dealers"),
           where("id", "==", parsedUser.dealer_id[0])
@@ -205,6 +217,7 @@ export default function BiddingSection() {
             exteriorColors,
             interiorColors,
             drivetrain: data.Drivetrain || "Unknown",
+            negotiationId: data.negotiation_Id || "",
           };
         });
 
@@ -228,6 +241,7 @@ export default function BiddingSection() {
             notes: data.comments ?? "",
             files: data.files || [],
             client: data.clientId || "",
+            negotiationId: data.negotiationId || "",
             createdAt:
               typeof data.timestamp === "string"
                 ? data.timestamp
@@ -417,15 +431,18 @@ export default function BiddingSection() {
           <>
             {tab == "available" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-3">
-                {filteredVehicles?.map((vehicle, index) => (
-                  <VehicleCard
-                    key={`vehicle-card-${vehicle.id}-${index}`}
-                    vehicle={vehicle}
-                    selectedVehicles={selectedVehicles}
-                    toggleVehicleSelection={toggleVehicleSelection}
-                    submitBid={submitBid}
-                  />
-                ))}
+                {filteredVehicles?.map((vehicle, index) => {
+                  return (
+                    <VehicleCard
+                      key={`vehicle-card-${vehicle.id}-${index}`}
+                      vehicle={vehicle}
+                      selectedVehicles={selectedVehicles}
+                      toggleVehicleSelection={toggleVehicleSelection}
+                      submitBid={submitBid}
+                      negotiationId={vehicle.negotiationId || ""}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <Table>

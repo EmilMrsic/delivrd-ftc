@@ -30,8 +30,10 @@ interface IVehicleCardProps {
     message: string,
     discountPrice: string,
     inventoryStatus: string,
-    files: FileList | null
+    files: FileList | null,
+    negotiationId: string
   ) => void;
+  negotiationId: string;
 }
 
 export const bidSchema = z.object({
@@ -45,6 +47,7 @@ const VehicleCard: FC<IVehicleCardProps> = ({
   selectedVehicles,
   toggleVehicleSelection,
   submitBid,
+  negotiationId,
 }) => {
   const [formValues, setFormValues] = useState({
     price: "",
@@ -100,7 +103,8 @@ const VehicleCard: FC<IVehicleCardProps> = ({
         formValues.message,
         formValues.discountPrice,
         formValues.inventoryStatus,
-        formValues.files
+        formValues.files,
+        negotiationId
       );
     }
   };

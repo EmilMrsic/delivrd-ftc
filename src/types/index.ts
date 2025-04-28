@@ -291,6 +291,7 @@ export type Vehicle = {
   interiorColors?: Color[];
   drivetrain?: string;
   createdAt?: string;
+  negotiationId?: string;
 };
 
 export type Negotiation = {
