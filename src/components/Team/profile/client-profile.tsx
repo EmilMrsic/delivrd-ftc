@@ -89,7 +89,7 @@ export const ClientProfile = ({
   });
 
   const [activityLog, setActivityLog] = useState<ActivityLog>();
-
+  // http://localhost:3000/team-profile?id=recH85js7w4MRVDru
   const addComment = async (bid_id: string) => {
     if (!newComment[bid_id]?.trim()) return;
 
@@ -119,6 +119,8 @@ export const ClientProfile = ({
       ...prev,
       [bid_id]: "",
     }));
+
+    console.log("sending bid comment from:", newCommentData);
 
     const commentRef = collection(db, "bid comment");
     await addDoc(commentRef, newCommentData);

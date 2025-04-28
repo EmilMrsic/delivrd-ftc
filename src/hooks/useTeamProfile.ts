@@ -21,15 +21,16 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNegotiations } from "./useNegotiations";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
+import { useLoggedInUser } from "./useLoggedInUser";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
 };
 
 const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
+  const user = useLoggedInUser();
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
-  const [user, setUser] = useState<any>();
   const [dealNegotiator, setDealNegotiator] = useState<DealNegotiator>();
 
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
@@ -184,11 +185,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   }, [negotiation]);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    setUser(JSON.parse(user ?? ""));
-  }, []);
-
-  useEffect(() => {
     const getDealNegotiatorData = async () => {
       if (!negotiation?.dealCoordinatorId) return;
 
@@ -220,7 +216,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     setDealers,
     dealers,
     user,
-    setUser,
     allDealNegotiator,
     setAllDealNegotiator,
     negotiation,

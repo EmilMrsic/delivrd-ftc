@@ -316,40 +316,44 @@ export const IncomingBidCard = ({
       {bidCommentsByBidId[bidDetails.bid_id] &&
       bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
         bidCommentsByBidId[bidDetails.bid_id].map(
-          (comment: IncomingBidCommentType, index: number) => (
-            <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
-              <div key={index} className="p-2 flex flex-col  mt-1">
-                <p>
-                  <strong>
-                    {comment?.author?.name ||
-                    comment.deal_coordinator_name === "N/A"
-                      ? comment.client_name
-                      : comment.deal_coordinator_name}
-                    :
-                  </strong>{" "}
-                  {parseComment(comment.comment)}
-                </p>
-                <p className="text-sm text-gray-500">{comment.time}</p>
+          (comment: IncomingBidCommentType, index: number) => {
+            console.log("got bid comment:", comment?.author?.name);
+            return (
+              <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
+                <div key={index} className="p-2 flex flex-col  mt-1">
+                  <p>
+                    <strong>
+                      {comment?.author?.name
+                        ? comment?.author?.name
+                        : comment.deal_coordinator_name === "N/A"
+                        ? comment.client_name
+                        : comment.deal_coordinator_name}
+                      :
+                    </strong>{" "}
+                    {parseComment(comment.comment)}
+                  </p>
+                  <p className="text-sm text-gray-500">{comment.time}</p>
+                </div>
+                {!clientMode && (
+                  <>
+                    {comment.deal_coordinator_name === "N/A" ? (
+                      <p className="pr-2">From Client</p>
+                    ) : (
+                      !noUserActions && (
+                        <Button
+                          variant="outline"
+                          className="border-black"
+                          onClick={() => handleSendComment(comment)}
+                        >
+                          Send To Client
+                        </Button>
+                      )
+                    )}
+                  </>
+                )}
               </div>
-              {!clientMode && (
-                <>
-                  {comment.deal_coordinator_name === "N/A" ? (
-                    <p className="pr-2">From Client</p>
-                  ) : (
-                    !noUserActions && (
-                      <Button
-                        variant="outline"
-                        className="border-black"
-                        onClick={() => handleSendComment(comment)}
-                      >
-                        Send To Client
-                      </Button>
-                    )
-                  )}
-                </>
-              )}
-            </div>
-          )
+            );
+          }
         )
       ) : (
         <p className="text-sm text-gray-500">

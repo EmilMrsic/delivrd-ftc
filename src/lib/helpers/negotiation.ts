@@ -318,7 +318,6 @@ export const removeNegotiatorFromNegotiations = async (
     const negotiationRef = doc(db, "delivrd_negotiations", negotiationId);
     await updateDoc(negotiationRef, {
       dealCoordinatorId: "",
-      stage: "Paid",
     });
 
     if (refetch) {

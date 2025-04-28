@@ -339,7 +339,7 @@ const ClientDetails = ({
                       });
                     }}
                     onRemoveNegotiator={async (id) => {
-                      // removeNegotiatorFromNegotiations(id);
+                      removeNegotiatorFromNegotiations(id);
                       handleChange({
                         key: "dealCoordinatorId",
                         newValue: "",
