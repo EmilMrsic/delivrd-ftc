@@ -4,6 +4,8 @@ import * as React from "react";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva, type VariantProps } from "class-variance-authority";
+import dealieImage from "@/lib/assets/dealie.png";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
@@ -13,17 +15,15 @@ const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Viewport>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
 >(({ className, ...props }, ref) => (
-  <ToastPrimitives.Viewport
-    ref={ref}
-    className={cn(
-      // sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]
-      // "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 max-w-[420px] ml-auto mr-auto",
-      // "fixed z-[100] flex max-h-screen w-full flex-col-reverse p-4 max-w-[420px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-      "fixed top-[30%] z-[100] flex max-h-screen w-full flex-col-reverse p-4 max-w-[420px] left-1/2 -translate-x-1/2",
-      className
-    )}
-    {...props}
-  />
+  <div className="fixed bottom-0 right-0 z-[100] max-h-screen p-4">
+    <div>
+      <ToastPrimitives.Viewport
+        ref={ref}
+        className={cn(className)}
+        {...props}
+      />
+    </div>
+  </div>
 ));
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
@@ -49,13 +49,21 @@ const Toast = React.forwardRef<
     VariantProps<typeof toastVariants>
 >(({ className, variant, ...props }, ref) => {
   return (
-    <ToastPrimitives.Root
-      ref={ref}
-      className={cn(toastVariants({ variant }), className)}
-      {...props}
-    />
+    <div className="flex items-center justify-end">
+      <ToastPrimitives.Root
+        ref={ref}
+        className={cn(toastVariants({ variant }), "w-[400px]")}
+        {...props}
+      />
+      <Image
+        src={dealieImage}
+        alt="this is a test"
+        className="w-[150px] z-[1000] fixed bottom-0 right-[400px]"
+      />
+    </div>
   );
 });
+
 Toast.displayName = ToastPrimitives.Root.displayName;
 
 const ToastAction = React.forwardRef<
@@ -65,7 +73,7 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      // "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
       className
     )}
     {...props}

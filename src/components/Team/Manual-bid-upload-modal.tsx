@@ -184,7 +184,8 @@ const ManualBidUpload = ({
           YourWebsite: "",
           id: dealerId,
         };
-        await setDoc(dealerRef, newDealer);
+        const dealerResponse = await setDoc(dealerRef, newDealer);
+        console.log("dealerResponse:", dealerResponse);
         setDealers && dealers && setDealers([...dealers, newDealer]);
       }
 
@@ -192,7 +193,6 @@ const ManualBidUpload = ({
       const bidData: any = {
         bid_id,
         negotiationId: id,
-        clientId: "N/A",
         dealerId,
         dealerName: formData.dealerName,
         dealerNumber: formData.dealerNumber,
@@ -213,6 +213,8 @@ const ManualBidUpload = ({
         }),
         bid_source: "Manual",
       };
+
+      console.log("creating bid", bidData);
       const bidRef = doc(db, "Incoming Bids", bid_id);
 
       await setDoc(bidRef, { ...bidData, bid_id });

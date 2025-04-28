@@ -120,7 +120,6 @@ export default function BiddingSection() {
       await addDoc(bidRef, {
         bid_id: generateRandomId(),
         dealerId: user.dealer_id[0],
-        clientId: vehicleId,
         price: parseFloat(price),
         dealerName: "N/A",
         dealerNumber: "N/A",
