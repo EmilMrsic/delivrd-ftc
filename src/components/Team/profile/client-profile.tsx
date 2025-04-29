@@ -433,20 +433,6 @@ export const ClientProfile = ({
 
           {!clientMode && (
             <>
-              <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
-                <div>
-                  <p className="text-xl font-bold">Delivrd</p>
-                  <p className="text-sm mt-1 opacity-75">
-                    Click on the button to show or hide deleted bids
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowDeletedBids(!showDeletedBids)}
-                  className="px-6 py-3 bg-white text-black hover:bg-black hover:text-white  rounded-full shadow-lg transition duration-300 transform hover:scale-105"
-                >
-                  {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
-                </button>
-              </div>
               {showDeletedBids && (
                 <DeleteBidSection
                   incomingBids={incomingBids}
@@ -470,6 +456,14 @@ export const ClientProfile = ({
                   setIncomingBids={setIncomingBids}
                 />
               )}
+              <AddNoteSection
+                user={user}
+                setNegotiation={setNegotiation}
+                negotiation={negotiation}
+                incomingBids={incomingBids}
+                allDealNegotiator={allDealNegotiator}
+                dealNegotiator={dealNegotiator}
+              />
             </>
           )}
           <WorkLogSection
@@ -479,16 +473,21 @@ export const ClientProfile = ({
           />
           {!clientMode && (
             <>
-              <AddNoteSection
-                user={user}
-                setNegotiation={setNegotiation}
-                negotiation={negotiation}
-                incomingBids={incomingBids}
-                allDealNegotiator={allDealNegotiator}
-                dealNegotiator={dealNegotiator}
-              />
-
               <ActivityLogSection activityLog={activityLog ?? []} />
+              <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
+                <div>
+                  <p className="text-xl font-bold">Delivrd</p>
+                  <p className="text-sm mt-1 opacity-75">
+                    Click on the button to show or hide deleted bids
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowDeletedBids(!showDeletedBids)}
+                  className="px-6 py-3 bg-white text-black hover:bg-black hover:text-white  rounded-full shadow-lg transition duration-300 transform hover:scale-105"
+                >
+                  {showDeletedBids ? "Hide Deleted Bids" : "Show Deleted Bids"}
+                </button>
+              </div>
             </>
           )}
         </div>
