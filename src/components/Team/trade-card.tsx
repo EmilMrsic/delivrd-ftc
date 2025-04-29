@@ -32,7 +32,7 @@ const TradeCard = ({
           field="trade_in_info"
           onChange={(newValue) =>
             handleChange({
-              key: "trade_in_info",
+              key: "tradeInInfo",
               newValue: newValue,
             })
           }

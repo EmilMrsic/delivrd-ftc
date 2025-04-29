@@ -264,6 +264,20 @@ const FeatureDetails = ({
           icon={DollarSign}
           readOnly={clientMode}
         />
+        <InputField
+          label="Travel Limit"
+          value={(negotiation?.travelLimit ?? "No travel limit") as string}
+          negotiationId={negotiationId ?? ""}
+          field="travelLimit"
+          onChange={(newValue) =>
+            handleChange({
+              key: "travelLimit",
+              newValue: newValue,
+            })
+          }
+          icon={DollarSign}
+          readOnly={clientMode}
+        />
         <div className="space-y-2"></div>
         <div className="space-x-2 flex items-center">
           <Calendar className="w-5 h-5 text-gray-400" />
