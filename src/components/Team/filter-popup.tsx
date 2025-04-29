@@ -48,46 +48,6 @@ const FilterPopup = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-full justify-between">
-              Select Makes
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-auto">
-            <input
-              ref={searchMakeInputRef}
-              autoFocus
-              type="text"
-              onFocus={() => searchMakeInputRef.current?.focus()}
-              placeholder="Search makes..."
-              className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
-              onChange={
-                (e) => setSearchMakes(e.target.value.toLowerCase()) // Update search state
-              }
-            />
-            <div className="h-56 overflow-scroll">
-              {vehicleOfInterest
-                .filter((make) =>
-                  make.toLowerCase().includes(searchMakes.toLowerCase())
-                )
-                .map((make: string, index) => (
-                  <DropdownMenuCheckboxItem
-                    key={index}
-                    checked={filters.makes.includes(make ?? "")}
-                    onCheckedChange={() =>
-                      handleFilterChange("makes", make ?? "")
-                    }
-                  >
-                    {make}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="space-y-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
               Select Deal Coordinators
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
