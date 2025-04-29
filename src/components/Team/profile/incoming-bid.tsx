@@ -412,7 +412,7 @@ export const BidDetailsDialog = ({
         </Button>
       </DialogTrigger>
       <DialogContent style={{ background: "white" }}>
-        <div className="text-[#202125] space-y-4">
+        <div className="text-[#202125] space-y-4 w-[95%]">
           <div className="flex items-center gap-3">
             <p className="text-2xl font-bold">
               {matchingDealer?.Dealership} Detail
@@ -570,8 +570,8 @@ export const BidDetailsDialog = ({
             </span>
           </div>
 
-          <div className="flex mt-4 border-t pt-4">
-            <div className="flex-1">
+          <div className="flex mt-4 border-t pt-4 justify-between">
+            <div>
               <p className="text-gray-500">Date Submitted</p>
               <p>{formatDate(bidDetails.timestamp)}</p>
             </div>
