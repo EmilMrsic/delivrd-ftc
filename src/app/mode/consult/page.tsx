@@ -100,7 +100,7 @@ export default function ConsultMode() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6 min-h-screen">
+    <div className="mx-auto p-4 space-y-6 min-h-screen">
       <TeamHeader />
       <div className="relative z-[11]">
         <div className="w-[200px] mr-0 ml-auto">

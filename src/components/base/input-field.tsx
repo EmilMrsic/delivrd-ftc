@@ -114,10 +114,6 @@ export const InputField = (props: {
   const { toast } = useToast();
   const { as: AsComponent } = props;
 
-  if (props.field === "clientPhone") {
-    console.log("clientPhone", props);
-  }
-
   const handleUpdate = async () => {
     // TODO: find some way to make this generic or move out to a component
     // as its currently used only for team-profile

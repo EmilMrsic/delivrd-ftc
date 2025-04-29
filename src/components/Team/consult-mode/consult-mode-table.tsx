@@ -6,6 +6,7 @@ import { formatDateToLocal } from "@/lib/helpers/dates";
 import { Button } from "@/components/ui/button";
 import { ClientProfile } from "../profile/client-profile";
 import { getStatusStyles } from "@/lib/utils";
+import EditableTextArea from "@/components/base/editable-textarea";
 
 // Parit: recAV4HHDm
 
@@ -163,15 +164,28 @@ export const ConsultModeTable = ({
                         // handleStageChange={handleStageChange}
                       />
                     ),
-                    expandedComponent: () => (
-                      <div>
-                        <p>{negotiation.consultNotes}</p>
-                      </div>
-                    ),
                   },
                   negotiation.clientEmail,
                   negotiation.trade ? (negotiation.trade ? "Yes" : "No") : "",
-                  negotiation.consultNotes,
+                  {
+                    text: negotiation.consultNotes,
+                    config: {
+                      expandable: true,
+                      expandedComponent: () => (
+                        <div>
+                          <EditableTextArea
+                            value={negotiation.consultNotes}
+                            onChange={(value) => {
+                              // refetch();
+                            }}
+                            negotiationId={negotiation.id}
+                            field="consultNotes"
+                          />
+                        </div>
+                      ),
+                      expandedSize: "normal",
+                    },
+                  },
                   {
                     Component: () =>
                       negotiation.purchaseTimeline && (

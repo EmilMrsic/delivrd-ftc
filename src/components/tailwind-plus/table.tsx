@@ -163,7 +163,7 @@ export const TailwindTableExpandedPopover = ({
   return (
     <TailwindPlusModal
       close={() => setExpanded(null)}
-      width={90}
+      width={cell.config?.expandedSize === "full" ? 90 : 40}
       height={90}
       onCloseTrigger={cell.config?.onExpandedClose}
     >

@@ -252,7 +252,7 @@ export default function DealList() {
   console.log("allNegotiations:", allNegotiations);
 
   return (
-    <div className="container mx-auto p-4 space-y-6 min-h-screen">
+    <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
       <TeamHeader />
       <Card className="bg-white shadow-lg">
         <CardContent>
