@@ -99,7 +99,11 @@ export const TeamDashboardClientNameDisplay = ({
     <>
       <div>
         <div>
-          <Link href={`/team-profile?id=${deal.id}`} target="_blank">
+          <Link
+            href={`/team-profile?id=${deal.id}`}
+            target="_blank"
+            className="text-[#2563eb]"
+          >
             {deal.clientNamefull}
           </Link>
         </div>
