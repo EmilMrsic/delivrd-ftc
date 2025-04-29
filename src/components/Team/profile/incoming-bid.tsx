@@ -570,8 +570,8 @@ export const BidDetailsDialog = ({
             </span>
           </div>
 
-          <div className="flex justify-between mt-4 border-t pt-4">
-            <div>
+          <div className="flex mt-4 border-t pt-4">
+            <div className="flex-1">
               <p className="text-gray-500">Date Submitted</p>
               <p>{formatDate(bidDetails.timestamp)}</p>
             </div>
@@ -611,9 +611,11 @@ export const BidDetailsDialog = ({
             </div>
           </div>
 
-          <div className="border-t pt-4 flex flex-col ">
+          <div className="border-t pt-4 flex flex-col">
             <p className="font-semibold">Additional Comments</p>
-            {parseComment(bidDetails.comments)}
+            <div className="break-words overflow-wrap break-words [overflow-wrap:anywhere]">
+              {parseComment(bidDetails.comments)}
+            </div>
           </div>
         </div>
       </DialogContent>

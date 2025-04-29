@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const path = usePathname();
   const router = useRouter();
 
@@ -38,9 +39,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         router.push("/");
       }
     }
+
+    setIsLoading(false);
   }, [path, router]);
 
-  return children;
+  // if (isLoading) {
+  //   return null;
+  // }
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

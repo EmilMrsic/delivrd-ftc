@@ -332,7 +332,6 @@ export const ClientProfile = ({
       );
 
       const result = await response.json();
-      console.log("result", result);
       if (result.success) {
         toast({ title: "Comment sent to client" });
       } else {
