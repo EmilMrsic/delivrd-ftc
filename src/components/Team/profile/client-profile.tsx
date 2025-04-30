@@ -333,7 +333,11 @@ export const ClientProfile = ({
 
       const result = await response.json();
       if (result.success) {
-        toast({ title: "Comment sent to client" });
+        toast({
+          title: `Comment sent to ${
+            user.privilege === "Client" ? "The Delivrd Team" : "client"
+          }`,
+        });
       } else {
         console.error("Failed to send comment:", result);
       }
