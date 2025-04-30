@@ -1,5 +1,5 @@
 import { TailwindPlusCard } from "@/components/tailwind-plus/card";
-import { DealNegotiatorType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { BidComments, DealerData, IncomingBid } from "@/types";
 import { FileText } from "lucide-react";
 import ManualBidUpload from "../Manual-bid-upload-modal";
@@ -32,6 +32,7 @@ export const IncomingBids = ({
   clientMode,
   handleBidFileUpload,
   handleDeleteFile,
+  negotiation,
 }: {
   incomingBids: IncomingBid[];
   setIncomingBids: (item: IncomingBid[]) => void;
@@ -59,6 +60,7 @@ export const IncomingBids = ({
   clientMode?: boolean;
   handleBidFileUpload: (files: FileList, bidId: string) => void;
   handleDeleteFile: (file: string, bidId: string) => void;
+  negotiation: NegotiationDataType;
 }) => {
   return (
     <TailwindPlusCard
@@ -73,6 +75,7 @@ export const IncomingBids = ({
             setIncomingBids={setIncomingBids}
             incomingBids={incomingBids}
             id={negotiationId}
+            negotiation={negotiation}
           />
         );
       }}

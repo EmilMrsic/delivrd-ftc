@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import ClientDetails from "../Client-details";
 import { IncomingBids } from "./incoming-bids";
-import { DealNegotiatorType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import DeleteBidSection from "../delete-bid-section";
 import AddNoteSection from "../add-note-section";
 import ActivityLogSection from "../activity-log";
@@ -429,6 +429,7 @@ export const ClientProfile = ({
             clientMode={clientMode}
             handleBidFileUpload={handleBidFileUpload}
             handleDeleteFile={handleDeleteFile}
+            negotiation={negotiation as NegotiationDataType}
           />
 
           {!clientMode && (

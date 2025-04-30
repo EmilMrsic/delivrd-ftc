@@ -24,6 +24,8 @@ import { TailwindPlusButton } from "../tailwind-plus/button";
 import { TailwindPlusInput } from "../tailwind-plus/input";
 import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
 import { TailwindPlusDialogContent } from "../tailwind-plus/dialog";
+import { createBidWebhook } from "@/lib/helpers/bids";
+import { NegotiationDataType } from "@/lib/models/team";
 
 interface FormData {
   dealerName: string;
@@ -54,6 +56,7 @@ type ManualBidUploadType = {
   setDealers?: (item: DealerData[]) => void;
   setIncomingBids: (item: IncomingBid[]) => void;
   incomingBids: IncomingBid[];
+  negotiation: NegotiationDataType;
 };
 
 const ManualBidUpload = ({
@@ -63,6 +66,7 @@ const ManualBidUpload = ({
   dealers,
   incomingBids,
   setIncomingBids,
+  negotiation,
 }: ManualBidUploadType) => {
   const [formData, setFormData] = useState<FormData>({
     dealerName: "",
@@ -169,6 +173,7 @@ const ManualBidUpload = ({
       const bid_id = generateRandomId();
       let dealerId = selectedDealership?.data?.id ?? generateRandomId();
       const dealerRef = doc(db, "Dealers", dealerId);
+      let dealerData = selectedDealership?.data;
       // Create New Dealer Entry If Needed
       if (!selectedDealership?.data && !selectedDealership?.label) {
         const newDealer = {
@@ -184,6 +189,7 @@ const ManualBidUpload = ({
           YourWebsite: "",
           id: dealerId,
         };
+        dealerData = newDealer;
         const dealerResponse = await setDoc(dealerRef, newDealer);
         console.log("dealerResponse:", dealerResponse);
         setDealers && dealers && setDealers([...dealers, newDealer]);

@@ -139,6 +139,7 @@ export const TeamDashboardClientNameDisplay = ({
             incomingBids={incomingBids}
             setIncomingBids={setIncomingBids}
             dealers={allDealNegotiator}
+            negotiation={negotiation}
           />
         </div>
       </div>
@@ -197,6 +198,7 @@ export const TeamDashboardClientNameDisplay = ({
               setEditedBid={() => {}}
               handleBidFileUpload={() => {}}
               handleDeleteFile={() => {}}
+              negotiation={negotiation}
             />
           )}
           {showModal === "shipping" && (

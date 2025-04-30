@@ -22,6 +22,7 @@ export const DashboardTableActions = ({
   incomingBids,
   setIncomingBids,
   dealers,
+  negotiation,
 }: any) => {
   // const [isDialogOpen, setIsDialogOpen] = useState(false);
   return (
@@ -65,6 +66,7 @@ export const DashboardTableActions = ({
             incomingBids={incomingBids}
             setIncomingBids={setIncomingBids}
             dealers={dealers}
+            negotiation={negotiation}
           />
         </div>
       </DropdownMenuContent>
