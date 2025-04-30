@@ -170,9 +170,16 @@ export const InputField = (props: {
           keyName = parentKey + "." + field;
         }
         let useableValue = value;
-        await updateDoc(negotiationDocRef, {
+        const updateObject = {
           [keyName]: useableValue,
-        });
+        };
+
+        if (field === "clientFirstName" || field === "clientLastName") {
+          updateObject["clientNamefull"] = firstName + " " + lastName;
+        }
+
+        await updateDoc(negotiationDocRef, updateObject);
+
         toast({
           title: "Field Updated",
         });

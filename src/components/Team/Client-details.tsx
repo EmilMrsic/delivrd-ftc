@@ -144,7 +144,7 @@ const ClientDetails = ({
             />
             <InputField
               label="Last Name"
-              firstName={negotiation?.clientLastName}
+              firstName={negotiation?.clientFirstName}
               lastName={negotiation?.clientLastName}
               value={negotiation?.clientLastName ?? ""}
               userField="lastName"
