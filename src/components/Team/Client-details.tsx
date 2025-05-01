@@ -174,33 +174,6 @@ const ClientDetails = ({
               icon={Mail}
               readOnly={clientMode}
             />
-            <InputField
-              field="zip"
-              negotiationId={negotiationId ?? ""}
-              label="Zip"
-              value={negotiation?.zip ?? ""}
-              onChange={(newValue) =>
-                handleChange({
-                  key: "zip",
-                  newValue: newValue,
-                })
-              }
-              icon={() => (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-              readOnly={clientMode}
-            />
           </div>
           {negotiation?.dealCoordinatorId && dealNegotiator ? (
             <div className="flex items-center space-x-4 w-full">
@@ -282,33 +255,64 @@ const ClientDetails = ({
               )}
               readOnly={clientMode}
             />
-            <InputField
-              field="city_state"
-              negotiationId={negotiationId ?? ""}
-              label="City/State"
-              value={negotiation?.city_state ?? ""}
-              onChange={(newValue) =>
-                handleChange({
-                  key: "city_state",
-                  newValue: newValue,
-                })
-              }
-              icon={() => (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-              readOnly={clientMode}
-            />
+            <div className="flex items-center gap-2 w-full">
+              <div className="w-fit mr-0 ml-auto flex gap-2">
+                <InputField
+                  field="city_state"
+                  negotiationId={negotiationId ?? ""}
+                  // label="City/State"
+                  value={negotiation?.city_state ?? ""}
+                  onChange={(newValue) =>
+                    handleChange({
+                      key: "city_state",
+                      newValue: newValue,
+                    })
+                  }
+                  // icon={() => (
+                  //   <svg
+                  //     xmlns="http://www.w3.org/2000/svg"
+                  //     className="h-5 w-5 text-gray-400"
+                  //     viewBox="0 0 20 20"
+                  //     fill="currentColor"
+                  //   >
+                  //     <path
+                  //       fillRule="evenodd"
+                  //       d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
+                  //       clipRule="evenodd"
+                  //     />
+                  //   </svg>
+                  // )}
+                  readOnly={true} //clientMode}
+                />
+                <InputField
+                  field="zip"
+                  negotiationId={negotiationId ?? ""}
+                  // label="Zip"
+                  value={negotiation?.zip ?? ""}
+                  onChange={(newValue) =>
+                    handleChange({
+                      key: "zip",
+                      newValue: newValue,
+                    })
+                  }
+                  // icon={() => (
+                  //   <svg
+                  //     xmlns="http://www.w3.org/2000/svg"
+                  //     className="h-5 w-5 text-gray-400"
+                  //     viewBox="0 0 20 20"
+                  //     fill="currentColor"
+                  //   >
+                  //     <path
+                  //       fillRule="evenodd"
+                  //       d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                  //       clipRule="evenodd"
+                  //     />
+                  //   </svg>
+                  // )}
+                  readOnly={true} //clientMode}
+                />
+              </div>
+            </div>
             {!clientMode && (
               <InputField
                 field="dealCoordinatorId"

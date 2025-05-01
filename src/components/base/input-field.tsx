@@ -23,7 +23,7 @@ import { NegotiationDataType } from "@/lib/models/team";
 import EditableTextArea from "./editable-textarea";
 
 interface EditableInputProps {
-  label: string;
+  label?: string;
   value: string | number;
   onChange: (newValue: string) => void;
   negotiationId: string;
@@ -72,7 +72,11 @@ const EditableInput: React.FC<EditableInputProps> = ({
 
   return (
     <Field className="w-full">
-      <Label className="font-bold text-[15px]">{label}:</Label>
+      {label ? (
+        <Label className="font-bold text-[15px]">{label}:</Label>
+      ) : (
+        <div className="h-6 w-5"></div>
+      )}
       <TailwindPlusInput
         ref={inputRef}
         type="text"
@@ -91,7 +95,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
 };
 
 export const InputField = (props: {
-  label: string;
+  label?: string;
   value?: string | number;
   onChange?: (newValue: string) => void;
   onDateChange?: (newValue: Date | null) => void;
@@ -193,9 +197,11 @@ export const InputField = (props: {
     return (
       <div className="flex items-start space-x-2 text-[#202125]">
         {props.icon && <props.icon className="h-5 w-5 text-gray-400" />}
-        <div className="font-bold text-[15px] whitespace-nowrap">
-          {props.label}:
-        </div>
+        {props.label && (
+          <div className="font-bold text-[15px] whitespace-nowrap">
+            {props.label}:
+          </div>
+        )}
         <div className="text-[15px] ">{props.value}</div>
       </div>
     );
@@ -273,7 +279,9 @@ export const InputField = (props: {
         <>
           {Icon && <Icon className="h-5 w-5 text-gray-400" />}
           <Field className="w-full">
-            <Label className="font-bold text-[15px]">{props.label}:</Label>
+            {props.label && (
+              <Label className="font-bold text-[15px]">{props.label}:</Label>
+            )}
             <div className="w-full">{FieldDisplay}</div>
           </Field>
         </>
