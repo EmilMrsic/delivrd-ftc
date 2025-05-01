@@ -228,35 +228,36 @@ const ClientDetails = ({
               icon={FileText}
               readOnly={clientMode}
             />
-            <InputField
-              field="address"
-              negotiationId={negotiationId ?? ""}
-              label="Address"
-              value={negotiation?.address ?? ""}
-              onChange={(newValue) =>
-                handleChange({
-                  key: "address",
-                  newValue: newValue,
-                })
-              }
-              icon={() => (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-              readOnly={clientMode}
-            />
             <div className="flex items-center gap-2 w-full">
-              <div className="w-fit mr-0 ml-auto flex gap-2">
+              <InputField
+                field="address"
+                negotiationId={negotiationId ?? ""}
+                label="Address"
+                value={negotiation?.address ?? ""}
+                onChange={(newValue) =>
+                  handleChange({
+                    key: "address",
+                    newValue: newValue,
+                  })
+                }
+                icon={() => (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-gray-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+                readOnly={clientMode}
+              />
+
+              {/* <div className="w-fit mr-0 ml-auto flex gap-2">
                 <InputField
                   field="city_state"
                   negotiationId={negotiationId ?? ""}
@@ -282,7 +283,7 @@ const ClientDetails = ({
                   //     />
                   //   </svg>
                   // )}
-                  readOnly={true} //clientMode}
+                  readOnly={clientMode}
                 />
                 <InputField
                   field="zip"
@@ -309,9 +310,9 @@ const ClientDetails = ({
                   //     />
                   //   </svg>
                   // )}
-                  readOnly={true} //clientMode}
+                  readOnly={clientMode}
                 />
-              </div>
+              </div> */}
             </div>
             {!clientMode && (
               <InputField

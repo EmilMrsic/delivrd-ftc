@@ -16,6 +16,7 @@ export const TailwindPlusToggle = ({
       <Switch
         checked={enabled}
         onChange={(toggle) => {
+          console.log("okay got here", onToggle);
           setEnabled(toggle);
           if (onToggle) {
             onToggle?.(toggle);

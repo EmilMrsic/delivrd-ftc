@@ -41,6 +41,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
 
   const handleBlur = async () => {
     if (negotiationId && field) {
+      console.log("handleBlur", negotiationId, field, value);
       try {
         // const usersQuery = query(
         //   collection(db, "users"),
@@ -96,12 +97,15 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
     }
   }, [value, isFocused]);
 
+  console.log("value:", value);
+
   return (
     <div className="flex items-center w-full">
       <textarea
         ref={inputRef}
         value={value}
         onChange={(e) => {
+          console.log("e.target.value:", e.target.value);
           onChange(e.target.value);
         }}
         onFocus={() => setIsFocused(true)}

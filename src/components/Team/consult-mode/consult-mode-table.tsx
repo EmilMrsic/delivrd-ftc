@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ClientProfile } from "../profile/client-profile";
 import { getStatusStyles } from "@/lib/utils";
 import EditableTextArea from "@/components/base/editable-textarea";
+import { useState } from "react";
+import EditableInput, { InputField } from "@/components/base/input-field";
 
 // Parit: recAV4HHDm
 
@@ -166,23 +168,78 @@ export const ConsultModeTable = ({
                     ),
                   },
                   negotiation.clientEmail,
-                  negotiation.trade ? (negotiation.trade ? "Yes" : "No") : "",
+                  {
+                    text: negotiation.trade
+                      ? negotiation.trade
+                        ? "Yes"
+                        : "No"
+                      : "",
+                    config: {
+                      expandable: true,
+                      expandedComponent: () => {
+                        const [trade, setTrade] = useState<boolean>(
+                          negotiation.trade ?? false
+                        );
+
+                        return (
+                          <>
+                            {" "}
+                            <div className="text-2xl font-bold">
+                              Edit Consult Notes
+                            </div>
+                            <div>
+                              <InputField
+                                type="toggle"
+                                checked={trade}
+                                field="trade"
+                                negotiationId={negotiation.id}
+                                onToggle={(e) => {
+                                  console.log("e:", e);
+                                  // setTrade(e);
+                                }}
+                              />
+                            </div>
+                          </>
+                        );
+                      },
+                      onExpandedClose: () => {
+                        refetch();
+                      },
+                      expandedSize: "normal",
+                    },
+                  },
                   {
                     text: negotiation.consultNotes,
                     config: {
                       expandable: true,
-                      expandedComponent: () => (
-                        <div>
-                          <EditableTextArea
-                            value={negotiation.consultNotes}
-                            onChange={(value) => {
-                              // refetch();
-                            }}
-                            negotiationId={negotiation.id}
-                            field="consultNotes"
-                          />
-                        </div>
-                      ),
+                      expandedComponent: () => {
+                        const [consultNotes, setConsultNotes] = useState(
+                          negotiation.consultNotes
+                        );
+
+                        return (
+                          <>
+                            <div className="text-2xl font-bold">
+                              Edit Consult Notes
+                            </div>
+                            <div>
+                              <EditableTextArea
+                                value={consultNotes}
+                                onChange={(value) => {
+                                  console.log("value:", value);
+                                  setConsultNotes(value);
+                                }}
+                                negotiationId={negotiation.id}
+                                field="consultNotes"
+                              />
+                            </div>
+                          </>
+                        );
+                      },
+                      onExpandedClose: () => {
+                        console.log("handleBlur refetching");
+                        refetch();
+                      },
                       expandedSize: "normal",
                     },
                   },

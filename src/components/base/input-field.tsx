@@ -21,6 +21,7 @@ import clsx from "clsx";
 import { formatDateToLocal } from "@/lib/helpers/dates";
 import { NegotiationDataType } from "@/lib/models/team";
 import EditableTextArea from "./editable-textarea";
+import { TailwindPlusToggle } from "../tailwind-plus/toggle";
 
 interface EditableInputProps {
   label?: string;
@@ -107,18 +108,20 @@ export const InputField = (props: {
   lastName?: string;
   options?: string[];
   icon?: React.ComponentType<{ className?: string }>;
-  type?: "text" | "searchableDropdown" | "datePicker" | "textarea";
+  type?: "text" | "searchableDropdown" | "datePicker" | "textarea" | "toggle";
   dateFormat?: string;
   placeholderText?: string;
   selected?: Date | null;
   parentKey?: string;
   readOnly?: boolean;
+  checked?: boolean;
+  onToggle?: (newValue: boolean) => void;
   as?: React.ComponentType<any>;
 }) => {
   const { toast } = useToast();
   const { as: AsComponent } = props;
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (valueOverride?: any) => {
     // TODO: find some way to make this generic or move out to a component
     // as its currently used only for team-profile
     const {
@@ -132,6 +135,7 @@ export const InputField = (props: {
     } = props;
 
     if (negotiationId && field) {
+      console.log("saving to db", field, value);
       try {
         // const usersQuery = query(
         //   collection(db, "delivrd_users"),
@@ -174,6 +178,11 @@ export const InputField = (props: {
           keyName = parentKey + "." + field;
         }
         let useableValue = value;
+
+        if (valueOverride !== undefined) {
+          useableValue = valueOverride;
+        }
+
         const updateObject = {
           [keyName]: useableValue,
         };
@@ -220,6 +229,9 @@ export const InputField = (props: {
 
     case "textarea":
       InputComponent = EditableTextArea;
+      break;
+    case "toggle":
+      InputComponent = TailwindPlusToggle;
       break;
 
     default:
@@ -268,6 +280,13 @@ export const InputField = (props: {
             handleUpdate();
           }
         }}
+        onToggle={(e: boolean) => {
+          if (props.onToggle) {
+            props.onToggle(e);
+          }
+          handleUpdate(e);
+        }}
+        checked={props.checked}
       />
     );
 
