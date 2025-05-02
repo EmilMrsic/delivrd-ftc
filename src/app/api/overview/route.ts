@@ -145,7 +145,7 @@ const countClosedDeals = async (
   return [dailyClosedDeals, monthlyClosedDeals];
 };
 
-export const isSameDay = (date1: Date, date2: Date) => {
+const isSameDay = (date1: Date, date2: Date) => {
   return (
     date1.getFullYear() === date2.getFullYear() &&
     date1.getMonth() === date2.getMonth() &&
@@ -153,7 +153,7 @@ export const isSameDay = (date1: Date, date2: Date) => {
   );
 };
 
-export const isWithinLast30Days = (date: Date) => {
+const isWithinLast30Days = (date: Date) => {
   const now = new Date();
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(now.getDate() - 30);
