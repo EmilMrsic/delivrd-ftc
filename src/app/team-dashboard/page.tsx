@@ -22,6 +22,7 @@ import {
 } from "@/lib/helpers/negotiation";
 import { useRouter } from "next/navigation";
 import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
+import { DealsOverviewBoard } from "@/components/Team/deals-overview/deals-overview-board";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -249,8 +250,6 @@ export default function DealList() {
     }
   };
 
-  console.log("allNegotiations:", allNegotiations);
-
   return (
     <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
       <TeamHeader />
@@ -269,6 +268,7 @@ export default function DealList() {
             archive={archive}
             setArchive={setArchive}
           />
+          <DealsOverviewBoard />
           <TeamDashboardTable
             // setCurrentDeals={setCurrentDeals}
             allNegotiations={allNegotiations}

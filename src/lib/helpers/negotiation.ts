@@ -177,7 +177,6 @@ export const getActiveDealDocuments = async (dealQuery: {
   if (dealQuery?.filter) {
     Object.keys(dealQuery.filter).forEach((key) => {
       if (key === "createdAt" || key === "consultDate") {
-        console.log("key:", key);
         if (dealQuery?.filter?.[key]) {
           const day = dealQuery.filter[key];
           const start = `${day}T00:00:00.000Z`;
