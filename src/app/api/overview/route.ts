@@ -192,7 +192,7 @@ const isThisMonth = (date: Date) => {
 };
 
 // check if the date this week, including sunday
-export const isThisWeek = (date: Date) => {
+const isThisWeek = (date: Date) => {
   const now = new Date();
   const lastSaturday = new Date();
   lastSaturday.setDate(now.getDate() - now.getDay() - 1);
