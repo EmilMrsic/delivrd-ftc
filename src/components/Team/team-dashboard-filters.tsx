@@ -5,6 +5,7 @@ import SearchAll from "./search-all";
 import { Input } from "../ui/input";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "../ui/checkbox";
+import { DealsOverviewBoard } from "./deals-overview/deals-overview-board";
 
 export const TeamDashboardFilters = ({
   allDealNegotiator,
@@ -71,6 +72,7 @@ export const TeamDashboardFilters = ({
             </div>
           </div>
         </div>
+        <DealsOverviewBoard mode="owner" />
         <div className="w-fit ml-auto mr-auto mt-4 flex">
           <FilterPopup
             dealCoordinators={allDealNegotiator}

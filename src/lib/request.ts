@@ -1,3 +1,5 @@
+import { getUserData } from "./user";
+
 export const backendRequest = async <T = object>(
   path: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
@@ -7,6 +9,9 @@ export const backendRequest = async <T = object>(
   if (postData) {
     headers["Content-Type"] = "application/json";
   }
+
+  headers["auth"] = getUserData().id;
+
   const response = await fetch(`/api/${path}`, {
     method: method,
     body: postData ? JSON.stringify(postData) : undefined,

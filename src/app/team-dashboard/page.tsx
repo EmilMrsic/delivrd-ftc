@@ -268,7 +268,6 @@ export default function DealList() {
             archive={archive}
             setArchive={setArchive}
           />
-          <DealsOverviewBoard />
           <TeamDashboardTable
             // setCurrentDeals={setCurrentDeals}
             allNegotiations={allNegotiations}
