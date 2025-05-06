@@ -137,7 +137,9 @@ const VehicleCard: FC<IVehicleCardProps> = ({
             alt="car"
             className="transform scale-x-[-1] filter invert"
           />
-          {vehicle.brand + " " + vehicle.name}
+          {vehicle.brand +
+            " " +
+            vehicle.name?.replaceAll(vehicle.brand || "", "")}
         </CardTitle>
       </CardHeader>
 
@@ -177,41 +179,65 @@ const VehicleCard: FC<IVehicleCardProps> = ({
         <Separator className="my-4" />
         <div className="space-y-4">
           <div>
-            <h4 className="font-semibold mb-2">Exterior Colors</h4>
+            {(vehicle.desiredExterior || vehicle.excludedExterior) && (
+              <h4 className="font-semibold mb-2">Exterior Colors</h4>
+            )}
             <div className="grid grid-cols-2 gap-2">
-              {vehicle.exteriorColors?.map((color, index) => (
-                <div key={color.name + index} className="flex items-center">
-                  {color.preferred ? (
-                    <CheckIcon
-                      width={16}
-                      height={16}
-                      className="  text-green-500 w-4 h-4 mr-2"
-                    />
-                  ) : (
-                    <XIcon
-                      width={16}
-                      height={16}
-                      className="text-destructive w-4 h-4 mr-2"
-                    />
-                  )}
-                  <span className="text-sm max-w-[150px]">{color.name}</span>
+              {vehicle.desiredExterior && (
+                <div className="flex items-center">
+                  <CheckIcon
+                    width={16}
+                    height={16}
+                    className="  text-green-500 w-4 h-4 mr-2"
+                  />
+                  <span className="text-sm max-w-[150px]">
+                    {vehicle.desiredExterior}
+                  </span>
                 </div>
-              ))}
+              )}
+              {vehicle.excludedExterior && (
+                <div className="flex items-center">
+                  <XIcon
+                    width={16}
+                    height={16}
+                    className="text-destructive w-4 h-4 mr-2"
+                  />
+                  <span className="text-sm max-w-[150px]">
+                    {vehicle.excludedExterior}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <div>
-            <h4 className="font-semibold mb-2">Interior Colors</h4>
+            {(vehicle.desiredInterior || vehicle.excludedInterior) && (
+              <h4 className="font-semibold mb-2">Interior Colors</h4>
+            )}
             <div className="grid grid-cols-2 gap-2">
-              {vehicle.interiorColors?.map((color, index) => (
-                <div key={color.name + index} className="flex items-center">
-                  {color.preferred ? (
-                    <CheckIcon className="text-green-500 w-4 h-4 mr-2" />
-                  ) : (
-                    <XIcon className="text-destructive w-4 h-4 mr-2" />
-                  )}
-                  <span className="text-sm max-w-[150px]">{color.name}</span>
+              {vehicle.desiredInterior && (
+                <div className="flex items-center">
+                  <CheckIcon
+                    width={16}
+                    height={16}
+                    className="  text-green-500 w-4 h-4 mr-2"
+                  />
+                  <span className="text-sm max-w-[150px]">
+                    {vehicle.desiredInterior}
+                  </span>
                 </div>
-              ))}
+              )}
+              {vehicle.excludedInterior && (
+                <div className="flex items-center">
+                  <XIcon
+                    width={16}
+                    height={16}
+                    className="text-destructive w-4 h-4 mr-2"
+                  />
+                  <span className="text-sm max-w-[150px]">
+                    {vehicle.excludedInterior}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <div>
@@ -229,7 +255,7 @@ const VehicleCard: FC<IVehicleCardProps> = ({
       >
         <div className="flex flex-col gap-2 w-full">
           <Label htmlFor={`price-${vehicle.id}`}>
-            <strong>Price - Excluding Tax & Title*</strong>
+            <strong>Selling Price - Excluding Tax & Title*</strong>
           </Label>
           <Input
             id={`price-${vehicle.id}`}

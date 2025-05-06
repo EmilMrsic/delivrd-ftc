@@ -292,6 +292,10 @@ export type Vehicle = {
   drivetrain?: string;
   createdAt?: string;
   negotiationId?: string;
+  desiredExterior?: string;
+  desiredInterior?: string;
+  excludedExterior?: string;
+  excludedInterior?: string;
 };
 
 export type Negotiation = {
