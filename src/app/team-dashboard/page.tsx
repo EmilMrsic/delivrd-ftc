@@ -286,7 +286,7 @@ export default function DealList() {
             sortConfig={sortConfig}
             setSortConfig={setSortConfig}
             refetch={refetch}
-            displayAllPaid={!searchAll}
+            displayAllPaid={true} //!searchAll}
             negotiations={negotiations}
             searchTerm={searchTerm}
             searchAll={searchAll}
