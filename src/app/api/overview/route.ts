@@ -1,5 +1,5 @@
 import { db } from "@/firebase/config";
-import { NegotiationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import {
   collection,
   doc,
@@ -20,6 +20,7 @@ const getUserDataFromDb = async (id: string) => {
 
 export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
   const body = await request.json();
+  const { mode } = body;
   const headers = request.headers;
   const userData = await getUserDataFromDb(headers.get("auth") as string);
   const negotiationsTable = collection(db, "delivrd_negotiations");
@@ -66,21 +67,67 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
   let shippingToday: NegotiationDataType[] = [];
   let salesThisWeek = 0;
   let salesThisMonth = 0;
+  const activeDealsByNegotiator: { [key: string]: number } = {};
+
+  const coordinators: { [key: string]: DealNegotiatorType } = {};
+  teamDelivrdSnapshot.docs.forEach((doc) => {
+    coordinators[doc.id] = doc.data() as DealNegotiatorType;
+  });
+
+  const shippingAndPickingUpTodayByCoordinator: {
+    [key: string]: {
+      pickingUpToday: NegotiationDataType[];
+      shippingToday: NegotiationDataType[];
+    };
+  } = {};
 
   allDeals.forEach((deal) => {
+    const coordinator = coordinators[deal.dealCoordinatorId];
+
+    if (mode === "reviewer" && coordinator?.visible) {
+      if (!shippingAndPickingUpTodayByCoordinator[coordinator.name]) {
+        shippingAndPickingUpTodayByCoordinator[coordinator.name] = {
+          pickingUpToday: [],
+          shippingToday: [],
+        };
+      }
+    }
+
     if (["Paid", "Deal Started", "Actively Negotiating"].includes(deal.stage)) {
-      activeDeals++;
+      // if assigned, make sure the coordinator is "visible" e.g. not a dev
+      if (coordinator?.visible || !coordinator) {
+        const coordinatorName =
+          coordinators[deal.dealCoordinatorId]?.name ?? "Unassigned";
+        if (!activeDealsByNegotiator[coordinatorName]) {
+          activeDealsByNegotiator[coordinatorName] = 0;
+        }
+        activeDealsByNegotiator[coordinatorName]++;
+
+        activeDeals++;
+      }
     } else if (
       deal.arrivalToClient == todaysDate &&
       deal.stage === "Deal Complete- Local"
     ) {
-      pickingUpToday.push(deal as NegotiationDataType);
+      if (mode === "reviewer" && coordinator?.visible) {
+        shippingAndPickingUpTodayByCoordinator[
+          coordinator.name
+        ].pickingUpToday.push(deal as NegotiationDataType);
+      } else {
+        pickingUpToday.push(deal as NegotiationDataType);
+      }
     } else if (
       deal.arrivalToClient == todaysDate &&
       (deal.stage === "Shipping" ||
         deal.stage === "Deal Complete- Long Distance")
     ) {
-      shippingToday.push(deal as NegotiationDataType);
+      if (mode === "reviewer" && coordinator?.visible) {
+        shippingAndPickingUpTodayByCoordinator[
+          coordinator.name
+        ].shippingToday.push(deal as NegotiationDataType);
+      } else {
+        shippingToday.push(deal as NegotiationDataType);
+      }
     } else if (deal.datePaid && isThisWeek(new Date(deal.datePaid))) {
       salesThisWeek++;
     } else if (deal.datePaid && isThisMonth(new Date(deal.datePaid))) {
@@ -91,14 +138,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
   const [dailyClosedDeals, monthlyClosedDeals, coordinatorSalesThisWeek] =
     await countClosedDeals(allDeals);
 
-  const coordinators: { [key: string]: string } = {};
-  teamDelivrdSnapshot.docs.forEach((doc) => {
-    coordinators[doc.id] = doc.data()?.name;
-  });
-
   for (const dealCoordinatorId of Object.keys(coordinatorSalesThisWeek)) {
     coordinatorSalesThisWeek[dealCoordinatorId].coordinatorName =
-      coordinators[dealCoordinatorId];
+      coordinators[dealCoordinatorId].name;
   }
 
   return NextResponse.json({
@@ -111,6 +153,8 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
     salesThisWeek,
     salesThisMonth,
     coordinatorSalesThisWeek,
+    activeDealsByNegotiator,
+    shippingAndPickingUpTodayByCoordinator,
   });
 };
 

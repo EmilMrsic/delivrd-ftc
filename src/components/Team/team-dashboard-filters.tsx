@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "../ui/checkbox";
 import { DealsOverviewBoard } from "./deals-overview/deals-overview-board";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 export const TeamDashboardFilters = ({
   allDealNegotiator,
@@ -19,7 +20,11 @@ export const TeamDashboardFilters = ({
   archive,
   setArchive,
 }: any) => {
+  const user = useLoggedInUser();
   const router = useRouter();
+
+  if (!user) return null;
+
   return (
     <>
       <div className="items-center mb-4 mt-4">
@@ -72,7 +77,7 @@ export const TeamDashboardFilters = ({
             </div>
           </div>
         </div>
-        <DealsOverviewBoard mode="owner" />
+        <DealsOverviewBoard mode={user?.mode || "coordinator"} />
         <div className="w-fit ml-auto mr-auto mt-4 flex">
           <FilterPopup
             dealCoordinators={allDealNegotiator}
