@@ -24,6 +24,7 @@ export const TeamDashboardFilters = ({
   const router = useRouter();
 
   if (!user) return null;
+  console.log("user:", user);
 
   return (
     <>

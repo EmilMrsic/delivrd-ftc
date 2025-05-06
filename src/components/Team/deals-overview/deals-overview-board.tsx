@@ -107,7 +107,7 @@ export const CoordinatorsMultiClosedDealsCard = ({
           <div className="text-xl text-black-500 font-bold text-center mt-[-35px] mb-4">
             {coordinatorName}
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-6">
             <MinimalCard>
               <div className="text-lg text-center mb-4">Picking up today</div>
               <DealsListCard
@@ -336,15 +336,19 @@ export const DealsListCard = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      {deals.map((deal) => (
-        <div
-          key={deal.id}
-          className="text-blue-500 cursor-pointer text-center"
-          onClick={() => setSelectedDeal(deal)}
-        >
-          {deal.clientNamefull}
-        </div>
-      ))}
+      {deals?.length ? (
+        deals.map((deal) => (
+          <div
+            key={deal.id}
+            className="text-blue-500 cursor-pointer text-center"
+            onClick={() => setSelectedDeal(deal)}
+          >
+            {deal.clientNamefull}
+          </div>
+        ))
+      ) : (
+        <div className="text-center">No deals</div>
+      )}
     </div>
   );
 };
