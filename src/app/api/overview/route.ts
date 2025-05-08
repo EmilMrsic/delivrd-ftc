@@ -135,7 +135,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
     }
   });
 
-  const [dailyClosedDeals, monthlyClosedDeals, coordinatorSalesThisWeek] =
+  const [dailyClosedDeals, weeklyClosedDeals, coordinatorSalesThisWeek] =
     await countClosedDeals(allDeals);
 
   for (const dealCoordinatorId of Object.keys(coordinatorSalesThisWeek)) {
@@ -148,7 +148,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
     pickingUpToday,
     shippingToday,
     dailyClosedDeals,
-    monthlyClosedDeals,
+    weeklyClosedDeals,
     metrics,
     salesThisWeek,
     salesThisMonth,
@@ -168,7 +168,7 @@ const countClosedDeals = async (
   ]
 > => {
   let dailyClosedDeals = 0;
-  let monthlyClosedDeals = 0;
+  let weeklyClosedDeals = 0;
 
   const coordinatorSalesThisWeek: {
     [key: string]: { coordinatorName: string; sales: number };
@@ -184,11 +184,13 @@ const countClosedDeals = async (
       if (isSameDay(closeDate, new Date())) {
         dailyClosedDeals++;
       }
-      if (isThisMonth(closeDate)) {
-        monthlyClosedDeals++;
-      }
+      // if (isThisMonth(closeDate)) {
+      //   monthlyClosedDeals++;
+      // }
 
       if (isThisWeek(closeDate)) {
+        weeklyClosedDeals++;
+
         if (deal.dealCoordinatorId) {
           if (!coordinatorSalesThisWeek[deal.dealCoordinatorId]) {
             coordinatorSalesThisWeek[deal.dealCoordinatorId] = {
@@ -203,7 +205,7 @@ const countClosedDeals = async (
     }
   });
 
-  return [dailyClosedDeals, monthlyClosedDeals, coordinatorSalesThisWeek];
+  return [dailyClosedDeals, weeklyClosedDeals, coordinatorSalesThisWeek];
 };
 
 const isSameDay = (date1: Date, date2: Date) => {

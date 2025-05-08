@@ -25,6 +25,9 @@ export const TeamDashboardFilters = ({
 
   if (!user) return null;
   console.log("user:", user);
+  const overviewMode =
+    process.env.NEXT_PUBLIC_TESTING_METRICS_DASHBOARD_OVERRIDE ??
+    (user?.mode || "coordinator");
 
   return (
     <>
@@ -78,7 +81,7 @@ export const TeamDashboardFilters = ({
             </div>
           </div>
         </div>
-        <DealsOverviewBoard mode={user?.mode || "coordinator"} />
+        <DealsOverviewBoard mode={overviewMode} />
         <div className="w-fit ml-auto mr-auto mt-4 flex">
           <FilterPopup
             dealCoordinators={allDealNegotiator}

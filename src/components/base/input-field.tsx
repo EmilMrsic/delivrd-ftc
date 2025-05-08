@@ -96,6 +96,7 @@ const EditableInput: React.FC<EditableInputProps> = ({
 };
 
 export const InputField = (props: {
+  disabled?: boolean;
   label?: string;
   value?: string | number;
   onChange?: (newValue: string) => void;
@@ -125,6 +126,7 @@ export const InputField = (props: {
     // TODO: find some way to make this generic or move out to a component
     // as its currently used only for team-profile
     const {
+      disabled,
       negotiationId,
       field,
       userField,
@@ -133,6 +135,10 @@ export const InputField = (props: {
       lastName,
       value,
     } = props;
+
+    if (disabled) {
+      return;
+    }
 
     if (negotiationId && field) {
       console.log("saving to db", field, value);

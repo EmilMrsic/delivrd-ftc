@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { FileText, Mail, Phone, User, User2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Mail,
+  Phone,
+  User,
+  User2,
+} from "lucide-react";
 import { InputField } from "../base/input-field";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
@@ -39,6 +47,7 @@ const ClientDetails = ({
   allowClientModeToggle,
   allDealNegotiator,
 }: ClientDetailsProps) => {
+  const [expandedAddress, setExpandedAddress] = useState(false);
   const [isBlur, setIsBlur] = useState(
     localStorage.getItem("streamMode") === "true"
   );
@@ -228,67 +237,106 @@ const ClientDetails = ({
               icon={FileText}
               readOnly={clientMode}
             />
-            <div className="flex items-center gap-2 w-full">
-              <InputField
-                field="address"
-                negotiationId={negotiationId ?? ""}
-                label="Address"
-                value={negotiation?.address ?? ""}
-                onChange={(newValue) =>
-                  handleChange({
-                    key: "address",
-                    newValue: newValue,
-                  })
-                }
-                icon={() => (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-gray-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-                readOnly={clientMode}
-              />
-
-              {/* <div className="w-fit mr-0 ml-auto flex gap-2">
+            <InputField
+              field="address"
+              negotiationId={negotiationId ?? ""}
+              label="Address"
+              value={`${negotiation?.address}, ${negotiation?.city}, ${negotiation?.state} ${negotiation?.zip}`}
+              disabled={true}
+              // onChange={(newValue) =>
+              //   handleChange({
+              //     key: "address",
+              //     newValue: newValue,
+              //   })
+              // }
+              icon={() => (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
+              readOnly={clientMode}
+            />
+            <div className="flex justify-between mb-0">
+              <div className="flex items-center gap-2 font-semibold">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Address Details
+              </div>
+              <div
+                className="cursor-pointer"
+                onClick={() => {
+                  setExpandedAddress(!expandedAddress);
+                }}
+              >
+                {expandedAddress ? <ChevronUp /> : <ChevronDown />}
+              </div>
+            </div>
+            {expandedAddress && (
+              <div className="w-full">
                 <InputField
-                  field="city_state"
+                  field="address"
                   negotiationId={negotiationId ?? ""}
-                  // label="City/State"
-                  value={negotiation?.city_state ?? ""}
+                  label="Street Address"
+                  value={negotiation?.address ?? ""}
                   onChange={(newValue) =>
                     handleChange({
-                      key: "city_state",
+                      key: "address",
                       newValue: newValue,
                     })
                   }
-                  // icon={() => (
-                  //   <svg
-                  //     xmlns="http://www.w3.org/2000/svg"
-                  //     className="h-5 w-5 text-gray-400"
-                  //     viewBox="0 0 20 20"
-                  //     fill="currentColor"
-                  //   >
-                  //     <path
-                  //       fillRule="evenodd"
-                  //       d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-                  //       clipRule="evenodd"
-                  //     />
-                  //   </svg>
-                  // )}
                   readOnly={clientMode}
                 />
+                <div className="flex justify-between">
+                  <InputField
+                    field="city"
+                    negotiationId={negotiationId ?? ""}
+                    label="City"
+                    value={negotiation?.city ?? ""}
+                    onChange={(newValue) =>
+                      handleChange({
+                        key: "city",
+                        newValue: newValue,
+                      })
+                    }
+                    readOnly={clientMode}
+                  />
+                  <InputField
+                    field="state"
+                    negotiationId={negotiationId ?? ""}
+                    label="State"
+                    value={negotiation?.state ?? ""}
+                    onChange={(newValue) =>
+                      handleChange({
+                        key: "state",
+                        newValue: newValue,
+                      })
+                    }
+                    readOnly={clientMode}
+                  />
+                </div>
                 <InputField
                   field="zip"
                   negotiationId={negotiationId ?? ""}
-                  // label="Zip"
+                  label="Zip"
                   value={negotiation?.zip ?? ""}
                   onChange={(newValue) =>
                     handleChange({
@@ -296,24 +344,10 @@ const ClientDetails = ({
                       newValue: newValue,
                     })
                   }
-                  // icon={() => (
-                  //   <svg
-                  //     xmlns="http://www.w3.org/2000/svg"
-                  //     className="h-5 w-5 text-gray-400"
-                  //     viewBox="0 0 20 20"
-                  //     fill="currentColor"
-                  //   >
-                  //     <path
-                  //       fillRule="evenodd"
-                  //       d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                  //       clipRule="evenodd"
-                  //     />
-                  //   </svg>
-                  // )}
                   readOnly={clientMode}
                 />
-              </div> */}
-            </div>
+              </div>
+            )}
             {!clientMode && (
               <InputField
                 field="dealCoordinatorId"

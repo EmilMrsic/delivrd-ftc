@@ -10,6 +10,9 @@ import { EditableText } from "@/components/tailwind-plus/editable-text";
 import { collection, doc, getDocs, query, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { cn } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 // https://thankyuu.notion.site/Dashboards-1e5aa77aecd1805ea5b6c55bdaef2fb9
 
@@ -47,7 +50,6 @@ export const DealsOverviewBoard = ({
   );
 
   if (!result.data) return null;
-  console.log("data to work with:", result.data);
 
   return (
     <>
@@ -72,7 +74,7 @@ export const DealsOverviewBoard = ({
         )}
         {mode === "owner" && <CoordinatorClosedDealsCard result={result} />}
         {mode === "reviewer" && (
-          <CoordinatorsMultiClosedDealsCard
+          <CoordinatorsMultiPickingUpAndShippingCard
             result={result}
             setSelectedDeal={setSelectedDeal}
           />
@@ -91,7 +93,7 @@ export const DealsOverviewBoard = ({
   );
 };
 
-export const CoordinatorsMultiClosedDealsCard = ({
+export const CoordinatorsMultiPickingUpAndShippingCard = ({
   result,
   setSelectedDeal,
 }: {
@@ -109,18 +111,24 @@ export const CoordinatorsMultiClosedDealsCard = ({
           </div>
           <div className="flex gap-6">
             <MinimalCard>
-              <div className="text-lg text-center mb-4">Picking up today</div>
-              <DealsListCard
-                deals={pickingUpToday}
-                setSelectedDeal={setSelectedDeal}
-              />
+              <div className="border-l-4 border-blue-500 pl-2 h-full">
+                <div className="text-lg text-center mb-4">Picking up today</div>
+                <DealsListCard
+                  deals={pickingUpToday}
+                  setSelectedDeal={setSelectedDeal}
+                  type="pickingUp"
+                />
+              </div>
             </MinimalCard>
             <MinimalCard>
-              <div className="text-lg text-center mb-4">Shipping</div>
-              <DealsListCard
-                deals={shippingToday}
-                setSelectedDeal={setSelectedDeal}
-              />
+              <div className="border-l-4 border-blue-500 pl-2 h-full">
+                <div className="text-lg text-center mb-4">Shipping</div>
+                <DealsListCard
+                  deals={shippingToday}
+                  setSelectedDeal={setSelectedDeal}
+                  type="shipping"
+                />
+              </div>
             </MinimalCard>
 
             {/* <div>{coordinatorName}</div> */}
@@ -171,7 +179,7 @@ export const ClosedDealsCard = ({
   result: any;
   updateField: (field: string, value: string) => void;
 }) => {
-  const { metrics, dailyClosedDeals, monthlyClosedDeals } = result.data;
+  const { metrics, dailyClosedDeals, weeklyClosedDeals } = result.data;
   return (
     <MinimalCard>
       <div className="text-lg text-center">Closed Today</div>
@@ -184,12 +192,12 @@ export const ClosedDealsCard = ({
       />
       <hr />
 
-      <div className="text-lg text-center">Closed This Month</div>
+      <div className="text-lg text-center">Closed This Week</div>
       <RatioDisplay
-        numerator={monthlyClosedDeals}
+        numerator={weeklyClosedDeals}
         denominator={metrics.monthlyGoal}
         onUpdate={(value) => {
-          updateField("monthlyGoal", value);
+          updateField("weeklyGoal", value);
         }}
       />
     </MinimalCard>
@@ -278,27 +286,44 @@ export const PickingUpAndShippingCard = ({
 }) => {
   return (
     <>
-      <MinimalCard>
-        <div className="text-lg text-center mb-4">Picking up today</div>
-        <DealsListCard
-          deals={result.data.pickingUpToday}
-          setSelectedDeal={setSelectedDeal}
-        />
+      <MinimalCard noGrid>
+        <div className="border-l-4 border-blue-500 pl-2 h-full">
+          <div className="text-lg text-center mb-4">Picking up today</div>
+          <DealsListCard
+            deals={result.data.pickingUpToday}
+            setSelectedDeal={setSelectedDeal}
+            type="pickingUp"
+          />
+        </div>
       </MinimalCard>
-      <MinimalCard>
-        <div className="text-lg text-center mb-4">Shipping</div>
-        <DealsListCard
-          deals={result.data.shippingToday}
-          setSelectedDeal={setSelectedDeal}
-        />
+      <MinimalCard noGrid>
+        <div className="border-l-4 border-blue-500 pl-2 h-full">
+          <div className="text-lg text-center mb-4">Shipping</div>
+          <DealsListCard
+            deals={result.data.shippingToday}
+            setSelectedDeal={setSelectedDeal}
+            type="shipping"
+          />
+        </div>
       </MinimalCard>
     </>
   );
 };
 
-export const MinimalCard = ({ children }: { children: React.ReactNode }) => {
+export const MinimalCard = ({
+  children,
+  noGrid,
+}: {
+  children: React.ReactNode;
+  noGrid?: boolean;
+}) => {
   return (
-    <div className="-m-2 grid grid-cols-1 rounded-3xl ring-1 shadow-[inset_0_0_2px_1px_#ffffff4d] ring-black/5 max-lg:mx-auto max-lg:w-full max-lg:max-w-md mb-4 p-4 max-w-[200px] w-[200px] min-h-[200px]">
+    <div
+      className={cn(
+        `-m-2 rounded-3xl ring-1 shadow-[inset_0_0_2px_1px_#ffffff4d] ring-black/5 max-lg:mx-auto max-lg:w-full max-lg:max-w-md mb-4 p-4 max-w-[250px] w-[250px] min-h-[200px]`,
+        !noGrid && "grid grid-cols-1"
+      )}
+    >
       {children}
     </div>
   );
@@ -330,25 +355,76 @@ export const RatioDisplay = ({
 export const DealsListCard = ({
   deals,
   setSelectedDeal,
+  type,
 }: {
   deals: NegotiationDataType[];
   setSelectedDeal: (deal: NegotiationDataType) => void;
+  type: "pickingUp" | "shipping";
 }) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 border-t border-black pt-4 max-h-[200px] overflow-y-auto pr-2 pl-2 pb-4">
       {deals?.length ? (
         deals.map((deal) => (
-          <div
+          <DealDisplay
             key={deal.id}
-            className="text-blue-500 cursor-pointer text-center"
-            onClick={() => setSelectedDeal(deal)}
-          >
-            {deal.clientNamefull}
-          </div>
+            deal={deal}
+            setSelectedDeal={setSelectedDeal}
+            type={type}
+          />
         ))
       ) : (
         <div className="text-center">No deals</div>
       )}
+    </div>
+  );
+};
+
+export const DealDisplay = ({
+  deal,
+  setSelectedDeal,
+  type,
+}: {
+  deal: NegotiationDataType;
+  setSelectedDeal: (deal: NegotiationDataType) => void;
+  type: "pickingUp" | "shipping";
+}) => {
+  const [checked, setChecked] = useState(
+    deal.pickingUpSelectedCoordinatorId ||
+      deal.shippingSelectedCoordinatorId ||
+      false
+  );
+  const user = useLoggedInUser();
+
+  const updateCheckState = (isChecked: boolean) => {
+    const negotiations = collection(db, "delivrd_negotiations");
+    const docRef = doc(negotiations, deal.id);
+    if (user.id) {
+      updateDoc(docRef, {
+        [`${type}SelectedCoordinatorId`]: isChecked ? user?.id : null,
+      });
+    }
+  };
+
+  return (
+    <div
+      key={deal.id}
+      className="text-blue-500 cursor-pointer rounded ring-1 shadow-[inset_0_0_2px_1px_#ffffff4d] p-2 flex gap-2"
+    >
+      <Checkbox
+        className="mt-auto mb-auto data-[state=checked]:bg-blue-500 border-blue-500 border-2 w-6 h-6"
+        checked={checked ? false : true}
+        onCheckedChange={() => {
+          setChecked(!checked);
+          updateCheckState(!checked);
+        }}
+      />
+      <div
+        className="flex justify-between w-full"
+        onClick={() => setSelectedDeal(deal)}
+      >
+        <span className="flex-shrink-1">{deal.clientNamefull}</span>
+        <ChevronRight className="w-6 h-6 mr-0 ml-auto flex-shrink-0" />
+      </div>
     </div>
   );
 };
