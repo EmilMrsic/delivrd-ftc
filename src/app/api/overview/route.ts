@@ -81,6 +81,8 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
     };
   } = {};
 
+  console.log("allDeals", mode, userData?.id);
+
   allDeals.forEach((deal) => {
     const coordinator = coordinators[deal.dealCoordinatorId];
 
@@ -114,6 +116,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
           coordinator.name
         ].pickingUpToday.push(deal as NegotiationDataType);
       } else {
+        if (mode === "coordinator" && deal.dealCoordinatorId !== userData?.id) {
+          return;
+        }
         pickingUpToday.push(deal as NegotiationDataType);
       }
     } else if (
@@ -126,6 +131,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
           coordinator.name
         ].shippingToday.push(deal as NegotiationDataType);
       } else {
+        if (mode === "coordinator" && deal.dealCoordinatorId !== userData?.id) {
+          return;
+        }
         shippingToday.push(deal as NegotiationDataType);
       }
     } else if (deal.datePaid && isThisWeek(new Date(deal.datePaid))) {

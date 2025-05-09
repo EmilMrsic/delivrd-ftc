@@ -64,7 +64,11 @@ export const DealsOverviewBoard = ({
           <SalesCard result={result} updateField={updateField} />
         )}
         {["owner", "coordinator"].includes(mode) && (
-          <ClosedDealsCard result={result} updateField={updateField} />
+          <ClosedDealsCard
+            result={result}
+            updateField={updateField}
+            mode={mode}
+          />
         )}
         {mode === "coordinator" && (
           <PickingUpAndShippingCard
@@ -175,9 +179,11 @@ export const CoordinatorClosedDealsCard = ({ result }: { result: any }) => {
 export const ClosedDealsCard = ({
   result,
   updateField,
+  mode,
 }: {
   result: any;
   updateField: (field: string, value: string) => void;
+  mode: "coordinator" | "owner" | "reviewer";
 }) => {
   const { metrics, dailyClosedDeals, weeklyClosedDeals } = result.data;
   return (
@@ -186,9 +192,13 @@ export const ClosedDealsCard = ({
       <RatioDisplay
         numerator={dailyClosedDeals}
         denominator={metrics.dailyGoal}
-        onUpdate={(value) => {
-          updateField("dailyGoal", value);
-        }}
+        onUpdate={
+          mode === "owner"
+            ? (value) => {
+                updateField("dailyGoal", value);
+              }
+            : undefined
+        }
       />
       <hr />
 
@@ -196,9 +206,13 @@ export const ClosedDealsCard = ({
       <RatioDisplay
         numerator={weeklyClosedDeals}
         denominator={metrics.monthlyGoal}
-        onUpdate={(value) => {
-          updateField("weeklyGoal", value);
-        }}
+        onUpdate={
+          mode === "owner"
+            ? (value) => {
+                updateField("weeklyGoal", value);
+              }
+            : undefined
+        }
       />
     </MinimalCard>
   );
