@@ -201,7 +201,13 @@ export const getActiveDealDocuments = async (dealQuery: {
     ...queryConditions
   );
 
-  const negotiationsSnapshot = await getDocs(negotiationsQuery);
+  let negotiationsSnapshot = await getDocs(negotiationsQuery);
+
+  if (dealQuery.profile && !negotiationsSnapshot.docs.length) {
+    negotiationsSnapshot = await getDocs(
+      query(collection(db, "delivrd_archive"), ...queryConditions)
+    );
+  }
 
   const negotiations = negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();
