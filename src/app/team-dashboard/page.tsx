@@ -21,7 +21,10 @@ import {
   sortMappedDataHelper,
 } from "@/lib/helpers/negotiation";
 import { useRouter } from "next/navigation";
-import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
+import {
+  ArchivedStatuses,
+  DEFAULT_SORTED_COLUMN,
+} from "@/lib/constants/negotiations";
 import { DealsOverviewBoard } from "@/components/Team/deals-overview/deals-overview-board";
 
 const DEFAULT_FILTERS = {
@@ -193,14 +196,23 @@ export default function DealList() {
     }
   }, []);
 
-  const handleStageChange = async (id: string, newStage: string) => {
+  const handleStageChange = async (
+    id: string,
+    newStage: string,
+    oldStage?: string
+  ) => {
     try {
-      await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
+      let tableName = "delivrd_negotiations";
+      if (ArchivedStatuses.includes(oldStage ?? "")) {
+        tableName = "delivrd_archive";
+      }
+
+      await updateDoc(doc(db, tableName, id ?? ""), {
         stage: newStage,
       });
 
       if (newStage !== "Closed") {
-        await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
+        await updateDoc(doc(db, tableName, id ?? ""), {
           close_date: "",
         });
       }

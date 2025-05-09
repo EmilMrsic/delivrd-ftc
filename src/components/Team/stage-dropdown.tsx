@@ -25,7 +25,7 @@ export const StageDropdown = ({
   all,
 }: {
   deal: NegotiationDataType;
-  handleStageChange?: (id: string, stage: string) => void;
+  handleStageChange?: (id: string, stage: string, oldStage?: string) => void;
   setNegotiation?: (negotiation: NegotiationDataType) => void;
   onStageChange?: (stage: string) => void;
   all?: boolean;
@@ -91,7 +91,7 @@ export const StageDropdown = ({
               e.preventDefault();
               e.stopPropagation();
               if (handleStageChange) {
-                handleStageChange(deal.id, stage); // Update stage
+                handleStageChange(deal.id, stage, deal.stage); // Update stage
               } else {
                 updateStatus(stage);
               }

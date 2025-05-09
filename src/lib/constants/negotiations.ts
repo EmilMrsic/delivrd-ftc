@@ -37,6 +37,8 @@ export const negotiationStatusOrder = [
   // "Proposal Sent",
 ];
 
+export const ArchivedStatuses = ["Closed", "Closed No Review"];
+
 export const consultModeStatusOrder = [
   "Scheduled",
   "Contacted",
