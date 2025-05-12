@@ -95,6 +95,10 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
 
     if (["Paid", "Deal Started", "Actively Negotiating"].includes(deal.stage)) {
       // if assigned, make sure the coordinator is "visible" e.g. not a dev
+      if (mode === "coordinator" && userData?.id !== deal.dealCoordinatorId) {
+        return;
+      }
+
       if (coordinator?.visible || !coordinator) {
         const coordinatorName =
           coordinators[deal.dealCoordinatorId]?.name ?? "Unassigned";
@@ -129,14 +133,16 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
         shippingToday.push(deal as NegotiationDataType);
       }
     } else if (deal.datePaid && isThisWeek(new Date(deal.datePaid))) {
+      console.log("salesThisWeek", deal.datePaid);
       salesThisWeek++;
     } else if (deal.datePaid && isThisMonth(new Date(deal.datePaid))) {
+      console.log("salesThisMonth", deal.datePaid);
       salesThisMonth++;
     }
   });
 
   const [dailyClosedDeals, weeklyClosedDeals, coordinatorSalesThisWeek] =
-    await countClosedDeals(allDeals);
+    await countClosedDeals(allDeals, mode, userData);
 
   for (const dealCoordinatorId of Object.keys(coordinatorSalesThisWeek)) {
     coordinatorSalesThisWeek[dealCoordinatorId].coordinatorName =
@@ -159,7 +165,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
 };
 
 const countClosedDeals = async (
-  deals: NegotiationDataType[]
+  deals: NegotiationDataType[],
+  mode: "coordinator" | "owner" | "reviewer",
+  userData: any
 ): Promise<
   [
     number,
@@ -175,6 +183,10 @@ const countClosedDeals = async (
   } = {};
 
   deals.forEach((deal) => {
+    if (mode === "coordinator" && userData.id !== deal.dealCoordinatorId) {
+      return;
+    }
+
     if (deal.closeDate) {
       let useableDate = deal.closeDate;
       if (deal.closeDate.includes("T")) {
@@ -184,9 +196,6 @@ const countClosedDeals = async (
       if (isSameDay(closeDate, new Date())) {
         dailyClosedDeals++;
       }
-      // if (isThisMonth(closeDate)) {
-      //   monthlyClosedDeals++;
-      // }
 
       if (isThisWeek(closeDate)) {
         weeklyClosedDeals++;

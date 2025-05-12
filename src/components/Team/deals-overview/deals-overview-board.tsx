@@ -55,7 +55,7 @@ export const DealsOverviewBoard = ({
     <>
       <div
         className={cn(
-          `flex flex-wrap gap-8 w-fit ml-auto mr-auto`,
+          `flex flex-wrap gap-8 w-fit ml-auto mr-auto mt-8`,
           mode === "reviewer" && "mt-[48px]"
         )}
       >
@@ -64,7 +64,11 @@ export const DealsOverviewBoard = ({
           <SalesCard result={result} updateField={updateField} />
         )}
         {["owner", "coordinator"].includes(mode) && (
-          <ClosedDealsCard result={result} updateField={updateField} />
+          <ClosedDealsCard
+            result={result}
+            updateField={updateField}
+            mode={mode}
+          />
         )}
         {mode === "coordinator" && (
           <PickingUpAndShippingCard
@@ -175,9 +179,11 @@ export const CoordinatorClosedDealsCard = ({ result }: { result: any }) => {
 export const ClosedDealsCard = ({
   result,
   updateField,
+  mode,
 }: {
   result: any;
   updateField: (field: string, value: string) => void;
+  mode: "coordinator" | "owner" | "reviewer";
 }) => {
   const { metrics, dailyClosedDeals, weeklyClosedDeals } = result.data;
   return (
@@ -186,9 +192,13 @@ export const ClosedDealsCard = ({
       <RatioDisplay
         numerator={dailyClosedDeals}
         denominator={metrics.dailyGoal}
-        onUpdate={(value) => {
-          updateField("dailyGoal", value);
-        }}
+        onUpdate={
+          mode === "owner"
+            ? (value) => {
+                updateField("dailyGoal", value);
+              }
+            : undefined
+        }
       />
       <hr />
 
@@ -196,9 +206,13 @@ export const ClosedDealsCard = ({
       <RatioDisplay
         numerator={weeklyClosedDeals}
         denominator={metrics.monthlyGoal}
-        onUpdate={(value) => {
-          updateField("weeklyGoal", value);
-        }}
+        onUpdate={
+          mode === "owner"
+            ? (value) => {
+                updateField("weeklyGoal", value);
+              }
+            : undefined
+        }
       />
     </MinimalCard>
   );
@@ -259,17 +273,22 @@ export const ActiveDealsCard = ({
       >
         {result.data.activeDeals}
       </div>
-      {mode === "owner" && (
+      {(mode === "owner" || mode === "reviewer") && (
         <>
           <div className="border-t border-black pt-4">
-            {(Object.keys(result.data.activeDealsByNegotiator || {}) || []).map(
-              (coordinatorName, idx) => (
+            <div key="unassigned">
+              Unassigned: {result.data.activeDealsByNegotiator["Unassigned"]}
+            </div>
+            {(Object.keys(result.data.activeDealsByNegotiator || {}) || [])
+              .filter(
+                (coordinatorName: string) => coordinatorName !== "Unassigned"
+              )
+              .map((coordinatorName: string, idx: number) => (
                 <div key={coordinatorName}>
                   {coordinatorName}:{" "}
                   {result.data.activeDealsByNegotiator[coordinatorName]}
                 </div>
-              )
-            )}
+              ))}
           </div>
         </>
       )}

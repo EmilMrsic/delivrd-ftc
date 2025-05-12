@@ -14,6 +14,7 @@ export const TailwindPlusExpandableTable = ({
   name,
   defaultExpanded,
   rows,
+  expandAll,
 }: {
   name?: string;
   defaultExpanded?: number[];
@@ -23,6 +24,7 @@ export const TailwindPlusExpandableTable = ({
     expandedComponent?: React.ComponentType | React.FC<any>;
     expandedComponentProps?: Record<string, any>;
   }[];
+  expandAll?: boolean;
 }) => {
   useEffect(() => {
     console.log("starting from scratch:");
@@ -64,6 +66,7 @@ export const TailwindPlusExpandableTable = ({
             idx={idx}
             setExpanded={setExpanded}
             expanded={expanded}
+            expandAll={expandAll}
           />
         ))}
       </TableBody>
@@ -76,6 +79,7 @@ export const ExpandableTableRow = ({
   idx,
   setExpanded,
   expanded,
+  expandAll,
 }: {
   row: {
     Component?: React.ComponentType;
@@ -86,6 +90,7 @@ export const ExpandableTableRow = ({
   idx: number;
   setExpanded: (expanded: Set<number>) => void;
   expanded: Set<number>;
+  expandAll?: boolean;
 }) => {
   const { Component, title, expandedComponent, expandedComponentProps } = row;
   const titleDisplay = Component ? <Component /> : row.title;
@@ -121,7 +126,7 @@ export const ExpandableTableRow = ({
         </TableCell>
         <TableCell>{titleDisplay}</TableCell>
       </TableRow>
-      {expanded.has(idx) && row.expandedComponent && (
+      {(expandAll || expanded.has(idx)) && row.expandedComponent && (
         <TableRow key={`${idx}-expanded`}>
           <TableCell colSpan={2}>
             {ExpandedComponent && (
