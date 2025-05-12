@@ -43,6 +43,7 @@ export const TeamDashboardFilters = ({
             <p>Consult Mode</p>
           </Button>
         </div>
+        <DealsOverviewBoard mode={overviewMode} />
         <div className="flex gap-3 mt-4">
           <div className="w-fit mr-0 ml-auto gap-2">
             <div className="flex gap-2">
@@ -81,7 +82,6 @@ export const TeamDashboardFilters = ({
             </div>
           </div>
         </div>
-        <DealsOverviewBoard mode={overviewMode} />
         <div className="w-fit ml-auto mr-auto mt-4 flex">
           <FilterPopup
             dealCoordinators={allDealNegotiator}

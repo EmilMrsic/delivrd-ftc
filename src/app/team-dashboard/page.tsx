@@ -26,6 +26,7 @@ import {
   DEFAULT_SORTED_COLUMN,
 } from "@/lib/constants/negotiations";
 import { DealsOverviewBoard } from "@/components/Team/deals-overview/deals-overview-board";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -87,6 +88,7 @@ export default function DealList() {
   const router = useRouter();
 
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
+  const user = useLoggedInUser();
 
   const {
     allNegotiations,
@@ -186,15 +188,10 @@ export default function DealList() {
   };
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    const parseUserData = JSON.parse(userData ?? "");
-    if (
-      parseUserData.privilege === "Client" ||
-      parseUserData.privilege === "Dealer"
-    ) {
+    if (user?.privilege === "Client" || user?.privilege === "Dealer") {
       router.push("/");
     }
-  }, []);
+  }, [user]);
 
   const handleStageChange = async (
     id: string,

@@ -746,6 +746,7 @@ export const dashbaordTableRowGrouped = ({
     expandedComponentProps: {
       name: statusIdx.toString(),
       defaultExpanded: stage === DEFAULT_OPEN_STAGE ? [0, 1] : [],
+      expandAll: true,
       rows: rowKeys.map((condition, conditionIdx) => {
         const total = deals[condition].length;
         return {

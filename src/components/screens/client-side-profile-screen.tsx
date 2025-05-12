@@ -22,6 +22,7 @@ export const ClientSideProfileScreen = () => {
 
   useEffect(() => {
     getNegotiationsByClientId(id as string).then((negotiations) => {
+      console.log("negotiations", id);
       setNegotiationId(negotiations[0].id);
     });
   }, [id]);
@@ -51,3 +52,5 @@ export const ClientSideProfileScreen = () => {
     </div>
   );
 };
+
+// 3fz6TO4HGd48fEdXqaXJ

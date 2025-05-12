@@ -55,7 +55,7 @@ export const DealsOverviewBoard = ({
     <>
       <div
         className={cn(
-          `flex flex-wrap gap-8 w-fit ml-auto mr-auto`,
+          `flex flex-wrap gap-8 w-fit ml-auto mr-auto mt-8`,
           mode === "reviewer" && "mt-[48px]"
         )}
       >
@@ -273,17 +273,22 @@ export const ActiveDealsCard = ({
       >
         {result.data.activeDeals}
       </div>
-      {mode === "owner" && (
+      {(mode === "owner" || mode === "reviewer") && (
         <>
           <div className="border-t border-black pt-4">
-            {(Object.keys(result.data.activeDealsByNegotiator || {}) || []).map(
-              (coordinatorName, idx) => (
+            <div key="unassigned">
+              Unassigned: {result.data.activeDealsByNegotiator["Unassigned"]}
+            </div>
+            {(Object.keys(result.data.activeDealsByNegotiator || {}) || [])
+              .filter(
+                (coordinatorName: string) => coordinatorName !== "Unassigned"
+              )
+              .map((coordinatorName: string, idx: number) => (
                 <div key={coordinatorName}>
                   {coordinatorName}:{" "}
                   {result.data.activeDealsByNegotiator[coordinatorName]}
                 </div>
-              )
-            )}
+              ))}
           </div>
         </>
       )}
