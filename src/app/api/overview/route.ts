@@ -88,7 +88,13 @@ export const POST = async (
     (doc) => doc.data() as NegotiationDataType
   );
   const allDeals: NegotiationDataType[] = [...deals, ...archivedDeals];
-  const metrics = metricsSnapshot.docs.map((doc) => doc.data())[0];
+  const metrics =
+    mode === "coordinator"
+      ? {
+          dailyGoal: userData?.dailyGoal || 0,
+          monthlyGoal: userData?.weeklyGoal || 0,
+        }
+      : metricsSnapshot.docs.map((doc) => doc.data())[0];
   let activeDeals = 0;
   let closedDeals = 0;
   let pickingUpToday: NegotiationDataType[] = [];
