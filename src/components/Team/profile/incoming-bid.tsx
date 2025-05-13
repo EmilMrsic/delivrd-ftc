@@ -18,6 +18,8 @@ import {
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { IncomingBidCommentType } from "@/lib/models/bids";
+import { ModalForm } from "@/components/tailwind-plus/modal-form";
+import { useState } from "react";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -53,6 +55,7 @@ export const IncomingBidCard = ({
   allowUndelete?: boolean;
   clientMode?: boolean;
 }) => {
+  const [connectClientAndDealer, setConnectClientAndDealer] = useState(true);
   const matchingDealer = dealers.find((dealer: DealNegotiatorType) => {
     return dealer.id === bidDetails.dealerId;
   });
@@ -153,9 +156,10 @@ export const IncomingBidCard = ({
   };
 
   return (
-    <div
-      key={index}
-      className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
+    <>
+      <div
+        key={index}
+        className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
           ${isDisabled ? "opacity-45 pointer-events-none" : ""}
       
         ${
@@ -163,36 +167,99 @@ export const IncomingBidCard = ({
             ? "opacity-45"
             : ""
         } ${
-        bidDetails.vote && bidDetails.vote === "like"
-          ? "bg-green-100 border-green-600 "
-          : bidDetails.vote === "dislike"
-          ? "bg-orange-100 border-orange-600"
-          : "bg-white border-blue-600"
-      }`}
-    >
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-lg font-semibold text-[#202125]">
-          {matchingDealer?.Dealership
-            ? `${matchingDealer.Dealership} Offer`
-            : "No Dealership"}
-        </h3>
-        <div className="flex items-center gap-3">
-          {!(noUserActions || clientMode) && (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent opening the dialog
-                  handleDeleteBid(bidDetails.bid_id);
-                }}
-                className="text-black rounded-full p-2"
-              >
-                <Trash className="w-5 h-5" />
-              </button>
+          bidDetails.vote && bidDetails.vote === "like"
+            ? "bg-green-100 border-green-600 "
+            : bidDetails.vote === "dislike"
+            ? "bg-orange-100 border-orange-600"
+            : "bg-white border-blue-600"
+        }`}
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-semibold text-[#202125]">
+            {matchingDealer?.Dealership
+              ? `${matchingDealer.Dealership} Offer`
+              : "No Dealership"}
+          </h3>
+          <div className="flex items-center gap-3">
+            {!(noUserActions || clientMode) && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent opening the dialog
+                    handleDeleteBid(bidDetails.bid_id);
+                  }}
+                  className="text-black rounded-full p-2"
+                >
+                  <Trash className="w-5 h-5" />
+                </button>
+                <VoteSection
+                  incomingBid={incomingBids}
+                  setIncomingBid={setIncomingBids}
+                  bidDetails={bidDetails}
+                />
+                {bidDetails.accept_offer ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCancelOffer(bidDetails)}
+                    className={
+                      "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
+                    }
+                  >
+                    Cancel Offer
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAcceptOffer(bidDetails)}
+                    className={"bg-white text-black"}
+                  >
+                    Accept Offer
+                  </Button>
+                )}
+              </>
+            )}
+            {clientMode && (
               <VoteSection
                 incomingBid={incomingBids}
                 setIncomingBid={setIncomingBids}
                 bidDetails={bidDetails}
+                clientMode={clientMode}
               />
+            )}
+            {allowUndelete && (
+              <Button variant="outline" size="sm" onClick={() => restoreBid()}>
+                Restore
+              </Button>
+            )}
+          </div>
+        </div>
+        <time className="block mb-2 text-sm text-[#202125]">
+          {formatDate(bidDetails?.timestamp)}
+        </time>
+        <p className="text-[#202125] mb-4">
+          Price: ${bidDetails?.price ? bidDetails?.price : "No price available"}
+        </p>
+        <div className="flex space-x-2 mb-4">
+          <BidDetailsDialog
+            openDialog={openDialog}
+            setEditingBidId={setEditingBidId}
+            setOpenDialog={setOpenDialog}
+            bidDetails={bidDetails}
+            matchingDealer={matchingDealer}
+            editingBidId={editingBidId}
+            handleSave={handleSave}
+            handleEdit={handleEdit}
+            handleDeleteFile={handleDeleteFile}
+            handleBidFileUpload={handleBidFileUpload}
+            editedBid={editedBid}
+            setEditedBid={setEditedBid}
+            parseComment={parseComment}
+            clientMode={clientMode}
+          />
+          {clientMode && (
+            <>
               {bidDetails.accept_offer ? (
                 <Button
                   variant="outline"
@@ -209,158 +276,117 @@ export const IncomingBidCard = ({
                   variant="outline"
                   size="sm"
                   onClick={() => handleAcceptOffer(bidDetails)}
-                  className={"bg-white text-black"}
+                  className={"bg-transparent text-black"}
                 >
                   Accept Offer
                 </Button>
               )}
             </>
           )}
-          {clientMode && (
-            <VoteSection
-              incomingBid={incomingBids}
-              setIncomingBid={setIncomingBids}
-              bidDetails={bidDetails}
-              clientMode={clientMode}
-            />
-          )}
-          {allowUndelete && (
-            <Button variant="outline" size="sm" onClick={() => restoreBid()}>
-              Restore
-            </Button>
-          )}
-        </div>
-      </div>
-      <time className="block mb-2 text-sm text-[#202125]">
-        {formatDate(bidDetails?.timestamp)}
-      </time>
-      <p className="text-[#202125] mb-4">
-        Price: ${bidDetails?.price ? bidDetails?.price : "No price available"}
-      </p>
-      <div className="flex space-x-2 mb-4">
-        <BidDetailsDialog
-          openDialog={openDialog}
-          setEditingBidId={setEditingBidId}
-          setOpenDialog={setOpenDialog}
-          bidDetails={bidDetails}
-          matchingDealer={matchingDealer}
-          editingBidId={editingBidId}
-          handleSave={handleSave}
-          handleEdit={handleEdit}
-          handleDeleteFile={handleDeleteFile}
-          handleBidFileUpload={handleBidFileUpload}
-          editedBid={editedBid}
-          setEditedBid={setEditedBid}
-          parseComment={parseComment}
-          clientMode={clientMode}
-        />
-        {clientMode && (
-          <>
-            {bidDetails.accept_offer ? (
+          {!noUserActions && (
+            <>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleCancelOffer(bidDetails)}
-                className={
-                  "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
+                onClick={() =>
+                  setCommentingBidId(
+                    commentingBidId === bidDetails.bid_id
+                      ? null
+                      : bidDetails.bid_id
+                  )
                 }
               >
-                Cancel Offer
+                <Plus className="mr-2 h-4 w-4" />
+                Add Comment
               </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleAcceptOffer(bidDetails)}
-                className={"bg-transparent text-black"}
-              >
-                Accept Offer
-              </Button>
-            )}
-          </>
+              {!clientMode && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setConnectClientAndDealer(true);
+                  }}
+                >
+                  Connect Client + Dealer
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+        {commentingBidId === bidDetails.bid_id && (
+          <div className="mb-4">
+            <Textarea
+              placeholder="Add a comment..."
+              value={newComment[bidDetails.bid_id] || ""}
+              onChange={(e) =>
+                setNewComment((prev: { [key: string]: string }) => ({
+                  ...prev,
+                  [bidDetails.bid_id]: e.target.value,
+                }))
+              }
+              className="mb-2"
+            />
+            <Button onClick={() => addComment(bidDetails.bid_id)}>
+              Submit Comment
+            </Button>
+          </div>
         )}
-        {!noUserActions && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setCommentingBidId(
-                commentingBidId === bidDetails.bid_id ? null : bidDetails.bid_id
-              )
+
+        {bidCommentsByBidId[bidDetails.bid_id] &&
+        bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
+          bidCommentsByBidId[bidDetails.bid_id].map(
+            (comment: IncomingBidCommentType, index: number) => {
+              console.log("got bid comment:", comment?.author?.name);
+              return (
+                <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
+                  <div key={index} className="p-2 flex flex-col  mt-1">
+                    <p>
+                      <strong>
+                        {comment?.author?.name
+                          ? comment?.author?.name
+                          : comment.deal_coordinator_name === "N/A"
+                          ? comment.client_name
+                          : comment.deal_coordinator_name}
+                        :
+                      </strong>{" "}
+                      {parseComment(comment.comment)}
+                    </p>
+                    <p className="text-sm text-gray-500">{comment.time}</p>
+                  </div>
+                  {!clientMode && (
+                    <>
+                      {comment.deal_coordinator_name === "N/A" ? (
+                        <p className="pr-2">From Client</p>
+                      ) : (
+                        !noUserActions && (
+                          <Button
+                            variant="outline"
+                            className="border-black"
+                            onClick={() => handleSendComment(comment)}
+                          >
+                            Send To Client
+                          </Button>
+                        )
+                      )}
+                    </>
+                  )}
+                </div>
+              );
             }
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Comment
-          </Button>
+          )
+        ) : (
+          <p className="text-sm text-gray-500">
+            No comments available for this bid.
+          </p>
         )}
       </div>
-      {commentingBidId === bidDetails.bid_id && (
-        <div className="mb-4">
-          <Textarea
-            placeholder="Add a comment..."
-            value={newComment[bidDetails.bid_id] || ""}
-            onChange={(e) =>
-              setNewComment((prev: { [key: string]: string }) => ({
-                ...prev,
-                [bidDetails.bid_id]: e.target.value,
-              }))
-            }
-            className="mb-2"
-          />
-          <Button onClick={() => addComment(bidDetails.bid_id)}>
-            Submit Comment
-          </Button>
-        </div>
+      {connectClientAndDealer && (
+        <ModalForm
+          onClose={() => setConnectClientAndDealer(false)}
+          title="Connect Client + Dealer"
+        />
       )}
-
-      {bidCommentsByBidId[bidDetails.bid_id] &&
-      bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
-        bidCommentsByBidId[bidDetails.bid_id].map(
-          (comment: IncomingBidCommentType, index: number) => {
-            console.log("got bid comment:", comment?.author?.name);
-            return (
-              <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
-                <div key={index} className="p-2 flex flex-col  mt-1">
-                  <p>
-                    <strong>
-                      {comment?.author?.name
-                        ? comment?.author?.name
-                        : comment.deal_coordinator_name === "N/A"
-                        ? comment.client_name
-                        : comment.deal_coordinator_name}
-                      :
-                    </strong>{" "}
-                    {parseComment(comment.comment)}
-                  </p>
-                  <p className="text-sm text-gray-500">{comment.time}</p>
-                </div>
-                {!clientMode && (
-                  <>
-                    {comment.deal_coordinator_name === "N/A" ? (
-                      <p className="pr-2">From Client</p>
-                    ) : (
-                      !noUserActions && (
-                        <Button
-                          variant="outline"
-                          className="border-black"
-                          onClick={() => handleSendComment(comment)}
-                        >
-                          Send To Client
-                        </Button>
-                      )
-                    )}
-                  </>
-                )}
-              </div>
-            );
-          }
-        )
-      ) : (
-        <p className="text-sm text-gray-500">
-          No comments available for this bid.
-        </p>
-      )}
-    </div>
+    </>
   );
 };
 
