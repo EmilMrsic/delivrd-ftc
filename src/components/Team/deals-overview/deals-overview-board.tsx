@@ -10,9 +10,12 @@ import { EditableText } from "@/components/tailwind-plus/editable-text";
 import { collection, doc, getDocs, query, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { cn } from "@/lib/utils";
-import { ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { DealsView } from "../deals-view";
+import { DropDownMenu } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 // https://thankyuu.notion.site/Dashboards-1e5aa77aecd1805ea5b6c55bdaef2fb9
 
@@ -21,9 +24,16 @@ export const DealsOverviewBoard = ({
 }: {
   mode: "coordinator" | "owner" | "reviewer";
 }) => {
+  const [expanded, setExpanded] = useState(true);
+  const [selectedCoordinator, setSelectedCoordinator] = useState<string | null>(
+    "Tomislav Mikula"
+  );
   const [selectedDeal, setSelectedDeal] = useState<NegotiationDataType | null>(
     null
   );
+  const [dealView, setDealView] = useState<{
+    deals: NegotiationDataType[];
+  } | null>(null);
   const result = useQuery({
     queryKey: ["deals-overview"],
     queryFn: async () => {
@@ -50,48 +60,116 @@ export const DealsOverviewBoard = ({
   );
 
   if (!result.data) return null;
-
   return (
     <>
       <div
-        className={cn(
-          `flex flex-wrap gap-8 w-fit ml-auto mr-auto mt-8`,
-          mode === "reviewer" && "mt-[48px]"
-        )}
+        className="w-fit flex gap-2 mt-4 text-xl font-bold cursor-pointer"
+        onClick={() => {
+          setExpanded(!expanded);
+        }}
       >
-        <ActiveDealsCard result={result} mode={mode} />
-        {mode === "owner" && (
-          <SalesCard result={result} updateField={updateField} />
+        {expanded ? (
+          <ChevronUp className="w-8 h-8" />
+        ) : (
+          <ChevronDown className="w-8 h-8" />
         )}
-        {["owner", "coordinator"].includes(mode) && (
-          <ClosedDealsCard
-            result={result}
-            updateField={updateField}
-            mode={mode}
-          />
-        )}
-        {mode === "coordinator" && (
-          <PickingUpAndShippingCard
-            result={result}
-            setSelectedDeal={setSelectedDeal}
-          />
-        )}
-        {mode === "owner" && <CoordinatorClosedDealsCard result={result} />}
-        {mode === "reviewer" && (
-          <CoordinatorsMultiPickingUpAndShippingCard
-            result={result}
-            setSelectedDeal={setSelectedDeal}
-          />
-        )}
+        Metrics Overview
       </div>
-      {selectedDeal && (
-        <TailwindPlusModal
-          close={() => setSelectedDeal(null)}
-          width={80}
-          height={80}
-        >
-          <ClientProfile negotiationId={selectedDeal.id} />
-        </TailwindPlusModal>
+      {expanded && (
+        <>
+          {mode === "reviewer" && (
+            <div className="w-fit ml-auto mr-0 flex gap-2">
+              <DropDownMenu
+                label="Coordinator"
+                checkedItem={selectedCoordinator || undefined}
+                options={Object.keys(
+                  result.data.shippingAndPickingUpTodayByCoordinator
+                ).map((coordinatorName) => coordinatorName)}
+                onCheckedChange={(checked, item) => {
+                  setSelectedCoordinator(item);
+                }}
+              />
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedCoordinator(null);
+                }}
+              >
+                Display All
+              </Button>
+            </div>
+          )}
+          {mode === "reviewer" && !selectedCoordinator && (
+            <div className="w-fit mr-auto ml-auto">
+              <ActiveDealsCard result={result} mode={mode} />
+            </div>
+          )}
+          <div
+            className={cn(
+              `flex gap-8 w-fit ml-auto mr-auto mt-8 flex-wrap`,
+              mode === "reviewer" && "mt-[48px]"
+            )}
+          >
+            {(selectedCoordinator || mode !== "reviewer") && (
+              <ActiveDealsCard result={result} mode={mode} />
+            )}
+            {mode === "owner" && (
+              <SalesCard result={result} updateField={updateField} />
+            )}
+            {["owner", "coordinator"].includes(mode) && (
+              <ClosedDealsCard
+                result={result}
+                updateField={updateField}
+                setDealView={setDealView}
+                mode={mode}
+              />
+            )}
+            {mode === "coordinator" && (
+              <PickingUpAndShippingCard
+                result={result}
+                setSelectedDeal={setSelectedDeal}
+              />
+            )}
+            {mode === "owner" && (
+              <CoordinatorClosedDealsCard
+                result={result}
+                setDealView={setDealView}
+              />
+            )}
+            {mode === "reviewer" && (
+              <CoordinatorsMultiPickingUpAndShippingCard
+                selectedCoordinator={selectedCoordinator}
+                result={result}
+                setSelectedDeal={setSelectedDeal}
+              />
+            )}
+          </div>
+          {dealView && (
+            <TailwindPlusModal
+              close={() => setDealView(null)}
+              noClose
+              closeButton
+              width={40}
+              height={80}
+            >
+              <DealsView
+                deals={dealView.deals}
+                setSelectedDeal={setSelectedDeal}
+              />
+            </TailwindPlusModal>
+          )}
+          {selectedDeal && (
+            <TailwindPlusModal
+              close={() => setSelectedDeal(null)}
+              noClose
+              closeButton
+              width={80}
+              height={80}
+            >
+              <ClientProfile negotiationId={selectedDeal.id} />
+            </TailwindPlusModal>
+          )}
+        </>
       )}
     </>
   );
@@ -100,20 +178,26 @@ export const DealsOverviewBoard = ({
 export const CoordinatorsMultiPickingUpAndShippingCard = ({
   result,
   setSelectedDeal,
+  selectedCoordinator,
 }: {
   result: any;
   setSelectedDeal: (deal: NegotiationDataType) => void;
+  selectedCoordinator: string | null;
 }) => {
-  return Object.keys(result.data.shippingAndPickingUpTodayByCoordinator).map(
-    (coordinatorName) => {
+  return Object.keys(result.data.shippingAndPickingUpTodayByCoordinator)
+    .filter((coordinatorName) => {
+      if (!selectedCoordinator) return true;
+      return coordinatorName === selectedCoordinator;
+    })
+    .map((coordinatorName) => {
       const { pickingUpToday, shippingToday } =
         result.data.shippingAndPickingUpTodayByCoordinator[coordinatorName];
       return (
-        <div key={coordinatorName}>
+        <div key={coordinatorName} className="flex-shrink-1 max-w-[400px]">
           <div className="text-xl text-black-500 font-bold text-center mt-[-35px] mb-4">
             {coordinatorName}
           </div>
-          <div className="flex gap-6">
+          <div className="flex gap-6 flex-shrink-1">
             <MinimalCard>
               <div className="border-l-4 border-blue-500 pl-2 h-full">
                 <div className="text-lg text-center mb-4">Picking up today</div>
@@ -139,18 +223,33 @@ export const CoordinatorsMultiPickingUpAndShippingCard = ({
           </div>
         </div>
       );
-    }
-  );
+    });
 };
 
-export const CoordinatorClosedDealsCard = ({ result }: { result: any }) => {
+export const CoordinatorClosedDealsCard = ({
+  result,
+  setDealView,
+}: {
+  result: any;
+  setDealView: (deals: { deals: NegotiationDataType[] }) => void;
+}) => {
   return (
     <MinimalCard>
       <div className="text-lg text-center">Deal Coordinators</div>
       <div>
         {Object.keys(result.data.coordinatorSalesThisWeek).map(
           (coordinatorId) => (
-            <div key={coordinatorId} className="mb-2">
+            <div
+              key={coordinatorId}
+              className="mb-2 cursor-pointer"
+              onClick={() =>
+                setDealView({
+                  deals:
+                    result.data.coordinatorSalesThisWeek[coordinatorId].sales
+                      .deals,
+                })
+              }
+            >
               <div className="flex justify-between">
                 <div>
                   {
@@ -159,12 +258,16 @@ export const CoordinatorClosedDealsCard = ({ result }: { result: any }) => {
                   }
                 </div>
                 <div>
-                  {result.data.coordinatorSalesThisWeek[coordinatorId].sales}
+                  {
+                    result.data.coordinatorSalesThisWeek[coordinatorId].sales
+                      .count
+                  }
                 </div>
               </div>
               <TailwindPlusProgressBar
                 numerator={
                   result.data.coordinatorSalesThisWeek[coordinatorId].sales
+                    .count
                 }
                 denominator={15}
               />
@@ -180,17 +283,24 @@ export const ClosedDealsCard = ({
   result,
   updateField,
   mode,
+  setDealView,
 }: {
   result: any;
   updateField: (field: string, value: string) => void;
   mode: "coordinator" | "owner" | "reviewer";
+  setDealView: (deals: { deals: NegotiationDataType[] }) => void;
 }) => {
   const { metrics, dailyClosedDeals, weeklyClosedDeals } = result.data;
   return (
     <MinimalCard>
       <div className="text-lg text-center">Closed Today</div>
       <RatioDisplay
-        numerator={dailyClosedDeals}
+        numerator={dailyClosedDeals.count}
+        numeratorAction={() =>
+          setDealView({
+            deals: dailyClosedDeals.deals,
+          })
+        }
         denominator={metrics.dailyGoal}
         onUpdate={
           mode === "owner"
@@ -204,7 +314,12 @@ export const ClosedDealsCard = ({
 
       <div className="text-lg text-center">Closed This Week</div>
       <RatioDisplay
-        numerator={weeklyClosedDeals}
+        numerator={weeklyClosedDeals.count}
+        numeratorAction={() =>
+          setDealView({
+            deals: weeklyClosedDeals.deals,
+          })
+        }
         denominator={metrics.monthlyGoal}
         onUpdate={
           mode === "owner"
@@ -351,15 +466,23 @@ export const MinimalCard = ({
 export const RatioDisplay = ({
   numerator,
   denominator,
+  numeratorAction,
   onUpdate,
 }: {
   numerator: number;
   denominator: number;
+  numeratorAction?: () => void;
   onUpdate?: (value: string) => void;
 }) => (
   <div className="text-4xl font-bold mt-2 mb-4 flex justify-center">
     {/* <div className="flex justify-center"> */}
-    {numerator} /{" "}
+    <span
+      className={`mr-2 ${numeratorAction ? "cursor-pointer" : ""}`}
+      onClick={numeratorAction}
+    >
+      {numerator}
+    </span>{" "}
+    /{" "}
     <EditableText
       value={denominator.toString()}
       size="4xl"

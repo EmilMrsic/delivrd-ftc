@@ -54,7 +54,7 @@ export const TeamDashboardFilters = ({
                 onChange={handleSearch}
                 className="pl-8 max-w-[300px] mt-auto mb-auto"
               />
-              <div className="flex gap-2 items-center w-fit">
+              {/* <div className="flex gap-2 items-center w-fit">
                 <Checkbox
                   id="search_all"
                   checked={searchAll}
@@ -63,7 +63,7 @@ export const TeamDashboardFilters = ({
                 <label htmlFor="search_all" className="text-nowrap">
                   All Deals
                 </label>
-              </div>
+              </div> */}
               <div className="flex gap-2 items-center w-fit">
                 <Checkbox
                   id="search_all"

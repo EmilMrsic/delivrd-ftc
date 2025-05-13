@@ -124,3 +124,7 @@ ol {
     @apply bg-background text-foreground;
   }
 }
+
+.flex-shrink-all * {
+  flex-shrink: 1;
+}

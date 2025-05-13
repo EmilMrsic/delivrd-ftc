@@ -187,10 +187,10 @@ export const DropDownMenu = ({
   onFocus,
   onCheckedChange,
 }: {
-  label: string;
+  label?: string;
   options: string[];
-  checkedItem: string;
-  onFocus: () => void;
+  checkedItem?: string;
+  onFocus?: () => void;
   onCheckedChange: (checked: boolean, item: string) => void;
 }) => {
   return (
@@ -207,7 +207,9 @@ export const DropDownMenu = ({
             <DropdownMenuCheckboxItem
               key={idx}
               checked={checkedItem === item}
-              onFocus={() => onFocus()}
+              onFocus={() => {
+                if (onFocus) onFocus();
+              }}
               onCheckedChange={(checked) => {
                 onCheckedChange(checked, item);
               }}

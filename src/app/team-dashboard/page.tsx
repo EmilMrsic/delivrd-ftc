@@ -298,11 +298,11 @@ export default function DealList() {
             displayAllPaid={true} //!searchAll}
             negotiations={negotiations}
             searchTerm={searchTerm}
-            searchAll={searchAll}
+            searchAll={searchTerm !== ""} // searchAll}
             refetchAll={refetchAll}
             name="team-dashboard-negotiator"
           />
-          {searchAll && (
+          {searchTerm !== "" && (
             <>
               <div className="border-t border-blue-200 mt-4 border-[4px]"></div>
               <TeamDashboardTable
@@ -323,7 +323,8 @@ export default function DealList() {
                 setSortConfig={setSortConfig}
                 refetch={refetch}
                 searchTerm={searchTerm}
-                searchAll={searchAll}
+                // searchAll={searchAll}
+                searchAll={searchTerm !== ""}
                 refetchAll={refetchAll}
                 name="team-dashboard-all"
               />

@@ -18,7 +18,35 @@ const getUserDataFromDb = async (id: string) => {
   return userDoc.data();
 };
 
-export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
+export interface DealCountType {
+  count: number;
+  deals: NegotiationDataType[];
+}
+
+export interface OverviewDashboardData {
+  activeDeals: number;
+  pickingUpToday: NegotiationDataType[];
+  shippingToday: NegotiationDataType[];
+  dailyClosedDeals: DealCountType;
+  weeklyClosedDeals: DealCountType;
+  metrics: any;
+  salesThisWeek: number;
+  salesThisMonth: number;
+  coordinatorSalesThisWeek: {
+    [key: string]: { coordinatorName: string; sales: DealCountType };
+  };
+  activeDealsByNegotiator: { [key: string]: number };
+  shippingAndPickingUpTodayByCoordinator: {
+    [key: string]: {
+      pickingUpToday: NegotiationDataType[];
+      shippingToday: NegotiationDataType[];
+    };
+  };
+}
+
+export const POST = async (
+  request: NextRequest
+): Promise<NextResponse<OverviewDashboardData>> => {
   const body = await request.json();
   const { mode } = body;
   const headers = request.headers;
@@ -67,6 +95,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
   let shippingToday: NegotiationDataType[] = [];
   let salesThisWeek = 0;
   let salesThisMonth = 0;
+
   const activeDealsByNegotiator: { [key: string]: number } = {};
 
   const coordinators: { [key: string]: DealNegotiatorType } = {};
@@ -80,8 +109,6 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
       shippingToday: NegotiationDataType[];
     };
   } = {};
-
-  console.log("allDeals", mode, userData?.id);
 
   allDeals.forEach((deal) => {
     const coordinator = coordinators[deal.dealCoordinatorId];
@@ -98,20 +125,21 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
     if (["Paid", "Deal Started", "Actively Negotiating"].includes(deal.stage)) {
       // if assigned, make sure the coordinator is "visible" e.g. not a dev
       if (mode === "coordinator" && userData?.id !== deal.dealCoordinatorId) {
-        return;
-      }
+      } else {
+        if (coordinator?.visible || !coordinator) {
+          const coordinatorName =
+            coordinators[deal.dealCoordinatorId]?.name ?? "Unassigned";
+          if (!activeDealsByNegotiator[coordinatorName]) {
+            activeDealsByNegotiator[coordinatorName] = 0;
+          }
+          activeDealsByNegotiator[coordinatorName]++;
 
-      if (coordinator?.visible || !coordinator) {
-        const coordinatorName =
-          coordinators[deal.dealCoordinatorId]?.name ?? "Unassigned";
-        if (!activeDealsByNegotiator[coordinatorName]) {
-          activeDealsByNegotiator[coordinatorName] = 0;
+          activeDeals++;
         }
-        activeDealsByNegotiator[coordinatorName]++;
-
-        activeDeals++;
       }
-    } else if (
+    }
+
+    if (
       deal.arrivalToClient == todaysDate &&
       deal.stage === "Deal Complete- Local"
     ) {
@@ -125,7 +153,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
         }
         pickingUpToday.push(deal as NegotiationDataType);
       }
-    } else if (
+    }
+
+    if (
       deal.arrivalToClient == todaysDate &&
       (deal.stage === "Shipping" ||
         deal.stage === "Deal Complete- Long Distance")
@@ -140,17 +170,21 @@ export const POST = async (request: NextRequest): Promise<NextResponse<{}>> => {
         }
         shippingToday.push(deal as NegotiationDataType);
       }
-    } else if (deal.datePaid && isThisWeek(new Date(deal.datePaid))) {
-      console.log("salesThisWeek", deal.datePaid);
+    }
+
+    if (deal.datePaid && isThisWeek(new Date(deal.datePaid))) {
+      // console.log("salesThisWeek", deal.datePaid);
       salesThisWeek++;
-    } else if (deal.datePaid && isThisMonth(new Date(deal.datePaid))) {
-      console.log("salesThisMonth", deal.datePaid);
+    }
+
+    if (deal.datePaid && isThisMonth(new Date(deal.datePaid))) {
+      // console.log("salesThisMonth", deal.datePaid, salesThisMonth);
       salesThisMonth++;
     }
   });
 
   const [dailyClosedDeals, weeklyClosedDeals, coordinatorSalesThisWeek] =
-    await countClosedDeals(allDeals, mode, userData);
+    await countClosedDeals(allDeals as NegotiationDataType[], mode, userData);
 
   for (const dealCoordinatorId of Object.keys(coordinatorSalesThisWeek)) {
     coordinatorSalesThisWeek[dealCoordinatorId].coordinatorName =
@@ -178,19 +212,19 @@ const countClosedDeals = async (
   userData: any
 ): Promise<
   [
-    number,
-    number,
-    { [key: string]: { coordinatorName: string; sales: number } }
+    DealCountType,
+    DealCountType,
+    { [key: string]: { coordinatorName: string; sales: DealCountType } }
   ]
 > => {
-  let dailyClosedDeals = 0;
-  let weeklyClosedDeals = 0;
+  let dailyClosedDeals = { count: 0, deals: [] };
+  let weeklyClosedDeals = { count: 0, deals: [] };
 
   const coordinatorSalesThisWeek: {
-    [key: string]: { coordinatorName: string; sales: number };
+    [key: string]: { coordinatorName: string; sales: DealCountType };
   } = {};
 
-  deals.forEach((deal) => {
+  deals.forEach((deal: NegotiationDataType) => {
     if (mode === "coordinator" && userData.id !== deal.dealCoordinatorId) {
       return;
     }
@@ -200,23 +234,35 @@ const countClosedDeals = async (
       if (deal.closeDate.includes("T")) {
         useableDate = deal.closeDate.split("T")[0];
       }
+
       const closeDate = new Date(useableDate);
       if (isSameDay(closeDate, new Date())) {
-        dailyClosedDeals++;
+        dailyClosedDeals.count++;
+        // @ts-ignore
+        dailyClosedDeals.deals.push(deal);
       }
 
       if (isThisWeek(closeDate)) {
-        weeklyClosedDeals++;
+        // if (isWithinLast30Days(closeDate)) {
+        weeklyClosedDeals.count++;
+        // @ts-ignore
+        weeklyClosedDeals.deals.push(deal);
 
         if (deal.dealCoordinatorId) {
           if (!coordinatorSalesThisWeek[deal.dealCoordinatorId]) {
             coordinatorSalesThisWeek[deal.dealCoordinatorId] = {
-              sales: 0,
+              sales: {
+                count: 0,
+                deals: [],
+              },
               coordinatorName: "",
             };
           }
 
-          coordinatorSalesThisWeek[deal.dealCoordinatorId].sales++;
+          coordinatorSalesThisWeek[deal.dealCoordinatorId].sales.count++;
+          coordinatorSalesThisWeek[deal.dealCoordinatorId].sales.deals.push(
+            deal
+          );
         }
       }
     }
@@ -247,10 +293,15 @@ const isWithinLast30Days = (date: Date) => {
 };
 
 const isThisMonth = (date: Date) => {
+  if (!date) return false;
   const now = new Date();
+  const useableDate = date ? date : null;
+
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
   return (
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear()
+    useableDate && useableDate >= startOfMonth && useableDate < startOfNextMonth
   );
 };
 
@@ -260,6 +311,6 @@ const isThisWeek = (date: Date) => {
   const lastSaturday = new Date();
   lastSaturday.setDate(now.getDate() - now.getDay() - 1);
   const nextSunday = new Date();
-  nextSunday.setDate(now.getDate() + (6 - now.getDay()));
+  nextSunday.setDate(now.getDate() + (7 - now.getDay()));
   return date >= lastSaturday && date <= nextSunday;
 };

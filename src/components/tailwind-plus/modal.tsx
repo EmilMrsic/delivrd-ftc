@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 export const TailwindPlusModal = ({
   children,
   close,
@@ -8,6 +9,7 @@ export const TailwindPlusModal = ({
   height,
   onCloseTrigger,
   noClose,
+  closeButton,
 }: {
   children: React.ReactNode;
   close: () => void;
@@ -16,6 +18,7 @@ export const TailwindPlusModal = ({
   height?: number;
   onCloseTrigger?: () => void;
   noClose?: boolean;
+  closeButton?: boolean;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -54,18 +57,28 @@ export const TailwindPlusModal = ({
       className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur flex items-center justify-center z-50 bg-blur"
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <div
-        className={cn(
-          "rounded-lg shadow-lg p-4 overflow-y-auto",
-          transparent ? "bg-transparent" : "bg-white",
-          !width && "max-w-md w-full",
-          !height && "max-h-[60vh]"
+      <div>
+        {closeButton && (
+          <button
+            className="block text-white cursor-pointer mr-0 ml-auto flex items-center gap-2"
+            onClick={close}
+          >
+            CLOSE <X />
+          </button>
         )}
-        style={styles}
-        ref={ref}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        {children}
+        <div
+          className={cn(
+            "rounded-lg shadow-lg p-4 overflow-y-auto",
+            transparent ? "bg-transparent" : "bg-white",
+            !width && "max-w-md w-full",
+            !height && "max-h-[60vh]"
+          )}
+          style={styles}
+          ref={ref}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
