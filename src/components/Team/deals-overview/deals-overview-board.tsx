@@ -24,6 +24,7 @@ export const DealsOverviewBoard = ({
 }: {
   mode: "coordinator" | "owner" | "reviewer";
 }) => {
+  const user = useLoggedInUser();
   const [expanded, setExpanded] = useState(true);
   const [selectedCoordinator, setSelectedCoordinator] = useState<string | null>(
     "Tomislav Mikula"
@@ -48,8 +49,11 @@ export const DealsOverviewBoard = ({
     (field: string, value: string) => {
       (async () => {
         if (result.data.metrics[field] !== value) {
-          const metricsTable = collection(db, "metrics");
-          const docRef = doc(metricsTable, result.data.metrics.id);
+          const tableName = mode === "coordinator" ? "users" : "metrics";
+          const tableRowId =
+            mode === "coordinator" ? user?.id : result.data.metrics.id;
+          const table = collection(db, tableName);
+          const docRef = doc(table, tableRowId);
           updateDoc(docRef, {
             [field]: value,
           });
@@ -302,13 +306,9 @@ export const ClosedDealsCard = ({
           })
         }
         denominator={metrics.dailyGoal}
-        onUpdate={
-          mode === "owner"
-            ? (value) => {
-                updateField("dailyGoal", value);
-              }
-            : undefined
-        }
+        onUpdate={(value) => {
+          updateField("dailyGoal", value);
+        }}
       />
       <hr />
 
@@ -321,13 +321,9 @@ export const ClosedDealsCard = ({
           })
         }
         denominator={metrics.monthlyGoal}
-        onUpdate={
-          mode === "owner"
-            ? (value) => {
-                updateField("weeklyGoal", value);
-              }
-            : undefined
-        }
+        onUpdate={(value) => {
+          updateField("weeklyGoal", value);
+        }}
       />
     </MinimalCard>
   );
@@ -547,6 +543,8 @@ export const DealDisplay = ({
     }
   };
 
+  console.log("checked:", checked ? false : true);
+
   return (
     <div
       key={deal.id}
@@ -554,7 +552,7 @@ export const DealDisplay = ({
     >
       <Checkbox
         className="mt-auto mb-auto data-[state=checked]:bg-blue-500 border-blue-500 border-2 w-6 h-6"
-        checked={checked ? false : true}
+        checked={checked ? true : false}
         onCheckedChange={() => {
           setChecked(!checked);
           updateCheckState(!checked);
