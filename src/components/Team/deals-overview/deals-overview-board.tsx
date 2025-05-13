@@ -358,7 +358,7 @@ export const SalesCard = ({
         </div>
         <TailwindPlusProgressBar
           numerator={result.data.salesThisMonth}
-          denominator={2}
+          denominator={result.data.metrics.monthlySalesGoal}
         />
         <div className="w-fit ml-auto mr-0">{result.data.salesThisMonth}</div>
       </div>
