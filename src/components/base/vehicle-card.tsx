@@ -108,6 +108,9 @@ const VehicleCard: FC<IVehicleCardProps> = ({
       );
     }
   };
+
+  console.log("vehicle", vehicle);
+
   return (
     <Card
       key={vehicle.id}

@@ -208,6 +208,7 @@ export default function BiddingSection() {
           const colorOptions = data.ColorOptions || "";
           const { exteriorColors, interiorColors } =
             parseColorOptions(colorOptions);
+
           return {
             id: doc.id,
             name: data.Model || "Unknown Model",
@@ -217,6 +218,10 @@ export default function BiddingSection() {
             trim: data.Trim || "",
             exteriorColors,
             interiorColors,
+            desiredExterior: data.desiredExterior || "",
+            desiredInterior: data.desiredInterior || "",
+            excludedInterior: data.excludedInterior || "",
+            excludedExterior: data.excludedExterior || "",
             drivetrain: data.Drivetrain || "Unknown",
             negotiationId: data.negotiation_Id || "",
           };
@@ -251,6 +256,7 @@ export default function BiddingSection() {
         });
         //filter vehicles for which we've already bid
         const filteredBidVehicles = vehicleData.filter((data) => {
+          console.log("data", data);
           return bidVehicleClientIds.includes(data.id);
         });
 
