@@ -37,6 +37,7 @@
     "dotenv": "^16.4.7",
     "firebase": "^10.13.1",
     "firebase-admin": "^13.0.1",
+    "formik": "^2.4.6",
     "framer-motion": "^11.11.7",
     "husky": "^9.1.7",
     "loadash": "^1.0.0",

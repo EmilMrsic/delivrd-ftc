@@ -86,8 +86,12 @@ const SearchableDropdown: React.FC<EditableDropdownProps> = ({
           formattedOptions.find((option) => option.value === selectedValue) ||
           null
         }
-        className="w-full"
         placeholder="Select an option"
+        styles={{
+          // control: (base) => ({ ...base, zIndex: 1 }),
+          container: (base) => ({ ...base, zIndex: 0 }),
+        }}
+        menuPortalTarget={null}
       />
     </Field>
   );

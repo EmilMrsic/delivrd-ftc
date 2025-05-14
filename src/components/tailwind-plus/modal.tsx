@@ -10,6 +10,8 @@ export const TailwindPlusModal = ({
   onCloseTrigger,
   noClose,
   closeButton,
+  className,
+  rounded = true,
 }: {
   children: React.ReactNode;
   close: () => void;
@@ -19,6 +21,8 @@ export const TailwindPlusModal = ({
   onCloseTrigger?: () => void;
   noClose?: boolean;
   closeButton?: boolean;
+  className?: string;
+  rounded?: boolean;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -54,7 +58,7 @@ export const TailwindPlusModal = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur flex items-center justify-center z-50 bg-blur"
+      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur flex items-center justify-center z-[9999] bg-blur"
       onMouseDown={(e) => e.stopPropagation()}
     >
       <div>
@@ -68,10 +72,12 @@ export const TailwindPlusModal = ({
         )}
         <div
           className={cn(
-            "rounded-lg shadow-lg p-4 overflow-y-auto",
+            "p-4 overflow-y-auto",
+            rounded ? "rounded-lg shadow-lg" : "",
             transparent ? "bg-transparent" : "bg-white",
             !width && "max-w-md w-full",
-            !height && "max-h-[60vh]"
+            !height && "max-h-[60vh]",
+            className
           )}
           style={styles}
           ref={ref}

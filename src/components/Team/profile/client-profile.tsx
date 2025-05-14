@@ -385,7 +385,7 @@ export const ClientProfile = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-[98%] mx-auto">
       <div className="md:col-span-2">
-        <div className="md:sticky space-y-6">
+        <div className="space-y-6">
           {/* <div className="md:hidden">
                 <FeatureDetails
                   setShowStickyHeader={setShowStickyHeader}
@@ -499,7 +499,8 @@ export const ClientProfile = ({
       </div>
 
       <div className="md:col-span-1">
-        <div className="md:sticky space-y-6">
+        {/* md:sticky  */}
+        <div className="space-y-6">
           <FeatureDetails
             negotiation={negotiation}
             negotiationId={negotiationId}

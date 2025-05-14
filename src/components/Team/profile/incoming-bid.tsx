@@ -5,7 +5,7 @@ import { formatDate } from "@/lib/utils";
 import { FileText, Pencil, Plus, Save, Trash, Upload, X } from "lucide-react";
 import VoteSection from "../vote-section";
 import { Textarea } from "@/components/ui/textarea";
-import { DealNegotiatorType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { BidComments, DealerData, IncomingBid } from "@/types";
 import {
   collection,
@@ -19,7 +19,7 @@ import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { IncomingBidCommentType } from "@/lib/models/bids";
 import { ModalForm } from "@/components/tailwind-plus/modal-form";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -50,10 +50,12 @@ export const IncomingBidCard = ({
   negotiationId,
   allowUndelete,
   clientMode,
+  negotiation,
 }: any & {
   noUserActions?: boolean;
   allowUndelete?: boolean;
   clientMode?: boolean;
+  negotiation?: NegotiationDataType;
 }) => {
   const [connectClientAndDealer, setConnectClientAndDealer] = useState(true);
   const matchingDealer = dealers.find((dealer: DealNegotiatorType) => {
@@ -154,6 +156,15 @@ export const IncomingBidCard = ({
       console.error("Error restoring bid:", error);
     }
   };
+
+  const defaultValues = useMemo(() => {
+    return {
+      name: negotiation?.clientNamefull,
+      email: negotiation?.clientEmail,
+      phone: negotiation?.clientPhone,
+      address: `${negotiation?.address}, ${negotiation?.city}, ${negotiation?.state} ${negotiation?.zip}`,
+    };
+  }, [negotiation]);
 
   return (
     <>
@@ -382,8 +393,41 @@ export const IncomingBidCard = ({
       </div>
       {connectClientAndDealer && (
         <ModalForm
-          onClose={() => setConnectClientAndDealer(false)}
-          title="Connect Client + Dealer"
+          onClose={() => {
+            setConnectClientAndDealer(false);
+          }}
+          title="Send Info to Dealer"
+          submitButtonLabel="Connect Dealer & Client"
+          fields={[
+            [
+              {
+                label: "Name",
+                name: "name",
+                defaultValue: defaultValues.name,
+              },
+              {
+                label: "Email",
+                name: "email",
+                defaultValue: defaultValues.email,
+              },
+            ],
+            [
+              {
+                label: "Phone",
+                name: "phone",
+                defaultValue: defaultValues.phone,
+              },
+              {
+                name: "address",
+                label: "Address",
+                defaultValue: defaultValues.address,
+              },
+            ],
+            {
+              name: "message",
+              type: "textarea",
+            },
+          ]}
         />
       )}
     </>

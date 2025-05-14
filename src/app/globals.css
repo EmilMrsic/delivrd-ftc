@@ -128,3 +128,7 @@ ol {
 .flex-shrink-all * {
   flex-shrink: 1;
 }
+
+.searchable-dropdown-styles * {
+  z-index: 1 !important;
+}

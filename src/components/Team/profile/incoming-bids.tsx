@@ -122,6 +122,7 @@ export const IncomingBids = ({
                 clientMode={clientMode}
                 handleBidFileUpload={handleBidFileUpload}
                 handleDeleteFile={handleDeleteFile}
+                negotiation={negotiation}
               />
             ))
         ) : (
