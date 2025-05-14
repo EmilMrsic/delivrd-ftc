@@ -372,7 +372,7 @@ const isThisWeek = (date: Date) => {
   // return date >= lastSaturday && date <= nextSunday;
 };
 
-export const dateTimeFormatter = () => {
+const dateTimeFormatter = () => {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     month: "2-digit",
@@ -383,6 +383,6 @@ export const dateTimeFormatter = () => {
   return formatter;
 };
 
-export const dateToTimeZone = (date: Date) => {
+const dateToTimeZone = (date: Date) => {
   return toZonedTime(date, "America/New_York");
 };
