@@ -121,36 +121,35 @@ export default function BiddingSection() {
       }
       // Change this line to use addDoc instead of setDoc
       const bidRef = collection(db, "Incoming Bids");
-      console.log("got here: ", negotiationId);
-      // const newBid = {
-      //   bid_id: generateRandomId(),
-      //   dealerId: user.dealer_id[0],
-      //   price: parseFloat(price),
-      //   dealerName: user.name || "N/A",
-      //   dealerNumber: user.phone || "N/A",
-      //   manual_add: false,
-      //   comments: message,
-      //   files: fileUrls,
-      //   timestamp: getCurrentTimestamp(),
-      //   discountPrice: discountPrice,
-      //   inventoryStatus: inventoryStatus,
-      //   salesPersonName: "N/A",
-      //   negotiationId: negotiationId,
-      //   city: "N/A",
-      //   state: "N/A",
-      //   salesPersonEmail: "N/A",
-      //   // source: "firebase",
-      //   bid_source: "FTC",
-      // };
+      const newBid = {
+        bid_id: generateRandomId(),
+        dealerId: user.dealer_id[0],
+        price: parseFloat(price),
+        dealerName: user.name || "N/A",
+        dealerNumber: user.phone || "N/A",
+        manual_add: false,
+        comments: message,
+        files: fileUrls,
+        timestamp: getCurrentTimestamp(),
+        discountPrice: discountPrice,
+        inventoryStatus: inventoryStatus,
+        salesPersonName: "N/A",
+        negotiationId: negotiationId,
+        city: "N/A",
+        state: "N/A",
+        salesPersonEmail: "N/A",
+        // source: "firebase",
+        bid_source: "FTC",
+      };
 
-      // await addDoc(bidRef, newBid);
-      // await updateDoc(doc(db, "delivrd_negotiations", negotiationId ?? ""), {
-      //   incomingBids: arrayUnion(newBid.bid_id),
-      // });
+      await addDoc(bidRef, newBid);
+      await updateDoc(doc(db, "delivrd_negotiations", negotiationId ?? ""), {
+        incomingBids: arrayUnion(newBid.bid_id),
+      });
 
-      // toast({
-      //   title: "Bid submitted successfully",
-      // });
+      toast({
+        title: "Bid submitted successfully",
+      });
     } catch (error) {
       console.error("Error submitting bid:", error);
       toast({
