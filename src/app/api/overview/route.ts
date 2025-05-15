@@ -11,6 +11,8 @@ import {
   where,
 } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";
+import { toZonedTime } from "date-fns-tz";
+import { isSameWeek } from "date-fns";
 
 const getUserDataFromDb = async (id: string) => {
   const userRef = doc(db, "users", id);
@@ -278,45 +280,109 @@ const countClosedDeals = async (
 };
 
 const isSameDay = (date1: Date, date2: Date) => {
+  if (!date1 || !date2) return false;
+
+  // Convert both dates to Eastern Time
+  const estDate1 = dateToTimeZone(date1);
+  const estDate2 = dateToTimeZone(date2);
+
+  // Compare year, month, and day components in Eastern Time
   return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
+    estDate1.getFullYear() === estDate2.getFullYear() &&
+    estDate1.getMonth() === estDate2.getMonth() &&
+    estDate1.getDate() === estDate2.getDate()
   );
 };
 
-const isWithinLast30Days = (date: Date) => {
-  const now = new Date();
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(now.getDate() - 30);
+// const isSameDay = (date1: Date, date2: Date) => {
+//   const formatter = dateTimeFormatter();
+//   // console.log(
+//   //   "looking at day",
+//   //   formatter.format(date1) === formatter.format(date2)
+//   // );
 
-  // Remove time part for accurate comparison
-  now.setHours(0, 0, 0, 0);
-  thirtyDaysAgo.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
+//   return formatter.format(date1) === formatter.format(date2);
 
-  return date >= thirtyDaysAgo && date <= now;
-};
+//   return (
+//     date1.getFullYear() === date2.getFullYear() &&
+//     date1.getMonth() === date2.getMonth() &&
+//     date1.getDate() === date2.getDate()
+//   );
+// };
+
+// const isWithinLast30Days = (date: Date) => {
+//   const now = new Date();
+//   const thirtyDaysAgo = new Date();
+//   thirtyDaysAgo.setDate(now.getDate() - 30);
+
+//   // Remove time part for accurate comparison
+//   now.setHours(0, 0, 0, 0);
+//   thirtyDaysAgo.setHours(0, 0, 0, 0);
+//   date.setHours(0, 0, 0, 0);
+
+//   return date >= thirtyDaysAgo && date <= now;
+// };
 
 const isThisMonth = (date: Date) => {
   if (!date) return false;
-  const now = new Date();
-  const useableDate = date ? date : null;
+  // Convert dates to Eastern Time
+  const estNow = dateToTimeZone(new Date());
+  const estDate = dateToTimeZone(date);
 
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  // Extract year and month from the EST dates
+  const estNowYear = estNow.getFullYear();
+  const estNowMonth = estNow.getMonth();
 
+  // Check if the date falls within the same year and month in EST
   return (
-    useableDate && useableDate >= startOfMonth && useableDate < startOfNextMonth
+    estDate.getFullYear() === estNowYear && estDate.getMonth() === estNowMonth
   );
+
+  // if (!date) return false;
+
+  // const now = dateToTimeZone(new Date());
+
+  // Compare year and month in Eastern Time
+  // return dateYear === nowYear && dateMonth === nowMonth;
+  // const useableDate = date ? dateToTimeZone(date) : null;
+
+  // const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  // const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  // return (
+  //   useableDate && useableDate >= startOfMonth && useableDate < startOfNextMonth
+  // );
 };
 
 // check if the date this week, including sunday
 const isThisWeek = (date: Date) => {
-  const now = new Date();
-  const lastSaturday = new Date();
-  lastSaturday.setDate(now.getDate() - now.getDay() - 1);
-  const nextSunday = new Date();
-  nextSunday.setDate(now.getDate() + (7 - now.getDay()));
-  return date >= lastSaturday && date <= nextSunday;
+  if (!date) return false;
+
+  // Convert both dates to Eastern Time
+  const estNow = dateToTimeZone(new Date());
+  const estDate = dateToTimeZone(date);
+
+  // Use date-fns to check if they're in the same week
+  return isSameWeek(estDate, estNow, { weekStartsOn: 0 });
+  // const now = new Date();
+  // const lastSaturday = new Date();
+  // lastSaturday.setDate(now.getDate() - now.getDay() - 1);
+  // const nextSunday = new Date();
+  // nextSunday.setDate(now.getDate() + (7 - now.getDay()));
+  // return date >= lastSaturday && date <= nextSunday;
+};
+
+const dateTimeFormatter = () => {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+  });
+
+  return formatter;
+};
+
+const dateToTimeZone = (date: Date) => {
+  return toZonedTime(date, "America/New_York");
 };

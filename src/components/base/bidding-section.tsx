@@ -121,36 +121,35 @@ export default function BiddingSection() {
       }
       // Change this line to use addDoc instead of setDoc
       const bidRef = collection(db, "Incoming Bids");
-      console.log("got here: ", negotiationId);
-      // const newBid = {
-      //   bid_id: generateRandomId(),
-      //   dealerId: user.dealer_id[0],
-      //   price: parseFloat(price),
-      //   dealerName: user.name || "N/A",
-      //   dealerNumber: user.phone || "N/A",
-      //   manual_add: false,
-      //   comments: message,
-      //   files: fileUrls,
-      //   timestamp: getCurrentTimestamp(),
-      //   discountPrice: discountPrice,
-      //   inventoryStatus: inventoryStatus,
-      //   salesPersonName: "N/A",
-      //   negotiationId: negotiationId,
-      //   city: "N/A",
-      //   state: "N/A",
-      //   salesPersonEmail: "N/A",
-      //   // source: "firebase",
-      //   bid_source: "FTC",
-      // };
+      const newBid = {
+        bid_id: generateRandomId(),
+        dealerId: user.dealer_id[0],
+        price: parseFloat(price),
+        dealerName: user.name || "N/A",
+        dealerNumber: user.phone || "N/A",
+        manual_add: false,
+        comments: message,
+        files: fileUrls,
+        timestamp: getCurrentTimestamp(),
+        discountPrice: discountPrice,
+        inventoryStatus: inventoryStatus,
+        salesPersonName: "N/A",
+        negotiationId: negotiationId,
+        city: "N/A",
+        state: "N/A",
+        salesPersonEmail: "N/A",
+        // source: "firebase",
+        bid_source: "FTC",
+      };
 
-      // await addDoc(bidRef, newBid);
-      // await updateDoc(doc(db, "delivrd_negotiations", negotiationId ?? ""), {
-      //   incomingBids: arrayUnion(newBid.bid_id),
-      // });
+      await addDoc(bidRef, newBid);
+      await updateDoc(doc(db, "delivrd_negotiations", negotiationId ?? ""), {
+        incomingBids: arrayUnion(newBid.bid_id),
+      });
 
-      // toast({
-      //   title: "Bid submitted successfully",
-      // });
+      toast({
+        title: "Bid submitted successfully",
+      });
     } catch (error) {
       console.error("Error submitting bid:", error);
       toast({
@@ -208,6 +207,7 @@ export default function BiddingSection() {
           const colorOptions = data.ColorOptions || "";
           const { exteriorColors, interiorColors } =
             parseColorOptions(colorOptions);
+
           return {
             id: doc.id,
             name: data.Model || "Unknown Model",
@@ -217,6 +217,10 @@ export default function BiddingSection() {
             trim: data.Trim || "",
             exteriorColors,
             interiorColors,
+            desiredExterior: data.desiredExterior || "",
+            desiredInterior: data.desiredInterior || "",
+            excludedInterior: data.excludedInterior || "",
+            excludedExterior: data.excludedExterior || "",
             drivetrain: data.Drivetrain || "Unknown",
             negotiationId: data.negotiation_Id || "",
           };
@@ -251,6 +255,7 @@ export default function BiddingSection() {
         });
         //filter vehicles for which we've already bid
         const filteredBidVehicles = vehicleData.filter((data) => {
+          console.log("data", data);
           return bidVehicleClientIds.includes(data.id);
         });
 
