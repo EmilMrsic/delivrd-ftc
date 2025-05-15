@@ -16,11 +16,13 @@ export const ModalForm = ({
   title,
   fields,
   submitButtonLabel,
+  onSubmit,
 }: {
   onClose: () => void;
   title: string;
   fields: Fields;
   submitButtonLabel: string;
+  onSubmit: (values: any) => Promise<void>;
 }) => {
   const initialValues = useMemo(() => {
     return fields.reduce((acc, field) => {
@@ -49,7 +51,12 @@ export const ModalForm = ({
         {title}
       </div>
       <div className="p-4">
-        <Formik initialValues={initialValues} onSubmit={() => {}}>
+        <Formik
+          initialValues={initialValues}
+          onSubmit={async (values) => {
+            await onSubmit(values);
+          }}
+        >
           <Form>
             <FormFields fields={fields} />
             <div className="w-full">

@@ -1,4 +1,5 @@
 import { initAdmin } from "@/firebaseAdmin";
+import { MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME } from "@/lib/constants/keys";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
@@ -36,21 +37,18 @@ export async function POST(req: Request) {
   </html>`;
 
     const emailData = new URLSearchParams();
-    emailData.append(
-      "from",
-      `Delivrd <postmaster@${process.env.NEXT_PUBLIC_MAILGUN_DOMAIN_NAME}>`
-    );
+    emailData.append("from", `Delivrd <postmaster@${MAILGUN_DOMAIN_NAME}>`);
     emailData.append("to", receiverEmail);
     emailData.append("subject", subject);
     emailData.append("html", html);
 
     const response = await axios.post(
-      `https://api.mailgun.net/v3/${process.env.NEXT_PUBLIC_MAILGUN_DOMAIN_NAME}/messages`,
+      `https://api.mailgun.net/v3/${MAILGUN_DOMAIN_NAME}/messages`,
       emailData,
       {
         auth: {
           username: "api",
-          password: process.env.NEXT_PUBLIC_MAILGUN_API_KEY || "",
+          password: MAILGUN_API_KEY,
         },
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

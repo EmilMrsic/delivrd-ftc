@@ -20,6 +20,7 @@ import { toast } from "@/hooks/use-toast";
 import { IncomingBidCommentType } from "@/lib/models/bids";
 import { ModalForm } from "@/components/tailwind-plus/modal-form";
 import { useMemo, useState } from "react";
+import { backendRequest, callZapierWebhook } from "@/lib/request";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -57,7 +58,8 @@ export const IncomingBidCard = ({
   clientMode?: boolean;
   negotiation?: NegotiationDataType;
 }) => {
-  const [connectClientAndDealer, setConnectClientAndDealer] = useState(true);
+  const [connectClientAndDealer, setConnectClientAndDealer] = useState(false);
+  const [notifyFTC, setNotifyFTC] = useState(false);
   const matchingDealer = dealers.find((dealer: DealNegotiatorType) => {
     return dealer.id === bidDetails.dealerId;
   });
@@ -310,16 +312,27 @@ export const IncomingBidCard = ({
                 <Plus className="mr-2 h-4 w-4" />
                 Add Comment
               </Button>
-              {!clientMode && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setConnectClientAndDealer(true);
-                  }}
-                >
-                  Connect Client + Dealer
-                </Button>
+              {!clientMode && bidDetails.accept_offer && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setConnectClientAndDealer(true);
+                    }}
+                  >
+                    Connect Client + Dealer
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setNotifyFTC(true);
+                    }}
+                  >
+                    Notify FTC
+                  </Button>
+                </>
               )}
             </>
           )}
@@ -398,6 +411,38 @@ export const IncomingBidCard = ({
           }}
           title="Send Info to Dealer"
           submitButtonLabel="Connect Dealer & Client"
+          onSubmit={async (values) => {
+            const webhookData = {
+              event: "connect_client_and_dealer",
+              client: {
+                id: negotiation?.userId,
+                name: values.name,
+                email: values.email,
+                phone: values.phone,
+                address: values.address,
+              },
+              dealer: {
+                id: matchingDealer?.id,
+                name: matchingDealer?.SalesPersonName,
+                dealership: matchingDealer?.Dealership,
+                email: matchingDealer?.SalesPersonEmail,
+                phone: matchingDealer?.SalesPersonPhone,
+              },
+              custom_message: values.message || "",
+            };
+
+            await callZapierWebhook(
+              process.env.NEXT_PUBLIC_CONNECT_CLIENT_DEALER_FUNC_URL ?? "",
+              webhookData
+            );
+
+            setConnectClientAndDealer(false);
+
+            toast({
+              title: "Dealer & Client Connected",
+              description: "Dealer & Client Connected",
+            });
+          }}
           fields={[
             [
               {
@@ -426,8 +471,44 @@ export const IncomingBidCard = ({
             {
               name: "message",
               type: "textarea",
+              defaultValue: `Hi ${negotiation?.clientFirstName}, this is ${matchingDealer?.SalesPersonName} with ${matchingDealer?.Dealership} wanted to connect you two. `,
             },
           ]}
+        />
+      )}
+      {notifyFTC && (
+        <ModalForm
+          title="Winning Bid Details for FTC Dealers"
+          onClose={() => {
+            setNotifyFTC(false);
+          }}
+          fields={[
+            [
+              { label: "Price", name: "price", defaultValue: bidDetails.price },
+              {
+                label: "Discount",
+                name: "discount",
+                defaultValue: bidDetails.discountPrice,
+              },
+            ],
+            [{ label: "Comments", name: "comments", type: "textarea" }],
+          ]}
+          onSubmit={async (values) => {
+            const request = await backendRequest(
+              "/email/notifyFTCOfBidClosure",
+              "POST",
+              {
+                ...values,
+                negotiationId: negotiationId,
+                dealerName: matchingDealer?.SalesPersonName,
+                make: negotiation?.brand,
+                model: negotiation?.model,
+                bidId: bidDetails.bid_id,
+              }
+            );
+            setNotifyFTC(false);
+          }}
+          submitButtonLabel="Notify FTC List"
         />
       )}
     </>

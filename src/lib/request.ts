@@ -20,3 +20,12 @@ export const backendRequest = async <T = object>(
   const data = await response.json();
   return data;
 };
+
+export const callZapierWebhook = async (webhook: string, webhookData: any) => {
+  const response = await fetch(`${webhook}`, {
+    method: "POST",
+    body: JSON.stringify(webhookData),
+  });
+  const data = await response.json();
+  return data;
+};
