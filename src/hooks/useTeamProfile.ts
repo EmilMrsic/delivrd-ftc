@@ -51,10 +51,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
       },
     });
 
-  console.log(
-    "negotiationsFromUseNegotiations:",
-    negotiationsFromUseNegotiations
-  );
   useEffect(() => {
     if (negotiationsFromUseNegotiations) {
       setNegotiation(negotiationsFromUseNegotiations[0]);
@@ -110,7 +106,7 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
             groupedBidComments[bid_id].push(bidCommentData);
           });
         } else {
-          console.warn(`No comments found for bid ID ${bid_id}`);
+          // console.warn(`No comments found for bid ID ${bid_id}`);
         }
       } catch (error) {
         console.error(`Error fetching bid comment for ID ${bid_id}:`, error);

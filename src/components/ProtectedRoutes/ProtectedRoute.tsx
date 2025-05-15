@@ -25,8 +25,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     const { privilege } = parsed;
 
-    console.log({ parsed });
-
     const isValidClientPath =
       path.includes("client") ||
       path.includes("complete-signin") ||

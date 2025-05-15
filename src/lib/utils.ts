@@ -831,7 +831,6 @@ export const getActivityLogsByNegotiationId = async (negotiationId: string) => {
     const activityLogs = querySnapshot.docs.map((doc) => doc.data());
 
     if (activityLogs.length > 0) {
-      console.log("Found Activity Logs:", activityLogs);
       return activityLogs;
     } else {
       console.log("No activity logs found for this negotiationId.");

@@ -18,7 +18,7 @@ import { db, storage } from "@/firebase/config";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { generateRandomId } from "@/lib/utils";
+import { cn, generateRandomId } from "@/lib/utils";
 import { DealerData, EditNegotiationData, IncomingBid } from "@/types";
 import { TailwindPlusButton } from "../tailwind-plus/button";
 import { TailwindPlusInput } from "../tailwind-plus/input";
@@ -121,7 +121,6 @@ const ManualBidUpload = ({
       const storageRef = ref(storage, `uploads/${timestamp}_${file.name}`);
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
-      console.log("File available at:", downloadURL);
       return downloadURL;
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -190,7 +189,7 @@ const ManualBidUpload = ({
         };
         dealerData = newDealer;
         const dealerResponse = await setDoc(dealerRef, newDealer);
-        console.log("dealerResponse:", dealerResponse);
+
         setDealers && dealers && setDealers([...dealers, newDealer]);
       }
 
@@ -219,7 +218,6 @@ const ManualBidUpload = ({
         bid_source: "Manual",
       };
 
-      console.log("creating bid", bidData);
       const bidRef = doc(db, "Incoming Bids", bid_id);
 
       await setDoc(bidRef, { ...bidData, bid_id });
@@ -300,21 +298,27 @@ const ManualBidUpload = ({
     <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
       <>
         <DialogTrigger
+          className={cn(
+            "inline-flex items-center justify-center px-4 py-[calc(--spacing(2)-1px)]",
+            "rounded-full border border-transparent bg-gray-950 shadow-md",
+            "text-base font-medium whitespace-nowrap text-white",
+            "data-disabled:bg-gray-950 data-disabled:opacity-40 data-hover:bg-gray-800"
+          )}
           onClick={(e) => {
             e.stopPropagation();
             setIsDialogOpen(true);
           }}
         >
-          <TailwindPlusButton
+          {/* <TailwindPlusButton
             onClick={(e) => {
               e.stopPropagation();
               setStopPropagation && setStopPropagation(true);
               setIsDialogOpen(true);
             }}
-          >
-            <UploadIcon className="mr-2 h-4 w-4" />
-            <p className="font-normal text-sm"> Manual Bids Upload</p>
-          </TailwindPlusButton>
+          > */}
+          <UploadIcon className="mr-2 h-4 w-4" />
+          <p className="font-normal text-sm"> Manual Bids Upload</p>
+          {/* </TailwindPlusButton> */}
         </DialogTrigger>
 
         <TailwindPlusDialogContent
@@ -336,7 +340,6 @@ const ManualBidUpload = ({
             </DialogTitle>
             <div
               onClick={(e) => {
-                console.log("isDialogOpen clicked");
                 e.preventDefault();
                 e.stopPropagation();
                 setStopPropagation && setStopPropagation(true);

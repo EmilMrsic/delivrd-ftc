@@ -95,6 +95,7 @@ export const IncomingBids = ({
             })
             .map((bidDetails, index) => (
               <IncomingBidCard
+                key={bidDetails.bid_id}
                 negotiationId={negotiationId}
                 noUserActions={noUserActions}
                 setIncomingBids={setIncomingBids}

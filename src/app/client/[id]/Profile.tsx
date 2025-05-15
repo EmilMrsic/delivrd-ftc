@@ -128,7 +128,7 @@ function ProjectProfile() {
             groupedBidComments[bid_id].push(bidCommentData);
           });
         } else {
-          console.warn(`No comments found for bid ID ${bid_id}`);
+          // console.warn(`No comments found for bid ID ${bid_id}`);
         }
       } catch (error) {
         console.error(`Error fetching bid comment for ID ${bid_id}:`, error);

@@ -71,8 +71,6 @@ export const ClientProfile = ({
     setDealers,
   } = useTeamProfile({ negotiationId });
 
-  console.log("loading profile:", negotiationId, negotiation);
-
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useSearchParams();
@@ -369,10 +367,6 @@ export const ClientProfile = ({
       setActivityLog(log as ActivityLog);
     });
   }, [negotiationId]);
-
-  useEffect(() => {
-    console.log("got negotiation", negotiation?.id);
-  }, [negotiation]);
 
   if (isLoading) {
     return (

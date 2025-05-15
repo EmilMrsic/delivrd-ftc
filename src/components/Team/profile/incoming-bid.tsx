@@ -360,10 +360,12 @@ export const IncomingBidCard = ({
         bidCommentsByBidId[bidDetails.bid_id].length > 0 ? (
           bidCommentsByBidId[bidDetails.bid_id].map(
             (comment: IncomingBidCommentType, index: number) => {
-              console.log("got bid comment:", comment?.author?.name);
               return (
-                <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
-                  <div key={index} className="p-2 flex flex-col  mt-1">
+                <div
+                  key={index}
+                  className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between"
+                >
+                  <div className="p-2 flex flex-col  mt-1">
                     <p>
                       <strong>
                         {comment?.author?.name

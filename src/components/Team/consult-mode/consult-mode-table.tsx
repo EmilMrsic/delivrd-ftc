@@ -226,7 +226,6 @@ export const ConsultModeTable = ({
                               <EditableTextArea
                                 value={consultNotes}
                                 onChange={(value) => {
-                                  console.log("value:", value);
                                   setConsultNotes(value);
                                 }}
                                 negotiationId={negotiation.id}
@@ -237,7 +236,6 @@ export const ConsultModeTable = ({
                         );
                       },
                       onExpandedClose: () => {
-                        console.log("handleBlur refetching");
                         refetch();
                       },
                       expandedSize: "normal",

@@ -17,7 +17,7 @@ const DealNegotiatorDialog = ({
   setStopPropogation,
 }: DealNegotiatorDialogProps) => {
   const [open, setOpen] = useState(false);
-  console.log(deal.dealStartDate);
+
   return (
     <Dialog open={open} onOpenChange={() => setOpen(false)}>
       <DialogTrigger

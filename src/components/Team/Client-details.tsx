@@ -69,8 +69,6 @@ const ClientDetails = ({
     return url.includes("youtube.com") || url.includes("youtu.be");
   };
 
-  console.log("client mode toggle:", allowClientModeToggle);
-
   return (
     <TailwindPlusCard
       title="Client Overview"
