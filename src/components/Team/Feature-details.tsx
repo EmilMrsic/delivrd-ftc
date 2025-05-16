@@ -404,6 +404,23 @@ const FeatureDetails = ({
           icon={X}
           readOnly={clientMode}
         />
+        {!clientMode && (
+          <InputField
+            negotiations={negotiation}
+            label="Onboarding Link"
+            value={negotiation?.onboardingLink ?? "No preference"}
+            negotiationId={negotiationId ?? ""}
+            field="onboardingLink"
+            onChange={(newValue) =>
+              handleChange({
+                key: "onboardingLink",
+                newValue: newValue,
+              })
+            }
+            icon={X}
+            readOnly={clientMode}
+          />
+        )}
       </div>
     </TailwindPlusCard>
   );
