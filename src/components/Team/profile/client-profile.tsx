@@ -41,6 +41,7 @@ import useCheckClientShareExpiry from "@/hooks/useCheckExpiration";
 import useClientShareExpired from "@/hooks/useCheckExpiration";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { IncomingBidCommentType } from "@/lib/models/bids";
+import { createNotification } from "@/lib/helpers/notifications";
 
 export const ClientProfile = ({
   negotiationId,
@@ -118,13 +119,21 @@ export const ClientProfile = ({
       [bid_id]: "",
     }));
 
-    console.log("sending bid comment from:", newCommentData);
-
     const commentRef = collection(db, "bid comment");
     await addDoc(commentRef, newCommentData);
+
     if (user.privilege === "Client") {
       handleSendComment(newCommentData);
     }
+
+    if (dealNegotiator?.id) {
+      await createNotification(dealNegotiator?.id, "bid_comment", {
+        bidId: bid_id,
+        negotiationId: negotiationId,
+        author: user.id,
+      });
+    }
+
     toast({ title: "Comment added successfully" });
   };
 
