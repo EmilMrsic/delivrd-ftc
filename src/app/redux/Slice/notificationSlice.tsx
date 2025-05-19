@@ -1,3 +1,4 @@
+import { NotificationDataType } from "@/lib/models/notification";
 import { notificationType } from "@/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -15,8 +16,12 @@ export const allNotificationSlice = createSlice({
   name: "notification",
   initialState,
   reducers: {
-    setAllNotifications: (state, action: PayloadAction<notificationType>) => {
-      state.notification = [...state.notification, action.payload];
+    setAllNotifications: (
+      state,
+      action: PayloadAction<NotificationDataType[]>
+    ) => {
+      // @ts-ignore
+      state.notification = action.payload; //[...state.notification, action.payload];
     },
     setNotificationCount: (state, action: PayloadAction<number>) => {
       state.notificationCount = action.payload;

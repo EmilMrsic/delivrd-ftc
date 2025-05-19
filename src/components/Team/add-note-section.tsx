@@ -30,6 +30,7 @@ import {
 } from "@/lib/models/team";
 import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
 import { v4 as uuidv4 } from "uuid";
+import { createNotification } from "@/lib/helpers/notifications";
 
 type AddNoteSectionProps = {
   user: any;
@@ -147,7 +148,9 @@ const AddNoteSection = ({
       if (negotiation) {
         const newNote: InternalNotesType = {
           author: user,
-          mentionedTeammember: mentionedUsers.map((user) => user.id).join(","),
+          mentionedTeammember: mentionedUsers
+            .map((mentionedUser) => mentionedUser.id)
+            .join(","),
           createdAt: getCurrentDateTime(),
           text: newInternalNote,
           noteId: uuidv4(),
@@ -165,7 +168,16 @@ const AddNoteSection = ({
           internalNotes: [...(negotiation.internalNotes ?? []), newNote],
         });
 
+        mentionedUsers.forEach(async (mentionedUser) => {
+          await createNotification(mentionedUser.id, "internal_note", {
+            negotiationId: negotiation.id,
+            author: user.id,
+            noteId: newNote.noteId,
+          });
+        });
+
         setMentionedUsers([]);
+        setNewInternalNote("");
 
         toast({ title: "Note added successfully" });
       } else {

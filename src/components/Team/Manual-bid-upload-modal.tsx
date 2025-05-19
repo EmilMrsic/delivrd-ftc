@@ -25,6 +25,8 @@ import { TailwindPlusInput } from "../tailwind-plus/input";
 import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
 import { TailwindPlusDialogContent } from "../tailwind-plus/dialog";
 import { NegotiationDataType } from "@/lib/models/team";
+import { createNotification } from "@/lib/helpers/notifications";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 interface FormData {
   dealerName: string;
@@ -67,6 +69,7 @@ const ManualBidUpload = ({
   setIncomingBids,
   negotiation,
 }: ManualBidUploadType) => {
+  const user = useLoggedInUser();
   const [formData, setFormData] = useState<FormData>({
     dealerName: "",
     dealerNumber: "",
@@ -229,6 +232,18 @@ const ManualBidUpload = ({
         incomingBids: arrayUnion(bid_id),
       });
 
+      if (negotiation.dealCoordinatorId) {
+        await createNotification(
+          negotiation.dealCoordinatorId,
+          "new_manual_bid",
+          {
+            bidId: bid_id,
+            negotiationId: id,
+            author: user.id,
+          }
+        );
+      }
+
       resetForm();
       toast({ title: "Bid created successfully" });
       closeDialog();
@@ -294,6 +309,8 @@ const ManualBidUpload = ({
     data: dealership, // To access full dealership data on selection
   }));
 
+  console.log("clicked:", isDialogOpen);
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
       <>
@@ -306,19 +323,21 @@ const ManualBidUpload = ({
           )}
           onClick={(e) => {
             e.stopPropagation();
-            setIsDialogOpen(true);
+            // setStopPropagation && setStopPropagation(true);
+            // setIsDialogOpen(true);
+            // console.log("clicked2:", isDialogOpen);
           }}
         >
-          {/* <TailwindPlusButton
+          <TailwindPlusButton
             onClick={(e) => {
               e.stopPropagation();
               setStopPropagation && setStopPropagation(true);
               setIsDialogOpen(true);
             }}
-          > */}
-          <UploadIcon className="mr-2 h-4 w-4" />
-          <p className="font-normal text-sm"> Manual Bids Upload</p>
-          {/* </TailwindPlusButton> */}
+          >
+            <UploadIcon className="mr-2 h-4 w-4" />
+            <p className="font-normal text-sm"> Manual Bids Upload</p>
+          </TailwindPlusButton>
         </DialogTrigger>
 
         <TailwindPlusDialogContent

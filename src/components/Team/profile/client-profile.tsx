@@ -86,6 +86,36 @@ export const ClientProfile = ({
     inventoryStatus: "In Stock",
     files: [""],
   });
+  const [hasScrolled, setHasScrolled] = useState<boolean>(false);
+
+  useEffect(() => {
+    const bidId = params.get("bid");
+    if (!isLoading && bidId) {
+      // Create a MutationObserver to watch for the element
+      const observer = new MutationObserver((mutations, obs) => {
+        const el = document.getElementById(`bid_${bidId}`);
+        if (el) {
+          // Element found, scroll to it
+          const y = el.getBoundingClientRect().top + window.pageYOffset - 100;
+          window.scrollTo({
+            top: y,
+            behavior: "smooth",
+          });
+          // Disconnect the observer since we found the element
+          obs.disconnect();
+        }
+      });
+
+      // Start observing the document body for changes
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      // Cleanup observer on unmount
+      return () => observer.disconnect();
+    }
+  }, [params, isLoading]);
 
   const [activityLog, setActivityLog] = useState<ActivityLog>();
   // http://localhost:3000/team-profile?id=recH85js7w4MRVDru

@@ -171,6 +171,7 @@ export const IncomingBidCard = ({
   return (
     <>
       <div
+        id={`bid_${bidDetails.bid_id}`}
         key={index}
         className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
           ${isDisabled ? "opacity-45 pointer-events-none" : ""}

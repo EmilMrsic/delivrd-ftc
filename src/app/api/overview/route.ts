@@ -13,12 +13,7 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 import { toZonedTime } from "date-fns-tz";
 import { isSameWeek } from "date-fns";
-
-const getUserDataFromDb = async (id: string) => {
-  const userRef = doc(db, "users", id);
-  const userDoc = await getDoc(userRef);
-  return userDoc.data();
-};
+import { getUserDataFromDb } from "@/lib/helpers/user";
 
 export interface DealCountType {
   count: number;

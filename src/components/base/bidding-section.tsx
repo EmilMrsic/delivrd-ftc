@@ -13,6 +13,7 @@ import {
   updateDoc,
   doc,
   arrayUnion,
+  getDoc,
 } from "firebase/firestore";
 import VehicleCard from "./vehicle-card";
 import { db, storage } from "@/firebase/config";
@@ -34,6 +35,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { createNotification } from "@/lib/helpers/notifications";
+import { NegotiationDataType } from "@/lib/models/team";
 
 const headers = [
   { label: "Make", column: "carMake" },
@@ -119,6 +122,11 @@ export default function BiddingSection() {
           Boolean
         ) as string[];
       }
+
+      const negotiationRef = doc(db, "delivrd_negotiations", negotiationId);
+      const negotiationSnapShot = await getDoc(negotiationRef);
+      const negotiation = negotiationSnapShot.data() as NegotiationDataType;
+
       // Change this line to use addDoc instead of setDoc
       const bidRef = collection(db, "Incoming Bids");
       const newBid = {
@@ -142,10 +150,22 @@ export default function BiddingSection() {
         bid_source: "FTC",
       };
 
+      console.log("newBid", vehicleId, newBid);
+
       await addDoc(bidRef, newBid);
       await updateDoc(doc(db, "delivrd_negotiations", negotiationId ?? ""), {
         incomingBids: arrayUnion(newBid.bid_id),
       });
+
+      await createNotification(
+        negotiation.dealCoordinatorId,
+        "new_dealer_bid",
+        {
+          bidId: newBid.bid_id,
+          negotiationId: negotiationId,
+          author: user.id,
+        }
+      );
 
       toast({
         title: "Bid submitted successfully",
