@@ -21,7 +21,7 @@ export const MultiButtonSelect = ({
   );
 
   useEffect(() => {
-    helpers.setValue(multiple ? selected : selected[0]);
+    helpers.setValue(selected);
   }, [selected]);
 
   return (
@@ -63,7 +63,11 @@ export const MultiButtonSelect = ({
         >
           {checkboxes && (
             <span className="text-sm mr-2">
-              <input type="radio" checked={selected.includes(option.value)} />
+              <input
+                type="radio"
+                checked={selected.includes(option.value)}
+                onChange={() => {}}
+              />
             </span>
           )}
           {option.label}

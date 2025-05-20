@@ -96,36 +96,52 @@ const BiddingPage = () => {
                 label: "First Name",
                 name: "firstName",
                 defaultValue: dealer.firstName || dealer.SalesPersonName,
+                required: true,
               },
               {
                 label: "Last Name",
                 name: "lastName",
                 defaultValue: dealer.lastName,
+                required: true,
               },
             ],
             {
               label: "Dealership Name",
               name: "Dealership",
               defaultValue: dealer.Dealership,
+              required: true,
             },
             [
-              { label: "City", name: "City", defaultValue: dealer.City },
-              { label: "State", name: "State", defaultValue: dealer.State },
+              {
+                label: "City",
+                name: "City",
+                defaultValue: dealer.City,
+                required: true,
+              },
+              {
+                label: "State",
+                name: "State",
+                defaultValue: dealer.State,
+                required: true,
+              },
             ],
             {
               label: "Dealership Website",
               name: "YourWebsite",
               defaultValue: dealer.YourWebsite,
+              required: true,
             },
             {
               label: "Mobile Phone for SMS Alerts",
               name: "SalesPersonPhone",
               type: "phoneNumber",
+              required: true,
             },
             {
               label: "Email Address",
               name: "YourEmail",
               defaultValue: dealer.YourEmail,
+              required: true,
             },
             {
               label: "Brands you Represent",
@@ -140,6 +156,7 @@ const BiddingPage = () => {
                 checkboxes: true,
               },
               defaultValue: dealer.Brand,
+              required: true,
             },
             {
               label: "Alert Radius",
@@ -182,10 +199,13 @@ const BiddingPage = () => {
                 ),
                 color: "blue",
               },
+              required: true,
             },
           ]}
           submitButtonLabel="Update Information"
-          onSubmit={async (values) => {}}
+          onSubmit={async (values) => {
+            console.log("submitted:");
+          }}
           height={100}
           width={30}
         />

@@ -1,11 +1,15 @@
 import { useMemo } from "react";
 import { TailwindPlusModal } from "./modal";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, useFormikContext } from "formik";
 import { MultiButtonSelect } from "./form-widgets/multi-button-select";
 import { cn } from "@/lib/utils";
 import { PhoneNumberInput } from "./form-widgets/phone-number-input";
 import { Infobox } from "./infobox";
 import { LoomVideo } from "../ui/loom-video";
+import { z } from "zod";
+import { toFormikValidationSchema } from "zod-formik-adapter";
+
+const nonInputTypes = ["break", "video", "infobox"];
 
 const customWidgets = {
   multiButtonSelect: MultiButtonSelect,
@@ -25,9 +29,42 @@ interface FieldType {
     icon?: React.ComponentType<any>;
     color?: "yellow" | "blue";
   };
+  required?: boolean;
 }
 
 export type Fields = (FieldType | FieldType[])[];
+
+const buildZodSchema = (fields: Fields): Record<string, z.ZodType> => {
+  let result: Record<string, z.ZodType> = {};
+
+  fields.forEach((field, index) => {
+    if (Array.isArray(field)) {
+      result = {
+        ...result,
+        ...buildZodSchema(field),
+      };
+    } else {
+      if (!field.type || !nonInputTypes.includes(field.type)) {
+        result[field.name] = fieldToZodType(field);
+      }
+    }
+  });
+
+  return result;
+};
+
+export const fieldToZodType = (field: FieldType) => {
+  let zodType: any = z.string();
+  if (field.type === "multiButtonSelect") {
+    zodType = z.array(z.string());
+  }
+
+  if (field.required) {
+    zodType = zodType.min(1);
+  }
+
+  return zodType;
+};
 
 export const ModalForm = ({
   onClose,
@@ -64,8 +101,27 @@ export const ModalForm = ({
     }, {});
   }, [fields]);
 
-  console.log("initial values", initialValues);
+  // const formSchema = useMemo(() => {
+  //   return fields.reduce((acc, field) => {
+  //     if (Array.isArray(field)) {
+  //       return {
+  //         ...acc,
+  //         ...field.reduce(
+  //           (acc, field) => ({
+  //             ...acc,
+  //             [field.name]: field.required ? z.string().min(1) : z.string(),
+  //           }),
+  //           {}
+  //         ),
+  //       };
+  //     }
+  //   }, {});
+  // }, [fields]);
 
+  const formSchema = useMemo(() => z.object(buildZodSchema(fields)), [fields]);
+
+  console.log("initial values", initialValues);
+  console.log("fields: form schema", formSchema);
   return (
     <TailwindPlusModal
       close={onClose}
@@ -89,18 +145,24 @@ export const ModalForm = ({
             console.log("values", values);
             if (onSubmit) await onSubmit(values);
           }}
+          validationSchema={toFormikValidationSchema(formSchema)}
         >
-          <Form>
-            <FormFields fields={fields} />
-            <div className="w-full">
-              <button
-                type="submit"
-                className="block bg-blue-600 text-white p-2 rounded-md w-full mr-auto ml-auto"
-              >
-                {submitButtonLabel}
-              </button>
-            </div>
-          </Form>
+          {({ errors }) => {
+            console.log("errors", errors);
+            return (
+              <Form>
+                <FormFields fields={fields} />
+                <div className="w-full">
+                  <button
+                    type="submit"
+                    className="block bg-blue-600 text-white p-2 rounded-md w-full mr-auto ml-auto"
+                  >
+                    {submitButtonLabel}
+                  </button>
+                </div>
+              </Form>
+            );
+          }}
         </Formik>
       </div>
     </TailwindPlusModal>
@@ -108,21 +170,23 @@ export const ModalForm = ({
 };
 
 export const FormFields = ({ fields }: { fields: Fields }) => {
-  return fields.map((field: FieldType[] | FieldType) => {
+  return fields.map((field: FieldType[] | FieldType, index: number) => {
     if (Array.isArray(field)) {
       return (
-        <div className="w-full flex gap-2 justify-between">
+        <div className="w-full flex gap-2 justify-between" key={index}>
           <FormFields fields={field} />
         </div>
       );
     } else {
-      return <FormField field={field} />;
+      return <FormField field={field} key={index} />;
     }
   });
 };
 
 export const FormField = ({ field }: { field: FieldType }) => {
-  const { label, name, type, options, props, infobox } = field;
+  const formik = useFormikContext();
+  const { errors, touched } = formik;
+  const { label, name, type, options, props, infobox, required } = field;
   let fieldType: string | React.ComponentType<any> = type ? type : "input";
   if (type && customWidgets[type as keyof typeof customWidgets]) {
     fieldType = customWidgets[type as keyof typeof customWidgets];
@@ -144,7 +208,7 @@ export const FormField = ({ field }: { field: FieldType }) => {
     <div className="w-full mb-4">
       {label && (
         <label htmlFor={name} className="text-sm text-black font-bold">
-          {label}
+          {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
       {infobox && (
@@ -163,6 +227,12 @@ export const FormField = ({ field }: { field: FieldType }) => {
         options={options}
         {...props}
       />
+      {errors[name as keyof typeof errors] &&
+        touched[name as keyof typeof touched] && (
+          <div className="text-red-500 text-sm">
+            {errors[name as keyof typeof errors]}
+          </div>
+        )}
     </div>
   );
 };
