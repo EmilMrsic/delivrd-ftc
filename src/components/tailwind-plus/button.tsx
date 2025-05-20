@@ -22,6 +22,12 @@ const variants = {
     "text-sm font-medium whitespace-nowrap text-gray-950",
     "data-disabled:bg-transparent data-disabled:opacity-40 data-hover:bg-gray-50"
   ),
+  outline2: clsx(
+    "inline-flex items-center px-2 py-[calc(--spacing(1.5)-1px)]",
+    "rounded-lg border border-transparent ring-1 shadow-sm ring-black/10",
+    "text-sm font-medium whitespace-nowrap text-gray-950",
+    "data-disabled:bg-transparent data-disabled:opacity-40 data-hover:bg-gray-50"
+  ),
 };
 
 type ButtonProps = {

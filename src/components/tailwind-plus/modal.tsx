@@ -25,6 +25,8 @@ export const TailwindPlusModal = ({
   rounded?: boolean;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const isMobile = window.innerWidth < 768;
+  console.log("isMobile", isMobile, window.innerWidth);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -51,7 +53,9 @@ export const TailwindPlusModal = ({
 
   const styles = useMemo(() => {
     return {
-      minWidth: width ? `${width}vw` : undefined,
+      minWidth: width ? `500px` : undefined,
+      maxWidth: width ? `${width}vw` : undefined,
+      // minHeight: height ? `${height}vh` : undefined,
       maxHeight: height ? `${height}vh` : undefined,
     };
   }, [width, height]);
@@ -61,7 +65,15 @@ export const TailwindPlusModal = ({
       className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur flex items-center justify-center z-[9999] bg-blur"
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <div>
+      <div
+        style={
+          isMobile
+            ? {
+                maxWidth: "100%",
+              }
+            : {}
+        }
+      >
         {closeButton && (
           <button
             className="block text-white cursor-pointer mr-0 ml-auto flex items-center gap-2"
@@ -72,14 +84,25 @@ export const TailwindPlusModal = ({
         )}
         <div
           className={cn(
-            "p-4 overflow-y-auto",
+            "p-4 overflow-y-auto overflow-x-hidden",
             rounded ? "rounded-lg shadow-lg" : "",
             transparent ? "bg-transparent" : "bg-white",
             !width && "max-w-md w-full",
             !height && "max-h-[60vh]",
             className
           )}
-          style={styles}
+          style={
+            isMobile
+              ? {
+                  // minWidth: "100%",
+                  // minHeight: "100%",
+                  // maxWidth: "100%",
+                  // maxHeight: "100%",
+                  // width: "100%",
+                  // height: "100%",
+                }
+              : styles
+          }
           ref={ref}
           onMouseDown={(e) => e.stopPropagation()}
         >

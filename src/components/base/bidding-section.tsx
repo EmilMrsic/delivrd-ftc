@@ -37,6 +37,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { createNotification } from "@/lib/helpers/notifications";
 import { NegotiationDataType } from "@/lib/models/team";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 const headers = [
   { label: "Make", column: "carMake" },
@@ -63,8 +64,7 @@ export default function BiddingSection() {
   const [subTab, setSubTab] = useState("new");
   const [sortColumn, setSortColumn] = useState<keyof Vehicle>("carMake");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-
-  const [user, setUser] = useState<null | IUser>(null);
+  const user = useLoggedInUser();
 
   const toggleVehicleSelection = (id: string) => {
     setSelectedVehicles((prev) =>
@@ -181,12 +181,6 @@ export default function BiddingSection() {
     }
   };
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    const parsedUser = user && JSON.parse(user);
-    setUser(parsedUser);
-  }, []);
-
   function formatTimestamp(timestamp: { seconds: number }) {
     if (!timestamp || !timestamp.seconds) return "";
 
@@ -275,7 +269,6 @@ export default function BiddingSection() {
         });
         //filter vehicles for which we've already bid
         const filteredBidVehicles = vehicleData.filter((data) => {
-          console.log("data", data);
           return bidVehicleClientIds.includes(data.id);
         });
 
@@ -394,6 +387,7 @@ export default function BiddingSection() {
     if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1;
     return 0;
   });
+
   return (
     <div className="min-h-screen  relative bg-background text-foreground">
       <Header user={user} />
