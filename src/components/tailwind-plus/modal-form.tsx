@@ -101,27 +101,8 @@ export const ModalForm = ({
     }, {});
   }, [fields]);
 
-  // const formSchema = useMemo(() => {
-  //   return fields.reduce((acc, field) => {
-  //     if (Array.isArray(field)) {
-  //       return {
-  //         ...acc,
-  //         ...field.reduce(
-  //           (acc, field) => ({
-  //             ...acc,
-  //             [field.name]: field.required ? z.string().min(1) : z.string(),
-  //           }),
-  //           {}
-  //         ),
-  //       };
-  //     }
-  //   }, {});
-  // }, [fields]);
-
   const formSchema = useMemo(() => z.object(buildZodSchema(fields)), [fields]);
 
-  console.log("initial values", initialValues);
-  console.log("fields: form schema", formSchema);
   return (
     <TailwindPlusModal
       close={onClose}

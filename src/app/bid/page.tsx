@@ -6,7 +6,14 @@ import { toast } from "@/hooks/use-toast";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { negotiationMakeColors } from "@/lib/constants/negotiations";
 import { DealerDataType } from "@/lib/models/dealer";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 
 const BiddingPage = () => {
@@ -28,13 +35,41 @@ const BiddingPage = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!dealer?.updated) {
-      document.body.style.overflow = "hidden";
-      setShowModal(true);
-    } else {
-      document.body.style.overflow = "";
+    if (dealer) {
+      if (!dealer?.updated) {
+        console.log("showing modal");
+        document.body.style.overflow = "hidden";
+        setShowModal(true);
+      } else {
+        document.body.style.overflow = "";
+      }
     }
   }, [dealer]);
+
+  const handleSubmit = async (values: DealerDataType) => {
+    console.log("submitted:", dealer?.id);
+    const dealerTable = collection(db, "Dealers");
+    const docRef = doc(dealerTable, dealer?.id);
+    await updateDoc(docRef, {
+      ...values,
+      radius: values?.radius?.[0],
+      updated: true,
+    });
+
+    setDealer({
+      ...dealer,
+      ...values,
+      radius: values?.radius?.[0],
+      updated: true,
+    });
+
+    setShowModal(false);
+
+    toast({
+      title: "Information updated",
+      description: "Your information has been updated",
+    });
+  };
 
   if (!dealer) return <></>;
 
@@ -134,6 +169,7 @@ const BiddingPage = () => {
             {
               label: "Mobile Phone for SMS Alerts",
               name: "SalesPersonPhone",
+              defaultValue: dealer.SalesPersonPhone,
               type: "phoneNumber",
               required: true,
             },
@@ -203,9 +239,7 @@ const BiddingPage = () => {
             },
           ]}
           submitButtonLabel="Update Information"
-          onSubmit={async (values) => {
-            console.log("submitted:");
-          }}
+          onSubmit={handleSubmit}
           height={100}
           width={30}
         />

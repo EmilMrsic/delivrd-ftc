@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import { Button } from "../ui/button";
 import { IUser } from "@/types";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ interface IHeaderProps {
 // TODO: Merge these headers into one with props for the different views
 
 const Header: FC<IHeaderProps> = ({ user }) => {
+  const [showAllBrands, setShowAllBrands] = useState(false);
   const router = useRouter();
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -47,8 +48,16 @@ const Header: FC<IHeaderProps> = ({ user }) => {
             </span>
           </motion.div>
           <div className="flex flex-col items-end mr-2">
-            <span className="bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text">
-              {Array.isArray(user?.brand) ? user.brand.join(", ") : user?.brand}
+            <span
+              className="bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text cursor-pointer"
+              onClick={() => setShowAllBrands(!showAllBrands)}
+            >
+              {Array.isArray(user?.brand)
+                ? showAllBrands
+                  ? user.brand.join(", ")
+                  : // @ts-ignore
+                    user?.brand.slice(0, 3).join(", ")
+                : user?.brand}
             </span>
             <div className="flex items-center">
               <span className="text-white text-xs">
