@@ -71,7 +71,7 @@ export const ClientProfile = ({
     setDealers,
   } = useTeamProfile({ negotiationId });
 
-  console.log("loading profile:", negotiationId, negotiation);
+  console.log("loading profile:", negotiationId, negotiation?.dealStartDate);
 
   const dispatch = useDispatch();
   const router = useRouter();

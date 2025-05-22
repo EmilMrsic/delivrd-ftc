@@ -132,7 +132,15 @@ export const POST = async (
 
     if (["Paid", "Deal Started", "Actively Negotiating"].includes(deal.stage)) {
       // if assigned, make sure the coordinator is "visible" e.g. not a dev
-      if (mode === "coordinator" && userData?.id !== deal.dealCoordinatorId) {
+      console.log(
+        "coordinator",
+        userData?.deal_coordinator_id,
+        deal.dealCoordinatorId
+      );
+      if (
+        mode === "coordinator" &&
+        userData?.deal_coordinator_id !== deal.dealCoordinatorId
+      ) {
       } else {
         if (coordinator?.visible || !coordinator) {
           const coordinatorName =
@@ -156,7 +164,10 @@ export const POST = async (
           coordinator.name
         ].pickingUpToday.push(deal as NegotiationDataType);
       } else {
-        if (mode === "coordinator" && deal.dealCoordinatorId !== userData?.id) {
+        if (
+          mode === "coordinator" &&
+          deal.dealCoordinatorId !== userData?.deal_coordinator_id
+        ) {
           return;
         }
         pickingUpToday.push(deal as NegotiationDataType);
@@ -173,7 +184,10 @@ export const POST = async (
           coordinator.name
         ].shippingToday.push(deal as NegotiationDataType);
       } else {
-        if (mode === "coordinator" && deal.dealCoordinatorId !== userData?.id) {
+        if (
+          mode === "coordinator" &&
+          deal.dealCoordinatorId !== userData?.deal_coordinator_id
+        ) {
           return;
         }
         shippingToday.push(deal as NegotiationDataType);
@@ -198,6 +212,8 @@ export const POST = async (
     coordinatorSalesThisWeek[dealCoordinatorId].coordinatorName =
       coordinators[dealCoordinatorId].name;
   }
+
+  console.log("activeDeals", activeDeals);
 
   return NextResponse.json({
     activeDeals,
@@ -233,7 +249,10 @@ const countClosedDeals = async (
   } = {};
 
   deals.forEach((deal: NegotiationDataType) => {
-    if (mode === "coordinator" && userData.id !== deal.dealCoordinatorId) {
+    if (
+      mode === "coordinator" &&
+      userData?.deal_coordinator_id !== deal.dealCoordinatorId
+    ) {
       return;
     }
 

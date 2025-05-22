@@ -136,6 +136,8 @@ export const InputField = (props: {
       value,
     } = props;
 
+    console.log("got here: handleUpdate:");
+
     if (disabled) {
       return;
     }
@@ -197,7 +199,8 @@ export const InputField = (props: {
           updateObject["clientNamefull"] = firstName + " " + lastName;
         }
 
-        await updateDoc(negotiationDocRef, updateObject);
+        const result = await updateDoc(negotiationDocRef, updateObject);
+        console.log("result", result);
 
         toast({
           title: "Field Updated",
@@ -253,6 +256,7 @@ export const InputField = (props: {
       <DatePicker
         selected={props.selected}
         onChange={(date) => {
+          console.log("got here: onDateChange");
           props.onDateChange?.(date);
         }}
         className={clsx(
