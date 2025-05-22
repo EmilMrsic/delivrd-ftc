@@ -23,6 +23,18 @@ export const PhoneNumberInput = ({ name }: { name: string }) => {
       countries={["US"]}
       international={false}
       smartCaret={true}
+      countrySelectComponent={() => null}
+      // onChange={(value) => {
+      //   // Only allow if it's a valid US number
+      //   if (value && value.startsWith("+1")) {
+      //     helpers.setValue(value);
+      //   } else if (value) {
+      //     // If it doesn't start with +1, force it to
+      //     helpers.setValue(`+1${value.replace(/\D/g, "")}`);
+      //   } else {
+      //     helpers.setValue(value);
+      //   }
+      // }}
     />
   );
 };
