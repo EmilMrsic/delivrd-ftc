@@ -220,17 +220,21 @@ export const getActiveDealDocuments = async (dealQuery: {
     }
   });
 
-  return negotiations.filter((negotiation: NegotiationDataType | null) => {
-    if (!negotiation) return false;
-    if (dealQuery.profile) return true;
-    if (dealQuery.archive) {
-      return ["Closed", "Closed No Review"].includes(negotiation.stage);
-    } else if (dealQuery.mode === "consult") {
-      return consultModeStatusOrder.includes(negotiation.stage);
-    } else {
-      return negotiationStatusOrder.includes(negotiation.stage);
+  const filteredNegotiations = negotiations.filter(
+    (negotiation: NegotiationDataType | null) => {
+      if (!negotiation) return false;
+      if (dealQuery.profile) return true;
+      if (dealQuery.archive) {
+        return ["Closed", "Closed No Review"].includes(negotiation.stage);
+      } else if (dealQuery.mode === "consult") {
+        return consultModeStatusOrder.includes(negotiation.stage);
+      } else {
+        return negotiationStatusOrder.includes(negotiation.stage);
+      }
     }
-  }) as NegotiationDataType[];
+  ) as NegotiationDataType[];
+
+  return filteredNegotiations;
 };
 
 export const getNegotiationsByClientId = async (clientId: string) => {
