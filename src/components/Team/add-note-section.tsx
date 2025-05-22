@@ -118,8 +118,9 @@ const AddNoteSection = ({
       setSelectedMentionIndex(selectedMentionIndex + 1);
     } else if (e.key === "ArrowUp" && selectedMentionIndex > 0) {
       setSelectedMentionIndex(selectedMentionIndex - 1);
-    } else if (e.key === "Enter" && selectedMentionIndex >= 0) {
-      handleMentionSelect(mentionSuggestions[selectedMentionIndex]);
+    } else if (e.key === "Enter") {
+      let indexToUse = selectedMentionIndex === -1 ? 0 : selectedMentionIndex;
+      handleMentionSelect(mentionSuggestions[indexToUse]);
     }
   };
 

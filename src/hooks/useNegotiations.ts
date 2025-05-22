@@ -67,6 +67,10 @@ export const useNegotiations = (
     negotiationsQuery.refetch();
   }, [id, filters, config.archive]);
 
+  useEffect(() => {
+    setFilters(config.filter ?? {});
+  }, [config.filter?.id]);
+
   return {
     negotiations: negotiationsQuery.data?.negotiations,
     team: negotiationsQuery.data?.team,

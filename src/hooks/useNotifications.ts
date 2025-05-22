@@ -30,6 +30,7 @@ export const useNotifications = () => {
       const result = await request.json();
       return result;
     },
+    refetchInterval: 5000,
   });
 
   const handleBellClick = () => {

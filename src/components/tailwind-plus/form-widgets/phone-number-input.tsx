@@ -20,6 +20,9 @@ export const PhoneNumberInput = ({ name }: { name: string }) => {
       defaultCountry="US"
       value={field.value}
       onChange={helpers.setValue}
+      countries={["US"]}
+      international={false}
+      smartCaret={true}
     />
   );
 };
