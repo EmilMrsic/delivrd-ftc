@@ -409,10 +409,11 @@ export const IncomingBidCard = ({
       </div>
       {connectClientAndDealer && (
         <ModalForm
+          height={60}
           onClose={() => {
             setConnectClientAndDealer(false);
           }}
-          title="Send Info to Dealer"
+          title="🤝 Connect Client & Dealer"
           submitButtonLabel="Connect Dealer & Client"
           onSubmit={async (values) => {
             const webhookData = {
@@ -428,8 +429,8 @@ export const IncomingBidCard = ({
                 id: matchingDealer?.id,
                 name: matchingDealer?.SalesPersonName,
                 dealership: matchingDealer?.Dealership,
-                email: matchingDealer?.SalesPersonEmail,
-                phone: matchingDealer?.SalesPersonPhone,
+                email: values.dealerEmail,
+                phone: values.dealerPhone,
               },
               custom_message: values.message || "",
             };
@@ -469,6 +470,18 @@ export const IncomingBidCard = ({
                 name: "address",
                 label: "Address",
                 defaultValue: defaultValues.address,
+              },
+            ],
+            [
+              {
+                label: "Dealers Phone Number",
+                name: "dealerPhone",
+                defaultValue: matchingDealer?.SalesPersonPhone,
+              },
+              {
+                label: "Dealers Email",
+                name: "dealerEmail",
+                defaultValue: matchingDealer?.YourEmail,
               },
             ],
             {

@@ -85,7 +85,7 @@ const BiddingPage = () => {
               name: "video",
               type: "video",
               props: {
-                url: "https://www.loom.com/embed/97aab9ff5bc44633a6b9059235d588d0?sid=e8b6b1f5-f735-4958-bba9-a7618b9f629d",
+                url: "https://www.loom.com/embed/357ba9d6b4e2474088b96e67bf4ab0f7?sid=de5aee96-42a4-43e1-8c89-6b0693b4732a", // https://www.loom.com/embed/97aab9ff5bc44633a6b9059235d588d0?sid=e8b6b1f5-f735-4958-bba9-a7618b9f629d",
               },
             },
             {
