@@ -215,6 +215,7 @@ export const getActiveDealDocuments = async (dealQuery: {
       const parsed = NegotiationDataModel.parse(data);
       return parsed;
     } catch (error) {
+      console.log("error:", error);
       console.error("Error parsing negotiation data:", data.id);
       return null;
     }

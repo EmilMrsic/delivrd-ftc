@@ -65,8 +65,6 @@ export const GET = async (request: NextRequest) => {
   const bidIds = new Set<string>();
   const negotiationIds = new Set<string>();
 
-  console.log("notificationsSnapshot", notificationsSnapshot);
-
   const notifications = Array.from(notificationsSnapshot).map((data) => {
     if (data.data.author && !authorIds.has(data.data.author)) {
       authorIds.add(data.data.author);
@@ -148,7 +146,6 @@ export const GET = async (request: NextRequest) => {
     };
 
     if (bids[notification.data.bidId]) {
-      console.log("found:", bids[notification.data.bidId]);
       newNotification.data.bid = bids[notification.data.bidId];
     }
 
