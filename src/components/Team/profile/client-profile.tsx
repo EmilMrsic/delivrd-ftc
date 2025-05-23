@@ -508,7 +508,7 @@ export const ClientProfile = ({
             negotiationId={negotiationId}
             user={user}
             noActions={clientMode}
-            negotiation={negotiation}
+            negotiation={negotiation as NegotiationDataType}
           />
           {!clientMode && (
             <>

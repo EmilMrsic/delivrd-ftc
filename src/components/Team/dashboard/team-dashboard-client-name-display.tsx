@@ -167,7 +167,7 @@ export const TeamDashboardClientNameDisplay = ({
               negotiationId={negotiation.id}
               user={user}
               noActions={true}
-              negotiation={negotiation}
+              negotiation={negotiation as NegotiationDataType}
             />
             // <ActivityLogSection activityLog={activityLog} />
           )}
