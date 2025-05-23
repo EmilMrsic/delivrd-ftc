@@ -47,23 +47,22 @@ const BiddingPage = () => {
   }, [dealer]);
 
   const handleSubmit = async (values: DealerDataType) => {
-    console.log("submitted:", values);
-    // const dealerTable = collection(db, "Dealers");
-    // const docRef = doc(dealerTable, dealer?.id);
-    // await updateDoc(docRef, {
-    //   ...values,
-    //   radius: values?.radius?.[0],
-    //   updated: true,
-    // });
+    const dealerTable = collection(db, "Dealers");
+    const docRef = doc(dealerTable, dealer?.id);
+    await updateDoc(docRef, {
+      ...values,
+      radius: values?.radius?.[0],
+      updated: true,
+    });
 
-    // setDealer({
-    //   ...dealer,
-    //   ...values,
-    //   radius: values?.radius?.[0],
-    //   updated: true,
-    // });
+    setDealer({
+      ...dealer,
+      ...values,
+      radius: values?.radius?.[0],
+      updated: true,
+    });
 
-    // setShowModal(false);
+    setShowModal(false);
 
     toast({
       title: "Information updated",
