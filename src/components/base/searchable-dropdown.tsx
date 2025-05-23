@@ -87,10 +87,12 @@ const SearchableDropdown: React.FC<EditableDropdownProps> = ({
           null
         }
         placeholder="Select an option"
-        styles={{
-          // control: (base) => ({ ...base, zIndex: 1 }),
-          container: (base) => ({ ...base, zIndex: 0 }),
-        }}
+        styles={
+          {
+            // control: (base) => ({ ...base, zIndex: 1 }),
+            // container: (base) => ({ ...base, zIndex: 0 }),
+          }
+        }
         menuPortalTarget={null}
       />
     </Field>

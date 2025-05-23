@@ -344,6 +344,7 @@ const ManualBidUpload = ({
           onClick={(e) => {
             e.stopPropagation();
           }}
+          className="z-[9999]"
         >
           <div
             onClick={(e) => {

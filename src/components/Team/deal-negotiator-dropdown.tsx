@@ -60,7 +60,7 @@ export const DealNegotiatorDropdown = ({
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 h-56 overflow-scroll">
+        <DropdownMenuContent className="w-56 h-56 overflow-scroll z-[9999]">
           {allDealNegotiator.map((negotiator: DealNegotiatorType, index) => (
             <DropdownMenuItem
               key={index}
