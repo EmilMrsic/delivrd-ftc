@@ -47,23 +47,23 @@ const BiddingPage = () => {
   }, [dealer]);
 
   const handleSubmit = async (values: DealerDataType) => {
-    console.log("submitted:", dealer?.id);
-    const dealerTable = collection(db, "Dealers");
-    const docRef = doc(dealerTable, dealer?.id);
-    await updateDoc(docRef, {
-      ...values,
-      radius: values?.radius?.[0],
-      updated: true,
-    });
+    console.log("submitted:", values);
+    // const dealerTable = collection(db, "Dealers");
+    // const docRef = doc(dealerTable, dealer?.id);
+    // await updateDoc(docRef, {
+    //   ...values,
+    //   radius: values?.radius?.[0],
+    //   updated: true,
+    // });
 
-    setDealer({
-      ...dealer,
-      ...values,
-      radius: values?.radius?.[0],
-      updated: true,
-    });
+    // setDealer({
+    //   ...dealer,
+    //   ...values,
+    //   radius: values?.radius?.[0],
+    //   updated: true,
+    // });
 
-    setShowModal(false);
+    // setShowModal(false);
 
     toast({
       title: "Information updated",
@@ -172,6 +172,12 @@ const BiddingPage = () => {
               defaultValue: dealer.SalesPersonPhone,
               type: "phoneNumber",
               required: true,
+              customValidation: (item) =>
+                item
+                  .length(12, { message: "Must be a valid US phone number" })
+                  .startsWith("+1", {
+                    message: "Must be a valid US phone number",
+                  }),
             },
             {
               label: "Email Address",

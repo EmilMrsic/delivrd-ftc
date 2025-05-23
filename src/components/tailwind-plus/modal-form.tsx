@@ -30,6 +30,7 @@ interface FieldType {
     color?: "yellow" | "blue";
   };
   required?: boolean;
+  customValidation?: (item: any) => boolean;
 }
 
 export type Fields = (FieldType | FieldType[])[];
@@ -61,6 +62,10 @@ export const fieldToZodType = (field: FieldType) => {
 
   if (field.required) {
     zodType = zodType.min(1);
+  }
+
+  if (field.customValidation) {
+    zodType = field.customValidation(zodType);
   }
 
   return zodType;
@@ -128,8 +133,10 @@ export const ModalForm = ({
           }}
           validationSchema={toFormikValidationSchema(formSchema)}
         >
-          {({ errors }) => {
+          {({ errors, values }) => {
             console.log("errors", errors);
+            console.log("values", values);
+            console.log("formSchema", formSchema);
             return (
               <Form>
                 <FormFields fields={fields} />
