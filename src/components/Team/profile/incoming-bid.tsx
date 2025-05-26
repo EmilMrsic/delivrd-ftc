@@ -578,7 +578,7 @@ export const BidDetailsDialog = ({
           View Offer
         </Button>
       </DialogTrigger>
-      <DialogContent style={{ background: "white" }}>
+      <DialogContent style={{ background: "white", zIndex: 9999 }}>
         <div className="text-[#202125] space-y-4 w-[95%]">
           <div className="flex items-center gap-3">
             <p className="text-2xl font-bold">
