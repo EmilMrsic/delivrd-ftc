@@ -23,13 +23,14 @@ import "react-quill/dist/quill.snow.css";
 import { toast } from "@/hooks/use-toast";
 import { generateRandomId, uploadFile } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
-import { WorkLogType } from "@/lib/models/team";
+import { NegotiationDataType, WorkLogType } from "@/lib/models/team";
 
 interface WorkLogSectionProps {
   user: any;
   negotiationId: string | null;
   noActions?: boolean;
   clientMode?: boolean;
+  negotiation: NegotiationDataType;
 }
 
 const WorkLogSection: React.FC<WorkLogSectionProps> = ({
@@ -37,6 +38,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   negotiationId,
   noActions = false,
   clientMode = false,
+  negotiation,
 }) => {
   const [workLogs, setWorkLogs] = useState<WorkLogType[]>([]);
   const [newWorkLog, setNewWorkLog] = useState<string>("");
@@ -186,9 +188,13 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
       const validFileUrls = fileUrls.filter((url) => url); // Remove null values
       console.log("Uploaded file URLs:", validFileUrls);
 
+      // recos5ry1A7L7rFo7
+
       const logEntry = {
         id: generateRandomId(),
-        deal_coordinator_id: user.deal_coordinator_id,
+        deal_coordinator_id: Array.isArray(user.deal_coordinator_id)
+          ? user.deal_coordinator_id?.[0] || negotiation.dealCoordinatorId
+          : user.deal_coordinator_id,
         user: user.name,
         userAvatar: user.profile_pic,
         content: newWorkLog,

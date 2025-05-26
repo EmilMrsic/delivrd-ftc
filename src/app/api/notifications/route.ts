@@ -5,6 +5,7 @@ import { NegotiationDataType } from "@/lib/models/team";
 import {
   collection,
   getDocs,
+  or,
   orderBy,
   query,
   Timestamp,
@@ -65,6 +66,8 @@ export const GET = async (request: NextRequest) => {
   const bidIds = new Set<string>();
   const negotiationIds = new Set<string>();
 
+  // console.log("notificationsSnapshot", notificationsSnapshot);
+
   const notifications = Array.from(notificationsSnapshot).map((data) => {
     if (data.data.author && !authorIds.has(data.data.author)) {
       authorIds.add(data.data.author);
@@ -84,59 +87,81 @@ export const GET = async (request: NextRequest) => {
     return data;
   });
 
-  const requests = [
-    Array.from(authorIds).length
-      ? getDocs(
-          query(
-            collection(db, "users"),
-            where("id", "in", Array.from(authorIds))
-          )
-        )
-      : Promise.resolve({
-          docs: [],
-        }),
-    Array.from(bidIds).length
-      ? getDocs(
-          query(
-            collection(db, "Incoming Bids"),
-            where("bid_id", "in", Array.from(bidIds))
-          )
-        )
-      : Promise.resolve({
-          docs: [],
-        }),
+  // const requests = [
+  //   Array.from(authorIds).length
+  //     ? getDocs(
+  //         query(
+  //           collection(db, "users"),
+  //           where("id", "in", Array.from(authorIds))
+  //         )
+  //       )
+  //     : Promise.resolve({
+  //         docs: [],
+  //       }),
+  //   {
+  //     docs: [],
+  //   },
+  //   // Array.from(bidIds).length
+  //   //   ? getDocs(
+  //   //       query(
+  //   //         collection(db, "Incoming Bids"),
+  //   //         // where("bid_id", "in", Array.from(bidIds))
+  //   //         or(...Array.from(bidIds).map((id) => where("bid_id", "==", id)))
+  //   //       )
+  //   //     )
+  //   //   : Promise.resolve({
+  //   //       docs: [],
+  //   //     }),
+  //   Array.from(negotiationIds).length
+  //     ? getDocs(
+  //         query(
+  //           collection(db, "delivrd_negotiations"),
+  //           where("id", "in", Array.from(negotiationIds))
+  //           // or(...Array.from(negotiationIds).map((id) => where("id", "==", id)))
+  //         )
+  //       )
+  //     : Promise.resolve({
+  //         docs: [],
+  //       }),
+  // ];
 
-    Array.from(negotiationIds).length
-      ? getDocs(
-          query(
-            collection(db, "delivrd_negotiations"),
-            where("id", "in", Array.from(negotiationIds))
-          )
-        )
-      : Promise.resolve({
-          docs: [],
-        }),
-  ];
+  // const [authorsSnapshot, _, negotiationsSnapshot] = await Promise.all(
+  //   requests
+  // );
 
-  const [authorsSnapshot, bidsSnapshot, negotiationsSnapshot] =
-    await Promise.all(requests);
+  const authorsSnapshot = await fetchBulkQuery(
+    "users",
+    "id",
+    Array.from(authorIds)
+  );
+
+  const bidsSnapshot = await fetchBulkQuery(
+    "Incoming Bids",
+    "bid_id",
+    Array.from(bidIds)
+  );
+
+  const negotiationsSnapshot = await fetchBulkQuery(
+    "delivrd_negotiations",
+    "id",
+    Array.from(negotiationIds)
+  );
+
+  // console.log("bidsSnapshot", bidsSnapshot);
 
   const authors: Record<string, any> = {};
   const bids: Record<string, any> = {};
   const negotiations: Record<string, any> = {};
 
-  authorsSnapshot?.docs.map((doc) => {
-    const data = doc.data();
+  authorsSnapshot?.map((data) => {
     authors[data.id] = data;
   });
 
-  bidsSnapshot?.docs.map((doc) => {
-    const data = doc.data();
+  bidsSnapshot?.map((data: any) => {
     bids[data.bid_id] = data;
   });
 
-  negotiationsSnapshot?.docs.map((doc) => {
-    const data = doc.data();
+  negotiationsSnapshot?.map((data) => {
     negotiations[data.id] = data;
   });
 
@@ -168,4 +193,37 @@ export const GET = async (request: NextRequest) => {
   });
 
   return NextResponse.json({ notificationData });
+};
+
+const chunkArray = <T>(array: T[], size: number): T[][] => {
+  return Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
+    array.slice(i * size, i * size + size)
+  );
+};
+
+const fetchBulkQuery = async (
+  collectionName: string,
+  field: string,
+  ids: string[]
+): Promise<any[]> => {
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const chunks = chunkArray(ids, 30);
+  const results = await Promise.all(
+    chunks.map((chunk) =>
+      getDocs(
+        query(
+          collection(db, collectionName),
+          or(...chunk.map((id) => where(field, "==", id)))
+        )
+      )
+    )
+  );
+
+  const allDocs = results.flatMap((result) => {
+    return result.docs.map((doc) => doc.data());
+  });
+  return allDocs;
 };
