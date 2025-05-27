@@ -127,11 +127,6 @@ export const POST = async (
 
     if (["Paid", "Deal Started", "Actively Negotiating"].includes(deal.stage)) {
       // if assigned, make sure the coordinator is "visible" e.g. not a dev
-      console.log(
-        "coordinator",
-        userData?.deal_coordinator_id,
-        deal.dealCoordinatorId
-      );
       if (
         mode === "coordinator" &&
         userData?.deal_coordinator_id !== deal.dealCoordinatorId

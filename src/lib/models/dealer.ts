@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { IncomingBidModel } from "./bids";
 
 export const DealerModel = z.object({
   id: z.string(),
@@ -16,6 +17,8 @@ export const DealerModel = z.object({
   lastName: z.string().optional(),
   radius: z.string().optional(),
   updated: z.boolean().optional(),
+  bids: z.array(IncomingBidModel).optional(),
+  lastBid: z.string().optional(),
 });
 
 export type DealerDataType = z.infer<typeof DealerModel>;

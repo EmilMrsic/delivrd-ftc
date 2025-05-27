@@ -47,6 +47,9 @@ export const TailwindPlusTable = ({
   setSortConfig,
   sortData,
   rowConfigs,
+  isLoading,
+  pagination,
+  pageLimit,
 }: {
   headers: (string | HeaderWithConfig)[];
   rows: (Cell | string | undefined | null)[][];
@@ -57,6 +60,9 @@ export const TailwindPlusTable = ({
   setSortConfig?: (config: { key: string; direction: string }) => void;
   sortData?: (key: string, direction: string) => void;
   rowConfigs?: RowConfig[];
+  isLoading?: boolean;
+  pagination?: boolean;
+  pageLimit?: number;
 }) => {
   const [expanded, setExpanded] = useState<null | [number, number]>(null);
 
@@ -83,6 +89,8 @@ export const TailwindPlusTable = ({
     enableColumnResizing: true,
   });
 
+  const useableRows = pagination ? rows.slice(0, pageLimit) : rows;
+
   return (
     <>
       <div className="min-w-full max-w-full w-full overflow-x-scroll">
@@ -107,33 +115,37 @@ export const TailwindPlusTable = ({
               ))}
             </thead>
             <tbody>
-              {rows.map((row, rowIdx) => {
-                const rowConfig = rowConfigs?.[rowIdx] ?? {};
-                const { backgroundColor } = rowConfig;
-                return (
-                  <tr
-                    key={`row-${rowIdx}`}
-                    className={cn(
-                      `divide-x divide-gray-200`,
-                      backgroundColor
-                        ? backgroundColor
-                        : rowIdx % 2 === 0
-                        ? "bg-white"
-                        : "bg-gray-50"
-                    )}
-                  >
-                    {row.map((cell, cellIdx) => (
-                      <TailwindTableCell
-                        key={`table-cell-${rowIdx}-${cellIdx}`}
-                        cell={cell}
-                        rowIdx={rowIdx}
-                        cellIdx={cellIdx}
-                        setExpanded={setExpanded}
-                      />
-                    ))}
-                  </tr>
-                );
-              })}
+              {isLoading ? (
+                <>Loading</>
+              ) : (
+                useableRows.map((row, rowIdx) => {
+                  const rowConfig = rowConfigs?.[rowIdx] ?? {};
+                  const { backgroundColor } = rowConfig;
+                  return (
+                    <tr
+                      key={`row-${rowIdx}`}
+                      className={cn(
+                        `divide-x divide-gray-200`,
+                        backgroundColor
+                          ? backgroundColor
+                          : rowIdx % 2 === 0
+                          ? "bg-white"
+                          : "bg-gray-50"
+                      )}
+                    >
+                      {row.map((cell, cellIdx) => (
+                        <TailwindTableCell
+                          key={`table-cell-${rowIdx}-${cellIdx}`}
+                          cell={cell}
+                          rowIdx={rowIdx}
+                          cellIdx={cellIdx}
+                          setExpanded={setExpanded}
+                        />
+                      ))}
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

@@ -43,6 +43,7 @@ export const IncomingBidModel = z.object({
       }),
     ])
     .optional(),
+  intTimestamp: z.number().optional(),
   client_offer: z.string().optional(),
   vote: z.enum(["like", "dislike", "neutral"]).optional(),
   delete: z.boolean().optional(),

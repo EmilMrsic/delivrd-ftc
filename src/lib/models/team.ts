@@ -46,7 +46,7 @@ export const NegotiationDataModel = z.object({
   stage: z.string(),
   invoiceStatus: z.string(),
   model: z.string(),
-  updatedAt: z.string(),
+  updatedAt: z.string().optional(),
   city: z.string(),
   excludedInterior: z.string(),
   source: z.string(),
@@ -54,13 +54,15 @@ export const NegotiationDataModel = z.object({
   travelLimit: z.string(),
   condition: z.string(),
   excludedExterior: z.string(),
-  invoiceLink: z.string(),
+  invoiceLink: z.string().optional(),
   monthlyBudget: z.union([z.number(), z.string()]).optional(),
   brand: z.string(),
-  invoiceStatusUpdatesLog: z.object({
-    created: z.string(),
-    paid: z.string(),
-  }),
+  invoiceStatusUpdatesLog: z
+    .object({
+      created: z.string(),
+      paid: z.string(),
+    })
+    .optional(),
   id: z.string(),
   datePaid: z.string(),
   dealStartDate: z.string(),
