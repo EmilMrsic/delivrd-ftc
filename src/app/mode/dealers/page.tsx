@@ -37,7 +37,7 @@ const useDealersTable = ({ query }: { query: string }) => {
   // };
 
   const sortDataHelper = (dealers: any, key: string, direction: string) => {
-    return dealers.sort((a, b) => {
+    return dealers.sort((a: any, b: any) => {
       const aValue = a[key as keyof DealerDataType];
       const bValue = b[key as keyof DealerDataType];
 
