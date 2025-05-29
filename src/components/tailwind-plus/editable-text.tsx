@@ -4,16 +4,18 @@ import { TailwindPlusInput } from "./input";
 
 export const EditableText = ({
   value: defaultValue,
-  size,
-  color,
+  size = "sm",
+  color = "black",
   onUpdate,
   className,
+  noMaxWidth = false,
 }: {
   value: string;
-  size: string;
-  color: string;
+  size?: string;
+  color?: string;
   onUpdate?: (value: string) => void;
   className?: string;
+  noMaxWidth?: boolean;
 }) => {
   const [value, setValue] = useState(defaultValue);
   const [isEditing, setIsEditing] = useState(false);
@@ -31,7 +33,9 @@ export const EditableText = ({
       onChange={(e) => {
         setValue(e.target.value);
       }}
-      className={`text-${size} max-w-[60px] ${className}`}
+      className={cn(`text-${size} ${className}`, {
+        "max-w-[60px]": !noMaxWidth,
+      })}
       onEnter={() => {
         setIsEditing(false);
         onUpdate?.(value);

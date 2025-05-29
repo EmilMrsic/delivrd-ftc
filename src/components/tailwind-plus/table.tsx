@@ -28,6 +28,8 @@ interface CellConfig {
   expandedSize?: "full" | "normal";
   onExpandedClose?: () => void;
   link?: string;
+  noExpandButton?: boolean;
+  noCloseButton?: boolean;
 }
 
 interface Cell {
@@ -180,17 +182,19 @@ export const TailwindTableExpandedPopover = ({
       onCloseTrigger={cell.config?.onExpandedClose}
     >
       {Component && <Component setExpanded={setExpanded} expanded={expanded} />}
-      <div className="text-right mt-4">
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={() => {
-            setExpanded(null);
-            cell.config?.onExpandedClose?.();
-          }}
-        >
-          Close
-        </button>
-      </div>
+      {!cell.config?.noCloseButton && (
+        <div className="text-right mt-4">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={() => {
+              setExpanded(null);
+              cell.config?.onExpandedClose?.();
+            }}
+          >
+            Close
+          </button>
+        </div>
+      )}
     </TailwindPlusModal>
   );
 };
@@ -299,20 +303,30 @@ export const TailwindTableCell = ({
 
   const TDContents = (
     <>
-      {typeof cell === "object" && cell?.config?.expandable && (
-        <div className="w-fit mr-0 ml-auto">
-          <button
-            className="transform  text-gray-500 hover:text-gray-700"
-            title="Expand"
-            onClick={() => {
-              setExpanded([rowIdx, cellIdx]);
-            }}
-          >
-            <Expand size={16} className="text-gray-500 hover:text-gray-700" />
-          </button>
-        </div>
+      {typeof cell === "object" &&
+        cell?.config?.expandable &&
+        !cell?.config?.noExpandButton && (
+          <div className="w-fit mr-0 ml-auto">
+            <button
+              className="transform  text-gray-500 hover:text-gray-700"
+              title="Expand"
+              onClick={() => {
+                setExpanded([rowIdx, cellIdx]);
+              }}
+            >
+              <Expand size={16} className="text-gray-500 hover:text-gray-700" />
+            </button>
+          </div>
+        )}
+      {Component ? (
+        <Component
+          expand={() => {
+            setExpanded([rowIdx, cellIdx]);
+          }}
+        />
+      ) : (
+        text
       )}
-      {Component ? <Component /> : text}
     </>
   );
 

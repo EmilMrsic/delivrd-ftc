@@ -8,11 +8,13 @@ export const MultiButtonSelect = ({
   options,
   multiple = false,
   checkboxes = false,
+  onChange,
 }: {
   name: string;
   options: { label: string; value: string }[];
   multiple?: boolean;
   checkboxes?: boolean;
+  onChange?: (value: string[]) => void;
 }) => {
   const isMobile = window.innerWidth < 768;
   const [field, meta, helpers] = useField(name);
@@ -22,6 +24,9 @@ export const MultiButtonSelect = ({
 
   useEffect(() => {
     helpers.setValue(selected);
+    if (onChange) {
+      onChange(selected);
+    }
   }, [selected]);
 
   return (

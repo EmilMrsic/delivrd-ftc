@@ -10,7 +10,9 @@ export const getDealerDocuments = async (
     all?: boolean;
   } = {}
 ): Promise<any> => {
-  const dealerTable = collection(db, "Dealers");
+  console.log("got variable:", process.env.NEXT_PUBLIC_COMMENT_FUNC_URL);
+
+  const dealerTable = collection(db, "delivrd_dealers");
   // const dealerSnapshot = await getDocs(dealerTable);
   const dealerQueryList: any = [];
   if (!dealerQuery.all) {
