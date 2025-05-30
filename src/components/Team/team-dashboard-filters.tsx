@@ -42,6 +42,12 @@ export const TeamDashboardFilters = ({
           >
             <p>Consult Mode</p>
           </Button>
+          <Button
+            onClick={() => router.push("/mode/dealers")}
+            newDefault={true}
+          >
+            <p>FTC Table</p>
+          </Button>
         </div>
         <DealsOverviewBoard mode={overviewMode} />
         <div className="flex gap-3 mt-4">
