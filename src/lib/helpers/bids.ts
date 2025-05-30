@@ -13,6 +13,7 @@ import {
   IncomingBidModel,
   IncomingBidType,
 } from "../models/bids";
+import { fetchBulkQuery } from "./firebase";
 
 export const getIncomingBids = async (incomingBidIds: string[]) => {
   const incomingBidsCollection = collection(db, "Incoming Bids");
@@ -107,4 +108,44 @@ export const fetchDealers = async (incomingBids: IncomingBidType[]) => {
   }
 
   return dealersData;
+};
+
+export const getDealerBids = async (dealerId: string) => {
+  const incomingBids = collection(db, "Incoming Bids");
+  const q = query(incomingBids, where("dealerId", "==", dealerId));
+  const snapshot = await getDocs(q);
+  const negotiationIds: string[] = [];
+  const bids = snapshot.docs.map((doc) => {
+    const data = doc.data();
+    if (data.negotiationId && data.negotiationId !== "N/A") {
+      negotiationIds.push(data.negotiationId);
+    }
+    return data;
+  });
+
+  // console.log("got client ids", clientIds);
+
+  const negotiationData = await fetchBulkQuery(
+    "delivrd_negotiations",
+    "id",
+    negotiationIds
+  );
+  // console.log("got client data", clientData);
+  // const clients: Record<string, any> = {};
+  // clientData.forEach((client) => {
+  //   // console.log("got client", client);
+  //   clients[client.id] = client;
+  // });
+
+  for (const bidIdx in bids) {
+    const bid = bids[bidIdx];
+    if (bid.clientId) {
+      // console.log("got here", bid.clientId, clients);
+      bid.negotiation = negotiationData[bid.negotiationId];
+    }
+
+    bids[bidIdx] = bid;
+  }
+
+  return bids;
 };

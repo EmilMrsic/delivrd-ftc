@@ -38,6 +38,9 @@ import { Button } from "../ui/button";
 import { createNotification } from "@/lib/helpers/notifications";
 import { NegotiationDataType } from "@/lib/models/team";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { PreviousBidsTable } from "../Dealer/previous-bids-table";
+import { DealerDataType } from "@/lib/models/dealer";
+import { useDealerBids } from "@/hooks/useDealerBids";
 
 const headers = [
   { label: "Make", column: "carMake" },
@@ -51,7 +54,7 @@ const headers = [
   { label: "Files", column: "" },
 ];
 
-export default function BiddingSection() {
+export default function BiddingSection({ dealer }: { dealer: DealerDataType }) {
   const { toast } = useToast();
   const [showSelected, setShowSelected] = useState(false);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
@@ -60,10 +63,13 @@ export default function BiddingSection() {
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [filteredBidVehicles, setFilteredBidVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState("available");
+  const [tab, setTab] = useState("previous"); // "available");
   const [subTab, setSubTab] = useState("new");
   const [sortColumn, setSortColumn] = useState<keyof Vehicle>("carMake");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const dealerBids = useDealerBids({
+    dealerId: dealer.id,
+  });
   const user = useLoggedInUser();
 
   const toggleVehicleSelection = (id: string) => {
@@ -389,7 +395,7 @@ export default function BiddingSection() {
   });
 
   return (
-    <div className="min-h-screen  relative bg-background text-foreground">
+    <div className="min-h-screen relative bg-background text-foreground">
       <Header user={user} />
 
       <main className="container mx-auto px-4 md:py-8 pb-8">
@@ -405,66 +411,83 @@ export default function BiddingSection() {
               <TabsTrigger value="previous">Previous Bids</TabsTrigger>
             </TabsList>
           </Tabs>
-          <div className="flex md:flex-row md:gap-0 gap-2 flex-col items-center justify-between mb-8">
-            <div className="text-lg font-semibold">
-              Selected Vehicles:{" "}
-              <span className="text-primary">{selectedVehicles.length}</span>
-            </div>
-            <div className="space-x-1">
-              <div className="flex md:flex-row md:gap-0 gap-3 flex-col items-center">
-                {tab == "available" && (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="showSelected"
-                      checked={showSelected}
-                      onCheckedChange={() => setShowSelected(!showSelected)}
-                    />
-                    <Label
-                      htmlFor="showSelected"
-                      className="text-sm font-medium "
-                    >
-                      Show only selected vehicles
-                    </Label>
-                  </div>
-                )}
-                <div>
-                  <Tabs
-                    value={subTab}
-                    defaultValue="all"
-                    className="ml-0 md:ml-8"
-                    onValueChange={(value) => setSubTab(value)}
-                  >
-                    <TabsList>
-                      <TabsTrigger value="all">All</TabsTrigger>
-                      <TabsTrigger value="new">New</TabsTrigger>
-                      <TabsTrigger value="used">Used</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
         {loading ? (
           <Loader />
         ) : (
           <>
             {tab == "available" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-3">
-                {filteredVehicles.map((vehicle, index) => {
-                  return (
-                    <VehicleCard
-                      key={`vehicle-card-${vehicle.id}-${index}`}
-                      vehicle={vehicle}
-                      selectedVehicles={selectedVehicles}
-                      toggleVehicleSelection={toggleVehicleSelection}
-                      submitBid={submitBid}
-                      negotiationId={vehicle.negotiationId || ""}
-                    />
-                  );
-                })}
-              </div>
+              <>
+                <div className="flex md:flex-row md:gap-0 gap-2 flex-col items-center justify-between mb-8">
+                  <div className="text-lg font-semibold">
+                    Selected Vehicles:{" "}
+                    <span className="text-primary">
+                      {selectedVehicles.length}
+                    </span>
+                  </div>
+                  <div className="space-x-1">
+                    <div className="flex md:flex-row md:gap-0 gap-3 flex-col items-center">
+                      {tab == "available" && (
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="showSelected"
+                            checked={showSelected}
+                            onCheckedChange={() =>
+                              setShowSelected(!showSelected)
+                            }
+                          />
+                          <Label
+                            htmlFor="showSelected"
+                            className="text-sm font-medium "
+                          >
+                            Show only selected vehicles
+                          </Label>
+                        </div>
+                      )}
+                      <div>
+                        <Tabs
+                          value={subTab}
+                          defaultValue="all"
+                          className="ml-0 md:ml-8"
+                          onValueChange={(value) => setSubTab(value)}
+                        >
+                          <TabsList>
+                            <TabsTrigger value="all">All</TabsTrigger>
+                            <TabsTrigger value="new">New</TabsTrigger>
+                            <TabsTrigger value="used">Used</TabsTrigger>
+                          </TabsList>
+                        </Tabs>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-3">
+                  {filteredVehicles.map((vehicle, index) => {
+                    return (
+                      <VehicleCard
+                        key={`vehicle-card-${vehicle.id}-${index}`}
+                        vehicle={vehicle}
+                        selectedVehicles={selectedVehicles}
+                        toggleVehicleSelection={toggleVehicleSelection}
+                        submitBid={submitBid}
+                        negotiationId={vehicle.negotiationId || ""}
+                      />
+                    );
+                  })}
+                </div>
+              </>
             ) : (
+              <PreviousBidsTable dealerBids={dealerBids} />
+            )}
+          </>
+        )}
+      </main>
+    </div>
+  );
+}
+
+/*  
+
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -479,7 +502,7 @@ export default function BiddingSection() {
                         <div className="flex items-center font-semibold">
                           {label}
 
-                          {/* Show sort icon only if the column is sortable */}
+                          /* Show sort icon only if the column is sortable 
                           {column && (
                             <Image
                               className={`h-4 w-4 ml-1 transition-transform duration-300 ${
@@ -562,10 +585,4 @@ export default function BiddingSection() {
                   ))}
                 </TableBody>
               </Table>
-            )}
-          </>
-        )}
-      </main>
-    </div>
-  );
-}
+*/

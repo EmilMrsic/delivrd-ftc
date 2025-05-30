@@ -11,7 +11,5 @@ export const useLoggedInUser = () => {
     },
   });
 
-  console.log("user data:", data);
-
   return data;
 };

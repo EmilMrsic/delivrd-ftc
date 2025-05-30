@@ -1,5 +1,6 @@
 "use client";
 import BiddingSection from "@/components/base/bidding-section";
+import { BidScreen } from "@/components/screens/bid-screen";
 import { ModalForm } from "@/components/tailwind-plus/modal-form";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
@@ -74,7 +75,8 @@ const BiddingPage = () => {
 
   return (
     <>
-      <BiddingSection />
+      {/* <BiddingSection dealer={dealer} /> */}
+      <BidScreen dealer={dealer} user={user} />
       {showModal && (
         <ModalForm
           onClose={() => {}}
