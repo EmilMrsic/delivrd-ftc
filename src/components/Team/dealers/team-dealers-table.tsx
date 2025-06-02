@@ -8,6 +8,7 @@ import { EditableText } from "@/components/tailwind-plus/editable-text";
 import { Form, Formik } from "formik";
 import { MultiButtonSelect } from "@/components/tailwind-plus/form-widgets/multi-button-select";
 import { negotiationMakeColors } from "@/lib/constants/negotiations";
+import { canonicalizePhoneNumber } from "@/lib/helpers/etc";
 
 export const TeamDealersTable = ({
   dealers,
@@ -211,7 +212,7 @@ export const TeamDealersTable = ({
           {
             Component: () => (
               <EditableText
-                value={dealer.SalesPersonPhone ?? ""}
+                value={canonicalizePhoneNumber(dealer.SalesPersonPhone ?? "")}
                 className="text-blue-500 w-full"
                 onUpdate={(value) => {
                   handleUpdate(dealer.id, "SalesPersonPhone", value);
