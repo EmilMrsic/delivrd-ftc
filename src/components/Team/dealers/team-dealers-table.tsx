@@ -283,7 +283,7 @@ export const TeamDealersTable = ({
           {
             Component: ({ expand }: any) => (
               <Button
-                onClick={expand}
+                // onClick={expand}
                 className="bg-green-500 text-white p-2 hover:bg-green-500"
               >
                 {dealer.bids?.length?.toString() ?? "0"}

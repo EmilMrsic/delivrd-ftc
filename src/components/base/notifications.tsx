@@ -63,6 +63,8 @@ export const NotificationItem = ({ item }: { item: NotificationDataType }) => {
     });
   };
 
+  if (!negotiation) return null;
+
   let link = "";
   if (["bid_comment", "new_manual_bid", "new_dealer_bid"].includes(item.type)) {
     link = `/team-profile?id=${negotiation.id}&bid=${bid?.bid_id}`;
