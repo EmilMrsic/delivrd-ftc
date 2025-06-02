@@ -108,6 +108,10 @@ const useDealersTable = ({ query }: { query: string }) => {
         );
       }
 
+      if (query === "") {
+        filtered = filtered.slice(0, 50);
+      }
+
       setFilteredDealers(filtered);
       setLoading(false);
     }
@@ -157,8 +161,6 @@ export default function FTCTable() {
   } = useDealersTable({
     query,
   });
-
-  console.log("dealers:", dealers);
 
   if (!dealers) {
     return <div>loading...</div>;
