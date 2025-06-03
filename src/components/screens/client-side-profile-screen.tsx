@@ -45,7 +45,7 @@ export const ClientSideProfileScreen = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
-      <TeamHeader />
+      <TeamHeader clientMode={true} />
       {negotiationId && (
         <ClientProfile negotiationId={negotiationId} clientMode={true} />
       )}

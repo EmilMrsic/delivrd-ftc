@@ -21,6 +21,12 @@ export const GET = async (request: NextRequest) => {
   // const twentyFourHoursAgo = Timestamp.fromDate(
   //   new Date(Date.now() - 24 * 60 * 60 * 1000)
   // );
+
+  if (!userData?.deal_coordinator_id) {
+    return NextResponse.json({ notificationData: [] });
+  }
+
+  console.log("userData", userData?.deal_coordinator_id);
   const twentyFourHoursAgo = new Date(
     Date.now() - 24 * 60 * 60 * 1000
   ).toISOString();
@@ -29,6 +35,7 @@ export const GET = async (request: NextRequest) => {
   const unreadQuery = query(
     collection(db, "delivrd_notifications"),
     where("read", "==", false),
+    where("dealCoordinatorId", "==", userData?.deal_coordinator_id || ""),
     orderBy("createdAt", "desc")
   );
 
@@ -37,6 +44,7 @@ export const GET = async (request: NextRequest) => {
     collection(db, "delivrd_notifications"),
     where("read", "==", true),
     where("createdAt", ">", twentyFourHoursAgo),
+    where("dealCoordinatorId", "==", userData?.deal_coordinator_id || ""),
     orderBy("createdAt", "desc")
   );
 
@@ -192,6 +200,8 @@ export const GET = async (request: NextRequest) => {
 
     return newNotification;
   });
+
+  console.log("notificationData", notificationData);
 
   return NextResponse.json({ notificationData });
 };
