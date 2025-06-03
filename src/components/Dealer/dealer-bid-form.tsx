@@ -11,6 +11,7 @@ export const DealerBidForm = ({
   return (
     <ModalForm
       title={`${vehicle.Brand} ${vehicle.Model}`}
+      height={80}
       fields={[
         {
           type: "break",
@@ -38,8 +39,13 @@ export const DealerBidForm = ({
           options: [
             { label: "In Stock", value: "In Stock" },
             { label: "In Transit", value: "In Transit" },
+            { label: "Out of Stock", value: "Out of Stock" },
           ],
           defaultValue: "In Stock",
+          props: {
+            checkboxes: true,
+            asRadio: true,
+          },
         },
       ]}
       submitButtonLabel="Submit"

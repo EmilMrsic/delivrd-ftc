@@ -25,12 +25,6 @@ export const GET = async (request: NextRequest) => {
 
   const finalClients = clients.map((client) => {
     const negotiation = negotiationsById[client.negotiation_Id];
-    console.log(
-      "negotiation",
-      client.createdAt,
-      client.id,
-      negotiation ? "found" : "not found"
-    );
 
     return {
       ...client,

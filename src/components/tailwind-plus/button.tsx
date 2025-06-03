@@ -28,6 +28,7 @@ const variants = {
     "text-sm font-medium whitespace-nowrap text-gray-950",
     "data-disabled:bg-transparent data-disabled:opacity-40 data-hover:bg-gray-50"
   ),
+  noBorder: "",
 };
 
 type ButtonProps = {
