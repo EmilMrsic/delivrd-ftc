@@ -24,10 +24,16 @@ export const MultiButtonSelect = ({
 
   useEffect(() => {
     helpers.setValue(selected);
-    if (onChange) {
-      onChange(selected);
-    }
-  }, [selected]);
+    // if (onChange && selected) {
+    //   console.log(name, "onChange", selected);
+    //   // onChange("test");
+    //   try {
+    //     onChange(selected);
+    //   } catch (e: any) {
+    //     console.log("onChange: got error on", name, "with selected:", selected);
+    //   }
+    // }
+  }, [selected, onChange]);
 
   return (
     <div

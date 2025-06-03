@@ -15,6 +15,7 @@ export const BidScreen = ({
   user: any;
 }) => {
   const [tab, setTab] = useState("available");
+  const [subTab, setSubTab] = useState("all");
   const vehicles = useVehicles();
 
   return (
@@ -35,8 +36,26 @@ export const BidScreen = ({
       </div>
       <div className="bg-white shadow-lg">
         <CardContent>
+          <div className="flex justify-end">
+            <Tabs
+              value={subTab}
+              defaultValue="all"
+              className="ml-0 md:ml-8"
+              onValueChange={(value) => setSubTab(value)}
+            >
+              <TabsList>
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="new">New</TabsTrigger>
+                <TabsTrigger value="used">Used</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
           {tab === "available" ? (
-            <VehicleTable vehicles={vehicles?.data?.clients} />
+            <VehicleTable
+              vehicles={vehicles?.data?.clients}
+              subTab={subTab}
+              dealer={dealer}
+            />
           ) : (
             <>previous</> // <PreviousBidsTable dealerBids={} />
           )}

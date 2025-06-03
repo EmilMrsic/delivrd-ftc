@@ -54,7 +54,7 @@ export const TailwindPlusTable = ({
   pageLimit,
 }: {
   headers: (string | HeaderWithConfig)[];
-  rows: (Cell | string | undefined | null)[][];
+  rows: (Cell | string | number | undefined | null)[][];
   sortConfig?: {
     key: string;
     direction: string;
@@ -282,12 +282,12 @@ export const TailwindTableCell = ({
   cellIdx,
   setExpanded,
 }: {
-  cell: Cell | string | null | undefined;
+  cell: Cell | string | number | null | undefined;
   rowIdx: number;
   cellIdx: number;
   setExpanded: (expanded: [number, number] | null) => void;
 }) => {
-  let text: string;
+  let text: string | number;
   if (typeof cell === "object") {
     if (cell?.text !== undefined && cell?.text !== null) {
       text = cell?.text.toString();
