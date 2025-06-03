@@ -24,9 +24,9 @@ export const MultiButtonSelect = ({
 
   useEffect(() => {
     helpers.setValue(selected);
-    if (onChange) {
-      onChange(selected);
-    }
+    // if (onChange) {
+    //   onChange(selected);
+    // }
   }, [selected]);
 
   return (
