@@ -8,6 +8,7 @@ import { Infobox } from "./infobox";
 import { LoomVideo } from "../ui/loom-video";
 import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
+import { FileUpload } from "./form-widgets/file-upload";
 
 const nonInputTypes = ["break", "video", "infobox"];
 
@@ -15,6 +16,7 @@ const customWidgets = {
   multiButtonSelect: MultiButtonSelect,
   phoneNumber: PhoneNumberInput,
   infobox: Infobox,
+  files: FileUpload,
 };
 
 interface FieldType {

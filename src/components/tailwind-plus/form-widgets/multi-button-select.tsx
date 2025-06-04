@@ -44,7 +44,7 @@ export const MultiButtonSelect = ({
         !asRadio && "ml-auto mr-auto gap-4 w-fit",
         checkboxes
           ? asRadio
-            ? "flex flex-col "
+            ? "flex flex-col items-start"
             : "grid grid-cols-2 max-h-[200px] overflow-y-auto border-2 w-full p-4"
           : "flex flex-row flex-wrap"
       )}

@@ -14,6 +14,20 @@ export const DealerBidForm = ({
       height={80}
       fields={[
         {
+          name: "alert",
+          type: "infobox",
+          props: {
+            innerComponent: () => (
+              <span className="whitespace-pre-wrap">
+                <strong className="font-semibold">Trim</strong>
+                <br />
+                {vehicle.Trim}
+              </span>
+            ),
+            color: "blue",
+          },
+        },
+        {
           type: "break",
           name: "break1",
         },
@@ -46,6 +60,16 @@ export const DealerBidForm = ({
             checkboxes: true,
             asRadio: true,
           },
+        },
+        {
+          label: "Additional Comments",
+          name: "comments",
+          type: "textarea",
+        },
+        {
+          label: "Upload Files",
+          name: "files",
+          type: "files",
         },
       ]}
       submitButtonLabel="Submit"
