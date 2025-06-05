@@ -193,59 +193,84 @@ export const IncomingBidCard = ({
             {matchingDealer?.Dealership
               ? `${matchingDealer.Dealership} Offer`
               : "No Dealership"}
+
+            {bidDetails.bid_source === "FTC" && !bidDetails.verified && (
+              <span className="text-gray-500 text-sm">
+                {" "}
+                - Under Review By The Delivrd Team
+              </span>
+            )}
           </h3>
-          <div className="flex items-center gap-3">
-            {!(noUserActions || clientMode) && (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent opening the dialog
-                    handleDeleteBid(bidDetails.bid_id);
-                  }}
-                  className="text-black rounded-full p-2"
-                >
-                  <Trash className="w-5 h-5" />
-                </button>
+
+          <div className="items-center gap-3">
+            <div className="flex">
+              {!(noUserActions || clientMode) && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent opening the dialog
+                      handleDeleteBid(bidDetails.bid_id);
+                    }}
+                    className="text-black rounded-full p-2"
+                  >
+                    <Trash className="w-5 h-5" />
+                  </button>
+                  <VoteSection
+                    incomingBid={incomingBids}
+                    setIncomingBid={setIncomingBids}
+                    bidDetails={bidDetails}
+                  />
+                  {bidDetails.accept_offer ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCancelOffer(bidDetails)}
+                      className={
+                        "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
+                      }
+                    >
+                      Cancel Offer
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAcceptOffer(bidDetails)}
+                      className={"bg-white text-black"}
+                    >
+                      Accept Offer
+                    </Button>
+                  )}
+                </>
+              )}
+              {clientMode && (
                 <VoteSection
                   incomingBid={incomingBids}
                   setIncomingBid={setIncomingBids}
                   bidDetails={bidDetails}
+                  clientMode={clientMode}
                 />
-                {bidDetails.accept_offer ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCancelOffer(bidDetails)}
-                    className={
-                      "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
-                    }
-                  >
-                    Cancel Offer
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleAcceptOffer(bidDetails)}
-                    className={"bg-white text-black"}
-                  >
-                    Accept Offer
-                  </Button>
-                )}
-              </>
-            )}
-            {clientMode && (
-              <VoteSection
-                incomingBid={incomingBids}
-                setIncomingBid={setIncomingBids}
-                bidDetails={bidDetails}
-                clientMode={clientMode}
-              />
-            )}
-            {allowUndelete && (
-              <Button variant="outline" size="sm" onClick={() => restoreBid()}>
-                Restore
-              </Button>
+              )}
+              {allowUndelete && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => restoreBid()}
+                >
+                  Restore
+                </Button>
+              )}
+            </div>
+            {bidDetails.bid_source === "FTC" && !bidDetails.verified && (
+              <div className="w-fit mr-0 ml-auto mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-green-500 text-white"
+                >
+                  Verify Bid
+                </Button>
+              </div>
             )}
           </div>
         </div>
