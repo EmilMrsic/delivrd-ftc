@@ -1,10 +1,16 @@
 import { Button } from "@/components/ui/button";
+import { useField } from "formik";
 import { X, XIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const FileUpload = ({ name }: { name: string }) => {
+  const [field, meta, helpers] = useField(name);
   const [files, setFiles] = useState<any[]>([]);
   const ref = useRef();
+
+  useEffect(() => {
+    helpers.setValue(files);
+  }, [files]);
 
   return (
     <div className="mt-4 w-full">
@@ -27,10 +33,10 @@ export const FileUpload = ({ name }: { name: string }) => {
             reader.onload = (e) => {
               setFiles([
                 ...files,
-                {
-                  ...file,
+                // file,
+                Object.assign(file, {
                   preview: e.target?.result,
-                },
+                }),
               ]);
             };
             reader.readAsDataURL(file);

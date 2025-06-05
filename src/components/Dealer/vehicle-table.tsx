@@ -192,6 +192,7 @@ export const VehicleTable = ({
         <DealerBidForm
           vehicle={selectedVehicle}
           onClose={() => setSelectedVehicle(null)}
+          dealer={dealer}
         />
       )}
     </>

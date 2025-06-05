@@ -9,6 +9,8 @@ import { LoomVideo } from "../ui/loom-video";
 import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { FileUpload } from "./form-widgets/file-upload";
+import { ColorDisplayCard } from "../base/color-display-card";
+import { TrimDisplayCard } from "../base/trim-display-card";
 
 const nonInputTypes = ["break", "video", "infobox"];
 
@@ -17,6 +19,8 @@ const customWidgets = {
   phoneNumber: PhoneNumberInput,
   infobox: Infobox,
   files: FileUpload,
+  colorDisplayCard: ColorDisplayCard,
+  trimDisplayCard: TrimDisplayCard,
 };
 
 interface FieldType {
@@ -58,12 +62,15 @@ const buildZodSchema = (fields: Fields): Record<string, z.ZodType> => {
 
 export const fieldToZodType = (field: FieldType) => {
   let zodType: any = z.string();
-  if (field.type === "multiButtonSelect") {
-    zodType = z.array(z.string());
+  let useableType = field?.type || "text";
+  if (["multiButtonSelect", "files"].includes(useableType)) {
+    zodType = z.array(z.any());
   }
 
   if (field.required) {
     zodType = zodType.min(1);
+  } else {
+    zodType = zodType.optional();
   }
 
   if (field.customValidation) {
@@ -90,20 +97,46 @@ export const ModalForm = ({
   height?: number;
   width?: number;
 }) => {
+  // const initialValues = useMemo(() => {
+  //   return fields.reduce((acc, field) => {
+  //     if (Array.isArray(field)) {
+  //       return {
+  //         ...acc,
+  //         ...field.reduce(
+  //           (acc, field) => ({
+  //             ...acc,
+  //             [field.name]: field.defaultValue || "",
+  //           }),
+  //           {}
+  //         ),
+  //       };
+  //     }
+
+  //     return { ...acc, [field.name]: field.defaultValue || "" };
+  //   }, {});
+  // }, [fields]);
+
   const initialValues = useMemo(() => {
     return fields.reduce((acc, field) => {
       if (Array.isArray(field)) {
         return {
           ...acc,
-          ...field.reduce(
-            (acc, field) => ({
+          ...field.reduce((acc, field) => {
+            if (field.type && nonInputTypes.includes(field.type)) {
+              return acc;
+            }
+            return {
               ...acc,
               [field.name]: field.defaultValue || "",
-            }),
-            {}
-          ),
+            };
+          }, {}),
         };
       }
+
+      if (field.type && nonInputTypes.includes(field.type)) {
+        return acc;
+      }
+
       return { ...acc, [field.name]: field.defaultValue || "" };
     }, {});
   }, [fields]);
