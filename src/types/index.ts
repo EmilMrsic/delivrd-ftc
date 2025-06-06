@@ -265,6 +265,7 @@ export interface IncomingBid {
   vote?: "like" | "dislike" | "neutral";
   delete: boolean;
   accept_offer: boolean;
+  verified?: boolean;
 }
 
 export type Color = {

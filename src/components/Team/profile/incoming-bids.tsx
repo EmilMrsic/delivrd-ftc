@@ -4,6 +4,7 @@ import { BidComments, DealerData, IncomingBid } from "@/types";
 import { FileText } from "lucide-react";
 import ManualBidUpload from "../Manual-bid-upload-modal";
 import { IncomingBidCard } from "./incoming-bid";
+import { useEffect, useState } from "react";
 
 export const IncomingBids = ({
   incomingBids,
@@ -33,6 +34,7 @@ export const IncomingBids = ({
   handleBidFileUpload,
   handleDeleteFile,
   negotiation,
+  refetch,
 }: {
   incomingBids: IncomingBid[];
   setIncomingBids: (item: IncomingBid[]) => void;
@@ -61,7 +63,21 @@ export const IncomingBids = ({
   handleBidFileUpload: (files: FileList, bidId: string) => void;
   handleDeleteFile: (file: string, bidId: string) => void;
   negotiation: NegotiationDataType;
+  refetch?: () => void;
 }) => {
+  console.log("got incomingBids", incomingBids?.[1]?.verified);
+  const sortedBids = [...incomingBids]
+    ?.filter((bid) => !bid?.delete)
+    .sort((a, b) => {
+      if (a.client_offer === "accepted") return -1;
+      if (b.client_offer === "accepted") return 1;
+      if (a.accept_offer) return -1;
+      if (b.accept_offer) return 1;
+      const dateA = new Date(a?.timestamp || 0).getTime();
+      const dateB = new Date(b?.timestamp || 0).getTime();
+      return dateB - dateA; // Newest bids first
+    });
+
   return (
     <TailwindPlusCard
       title="Incoming Bids"
@@ -81,19 +97,15 @@ export const IncomingBids = ({
       }}
     >
       <div className="space-y-8">
-        {incomingBids.length ? (
-          incomingBids
-            ?.filter((bid) => !bid?.delete)
-            .sort((a, b) => {
-              if (a.client_offer === "accepted") return -1;
-              if (b.client_offer === "accepted") return 1;
-              if (a.accept_offer) return -1;
-              if (b.accept_offer) return 1;
-              const dateA = new Date(a?.timestamp || 0).getTime();
-              const dateB = new Date(b?.timestamp || 0).getTime();
-              return dateB - dateA; // Newest bids first
-            })
-            .map((bidDetails, index) => (
+        {sortedBids.length ? (
+          sortedBids.map((bidDetails, index) => {
+            if (index === 1)
+              console.log(
+                "got incomingBids: rerunning",
+                incomingBids?.[1]?.verified,
+                bidDetails?.verified
+              );
+            return (
               <IncomingBidCard
                 key={bidDetails.bid_id}
                 negotiationId={negotiationId}
@@ -124,8 +136,10 @@ export const IncomingBids = ({
                 handleBidFileUpload={handleBidFileUpload}
                 handleDeleteFile={handleDeleteFile}
                 negotiation={negotiation}
+                refetch={refetch}
               />
-            ))
+            );
+          })
         ) : (
           <p>No incoming bids available</p>
         )}
