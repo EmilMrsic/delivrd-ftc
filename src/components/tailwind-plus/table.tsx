@@ -123,28 +123,44 @@ export const TailwindPlusTable = ({
                 useableRows.map((row, rowIdx) => {
                   const rowConfig = rowConfigs?.[rowIdx] ?? {};
                   const { backgroundColor } = rowConfig;
+                  let useableRow = row;
+                  let SubRow: any = null;
+                  if (row[0]?.descriptor) {
+                    useableRow = row.slice(1);
+                    if (row[0]?.descriptor?.subRow?.Component) {
+                      SubRow = row[0]?.descriptor?.subRow?.Component;
+                    }
+                  }
+
                   return (
-                    <tr
-                      key={`row-${rowIdx}`}
-                      className={cn(
-                        `divide-x divide-gray-200`,
-                        backgroundColor
-                          ? backgroundColor
-                          : rowIdx % 2 === 0
-                          ? "bg-white"
-                          : "bg-gray-50"
+                    <>
+                      <tr
+                        key={`row-${rowIdx}`}
+                        className={cn(
+                          `divide-x divide-gray-200`,
+                          backgroundColor
+                            ? backgroundColor
+                            : rowIdx % 2 === 0
+                            ? "bg-white"
+                            : "bg-gray-50"
+                        )}
+                      >
+                        {useableRow.map((cell, cellIdx) => (
+                          <TailwindTableCell
+                            key={`table-cell-${rowIdx}-${cellIdx}`}
+                            cell={cell}
+                            rowIdx={rowIdx}
+                            cellIdx={cellIdx}
+                            setExpanded={setExpanded}
+                          />
+                        ))}
+                      </tr>
+                      {SubRow && (
+                        <tr>
+                          <SubRow />
+                        </tr>
                       )}
-                    >
-                      {row.map((cell, cellIdx) => (
-                        <TailwindTableCell
-                          key={`table-cell-${rowIdx}-${cellIdx}`}
-                          cell={cell}
-                          rowIdx={rowIdx}
-                          cellIdx={cellIdx}
-                          setExpanded={setExpanded}
-                        />
-                      ))}
-                    </tr>
+                    </>
                   );
                 })
               )}

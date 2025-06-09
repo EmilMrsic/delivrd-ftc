@@ -140,10 +140,19 @@ export const getDealerBids = async (dealerId: string) => {
   const finalBids: any[] = [];
   for (const bid of bids) {
     const client = clients[bid.negotiationId];
+
     if (client) {
+      let bidStatus = "pending";
+      if (bid.accept_offer) {
+        bidStatus = "won";
+      }
+      // if (bid.client_offer === "accepted") {
+      //   bidStatus = "accepted";
+      // }
       finalBids.push({
         ...bid,
         ...client,
+        bidStatus,
       });
     }
   }

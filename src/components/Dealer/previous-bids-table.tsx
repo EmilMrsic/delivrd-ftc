@@ -145,7 +145,17 @@ export const PreviousBidsTable = ({
           },
         ]}
         rows={filteredBids.map((bid) => {
+          const subRow = {};
+          if (bid.bidStatus === "won") {
+            subRow.descriptor = {
+              subRow: {
+                Component: () => <div>test</div>,
+              },
+            };
+          }
+
           return [
+            // subRow,
             {
               Component: () => <MakeButton make={bid.Brand} />,
             },
