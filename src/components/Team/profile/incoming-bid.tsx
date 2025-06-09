@@ -196,6 +196,13 @@ export const IncomingBidCard = ({
       console.log("fresh bid:", bidDetails);
   }, [bidDetails]);
 
+  const isManualBid =
+    bidDetails.bid_source === "Manual" ||
+    bidDetails.source === "Manual" ||
+    bidDetails.manual_add;
+  const bidVerified = isManualBid || bidDetails.verified;
+  console.log("got this bid:", bidDetails.bid_id, bidVerified);
+
   return (
     <>
       <div
@@ -222,18 +229,16 @@ export const IncomingBidCard = ({
               ? `${matchingDealer.Dealership} Offer`
               : "No Dealership"}
 
-            {bidDetails.bid_source === "FTC" && (
-              <span
-                className={cn(
-                  `px-2 py-1 text-sm font-medium text-white rounded-full ml-2`,
-                  bidDetails.verified ? "bg-green-600" : "bg-red-500"
-                )}
-              >
-                {!bidDetails.verified
-                  ? "Under Review By The Delivrd Team"
-                  : "Verified By The Delivrd Team"}
-              </span>
-            )}
+            <span
+              className={cn(
+                `px-2 py-1 text-sm font-medium text-white rounded-full ml-2`,
+                bidVerified ? "bg-green-600" : "bg-red-500"
+              )}
+            >
+              {!bidVerified
+                ? "Under Review By The Delivrd Team"
+                : "Verified By The Delivrd Team"}
+            </span>
           </h3>
 
           <div className="items-center gap-3">

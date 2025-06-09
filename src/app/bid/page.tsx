@@ -74,7 +74,7 @@ const BiddingPage = () => {
 
   return (
     <>
-      <BiddingSection />
+      {/* <BiddingSection /> */}
       {showModal && (
         <ModalForm
           onClose={() => {}}
