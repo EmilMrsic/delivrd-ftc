@@ -218,6 +218,11 @@ const ManualBidUpload = ({
           day: "2-digit",
           year: "numeric",
         }),
+        createdAt: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
         bid_source: "Manual",
       };
 

@@ -6,6 +6,7 @@ import { CardContent } from "../ui/card";
 import { VehicleTable } from "../Dealer/vehicle-table";
 import { PreviousBidsTable } from "../Dealer/previous-bids-table";
 import { useVehicles } from "@/hooks/useVehicles";
+import { useDealerBids } from "@/hooks/useDealerBids";
 
 export const BidScreen = ({
   dealer,
@@ -17,6 +18,7 @@ export const BidScreen = ({
   const [tab, setTab] = useState("available");
   const [subTab, setSubTab] = useState("all");
   const vehicles = useVehicles();
+  const dealerBids = useDealerBids({ dealerId: dealer.id });
 
   return (
     <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
@@ -55,9 +57,10 @@ export const BidScreen = ({
               vehicles={vehicles?.data?.clients}
               subTab={subTab}
               dealer={dealer}
+              refetch={vehicles?.refetch}
             />
           ) : (
-            <>previous</> // <PreviousBidsTable dealerBids={} />
+            <PreviousBidsTable dealerBids={dealerBids?.bids} subTab={subTab} />
           )}
         </CardContent>
       </div>

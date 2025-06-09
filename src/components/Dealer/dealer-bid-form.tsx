@@ -24,10 +24,12 @@ export const DealerBidForm = ({
   vehicle,
   dealer,
   onClose,
+  refetch,
 }: {
   vehicle: ClientDataType & { bidNum: number; trade: boolean };
   dealer: DealerDataType;
   onClose: () => void;
+  refetch: () => void;
 }) => {
   const handleSubmit = async (values: any) => {
     let fileUrls: string[] = [];
@@ -60,10 +62,13 @@ export const DealerBidForm = ({
       salesPersonEmail: dealer.YourEmail,
       city: dealer.City,
       state: dealer.State,
+      timestamp: Date.now(),
+      createdAt: Date.now(),
     };
 
     const bidRef = doc(db, "Incoming Bids", bid_id);
     await setDoc(bidRef, bidObject);
+    refetch();
     onClose();
   };
 

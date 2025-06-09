@@ -54,7 +54,7 @@ export const TailwindPlusTable = ({
   pageLimit,
 }: {
   headers: (string | HeaderWithConfig)[];
-  rows: (Cell | string | number | undefined | null)[][];
+  rows: (Cell | string | number | undefined | null | any)[][];
   sortConfig?: {
     key: string;
     direction: string;

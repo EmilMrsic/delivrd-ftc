@@ -43,6 +43,17 @@ export const IncomingBidModel = z.object({
       }),
     ])
     .optional(),
+  timestamps: z
+    .union([
+      z.string(),
+      z.number(),
+      z.object({
+        nanoseconds: z.number(),
+        seconds: z.number(),
+      }),
+    ])
+    .optional(),
+  createdAt: z.string().optional(),
   intTimestamp: z.number().optional(),
   client_offer: z.string().optional(),
   vote: z.enum(["like", "dislike", "neutral"]).optional(),

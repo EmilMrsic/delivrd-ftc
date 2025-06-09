@@ -117,35 +117,36 @@ export const getDealerBids = async (dealerId: string) => {
   const negotiationIds: string[] = [];
   const bids = snapshot.docs.map((doc) => {
     const data = doc.data();
-    if (data.negotiationId && data.negotiationId !== "N/A") {
+    if (
+      data.negotiationId &&
+      data.negotiationId !== "N/A" &&
+      data.negotiationId !== ""
+    ) {
       negotiationIds.push(data.negotiationId);
     }
     return data;
   });
 
-  // console.log("got client ids", clientIds);
-
-  const negotiationData = await fetchBulkQuery(
-    "delivrd_negotiations",
-    "id",
+  const clientData = await fetchBulkQuery(
+    "Clients",
+    "negotiation_Id",
     negotiationIds
   );
-  // console.log("got client data", clientData);
-  // const clients: Record<string, any> = {};
-  // clientData.forEach((client) => {
-  //   // console.log("got client", client);
-  //   clients[client.id] = client;
-  // });
 
-  for (const bidIdx in bids) {
-    const bid = bids[bidIdx];
-    if (bid.clientId) {
-      // console.log("got here", bid.clientId, clients);
-      bid.negotiation = negotiationData[bid.negotiationId];
+  const clients: Record<string, any> = {};
+  clientData.forEach((client) => {
+    clients[client.negotiation_Id] = client;
+  });
+  const finalBids: any[] = [];
+  for (const bid of bids) {
+    const client = clients[bid.negotiationId];
+    if (client) {
+      finalBids.push({
+        ...bid,
+        ...client,
+      });
     }
-
-    bids[bidIdx] = bid;
   }
 
-  return bids;
+  return finalBids;
 };

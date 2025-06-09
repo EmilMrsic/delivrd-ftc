@@ -477,7 +477,7 @@ export default function BiddingSection({ dealer }: { dealer: DealerDataType }) {
                 </div>
               </>
             ) : (
-              <PreviousBidsTable dealerBids={dealerBids} />
+              <>test</> //<PreviousBidsTable dealerBids={dealerBids} />
             )}
           </>
         )}

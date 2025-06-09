@@ -5,15 +5,18 @@ import { DealerDataType } from "@/lib/models/dealer";
 import { Button } from "../ui/button";
 import { ModalForm } from "../tailwind-plus/modal-form";
 import { DealerBidForm } from "./dealer-bid-form";
+import { MakeButton } from "../Team/make-button";
 
 export const VehicleTable = ({
   vehicles,
   subTab,
   dealer,
+  refetch,
 }: {
   vehicles: (ClientDataType & { bidNum: number; trade: boolean })[];
   subTab: string;
   dealer: DealerDataType;
+  refetch: () => void;
 }) => {
   const [selectedVehicle, setSelectedVehicle] = useState<
     (ClientDataType & { bidNum: number; trade: boolean }) | null
@@ -24,7 +27,6 @@ export const VehicleTable = ({
   }>({ key: "bidNum", direction: "desc" });
   const [filteredVehicles, setFilteredVehicles] =
     useState<(ClientDataType & { bidNum: number; trade: boolean })[]>(vehicles);
-  console.log("showing subtab", subTab);
 
   const filterVehicles = (
     incomingVehicles: (ClientDataType & { bidNum: number; trade: boolean })[]
@@ -104,6 +106,13 @@ export const VehicleTable = ({
         headers={[
           "Bid",
           {
+            header: "Make",
+            config: {
+              sortable: true,
+              key: "Brand",
+            },
+          },
+          {
             header: "Model",
             config: {
               sortable: true,
@@ -174,6 +183,9 @@ export const VehicleTable = ({
                 </Button>
               ),
             },
+            {
+              Component: () => <MakeButton make={vehicle.Brand} />,
+            },
             vehicle.Model,
             vehicle.Trim,
             vehicle.ZipCode,
@@ -193,6 +205,7 @@ export const VehicleTable = ({
           vehicle={selectedVehicle}
           onClose={() => setSelectedVehicle(null)}
           dealer={dealer}
+          refetch={refetch}
         />
       )}
     </>
