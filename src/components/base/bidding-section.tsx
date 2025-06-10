@@ -51,7 +51,7 @@ const headers = [
   { label: "Files", column: "" },
 ];
 
-export default function BiddingSection() {
+export default function BiddingSection({ refresh }: { refresh: boolean }) {
   const { toast } = useToast();
   const [showSelected, setShowSelected] = useState(false);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
@@ -312,6 +312,10 @@ export default function BiddingSection() {
   useEffect(() => {
     fetchVehicles();
   }, []);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, [refresh]);
 
   useEffect(() => {
     if (tab === "available") {

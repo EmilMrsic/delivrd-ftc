@@ -31,6 +31,7 @@ interface FieldType {
   };
   required?: boolean;
   customValidation?: (item: any) => boolean;
+  size?: string;
 }
 
 export type Fields = (FieldType | FieldType[])[];
@@ -174,7 +175,7 @@ export const FormFields = ({ fields }: { fields: Fields }) => {
 export const FormField = ({ field }: { field: FieldType }) => {
   const formik = useFormikContext();
   const { errors, touched } = formik;
-  const { label, name, type, options, props, infobox, required } = field;
+  const { label, name, type, options, props, infobox, required, size } = field;
   let fieldType: string | React.ComponentType<any> = type ? type : "input";
   if (type && customWidgets[type as keyof typeof customWidgets]) {
     fieldType = customWidgets[type as keyof typeof customWidgets];
@@ -193,7 +194,13 @@ export const FormField = ({ field }: { field: FieldType }) => {
   }
 
   return (
-    <div className="w-full mb-4">
+    <div
+      className={cn(`mb-4`)}
+      style={{
+        width: size || "100%",
+      }}
+    >
+      {/* , size ? `w-[${size}]` : "w-full")}> */}
       {label && (
         <label htmlFor={name} className="text-sm text-black font-bold">
           {label} {required && <span className="text-red-500">*</span>}

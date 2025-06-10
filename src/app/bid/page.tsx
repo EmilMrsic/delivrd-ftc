@@ -9,6 +9,7 @@ import { DealerDataType } from "@/lib/models/dealer";
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   updateDoc,
@@ -46,20 +47,30 @@ const BiddingPage = () => {
     }
   }, [dealer]);
 
-  const handleSubmit = async (values: DealerDataType) => {
+  const handleSubmit = async (
+    values: DealerDataType & { areaCode?: string; phoneNumber?: string }
+  ) => {
     const dealerTable = collection(db, "Dealers");
-    const docRef = doc(dealerTable, dealer?.id);
-    await updateDoc(docRef, {
+    const docSnapshot = await getDocs(
+      query(dealerTable, where("id", "==", dealer?.id))
+    );
+    const docRef = docSnapshot.docs[0].ref;
+
+    const submitObject = {
       ...values,
       radius: values?.radius?.[0],
       updated: true,
-    });
+      SalesPersonPhone: `(${values.areaCode}) ${values.phoneNumber}`,
+    };
+
+    delete submitObject.areaCode;
+    delete submitObject.phoneNumber;
+
+    await updateDoc(docRef, submitObject);
 
     setDealer({
       ...dealer,
-      ...values,
-      radius: values?.radius?.[0],
-      updated: true,
+      ...submitObject,
     });
 
     setShowModal(false);
@@ -70,11 +81,12 @@ const BiddingPage = () => {
     });
   };
 
+  console.log("got here: dealer", dealer);
   if (!dealer) return <></>;
 
   return (
     <>
-      <BiddingSection />
+      <BiddingSection refresh={dealer?.updated ?? false} />
       {showModal && (
         <ModalForm
           onClose={() => {}}
@@ -165,19 +177,28 @@ const BiddingPage = () => {
               defaultValue: dealer.YourWebsite,
               required: true,
             },
-            {
-              label: "Mobile Phone for SMS Alerts",
-              name: "SalesPersonPhone",
-              defaultValue: dealer.SalesPersonPhone,
-              type: "phoneNumber",
-              required: true,
-              customValidation: (item) =>
-                item
-                  .length(12, { message: "Must be a valid US phone number" })
-                  .startsWith("+1", {
-                    message: "Must be a valid US phone number",
-                  }),
-            },
+            [
+              {
+                label: "Area Code",
+                name: "areaCode",
+                required: true,
+                size: "30%",
+              },
+              {
+                label: "Mobile Phone for SMS Alerts",
+                name: "phoneNumber",
+                // defaultValue: dealer.SalesPersonPhone,
+                // type: "phoneNumber",
+                required: true,
+                // customValidation: (item) =>
+                //   item
+                //     .length(12, { message: "Must be a valid US phone number" })
+                //     .startsWith("+1", {
+                //       message: "Must be a valid US phone number",
+                //     }),
+                size: "70%",
+              },
+            ],
             {
               label: "Email Address",
               name: "YourEmail",
