@@ -11,7 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";
-import { toZonedTime } from "date-fns-tz";
+import { format, toZonedTime } from "date-fns-tz";
 import { isSameWeek } from "date-fns";
 import { getUserDataFromDb } from "@/lib/helpers/user";
 
@@ -253,6 +253,15 @@ const countClosedDeals = async (
       }
 
       const closeDate = new Date(useableDate);
+      if (deal.id === "recI0FkP4s") {
+        console.log("same day: normal", deal.id, closeDate, new Date());
+        console.log(
+          "same day: formatted",
+          deal.id,
+          formatDateToTimezone(closeDate),
+          formatDateToTimezone(new Date())
+        );
+      }
       if (isSameDay(closeDate, new Date())) {
         dailyClosedDeals.count++;
         // @ts-ignore
@@ -292,15 +301,25 @@ const isSameDay = (date1: Date, date2: Date) => {
   if (!date1 || !date2) return false;
 
   // Convert both dates to Eastern Time
-  const estDate1 = dateToTimeZone(date1);
-  const estDate2 = dateToTimeZone(date2);
+  // const estDate1 = dateToTimeZone(date1);
+  // const estDate2 = dateToTimeZone(date2);
 
-  // Compare year, month, and day components in Eastern Time
-  return (
-    estDate1.getFullYear() === estDate2.getFullYear() &&
-    estDate1.getMonth() === estDate2.getMonth() &&
-    estDate1.getDate() === estDate2.getDate()
-  );
+  // // Compare year, month, and day components in Eastern Time
+  // return (
+  //   estDate1.getFullYear() === estDate2.getFullYear() &&
+  //   estDate1.getMonth() === estDate2.getMonth() &&
+  //   estDate1.getDate() === estDate2.getDate()
+  // );
+
+  // if (date1.toISOString().includes("6-10")) {
+  //   console.log(
+  //     "same day",
+  //     formatDateToTimezone(date1),
+  //     formatDateToTimezone(date2)
+  //   );
+  // }
+
+  return formatDateToTimezone(date1) === formatDateToTimezone(date2);
 };
 
 // const isSameDay = (date1: Date, date2: Date) => {
@@ -394,4 +413,8 @@ const dateTimeFormatter = () => {
 
 const dateToTimeZone = (date: Date) => {
   return toZonedTime(date, "America/New_York");
+};
+
+const formatDateToTimezone = (date: Date) => {
+  return format(date, "yyyy-MM-dd", { timeZone: "America/New_York" });
 };

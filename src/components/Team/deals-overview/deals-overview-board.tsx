@@ -320,7 +320,7 @@ export const ClosedDealsCard = ({
             deals: weeklyClosedDeals.deals,
           })
         }
-        denominator={metrics.monthlyGoal}
+        denominator={metrics.weeklyGoal}
         onUpdate={(value) => {
           updateField("weeklyGoal", value);
         }}

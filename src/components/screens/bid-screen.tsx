@@ -11,9 +11,11 @@ import { useDealerBids } from "@/hooks/useDealerBids";
 export const BidScreen = ({
   dealer,
   user,
+  refresh,
 }: {
   dealer: DealerDataType;
   user: any;
+  refresh: boolean;
 }) => {
   const [tab, setTab] = useState("available");
   const [subTab, setSubTab] = useState("all");
@@ -25,6 +27,11 @@ export const BidScreen = ({
       setSubTab("all");
     }
   }, [tab, subTab]);
+
+  useEffect(() => {
+    dealerBids.refetch();
+    vehicles.refetch();
+  }, [refresh]);
 
   return (
     <div className="mx-auto p-4 space-y-6 min-h-screen w-full">

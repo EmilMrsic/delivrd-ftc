@@ -70,6 +70,7 @@ export const ClientProfile = ({
     setBidCommentsByBidId,
     isLoading,
     setDealers,
+    refetch,
   } = useTeamProfile({ negotiationId });
 
   const dispatch = useDispatch();
@@ -467,6 +468,7 @@ export const ClientProfile = ({
             handleBidFileUpload={handleBidFileUpload}
             handleDeleteFile={handleDeleteFile}
             negotiation={negotiation as NegotiationDataType}
+            refetch={refetch}
           />
 
           {!clientMode && (

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { FileText, Pencil, Plus, Save, Trash, Upload, X } from "lucide-react";
 import VoteSection from "../vote-section";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +19,7 @@ import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { IncomingBidCommentType } from "@/lib/models/bids";
 import { ModalForm } from "@/components/tailwind-plus/modal-form";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { backendRequest, callZapierWebhook } from "@/lib/request";
 
 export const IncomingBidCard = ({
@@ -52,11 +52,13 @@ export const IncomingBidCard = ({
   allowUndelete,
   clientMode,
   negotiation,
+  refetch,
 }: any & {
   noUserActions?: boolean;
   allowUndelete?: boolean;
   clientMode?: boolean;
   negotiation?: NegotiationDataType;
+  refetch?: () => void;
 }) => {
   const [connectClientAndDealer, setConnectClientAndDealer] = useState(false);
   const [notifyFTC, setNotifyFTC] = useState(false);
@@ -159,6 +161,25 @@ export const IncomingBidCard = ({
     }
   };
 
+  const handleVerifyBid = async () => {
+    const newBids = incomingBids.map((bid: IncomingBid, i: number) =>
+      bidDetails.bid_id === bid.bid_id
+        ? { ...bid, verified: !bid.verified }
+        : bid
+    );
+    setIncomingBids([...newBids]);
+    const q = query(
+      collection(db, "Incoming Bids"),
+      where("bid_id", "==", bidDetails.bid_id)
+    );
+    const querySnapshot = await getDocs(q);
+    const bidRef = querySnapshot.docs[0].ref;
+    await updateDoc(bidRef, { verified: !bidDetails.verified });
+
+    toast({ title: "Bid verified" });
+    // refetch?.();
+  };
+
   const defaultValues = useMemo(() => {
     return {
       name: negotiation?.clientNamefull,
@@ -167,6 +188,20 @@ export const IncomingBidCard = ({
       address: `${negotiation?.address}, ${negotiation?.city}, ${negotiation?.state} ${negotiation?.zip}`,
     };
   }, [negotiation]);
+
+  console.log("got bid: details", bidDetails.verified);
+
+  useEffect(() => {
+    if (bidDetails.bid_id === "recxcMJ3pVrPskWjS9U")
+      console.log("fresh bid:", bidDetails);
+  }, [bidDetails]);
+
+  const isManualBid =
+    bidDetails.bid_source === "Manual" ||
+    bidDetails.source === "Manual" ||
+    bidDetails.manual_add;
+  const bidVerified = isManualBid || bidDetails.verified;
+  console.log("got this bid:", bidDetails.bid_id, bidVerified);
 
   return (
     <>
@@ -193,59 +228,93 @@ export const IncomingBidCard = ({
             {matchingDealer?.Dealership
               ? `${matchingDealer.Dealership} Offer`
               : "No Dealership"}
+
+            <span
+              className={cn(
+                `px-2 py-1 text-sm font-medium text-white rounded-full ml-2`,
+                bidVerified ? "bg-green-600" : "bg-red-500"
+              )}
+            >
+              {!bidVerified
+                ? "Under Review By The Delivrd Team"
+                : "Verified By The Delivrd Team"}
+            </span>
           </h3>
-          <div className="flex items-center gap-3">
-            {!(noUserActions || clientMode) && (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent opening the dialog
-                    handleDeleteBid(bidDetails.bid_id);
-                  }}
-                  className="text-black rounded-full p-2"
-                >
-                  <Trash className="w-5 h-5" />
-                </button>
+
+          <div className="items-center gap-3">
+            <div className="flex">
+              {!(noUserActions || clientMode) && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent opening the dialog
+                      handleDeleteBid(bidDetails.bid_id);
+                    }}
+                    className="text-black rounded-full p-2"
+                  >
+                    <Trash className="w-5 h-5" />
+                  </button>
+                  <VoteSection
+                    incomingBid={incomingBids}
+                    setIncomingBid={setIncomingBids}
+                    bidDetails={bidDetails}
+                  />
+                  {bidDetails.accept_offer ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCancelOffer(bidDetails)}
+                      className={
+                        "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
+                      }
+                    >
+                      Cancel Offer
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAcceptOffer(bidDetails)}
+                      className={"bg-white text-black"}
+                    >
+                      Accept Offer
+                    </Button>
+                  )}
+                </>
+              )}
+              {clientMode && (
                 <VoteSection
                   incomingBid={incomingBids}
                   setIncomingBid={setIncomingBids}
                   bidDetails={bidDetails}
+                  clientMode={clientMode}
                 />
-                {bidDetails.accept_offer ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCancelOffer(bidDetails)}
-                    className={
-                      "bg-red-700 text-white hover:text-white hover:bg-red-700 hover:opacity-80"
-                    }
-                  >
-                    Cancel Offer
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleAcceptOffer(bidDetails)}
-                    className={"bg-white text-black"}
-                  >
-                    Accept Offer
-                  </Button>
-                )}
-              </>
-            )}
-            {clientMode && (
-              <VoteSection
-                incomingBid={incomingBids}
-                setIncomingBid={setIncomingBids}
-                bidDetails={bidDetails}
-                clientMode={clientMode}
-              />
-            )}
-            {allowUndelete && (
-              <Button variant="outline" size="sm" onClick={() => restoreBid()}>
-                Restore
-              </Button>
+              )}
+              {allowUndelete && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => restoreBid()}
+                >
+                  Restore
+                </Button>
+              )}
+            </div>
+            {bidDetails.bid_source === "FTC" && (
+              <div className="w-fit mr-0 ml-auto mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    bidDetails.verified
+                      ? `bg-white text-black`
+                      : `bg-green-500 text-white`
+                  )}
+                  onClick={() => handleVerifyBid()}
+                >
+                  {bidDetails.verified ? "Remove Verification" : "Verify Bid"}
+                </Button>
+              </div>
             )}
           </div>
         </div>

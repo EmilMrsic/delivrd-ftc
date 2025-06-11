@@ -54,7 +54,13 @@ const headers = [
   { label: "Files", column: "" },
 ];
 
-export default function BiddingSection({ dealer }: { dealer: DealerDataType }) {
+export default function BiddingSection({
+  dealer,
+  refresh,
+}: {
+  dealer: DealerDataType;
+  refresh: boolean;
+}) {
   const { toast } = useToast();
   const [showSelected, setShowSelected] = useState(false);
   const [selectedVehicles, setSelectedVehicles] = useState<string[]>([]);
@@ -318,6 +324,10 @@ export default function BiddingSection({ dealer }: { dealer: DealerDataType }) {
   useEffect(() => {
     fetchVehicles();
   }, []);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, [refresh]);
 
   useEffect(() => {
     if (tab === "available") {

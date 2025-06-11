@@ -28,6 +28,7 @@ export const useNotifications = () => {
       });
 
       const result = await request.json();
+      console.log("notifications result:", result);
       return result;
     },
     refetchInterval: 5000,

@@ -261,9 +261,9 @@ export const TeamDealersTable = ({
                             value: "nationwide",
                           },
                         ]}
-                        onChange={(value: any) => {
-                          console.log("got updated value", value);
-                        }}
+                        // onChange={(value: any) => {
+                        //   console.log("got updated value", value);
+                        // }}
                       />
                       <div className="w-full justify-end">
                         <Button

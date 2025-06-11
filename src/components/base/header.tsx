@@ -79,8 +79,10 @@ const Header: FC<IHeaderProps> = ({ user }) => {
 
 export const TeamHeader = ({
   negotiatorData,
+  clientMode = false,
 }: {
   negotiatorData?: DealNegotiatorType;
+  clientMode?: boolean;
 }) => {
   const user = useLoggedInUser();
   const negotiatorDataToUser = negotiatorData ? negotiatorData : user;
@@ -105,7 +107,8 @@ export const TeamHeader = ({
       <div className="flex items-center gap-3">
         <div className="fit">
           <div className="flex items-center gap-2">
-            <Notifications />
+            {negotiatorDataToUser?.privilege &&
+              negotiatorDataToUser?.privilege !== "Client" && <Notifications />}
             <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text mt-0">
               Client Deals Dashboard
             </h1>

@@ -42,14 +42,17 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     null
   );
 
-  const { negotiations: negotiationsFromUseNegotiations, isLoading } =
-    useNegotiations({
-      all: true,
-      profile: true,
-      filter: {
-        id: negotiationId,
-      },
-    });
+  const {
+    negotiations: negotiationsFromUseNegotiations,
+    isLoading,
+    refetch,
+  } = useNegotiations({
+    all: true,
+    profile: true,
+    filter: {
+      id: negotiationId,
+    },
+  });
 
   useEffect(() => {
     if (negotiationsFromUseNegotiations) {
@@ -222,6 +225,7 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     bidCommentsByBidId,
     setBidCommentsByBidId,
     isLoading,
+    refetch,
   };
 };
 
