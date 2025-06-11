@@ -1,7 +1,7 @@
 import { DealerDataType } from "@/lib/models/dealer";
 import Header from "../base/header";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CardContent } from "../ui/card";
 import { VehicleTable } from "../Dealer/vehicle-table";
 import { PreviousBidsTable } from "../Dealer/previous-bids-table";
@@ -19,6 +19,12 @@ export const BidScreen = ({
   const [subTab, setSubTab] = useState("all");
   const vehicles = useVehicles();
   const dealerBids = useDealerBids({ dealerId: dealer.id });
+
+  useEffect(() => {
+    if (tab === "available" && ["won", "lost"].includes(subTab)) {
+      setSubTab("all");
+    }
+  }, [tab, subTab]);
 
   return (
     <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
@@ -49,6 +55,12 @@ export const BidScreen = ({
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="new">New</TabsTrigger>
                 <TabsTrigger value="used">Used</TabsTrigger>
+                {tab === "previous" && (
+                  <>
+                    <TabsTrigger value="won">Won</TabsTrigger>
+                    <TabsTrigger value="lost">Lost</TabsTrigger>
+                  </>
+                )}
               </TabsList>
             </Tabs>
           </div>

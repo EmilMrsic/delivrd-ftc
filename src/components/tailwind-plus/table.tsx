@@ -126,7 +126,7 @@ export const TailwindPlusTable = ({
                   let useableRow = row;
                   let SubRow: any = null;
                   if (row[0]?.descriptor) {
-                    useableRow = row.slice(1);
+                    // useableRow = row.slice(1);
                     if (row[0]?.descriptor?.subRow?.Component) {
                       SubRow = row[0]?.descriptor?.subRow?.Component;
                     }
@@ -145,15 +145,21 @@ export const TailwindPlusTable = ({
                             : "bg-gray-50"
                         )}
                       >
-                        {useableRow.map((cell, cellIdx) => (
-                          <TailwindTableCell
-                            key={`table-cell-${rowIdx}-${cellIdx}`}
-                            cell={cell}
-                            rowIdx={rowIdx}
-                            cellIdx={cellIdx}
-                            setExpanded={setExpanded}
-                          />
-                        ))}
+                        {row.map((cell, cellIdx) => {
+                          if (cell?.descriptor) {
+                            return <></>;
+                          }
+
+                          return (
+                            <TailwindTableCell
+                              key={`table-cell-${rowIdx}-${cellIdx}`}
+                              cell={cell}
+                              rowIdx={rowIdx}
+                              cellIdx={cellIdx}
+                              setExpanded={setExpanded}
+                            />
+                          );
+                        })}
                       </tr>
                       {SubRow && (
                         <tr>
@@ -189,6 +195,7 @@ export const TailwindTableExpandedPopover = ({
   expanded: [number, number] | null;
 }) => {
   const Component = cell.config?.expandedComponent;
+  console.log("expandedComponent:", cell);
 
   return (
     <TailwindPlusModal

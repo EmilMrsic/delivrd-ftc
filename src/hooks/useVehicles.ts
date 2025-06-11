@@ -10,6 +10,5 @@ export const useVehicles = () => {
     },
   });
 
-  console.log("got vehicles:", data);
   return { data, isLoading, error, refetch };
 };

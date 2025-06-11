@@ -62,6 +62,8 @@ export const IncomingBids = ({
   handleDeleteFile: (file: string, bidId: string) => void;
   negotiation: NegotiationDataType;
 }) => {
+  console.log("got bids", incomingBids);
+
   return (
     <TailwindPlusCard
       title="Incoming Bids"

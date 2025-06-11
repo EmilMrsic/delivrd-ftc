@@ -5,7 +5,16 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "@/firebase/config";
 import { DealerDataType } from "@/lib/models/dealer";
 import { generateRandomId } from "@/lib/utils";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  arrayUnion,
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 
 const uploadFile = async (file: File): Promise<string | null> => {
   try {
@@ -49,10 +58,12 @@ export const DealerBidForm = ({
       bid_id: bid_id,
       clientId: vehicle.id,
       files: fileUrls,
-      inventoryStatus: values.inventoryStatus,
+      inventoryStatus: values.inventoryStatus[0],
       manual_add: true,
       negotiationId: vehicle.negotiation_Id,
       price: values.price,
+      bid_source: "FTC",
+      source: "FTC",
       discountAmount: values.discountPrice,
       comments: values.comments,
       dealerId: dealer.id,
@@ -63,11 +74,23 @@ export const DealerBidForm = ({
       city: dealer.City,
       state: dealer.State,
       timestamp: Date.now(),
+      timestamps: Date.now(),
       createdAt: Date.now(),
     };
 
     const bidRef = doc(db, "Incoming Bids", bid_id);
+    const negotiationSnapshot = await getDocs(
+      query(
+        collection(db, "delivrd_negotiations"),
+        where("id", "==", vehicle.negotiation_Id)
+      )
+    );
+    const negotiationRef = negotiationSnapshot.docs[0].ref;
+    // const negotiation
     await setDoc(bidRef, bidObject);
+    await updateDoc(negotiationRef, {
+      incomingBids: arrayUnion(bid_id),
+    });
     refetch();
     onClose();
   };

@@ -59,6 +59,7 @@ export const IncomingBidModel = z.object({
   vote: z.enum(["like", "dislike", "neutral"]).optional(),
   delete: z.boolean().optional(),
   bidComments: z.array(IncomingBidCommentModel).optional(),
+  submittedDate: z.string().optional(),
 });
 
 export type IncomingBidType = z.infer<typeof IncomingBidModel>;

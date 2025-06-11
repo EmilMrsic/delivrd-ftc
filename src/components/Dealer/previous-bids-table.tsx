@@ -3,25 +3,30 @@ import { TailwindPlusTable } from "../tailwind-plus/table";
 import { IncomingBidType } from "@/lib/models/bids";
 import { MakeButton } from "../Team/make-button";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { FileIcon } from "lucide-react";
+import Link from "next/link";
+import { Button } from "../ui/button";
+
+type PreviousBidType = IncomingBidType &
+  ClientDataType & { bidStatus: string; winningBid: any };
 
 //wherrera@toyotagallatin.com
 export const PreviousBidsTable = ({
   dealerBids,
   subTab,
 }: {
-  dealerBids: (IncomingBidType & ClientDataType)[];
+  dealerBids: PreviousBidType[];
   subTab: string;
 }) => {
   const [filteredBids, setFilteredBids] =
-    useState<(IncomingBidType & ClientDataType)[]>(dealerBids);
+    useState<PreviousBidType[]>(dealerBids);
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: string;
   }>({ key: "submittedDate", direction: "desc" });
 
-  const filterVehicles = (
-    incomingVehicles: (IncomingBidType & ClientDataType)[]
-  ) => {
+  const filterVehicles = (incomingVehicles: PreviousBidType[]) => {
     if (subTab === "all") return incomingVehicles;
     if (subTab === "new") {
       return incomingVehicles.filter((vehicle) => {
@@ -34,11 +39,24 @@ export const PreviousBidsTable = ({
         return vehicle.NewOrUsed === "Used";
       });
     }
+
+    if (subTab === "won") {
+      return incomingVehicles.filter((vehicle) => {
+        return vehicle.bidStatus === "won";
+      });
+    }
+
+    if (subTab === "lost") {
+      return incomingVehicles.filter((vehicle) => {
+        return vehicle.bidStatus === "lost";
+      });
+    }
+
     return [];
   };
 
   const sortDataHelper = (
-    incomingVehicles: (IncomingBidType & ClientDataType)[],
+    incomingVehicles: PreviousBidType[],
     key: string,
     direction: string
   ) => {
@@ -113,7 +131,7 @@ export const PreviousBidsTable = ({
             header: "Submitted Date",
             config: {
               sortable: true,
-              key: "timestamps",
+              key: "submittedDate",
             },
           },
           {
@@ -145,29 +163,117 @@ export const PreviousBidsTable = ({
           },
         ]}
         rows={filteredBids.map((bid) => {
-          const subRow = {};
-          if (bid.bidStatus === "won") {
+          console.log("bid", bid.Model, bid.bid_id);
+          const subRow: any = {
+            descriptor: {},
+          };
+          if (bid.bidStatus === "won" || bid.bidStatus === "lost") {
+            // lost color #FCF2F2
             subRow.descriptor = {
               subRow: {
-                Component: () => <div>test</div>,
+                Component: () => (
+                  <td
+                    colSpan={9}
+                    className={cn(
+                      `p-4`,
+                      bid.bidStatus === "won" ? "bg-[#F2FDF5]" : "bg-[#FCF2F2]"
+                    )}
+                  >
+                    <div className="flex gap-2">
+                      <div className="mr-[10%]">
+                        <div
+                          className={cn(
+                            `font-bold text-xl`,
+                            bid.bidStatus === "won"
+                              ? "text-green-700"
+                              : "text-red-700"
+                          )}
+                        >
+                          {bid.bidStatus === "won"
+                            ? "You Won This Bid!"
+                            : "Another Dealer Won This Bid"}
+                        </div>
+                        <div>
+                          <span className="font-bold">Winning Bid Price:</span>{" "}
+                          {bid.winningBid?.price || bid.price}
+                        </div>
+                      </div>
+                      <div className="mb-0 mt-auto">
+                        <span className="font-bold">Winning discount:</span>{" "}
+                        {bid.winningBid?.discountPrice || bid.discountPrice}
+                      </div>
+                    </div>
+                  </td>
+                ),
               },
             };
           }
 
           return [
-            // subRow,
+            subRow,
             {
               Component: () => <MakeButton make={bid.Brand} />,
             },
             bid.Model,
             bid.Trim,
-            bid.timestamps || bid.timestamp,
+            bid.submittedDate,
             bid.price,
             bid.discountPrice,
-            bid.inventoryStatus,
+            {
+              Component: () => {
+                console.log(
+                  "bid.inventoryStatus:",
+                  bid.bid_id,
+                  bid.inventoryStatus
+                );
+                return (
+                  <div
+                    className={cn(
+                      `w-fit px-4 py-2 rounded-full font-bold`,
+                      bid.inventoryStatus === "In Stock"
+                        ? "bg-black text-white"
+                        : "bg-gray text-black"
+                    )}
+                  >
+                    {bid.inventoryStatus}
+                  </div>
+                );
+              },
+            },
             bid.comments,
             {
-              Component: () => bid.files,
+              Component: ({ expand }: any) => (
+                <FileIcon
+                  onClick={() => {
+                    expand();
+                  }}
+                  className="cursor-pointer"
+                />
+              ),
+              config: {
+                expandable: true,
+                noExpandButton: true,
+                expandedComponent: () => {
+                  return (
+                    <>
+                      {bid.files?.map((file, idx) => {
+                        console.log("file:", file);
+                        return (
+                          <div>
+                            <Link target="_blank" href={file}>
+                              <img
+                                src={file}
+                                alt={file}
+                                className="w-[100px] h-[100px]"
+                              />
+                            </Link>
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
+                },
+              },
             },
           ];
         })}

@@ -13,7 +13,7 @@ import {
   IncomingBidModel,
   IncomingBidType,
 } from "../models/bids";
-import { fetchBulkQuery } from "./firebase";
+import { chunkArray, fetchBulkQuery } from "./firebase";
 
 export const getIncomingBids = async (incomingBidIds: string[]) => {
   const incomingBidsCollection = collection(db, "Incoming Bids");
@@ -110,11 +110,39 @@ export const fetchDealers = async (incomingBids: IncomingBidType[]) => {
   return dealersData;
 };
 
+const getBidsWonBySomeoneElse = async (
+  negotiationIds: string[],
+  dealerId: string
+) => {
+  const incomingBids = collection(db, "Incoming Bids");
+  const chunks = chunkArray(negotiationIds, 10);
+  const requests = chunks.map((chunk) => {
+    return getDocs(
+      query(
+        incomingBids,
+        where("negotiationId", "in", chunk),
+        where("accept_offer", "==", true)
+      )
+    );
+  });
+
+  const batchResults = await Promise.all(requests);
+  const result: any[] = [];
+  batchResults.flatMap((batch) => {
+    batch.docs.map((doc) => {
+      const data = doc.data();
+      result.push(data);
+    });
+  });
+  return result;
+};
+
 export const getDealerBids = async (dealerId: string) => {
   const incomingBids = collection(db, "Incoming Bids");
   const q = query(incomingBids, where("dealerId", "==", dealerId));
   const snapshot = await getDocs(q);
   const negotiationIds: string[] = [];
+  const bidsNotWonIds: string[] = [];
   const bids = snapshot.docs.map((doc) => {
     const data = doc.data();
     if (
@@ -124,14 +152,22 @@ export const getDealerBids = async (dealerId: string) => {
     ) {
       negotiationIds.push(data.negotiationId);
     }
+
+    if (!data.accept_offer) {
+      bidsNotWonIds.push(data.negotiationId);
+    }
     return data;
   });
 
-  const clientData = await fetchBulkQuery(
-    "Clients",
-    "negotiation_Id",
-    negotiationIds
-  );
+  const [clientData, bidsWonBySomeoneElse] = await Promise.all([
+    fetchBulkQuery("Clients", "negotiation_Id", negotiationIds),
+    getBidsWonBySomeoneElse(negotiationIds, dealerId),
+  ]);
+
+  const bidsWonBySomeoneElseMap: Record<string, any> = {};
+  bidsWonBySomeoneElse.forEach((bid) => {
+    bidsWonBySomeoneElseMap[bid.negotiationId] = bid;
+  });
 
   const clients: Record<string, any> = {};
   clientData.forEach((client) => {
@@ -145,14 +181,31 @@ export const getDealerBids = async (dealerId: string) => {
       let bidStatus = "pending";
       if (bid.accept_offer) {
         bidStatus = "won";
+      } else {
+        if (bidsWonBySomeoneElseMap[bid.negotiationId]) {
+          bidStatus = "lost";
+          bid.winningBid = bidsWonBySomeoneElseMap[bid.negotiationId];
+        }
       }
       // if (bid.client_offer === "accepted") {
       //   bidStatus = "accepted";
       // }
+
+      const useableDate = bid.timestamps || bid.timestamp;
+      const date = new Date(useableDate);
+      const formattedDate = date
+        .toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })
+        .replaceAll("/", "-");
+
       finalBids.push({
         ...bid,
         ...client,
         bidStatus,
+        submittedDate: formattedDate,
       });
     }
   }

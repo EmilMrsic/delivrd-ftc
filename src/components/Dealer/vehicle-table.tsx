@@ -169,33 +169,36 @@ export const VehicleTable = ({
             },
           },
         ]}
-        rows={filteredVehicles.map((vehicle) => {
-          console.log("vehicle", vehicle);
-          return [
-            {
-              Component: () => (
-                <Button
-                  variant="outline"
-                  className="bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-                  onClick={() => setSelectedVehicle(vehicle)}
-                >
-                  Submit Bid
-                </Button>
-              ),
-            },
-            {
-              Component: () => <MakeButton make={vehicle.Brand} />,
-            },
-            vehicle.Model,
-            vehicle.Trim,
-            vehicle.ZipCode,
-            vehicle.desiredExterior,
-            vehicle.desiredInterior,
-            vehicle.Drivetrain,
-            vehicle.bidNum ?? 0,
-            vehicle.trade ? "Yes" : "No",
-          ];
-        })}
+        rows={filteredVehicles
+          // .filter((vehicle) => {
+          //   return vehicle.negotiation_Id === "recH85js7w4MRVDru";
+          // })
+          .map((vehicle) => {
+            return [
+              {
+                Component: () => (
+                  <Button
+                    variant="outline"
+                    className="bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                    onClick={() => setSelectedVehicle(vehicle)}
+                  >
+                    Submit Bid
+                  </Button>
+                ),
+              },
+              {
+                Component: () => <MakeButton make={vehicle.Brand} />,
+              },
+              vehicle.Model,
+              vehicle.Trim,
+              vehicle.ZipCode,
+              vehicle.desiredExterior,
+              vehicle.desiredInterior,
+              vehicle.Drivetrain,
+              vehicle.bidNum ?? 0,
+              vehicle.trade ? "Yes" : "No",
+            ];
+          })}
         sortConfig={sortConfig}
         setSortConfig={setSortConfig}
         sortData={sortData}
