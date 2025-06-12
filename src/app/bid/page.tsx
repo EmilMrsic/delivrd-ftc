@@ -1,5 +1,6 @@
 "use client";
 import BiddingSection from "@/components/base/bidding-section";
+import { Loader } from "@/components/base/loader";
 import { BidScreen } from "@/components/screens/bid-screen";
 import { ModalForm } from "@/components/tailwind-plus/modal-form";
 import { db } from "@/firebase/config";
@@ -16,6 +17,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { LoadingIndicator } from "node_modules/react-select/dist/declarations/src/components/indicators";
 import React, { useEffect, useState } from "react";
 
 const BiddingPage = () => {
@@ -82,8 +84,7 @@ const BiddingPage = () => {
     });
   };
 
-  console.log("got here: dealer", dealer);
-  if (!dealer) return <></>;
+  if (!dealer) return <Loader />;
 
   return (
     <>

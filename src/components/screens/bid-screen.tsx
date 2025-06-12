@@ -7,6 +7,8 @@ import { VehicleTable } from "../Dealer/vehicle-table";
 import { PreviousBidsTable } from "../Dealer/previous-bids-table";
 import { useVehicles } from "@/hooks/useVehicles";
 import { useDealerBids } from "@/hooks/useDealerBids";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { cn } from "@/lib/utils";
 
 export const BidScreen = ({
   dealer,
@@ -21,6 +23,7 @@ export const BidScreen = ({
   const [subTab, setSubTab] = useState("all");
   const vehicles = useVehicles();
   const dealerBids = useDealerBids({ dealerId: dealer.id });
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (tab === "available" && ["won", "lost"].includes(subTab)) {
@@ -34,7 +37,12 @@ export const BidScreen = ({
   }, [refresh]);
 
   return (
-    <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
+    <div
+      className={cn(
+        `mx-auto space-y-6 min-h-screen w-full`,
+        !isMobile && `p-4`
+      )}
+    >
       <Header user={user} />
       <div className="block md:bg-transparent bg-white md:border-none border-b top-[145px] md:pt-0 pt-8 md:static sticky z-50">
         <Tabs

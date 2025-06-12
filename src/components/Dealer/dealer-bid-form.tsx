@@ -102,11 +102,11 @@ export const DealerBidForm = ({
         type: "infobox",
         props: {
           innerComponent: () => (
-            <span className="whitespace-pre-wrap">
+            <div className="max-w-[400px]">
               <strong className="font-semibold">Trim</strong>
               <br />
               {vehicle.Trim}
-            </span>
+            </div>
           ),
           color: "blue",
         },

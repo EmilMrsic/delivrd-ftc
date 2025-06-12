@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { Expand } from "lucide-react";
 import Link from "next/link";
 import { TailwindPlusModal } from "./modal";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface HeaderConfig {
   sortable?: boolean;
@@ -32,10 +33,19 @@ interface CellConfig {
   noCloseButton?: boolean;
 }
 
+export interface CellDescriptor {
+  mobileHeader?: string | React.ComponentType<any>;
+  cta?: React.ComponentType<any>;
+  subRow?: {
+    Component: React.ComponentType<any>;
+  };
+}
+
 interface Cell {
   text?: string | null | number;
   Component?: React.ComponentType<any>;
   config?: CellConfig;
+  descriptor?: CellDescriptor;
 }
 
 interface RowConfig {
@@ -66,6 +76,7 @@ export const TailwindPlusTable = ({
   pagination?: boolean;
   pageLimit?: number;
 }) => {
+  const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState<null | [number, number]>(null);
 
   const table = useReactTable({
@@ -98,24 +109,26 @@ export const TailwindPlusTable = ({
       <div className="min-w-full max-w-full w-full overflow-x-scroll">
         <div className="w-full py-2 align-middle">
           <table className="min-w-full border-separate border-spacing-0 divide-y divide-x divide-gray-200">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup, idx) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header, idx) => {
-                    return (
-                      <TailwindTableHeader
-                        key={header.id}
-                        header={header}
-                        headerConfig={headers[idx]}
-                        sortConfig={sortConfig}
-                        setSortConfig={setSortConfig}
-                        sortData={sortData}
-                      />
-                    );
-                  })}
-                </tr>
-              ))}
-            </thead>
+            {!isMobile && (
+              <thead>
+                {table.getHeaderGroups().map((headerGroup, idx) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header, idx) => {
+                      return (
+                        <TailwindTableHeader
+                          key={header.id}
+                          header={header}
+                          headerConfig={headers[idx]}
+                          sortConfig={sortConfig}
+                          setSortConfig={setSortConfig}
+                          sortData={sortData}
+                        />
+                      );
+                    })}
+                  </tr>
+                ))}
+              </thead>
+            )}
             <tbody>
               {isLoading ? (
                 <>Loading</>
@@ -132,7 +145,71 @@ export const TailwindPlusTable = ({
                     }
                   }
 
-                  return (
+                  let hasDescriptor = false;
+                  const rowCells = (
+                    <>
+                      {row.map((cell, cellIdx) => {
+                        if (cell?.descriptor) {
+                          hasDescriptor = true;
+                          return <></>;
+                        }
+
+                        const useableCellIndex = hasDescriptor
+                          ? cellIdx - 1
+                          : cellIdx;
+
+                        return (
+                          <TailwindTableCell
+                            key={`table-cell-${rowIdx}-${cellIdx}`}
+                            cell={cell}
+                            rowIdx={rowIdx}
+                            cellIdx={cellIdx}
+                            setExpanded={setExpanded}
+                            isMobile={isMobile}
+                            headerName={
+                              headers &&
+                              typeof headers[useableCellIndex] === "string"
+                                ? headers[useableCellIndex]
+                                : (
+                                    headers[
+                                      useableCellIndex
+                                    ] as HeaderWithConfig
+                                  )?.header
+                            }
+                          />
+                        );
+                      })}
+                    </>
+                  );
+
+                  const CTA = row[0]?.descriptor?.cta;
+                  const MobileHeader = row[0]?.descriptor?.mobileHeader;
+                  return isMobile ? (
+                    <div className="border-2 rounded-md border-gray-200 mb-4 p-2 relative">
+                      <div className="flex flex-wrap mb-4">
+                        {row[0]?.descriptor?.mobileHeader && (
+                          <div className="font-bold text-xl">
+                            {typeof MobileHeader === "string" ? (
+                              MobileHeader
+                            ) : (
+                              <MobileHeader />
+                            )}
+                          </div>
+                        )}
+                        {row[0]?.descriptor?.cta && (
+                          <div className="absolute right-2 top-2">
+                            <CTA />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap">{rowCells}</div>
+                      {SubRow && (
+                        <div className="mt-4">
+                          <SubRow />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
                     <>
                       <tr
                         key={`row-${rowIdx}`}
@@ -145,21 +222,7 @@ export const TailwindPlusTable = ({
                             : "bg-gray-50"
                         )}
                       >
-                        {row.map((cell, cellIdx) => {
-                          if (cell?.descriptor) {
-                            return <></>;
-                          }
-
-                          return (
-                            <TailwindTableCell
-                              key={`table-cell-${rowIdx}-${cellIdx}`}
-                              cell={cell}
-                              rowIdx={rowIdx}
-                              cellIdx={cellIdx}
-                              setExpanded={setExpanded}
-                            />
-                          );
-                        })}
+                        {rowCells}
                       </tr>
                       {SubRow && (
                         <tr>
@@ -304,11 +367,15 @@ export const TailwindTableCell = ({
   rowIdx,
   cellIdx,
   setExpanded,
+  isMobile,
+  headerName,
 }: {
   cell: Cell | string | number | null | undefined;
   rowIdx: number;
   cellIdx: number;
   setExpanded: (expanded: [number, number] | null) => void;
+  isMobile: boolean;
+  headerName: string;
 }) => {
   let text: string | number;
   if (typeof cell === "object") {
@@ -353,18 +420,29 @@ export const TailwindTableCell = ({
     </>
   );
 
-  return (
+  const cellContent = (
+    <>
+      {typeof cell === "object" && cell?.config?.link ? (
+        <Link href={cell.config.link}>{TDContents}</Link>
+      ) : (
+        TDContents
+      )}
+    </>
+  );
+
+  return isMobile ? (
+    <div className="basis-1/2 p-2">
+      <div className="text-gray-500 font-bold mr-4">{headerName}</div>
+      {cellContent}
+    </div>
+  ) : (
     <td
       key={`cell-${rowIdx}-${cellIdx}`}
       className={cn(
         `px-3 py-4 text-sm whitespace-nowrap text-gray-500 sm:table-cell text-wrap`
       )}
     >
-      {typeof cell === "object" && cell?.config?.link ? (
-        <Link href={cell.config.link}>{TDContents}</Link>
-      ) : (
-        TDContents
-      )}
+      {cellContent}
     </td>
   );
 };
