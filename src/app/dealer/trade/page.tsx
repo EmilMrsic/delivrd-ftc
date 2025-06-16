@@ -1,5 +1,6 @@
 "use client";
 import { Loader } from "@/components/base/loader";
+import { TradeInTable } from "@/components/Dealer/trade-in-table";
 import { useNegotiations } from "@/hooks/useNegotiations";
 import { backendRequest } from "@/lib/request";
 import { useQuery } from "@tanstack/react-query";
@@ -17,5 +18,5 @@ export default function TradePage() {
 
   console.log("tradeIns: ", tradeIns);
 
-  return <></>;
+  return <TradeInTable negotiations={tradeIns.tradeIns} />;
 }
