@@ -295,6 +295,7 @@ export const ClosedDealsCard = ({
   setDealView: (deals: { deals: NegotiationDataType[] }) => void;
 }) => {
   const { metrics, dailyClosedDeals, weeklyClosedDeals } = result.data;
+
   return (
     <MinimalCard>
       <div className="text-lg text-center">Closed Today</div>
@@ -320,7 +321,7 @@ export const ClosedDealsCard = ({
             deals: weeklyClosedDeals.deals,
           })
         }
-        denominator={metrics.weeklyGoal}
+        denominator={metrics?.weeklyGoal || metrics?.monthlyGoal || 0}
         onUpdate={(value) => {
           updateField("weeklyGoal", value);
         }}

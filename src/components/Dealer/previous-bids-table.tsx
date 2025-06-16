@@ -200,9 +200,8 @@ export const PreviousBidsTable = ({
         subRow.descriptor.mobileHeader = () => (
           <>
             <div>
-              <MakeButton make={bid.Brand} />
+              {bid.Brand} {bid.Model}
             </div>
-            <div>{bid.Model}</div>
           </>
         );
       }
