@@ -31,6 +31,8 @@ interface CellConfig {
   link?: string;
   noExpandButton?: boolean;
   noCloseButton?: boolean;
+  mobileSingleRow?: boolean;
+  topDivider?: boolean;
 }
 
 export interface CellDescriptor {
@@ -185,10 +187,15 @@ export const TailwindPlusTable = ({
                   const CTA = row[0]?.descriptor?.cta;
                   const MobileHeader = row[0]?.descriptor?.mobileHeader;
                   return isMobile ? (
-                    <div className="border-2 rounded-md border-gray-200 mb-4 p-2 relative">
-                      <div className="flex flex-wrap mb-4">
+                    <div className="border-2 rounded-md border-gray-200 mb-4 relative">
+                      <div className="flex flex-wrap mb-4 bg-[#F9FAFB] p-2">
                         {row[0]?.descriptor?.mobileHeader && (
-                          <div className="font-bold text-xl">
+                          <div
+                            className={cn(
+                              `font-bold text-normal`,
+                              row[0].descriptor.cta && "w-[50%]"
+                            )}
+                          >
                             {typeof MobileHeader === "string" ? (
                               MobileHeader
                             ) : (
@@ -431,9 +438,21 @@ export const TailwindTableCell = ({
   );
 
   return isMobile ? (
-    <div className="basis-1/2 p-2">
-      <div className="text-gray-500 font-bold mr-4">{headerName}</div>
-      {cellContent}
+    <div
+      className={cn(
+        `p-2`,
+        typeof cell === "object" && cell?.config?.mobileSingleRow
+          ? "basis-full"
+          : "basis-1/2",
+        typeof cell === "object" && cell?.config?.topDivider
+          ? "border-t border-gray-200"
+          : ""
+      )}
+    >
+      <div className="text-gray-500 font-bold mr-4 uppercase text-xs">
+        {headerName}
+      </div>
+      <span className="text-sm">{cellContent}</span>
     </div>
   ) : (
     <td

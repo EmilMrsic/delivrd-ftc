@@ -214,9 +214,8 @@ export const VehicleTable = ({
           configObj.descriptor.mobileHeader = () => (
             <>
               <div>
-                <MakeButton make={vehicle.Brand} />
+                {vehicle.Brand} {vehicle.Model}
               </div>
-              <div>{vehicle.Model}</div>
             </>
           );
           configObj.descriptor.cta = () => (
@@ -268,7 +267,16 @@ export const VehicleTable = ({
         ];
 
         if (isMobile) {
-          row = [...row, vehicle.Trim];
+          row = [
+            ...row,
+            {
+              text: vehicle.Trim,
+              config: {
+                mobileSingleRow: true,
+                topDivider: true,
+              },
+            },
+          ];
         }
 
         return row;
