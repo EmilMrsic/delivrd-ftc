@@ -27,7 +27,7 @@ export const BidScreen = ({
 
   useEffect(() => {
     if (tab === "available" && ["won", "lost"].includes(subTab)) {
-      setSubTab("all");
+      setSubTab("new");
     }
   }, [tab, subTab]);
 
