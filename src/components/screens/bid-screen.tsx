@@ -20,14 +20,14 @@ export const BidScreen = ({
   refresh: boolean;
 }) => {
   const [tab, setTab] = useState("available");
-  const [subTab, setSubTab] = useState("all");
+  const [subTab, setSubTab] = useState("new");
   const vehicles = useVehicles();
   const dealerBids = useDealerBids({ dealerId: dealer.id });
   const isMobile = useIsMobile();
 
   useEffect(() => {
     if (tab === "available" && ["won", "lost"].includes(subTab)) {
-      setSubTab("all");
+      setSubTab("new");
     }
   }, [tab, subTab]);
 

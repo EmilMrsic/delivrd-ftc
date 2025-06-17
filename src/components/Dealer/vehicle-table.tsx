@@ -34,6 +34,8 @@ export const VehicleTable = ({
   const filterVehicles = (
     incomingVehicles: (ClientDataType & { bidNum: number; trade: boolean })[]
   ) => {
+    if (!incomingVehicles) return [];
+
     if (subTab === "all") return incomingVehicles;
     if (subTab === "new") {
       return incomingVehicles.filter((vehicle) => {
