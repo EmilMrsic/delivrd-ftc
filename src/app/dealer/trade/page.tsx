@@ -16,7 +16,5 @@ export default function TradePage() {
 
   if (isLoading) return <Loader />;
 
-  console.log("tradeIns: ", tradeIns);
-
   return <TradeInTable negotiations={tradeIns.tradeIns} />;
 }

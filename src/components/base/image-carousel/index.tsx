@@ -1,8 +1,15 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { NextButton, PrevButton, usePrevNextButtons } from "./prev-next-button";
 import { DotButton, useDotButton } from "./dot-buttons";
+import { cn } from "@/lib/utils";
 
-export const ImageCarousel = ({ images }: { images: string[] }) => {
+export const ImageCarousel = ({
+  images,
+  className,
+}: {
+  images: string[];
+  className?: string;
+}) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const { selectedIndex, scrollSnaps, onDotButtonClick } =
     useDotButton(emblaApi);
@@ -15,14 +22,17 @@ export const ImageCarousel = ({ images }: { images: string[] }) => {
   } = usePrevNextButtons(emblaApi);
 
   return (
-    <div className="relative overflow-hidden w-full" ref={emblaRef}>
-      <div className="embla__container flex overflow-hidden">
+    <div
+      className={cn(`relative overflow-hidden w-full`, className && className)}
+      ref={emblaRef}
+    >
+      <div className="embla__container flex w-full">
         {images.map((url, index) => (
-          <div className="flex-[0_0_100%] bg-red-500" key={index}>
+          <div className="flex-[0_0_100%]" key={index}>
             <img
               src={url}
               alt={`image-${index}`}
-              className="w-[100%] min-h-[300px] aspect-[16/9] object-cover block border-blue-500"
+              className="w-[100%] min-h-[300px] aspect-[16/9] object-cover block"
             />
           </div>
         ))}
