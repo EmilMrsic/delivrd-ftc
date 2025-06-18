@@ -196,12 +196,8 @@ export const IncomingBidCard = ({
       console.log("fresh bid:", bidDetails);
   }, [bidDetails]);
 
-  const isManualBid =
-    bidDetails.bid_source === "Manual" ||
-    bidDetails.source === "Manual" ||
-    bidDetails.manual_add;
+  const isManualBid = bidDetails.bid_source === "Manual";
   const bidVerified = isManualBid || bidDetails.verified;
-  console.log("got this bid:", bidDetails.bid_id, bidVerified);
 
   return (
     <>

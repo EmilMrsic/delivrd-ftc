@@ -75,7 +75,7 @@ export const DealerBidForm = ({
       state: dealer.State,
       timestamp: Date.now(),
       timestamps: Date.now(),
-      createdAt: Date.now(),
+      createdAt: Date.now().toString(),
     };
 
     const bidRef = doc(db, "Incoming Bids", bid_id);
