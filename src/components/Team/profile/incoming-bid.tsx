@@ -627,6 +627,7 @@ export const BidDetailsDialog = ({
   parseComment: (comment: string) => React.ReactNode;
   clientMode?: boolean;
 }) => {
+  console.log("view offer:", bidDetails.bid_id);
   return (
     <Dialog
       open={openDialog === bidDetails.bid_id}
@@ -837,7 +838,8 @@ export const BidDetailsDialog = ({
                     }
                   />
                 ) : (
-                  bidDetails.discountPrice
+                  // @ts-ignore
+                  bidDetails.discountPrice || bidDetails.discountAmount
                 )}
               </p>
             </div>

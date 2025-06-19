@@ -68,7 +68,7 @@ export const DealerBidForm = ({
       price: values.price,
       bid_source: "FTC",
       source: "FTC",
-      discountAmount: values.discountPrice,
+      discountPrice: values.discountPrice,
       comments: values.comments,
       dealerId: dealer.id,
       dealerName: dealer.Dealership,
