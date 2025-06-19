@@ -627,7 +627,6 @@ export const BidDetailsDialog = ({
   parseComment: (comment: string) => React.ReactNode;
   clientMode?: boolean;
 }) => {
-  console.log("view offer:", bidDetails.bid_id);
   return (
     <Dialog
       open={openDialog === bidDetails.bid_id}
