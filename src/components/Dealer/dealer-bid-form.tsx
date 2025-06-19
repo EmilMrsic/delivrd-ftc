@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore";
 import { createNotification } from "@/lib/helpers/notifications";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { toast } from "@/hooks/use-toast";
 
 const uploadFile = async (file: File): Promise<string | null> => {
   try {
@@ -62,7 +63,7 @@ export const DealerBidForm = ({
       clientId: vehicle.id,
       files: fileUrls,
       inventoryStatus: values.inventoryStatus[0],
-      manual_add: true,
+      manual_add: false,
       negotiationId: vehicle.negotiation_Id,
       price: values.price,
       bid_source: "FTC",
@@ -105,6 +106,11 @@ export const DealerBidForm = ({
         author: user?.id,
       }
     );
+
+    toast({
+      title: "Bid submitted successfully",
+      description: "The bid has been submitted to the negotiation",
+    });
     refetch();
     onClose();
   };
