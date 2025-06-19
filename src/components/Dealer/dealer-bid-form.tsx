@@ -15,6 +15,8 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { createNotification } from "@/lib/helpers/notifications";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 
 const uploadFile = async (file: File): Promise<string | null> => {
   try {
@@ -40,6 +42,7 @@ export const DealerBidForm = ({
   onClose: () => void;
   refetch: () => void;
 }) => {
+  const user = useLoggedInUser();
   const handleSubmit = async (values: any) => {
     let fileUrls: string[] = [];
     if (values.files?.length) {
@@ -86,11 +89,22 @@ export const DealerBidForm = ({
       )
     );
     const negotiationRef = negotiationSnapshot.docs[0].ref;
+    const negotiationData = negotiationSnapshot.docs[0].data();
     // const negotiation
     await setDoc(bidRef, bidObject);
     await updateDoc(negotiationRef, {
       incomingBids: arrayUnion(bid_id),
     });
+
+    await createNotification(
+      negotiationData.dealCoordinatorId,
+      "new_dealer_bid",
+      {
+        bidId: bidObject.bid_id,
+        negotiationId: negotiationData.id,
+        author: user?.id,
+      }
+    );
     refetch();
     onClose();
   };
