@@ -33,7 +33,7 @@ interface FieldType {
   infobox?: {
     innerComponent: React.ComponentType<any>;
     icon?: React.ComponentType<any>;
-    color?: "yellow" | "blue";
+    color?: "yellow" | "blue" | "white";
   };
   required?: boolean;
   customValidation?: (item: any) => boolean;
