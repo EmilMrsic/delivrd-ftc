@@ -10,6 +10,7 @@ import { negotiationMakeColors } from "@/lib/constants/negotiations";
 import { DealerDataType } from "@/lib/models/dealer";
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -59,6 +60,11 @@ const BiddingPage = () => {
     );
     const docRef = docSnapshot.docs[0].ref;
 
+    const userRowSnapshot = await getDocs(
+      query(collection(db, "users"), where("id", "==", dealer?.id))
+    );
+    const userRowRef = userRowSnapshot.docs[0].ref;
+
     const submitObject = {
       ...values,
       radius: values?.radius?.[0],
@@ -70,6 +76,28 @@ const BiddingPage = () => {
     delete submitObject.phoneNumber;
 
     await updateDoc(docRef, submitObject);
+    await updateDoc(userRowRef, {
+      email: values.YourEmail,
+    });
+
+    if (dealer?.YourEmail !== values.YourEmail) {
+      /* if we get a different email, 
+        we need to find other rows with this email and delete them.
+      */
+      const userTable = collection(db, "users");
+      const userQuery = query(
+        userTable,
+        where("email", "==", values.YourEmail),
+        where("id", "!=", dealer?.id)
+      );
+
+      const userSnapshot = await getDocs(userQuery);
+      await Promise.all(
+        userSnapshot.docs.map(async (doc) => {
+          await deleteDoc(doc.ref);
+        })
+      );
+    }
 
     setDealer({
       ...dealer,

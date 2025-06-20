@@ -65,7 +65,6 @@ export const IncomingBids = ({
   negotiation: NegotiationDataType;
   refetch?: () => void;
 }) => {
-  console.log("got incomingBids", incomingBids?.[1]?.verified);
   const sortedBids = [...incomingBids]
     ?.filter((bid) => !bid?.delete)
     .sort((a, b) => {
@@ -99,12 +98,6 @@ export const IncomingBids = ({
       <div className="space-y-8">
         {sortedBids.length ? (
           sortedBids.map((bidDetails, index) => {
-            if (index === 1)
-              console.log(
-                "got incomingBids: rerunning",
-                incomingBids?.[1]?.verified,
-                bidDetails?.verified
-              );
             return (
               <IncomingBidCard
                 key={bidDetails.bid_id}

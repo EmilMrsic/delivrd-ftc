@@ -15,6 +15,9 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { createNotification } from "@/lib/helpers/notifications";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { toast } from "@/hooks/use-toast";
 
 const uploadFile = async (file: File): Promise<string | null> => {
   try {
@@ -40,6 +43,7 @@ export const DealerBidForm = ({
   onClose: () => void;
   refetch: () => void;
 }) => {
+  const user = useLoggedInUser();
   const handleSubmit = async (values: any) => {
     let fileUrls: string[] = [];
     if (values.files?.length) {
@@ -59,12 +63,12 @@ export const DealerBidForm = ({
       clientId: vehicle.id,
       files: fileUrls,
       inventoryStatus: values.inventoryStatus[0],
-      manual_add: true,
+      manual_add: false,
       negotiationId: vehicle.negotiation_Id,
       price: values.price,
       bid_source: "FTC",
       source: "FTC",
-      discountAmount: values.discountPrice,
+      discountPrice: values.discountPrice,
       comments: values.comments,
       dealerId: dealer.id,
       dealerName: dealer.Dealership,
@@ -75,7 +79,7 @@ export const DealerBidForm = ({
       state: dealer.State,
       timestamp: Date.now(),
       timestamps: Date.now(),
-      createdAt: Date.now(),
+      createdAt: Date.now().toString(),
     };
 
     const bidRef = doc(db, "Incoming Bids", bid_id);
@@ -86,10 +90,26 @@ export const DealerBidForm = ({
       )
     );
     const negotiationRef = negotiationSnapshot.docs[0].ref;
+    const negotiationData = negotiationSnapshot.docs[0].data();
     // const negotiation
     await setDoc(bidRef, bidObject);
     await updateDoc(negotiationRef, {
       incomingBids: arrayUnion(bid_id),
+    });
+
+    await createNotification(
+      negotiationData.dealCoordinatorId,
+      "new_dealer_bid",
+      {
+        bidId: bidObject.bid_id,
+        negotiationId: negotiationData.id,
+        author: user?.id,
+      }
+    );
+
+    toast({
+      title: "Bid submitted successfully",
+      description: "The bid has been submitted to the negotiation",
     });
     refetch();
     onClose();

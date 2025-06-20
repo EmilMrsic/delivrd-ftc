@@ -196,12 +196,8 @@ export const IncomingBidCard = ({
       console.log("fresh bid:", bidDetails);
   }, [bidDetails]);
 
-  const isManualBid =
-    bidDetails.bid_source === "Manual" ||
-    bidDetails.source === "Manual" ||
-    bidDetails.manual_add;
+  const isManualBid = bidDetails.bid_source === "Manual";
   const bidVerified = isManualBid || bidDetails.verified;
-  console.log("got this bid:", bidDetails.bid_id, bidVerified);
 
   return (
     <>
@@ -841,7 +837,8 @@ export const BidDetailsDialog = ({
                     }
                   />
                 ) : (
-                  bidDetails.discountPrice
+                  // @ts-ignore
+                  bidDetails.discountPrice || bidDetails.discountAmount
                 )}
               </p>
             </div>
@@ -849,7 +846,7 @@ export const BidDetailsDialog = ({
 
           <div className="border-t pt-4 flex flex-col">
             <p className="font-semibold">Additional Comments</p>
-            <div className="break-words overflow-wrap break-words [overflow-wrap:anywhere]">
+            <div className="break-words overflow-wrap break-words [overflow-wrap:anywhere] overflow-hidden max-w-[450px]">
               {parseComment(bidDetails.comments)}
             </div>
           </div>
