@@ -846,7 +846,7 @@ export const BidDetailsDialog = ({
 
           <div className="border-t pt-4 flex flex-col">
             <p className="font-semibold">Additional Comments</p>
-            <div className="break-words overflow-wrap break-words [overflow-wrap:anywhere]">
+            <div className="break-words overflow-wrap break-words [overflow-wrap:anywhere] overflow-hidden max-w-[450px]">
               {parseComment(bidDetails.comments)}
             </div>
           </div>
