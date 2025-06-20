@@ -12,7 +12,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { BrandSelectDropdown } from "../base/brand-select-dropdown";
 import { NormalDropdown } from "../tailwind-plus/normal-dropdown";
 import { negotiationMakeColors } from "@/lib/constants/negotiations";
 
