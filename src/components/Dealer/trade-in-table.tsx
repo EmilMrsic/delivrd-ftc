@@ -3,8 +3,8 @@ import { ImageCarousel } from "../base/image-carousel";
 import { GridDisplay } from "../tailwind-plus/grid-display";
 import { Button } from "../ui/button";
 import { useIsMobile, useScreenSize } from "@/hooks/useIsMobile";
-import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
+import { cn, generateRandomId } from "@/lib/utils";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { ModalForm } from "../tailwind-plus/modal-form";
 import {
   DropdownMenu,
@@ -14,11 +14,18 @@ import {
 } from "../ui/dropdown-menu";
 import { NormalDropdown } from "../tailwind-plus/normal-dropdown";
 import { negotiationMakeColors } from "@/lib/constants/negotiations";
+import { uploadFile } from "@/lib/helpers/files";
+import { TradeInBidType } from "@/lib/models/bids";
+import { DealerContext } from "@/lib/context/dealer-context";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
 
 export const TradeInTable = ({
   negotiations,
+  refetch,
 }: {
   negotiations: NegotiationDataType[];
+  refetch: () => void;
 }) => {
   const screenSize = useScreenSize();
   const isMobile = useIsMobile();
@@ -55,7 +62,6 @@ export const TradeInTable = ({
       return true;
     });
 
-    console.log("sorted: filtered: ", filtered);
     const sorted = filtered.sort((a, b) => {
       if (sortConfig.sort === "Newest First") {
         return (
@@ -65,8 +71,6 @@ export const TradeInTable = ({
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
 
-    console.log("sorted: ", sorted);
-
     setFilteredNegotiations(sorted);
   }, [sortConfig]);
 
@@ -75,7 +79,6 @@ export const TradeInTable = ({
   }, [negotiations]);
 
   if (!filteredNegotiations) return null;
-  console.log("filteredNegotiations: ", filteredNegotiations);
 
   return (
     <>
@@ -136,6 +139,7 @@ export const TradeInTable = ({
         <TradeInBidForm
           negotiation={selectedNegotiation}
           onClose={() => setSelectedNegotiation(null)}
+          refetch={refetch}
         />
       )}
     </>
@@ -210,10 +214,45 @@ export const TradeInCard = ({
 export const TradeInBidForm = ({
   negotiation,
   onClose,
+  refetch,
 }: {
   negotiation: NegotiationDataType;
   onClose: () => void;
+  refetch: () => void;
 }) => {
+  const dealer = useContext(DealerContext);
+  const handleSubmit = async (values: any) => {
+    if (!dealer) return;
+
+    let fileUrls: string[] = [];
+    const newId = generateRandomId();
+    if (values.files?.length) {
+      const fileArray = Array.from(values.files);
+      // @ts-ignore
+      const uploadResults = await Promise.allSettled(fileArray.map(uploadFile));
+      fileUrls = uploadResults
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => (result as PromiseFulfilledResult<string>).value);
+    }
+
+    const bidObject: TradeInBidType = {
+      id: newId,
+      negotiationId: negotiation.id,
+      dealerId: dealer?.id,
+      files: fileUrls,
+      price: values.price,
+      comments: values.comments,
+      timestamp: Date.now(),
+      createdAt: new Date().toISOString(),
+    };
+
+    const bidRef = doc(db, "delivrd_trade_in_bids", newId);
+    await setDoc(bidRef, bidObject);
+
+    onClose();
+    refetch();
+  };
+
   return (
     <ModalForm
       onClose={onClose}
@@ -256,7 +295,7 @@ export const TradeInBidForm = ({
         },
       ]}
       submitButtonLabel="Submit Bid"
-      onSubmit={async (values) => {}}
+      onSubmit={handleSubmit}
     />
   );
 };

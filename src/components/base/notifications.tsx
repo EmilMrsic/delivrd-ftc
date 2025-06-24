@@ -14,8 +14,6 @@ export const Notifications = () => {
   const { notification, notificationCount, handleBellClick } =
     useNotifications();
 
-  console.log("notifications:", notification);
-
   return (
     <DropdownMenu onOpenChange={handleBellClick}>
       <DropdownMenuTrigger>

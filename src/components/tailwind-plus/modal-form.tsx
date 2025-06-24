@@ -170,9 +170,6 @@ export const ModalForm = ({
           validationSchema={toFormikValidationSchema(formSchema)}
         >
           {({ errors, values }) => {
-            console.log("errors", errors);
-            console.log("values", values);
-            console.log("formSchema", formSchema);
             return (
               <Form>
                 <FormFields fields={fields} />

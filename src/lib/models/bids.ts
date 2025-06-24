@@ -62,5 +62,18 @@ export const IncomingBidModel = z.object({
   submittedDate: z.string().optional(),
 });
 
+export const TradeInBidModel = z.object({
+  id: z.string(),
+  // clientId: z.string(),
+  negotiationId: z.string(),
+  dealerId: z.string(),
+  files: z.array(z.string()),
+  price: z.number(),
+  comments: z.string(),
+  timestamp: z.number(),
+  createdAt: z.string(),
+});
+
 export type IncomingBidType = z.infer<typeof IncomingBidModel>;
 export type IncomingBidCommentType = z.infer<typeof IncomingBidCommentModel>;
+export type TradeInBidType = z.infer<typeof TradeInBidModel>;

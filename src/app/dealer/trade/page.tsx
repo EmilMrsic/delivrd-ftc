@@ -6,7 +6,11 @@ import { backendRequest } from "@/lib/request";
 import { useQuery } from "@tanstack/react-query";
 
 export default function TradePage() {
-  const { data: tradeIns, isLoading } = useQuery({
+  const {
+    data: tradeIns,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["tradeIns"],
     queryFn: () => {
       const request = backendRequest("trade");
@@ -16,5 +20,5 @@ export default function TradePage() {
 
   if (isLoading) return <Loader />;
 
-  return <TradeInTable negotiations={tradeIns.tradeIns} />;
+  return <TradeInTable negotiations={tradeIns.tradeIns} refetch={refetch} />;
 }

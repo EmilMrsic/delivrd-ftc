@@ -18,19 +18,7 @@ import {
 import { createNotification } from "@/lib/helpers/notifications";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { toast } from "@/hooks/use-toast";
-
-const uploadFile = async (file: File): Promise<string | null> => {
-  try {
-    const timestamp = Date.now();
-    const storageRef = ref(storage, `uploads/${timestamp}_${file.name}`);
-    await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(storageRef);
-    return downloadURL;
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    return null;
-  }
-};
+import { uploadFile } from "@/lib/helpers/files";
 
 export const DealerBidForm = ({
   vehicle,

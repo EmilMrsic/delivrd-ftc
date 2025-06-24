@@ -26,7 +26,6 @@ export const TailwindPlusModal = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const isMobile = window.innerWidth < 768;
-  console.log("isMobile", isMobile, window.innerWidth);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
