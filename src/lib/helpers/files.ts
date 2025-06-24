@@ -13,3 +13,19 @@ export const uploadFile = async (file: File): Promise<string | null> => {
     return null;
   }
 };
+
+export const filesToUploadedUrls = async (
+  files: FileList
+): Promise<string[]> => {
+  let fileUrls: string[] = [];
+  if (files?.length) {
+    const fileArray = Array.from(files);
+    // @ts-ignore
+    const uploadResults = await Promise.allSettled(fileArray.map(uploadFile));
+    fileUrls = uploadResults
+      .filter((result) => result.status === "fulfilled")
+      .map((result) => (result as PromiseFulfilledResult<string>).value);
+  }
+
+  return fileUrls;
+};

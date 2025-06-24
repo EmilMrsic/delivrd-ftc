@@ -27,15 +27,21 @@ export const ImageCarousel = ({
       ref={emblaRef}
     >
       <div className="embla__container flex w-full">
-        {images.map((url, index) => (
-          <div className="flex-[0_0_100%]" key={index}>
-            <img
-              src={url}
-              alt={`image-${index}`}
-              className="w-[100%] min-h-[300px] aspect-[16/9] object-cover block"
-            />
+        {images.length > 0 ? (
+          images.map((url, index) => (
+            <div className="flex-[0_0_100%]" key={index}>
+              <img
+                src={url}
+                alt={`image-${index}`}
+                className="w-[100%] min-h-[300px] aspect-[16/9] object-cover block"
+              />
+            </div>
+          ))
+        ) : (
+          <div className="flex-[0_0_100%]">
+            <div className="w-[100%] min-h-[300px] aspect-[16/9] bg-gray-200"></div>
           </div>
-        ))}
+        )}
       </div>
 
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2">

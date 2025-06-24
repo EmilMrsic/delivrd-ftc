@@ -3,22 +3,14 @@ import { ImageCarousel } from "../base/image-carousel";
 import { GridDisplay } from "../tailwind-plus/grid-display";
 import { Button } from "../ui/button";
 import { useIsMobile, useScreenSize } from "@/hooks/useIsMobile";
-import { cn, generateRandomId } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ModalForm } from "../tailwind-plus/modal-form";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { NormalDropdown } from "../tailwind-plus/normal-dropdown";
 import { negotiationMakeColors } from "@/lib/constants/negotiations";
-import { uploadFile } from "@/lib/helpers/files";
-import { TradeInBidType } from "@/lib/models/bids";
+
 import { DealerContext } from "@/lib/context/dealer-context";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "@/firebase/config";
+import { createNewBid } from "@/lib/helpers/bids";
 
 export const TradeInTable = ({
   negotiations,
@@ -120,20 +112,17 @@ export const TradeInTable = ({
             `grid gap-4 ${screenSize > 2000 ? "grid-cols-3" : "grid-cols-2"}`
         )}
       >
-        {filteredNegotiations
-          .filter((negotiation) => negotiation?.tradeDetails?.fileUrls?.length)
-          // .slice(0, 1)
-          .map((negotiation, idx) => {
-            return (
-              // max-w-[800px]
-              <div key={idx} className="basis-1/2 min-w-0">
-                <TradeInCard
-                  negotiation={negotiation}
-                  setSelectedNegotiation={setSelectedNegotiation}
-                />
-              </div>
-            );
-          })}
+        {filteredNegotiations.map((negotiation, idx) => {
+          return (
+            // max-w-[800px]
+            <div key={idx} className="basis-1/2 min-w-0">
+              <TradeInCard
+                negotiation={negotiation}
+                setSelectedNegotiation={setSelectedNegotiation}
+              />
+            </div>
+          );
+        })}
       </div>
       {selectedNegotiation && (
         <TradeInBidForm
@@ -224,30 +213,7 @@ export const TradeInBidForm = ({
   const handleSubmit = async (values: any) => {
     if (!dealer) return;
 
-    let fileUrls: string[] = [];
-    const newId = generateRandomId();
-    if (values.files?.length) {
-      const fileArray = Array.from(values.files);
-      // @ts-ignore
-      const uploadResults = await Promise.allSettled(fileArray.map(uploadFile));
-      fileUrls = uploadResults
-        .filter((result) => result.status === "fulfilled")
-        .map((result) => (result as PromiseFulfilledResult<string>).value);
-    }
-
-    const bidObject: TradeInBidType = {
-      id: newId,
-      negotiationId: negotiation.id,
-      dealerId: dealer?.id,
-      files: fileUrls,
-      price: values.price,
-      comments: values.comments,
-      timestamp: Date.now(),
-      createdAt: new Date().toISOString(),
-    };
-
-    const bidRef = doc(db, "delivrd_trade_in_bids", newId);
-    await setDoc(bidRef, bidObject);
+    const newBid = await createNewBid(negotiation, dealer, values, "tradeIn");
 
     onClose();
     refetch();

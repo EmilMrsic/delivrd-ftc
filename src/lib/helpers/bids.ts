@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   query,
+  setDoc,
   where,
 } from "firebase/firestore";
 import {
@@ -14,6 +15,10 @@ import {
   IncomingBidType,
 } from "../models/bids";
 import { chunkArray, fetchBulkQuery } from "./firebase";
+import { generateRandomId } from "../utils";
+import { NegotiationDataType } from "../models/team";
+import { DealerDataType } from "../models/dealer";
+import { filesToUploadedUrls } from "./files";
 
 export const getIncomingBids = async (incomingBidIds: string[]) => {
   const incomingBidsCollection = collection(db, "Incoming Bids");
@@ -212,3 +217,46 @@ export const getDealerBids = async (dealerId: string) => {
 
   return finalBids;
 };
+
+export const createNewBid = async (
+  negotiation: NegotiationDataType,
+  dealer: DealerDataType,
+  newBidValues: any,
+  type: "tradeIn" | "bid"
+) => {
+  const newId = generateRandomId();
+  const bidRef = doc(db, "Incoming Bids", newId);
+  const fileUrls = await filesToUploadedUrls(newBidValues.files);
+  console.log("new bid values", newBidValues);
+  const bidObject: IncomingBidType = {
+    id: newId,
+    bid_id: newId,
+    negotiationId: negotiation.id,
+    dealerId: dealer.id,
+    files: fileUrls,
+    price: newBidValues.price,
+    comments: newBidValues.comments,
+    timestamp: Date.now(),
+    createdAt: new Date().toISOString(),
+    bidType: type,
+  };
+  await setDoc(bidRef, bidObject);
+  return bidObject;
+};
+
+// const newId = generateRandomId();
+
+// const bidObject: TradeInBidType = {
+//   id: newId,
+//   negotiationId: negotiation.id,
+//   dealerId: dealer?.id,
+//   files: fileUrls,
+//   price: values.price,
+//   comments: values.comments,
+//   timestamp: Date.now(),
+//   createdAt: new Date().toISOString(),
+//   bidType: "tradeIn",
+// };
+
+// const bidRef = doc(db, "Incoming Bids", newId);
+// await setDoc(bidRef, bidObject);

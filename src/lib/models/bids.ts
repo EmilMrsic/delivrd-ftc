@@ -25,6 +25,7 @@ export const IncomingBidCommentModel = z.object({
 });
 
 export const IncomingBidModel = z.object({
+  id: z.string().optional(),
   bid_id: z.string().optional(),
   clientId: z.string().optional(),
   comments: z.string().optional(),
@@ -33,6 +34,7 @@ export const IncomingBidModel = z.object({
   files: z.array(z.string()).optional(),
   inventoryStatus: z.string().optional(),
   price: z.union([z.number(), z.string(), z.nan()]).optional(),
+  negotiationId: z.string(),
   timestamp: z
     .union([
       z.string(),
@@ -60,20 +62,21 @@ export const IncomingBidModel = z.object({
   delete: z.boolean().optional(),
   bidComments: z.array(IncomingBidCommentModel).optional(),
   submittedDate: z.string().optional(),
+  bidType: z.enum(["tradeIn", "bid"]).optional(),
 });
 
-export const TradeInBidModel = z.object({
-  id: z.string(),
-  // clientId: z.string(),
-  negotiationId: z.string(),
-  dealerId: z.string(),
-  files: z.array(z.string()),
-  price: z.number(),
-  comments: z.string(),
-  timestamp: z.number(),
-  createdAt: z.string(),
-});
+// export const TradeInBidModel = z.object({
+//   id: z.string(),
+//   // clientId: z.string(),
+//   negotiationId: z.string(),
+//   dealerId: z.string(),
+//   files: z.array(z.string()),
+//   price: z.number(),
+//   comments: z.string(),
+//   timestamp: z.number(),
+//   createdAt: z.string(),
+// });
 
 export type IncomingBidType = z.infer<typeof IncomingBidModel>;
 export type IncomingBidCommentType = z.infer<typeof IncomingBidCommentModel>;
-export type TradeInBidType = z.infer<typeof TradeInBidModel>;
+// export type TradeInBidType = z.infer<typeof TradeInBidModel>;
