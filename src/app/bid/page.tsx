@@ -61,8 +61,9 @@ const BiddingPage = () => {
     const docRef = docSnapshot.docs[0].ref;
 
     const userRowSnapshot = await getDocs(
-      query(collection(db, "users"), where("id", "==", dealer?.id))
+      query(collection(db, "users"), where("id", "==", user?.id))
     );
+
     const userRowRef = userRowSnapshot.docs[0].ref;
 
     const submitObject = {
