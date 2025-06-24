@@ -26,7 +26,6 @@ export const GET = async (request: NextRequest) => {
     return NextResponse.json({ notificationData: [] });
   }
 
-  console.log("userData", userData?.deal_coordinator_id);
   const twentyFourHoursAgo = new Date(
     Date.now() - 24 * 60 * 60 * 1000
   ).toISOString();
@@ -74,8 +73,6 @@ export const GET = async (request: NextRequest) => {
   const authorIds = new Set<string>();
   const bidIds = new Set<string>();
   const negotiationIds = new Set<string>();
-
-  // console.log("notificationsSnapshot", notificationsSnapshot);
 
   const notifications = Array.from(notificationsSnapshot).map((data) => {
     if (data.data.author && !authorIds.has(data.data.author)) {
@@ -200,8 +197,6 @@ export const GET = async (request: NextRequest) => {
 
     return newNotification;
   });
-
-  console.log("notificationData", notificationData);
 
   return NextResponse.json({ notificationData });
 };

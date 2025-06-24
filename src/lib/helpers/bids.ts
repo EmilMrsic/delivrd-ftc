@@ -233,15 +233,65 @@ export const createNewBid = async (
     bid_id: newId,
     negotiationId: negotiation.id,
     dealerId: dealer.id,
+    dealerName: dealer.Dealership,
     files: fileUrls,
     price: newBidValues.price,
     comments: newBidValues.comments,
     timestamp: Date.now(),
     createdAt: new Date().toISOString(),
     bidType: type,
+    bid_source: "FTC",
   };
   await setDoc(bidRef, bidObject);
   return bidObject;
+};
+
+export const getBidsByNegotiationId = async (negotiationId: string) => {
+  const bidTable = collection(db, "Incoming Bids");
+  const bidsSnapshot = await getDocs(
+    query(bidTable, where("negotiationId", "==", negotiationId))
+  );
+
+  const workingDealerIds: string[] = [];
+  const bids = bidsSnapshot.docs.map((doc) => {
+    const data = doc.data();
+    workingDealerIds.push(data.dealerId);
+    return {
+      ...data,
+    };
+  });
+
+  const dealerIds = Array.from(new Set(workingDealerIds)).filter(
+    (id) => id && id !== "N/A"
+  );
+  console.log("dealerIds:", dealerIds);
+  const dealers = await fetchBulkQuery("Dealers", "id", dealerIds);
+  const dealersMap: Record<string, DealerDataType> = {};
+  dealers.forEach((dealer) => {
+    dealersMap[dealer.id] = dealer;
+  });
+
+  const finalBids: {
+    [key: string]: IncomingBidType[];
+  } = {
+    tradeIns: [],
+    bids: [],
+  };
+
+  bids.forEach((bid) => {
+    // @ts-ignore
+    const finalBid: IncomingBidType & { bidDealer: DealerDataType } = {
+      ...bid,
+      bidDealer: dealersMap[bid.dealerId as string],
+    };
+    if (bid.bidType === "tradeIn") {
+      finalBids.tradeIns.push(finalBid as IncomingBidType);
+    } else {
+      finalBids.bids.push(finalBid as IncomingBidType);
+    }
+  });
+
+  return finalBids;
 };
 
 // const newId = generateRandomId();

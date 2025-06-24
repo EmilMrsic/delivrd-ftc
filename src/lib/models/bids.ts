@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DealerModel } from "./dealer";
 
 export const IncomingBidCommentModel = z.object({
   author: z
@@ -30,6 +31,7 @@ export const IncomingBidModel = z.object({
   clientId: z.string().optional(),
   comments: z.string().optional(),
   dealerId: z.string().optional(),
+  dealerName: z.string().optional(),
   discountPrice: z.union([z.number(), z.string()]).optional(),
   files: z.array(z.string()).optional(),
   inventoryStatus: z.string().optional(),
@@ -63,6 +65,9 @@ export const IncomingBidModel = z.object({
   bidComments: z.array(IncomingBidCommentModel).optional(),
   submittedDate: z.string().optional(),
   bidType: z.enum(["tradeIn", "bid"]).optional(),
+  accept_offer: z.boolean().optional(),
+  verified: z.boolean().optional(),
+  bid_source: z.string().optional(),
 });
 
 // export const TradeInBidModel = z.object({

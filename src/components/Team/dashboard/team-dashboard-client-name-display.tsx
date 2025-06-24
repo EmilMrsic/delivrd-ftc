@@ -174,6 +174,7 @@ export const TeamDashboardClientNameDisplay = ({
           {showModal === "bids" && incomingBids && (
             <IncomingBids
               noUserActions={true}
+              // @ts-ignore
               incomingBids={incomingBids as IncomingBid[]}
               negotiationId={negotiation.id}
               dealers={dealers}
@@ -193,6 +194,7 @@ export const TeamDashboardClientNameDisplay = ({
               addComment={() => {}}
               handleSave={() => {}}
               newComment={{}}
+              // @ts-ignore
               setIncomingBids={setIncomingBids}
               editingBidId={null}
               editedBid={null}

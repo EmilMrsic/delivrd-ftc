@@ -1,10 +1,6 @@
-import { TailwindPlusCard } from "@/components/tailwind-plus/card";
-import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
+import { NegotiationDataType } from "@/lib/models/team";
 import { BidComments, DealerData, IncomingBid } from "@/types";
-import { FileText } from "lucide-react";
-import ManualBidUpload from "../Manual-bid-upload-modal";
 import { IncomingBidCard } from "./incoming-bid";
-import { useEffect, useState } from "react";
 
 export const IncomingBids = ({
   incomingBids,
@@ -78,65 +74,47 @@ export const IncomingBids = ({
     });
 
   return (
-    <TailwindPlusCard
-      title="Incoming Bids"
-      icon={FileText}
-      actions={() => {
-        if (noUserActions || clientMode) return null;
-        return (
-          <ManualBidUpload
-            dealers={dealers}
-            setDealers={setDealers}
-            setIncomingBids={setIncomingBids}
-            incomingBids={incomingBids}
-            id={negotiationId}
-            negotiation={negotiation}
-          />
-        );
-      }}
-    >
-      <div className="space-y-8">
-        {sortedBids.length ? (
-          sortedBids.map((bidDetails, index) => {
-            return (
-              <IncomingBidCard
-                key={bidDetails.bid_id}
-                negotiationId={negotiationId}
-                noUserActions={noUserActions}
-                setIncomingBids={setIncomingBids}
-                bidDetails={bidDetails}
-                dealers={dealers}
-                incomingBids={incomingBids}
-                setEditingBidId={setEditingBidId}
-                setOpenDialog={setOpenDialog}
-                index={index}
-                handleDeleteBid={handleDeleteBid}
-                setCommentingBidId={setCommentingBidId}
-                commentingBidId={commentingBidId}
-                newComment={newComment}
-                setNewComment={setNewComment}
-                addComment={addComment}
-                bidCommentsByBidId={bidCommentsByBidId}
-                parseComment={parseComment}
-                openDialog={openDialog}
-                handleSendComment={handleSendComment}
-                handleSave={handleSave}
-                handleEdit={handleEdit}
-                editingBidId={editingBidId}
-                editedBid={editedBid}
-                setEditedBid={setEditedBid}
-                clientMode={clientMode}
-                handleBidFileUpload={handleBidFileUpload}
-                handleDeleteFile={handleDeleteFile}
-                negotiation={negotiation}
-                refetch={refetch}
-              />
-            );
-          })
-        ) : (
-          <p>No incoming bids available</p>
-        )}
-      </div>
-    </TailwindPlusCard>
+    <div className="space-y-8">
+      {sortedBids.length ? (
+        sortedBids.map((bidDetails, index) => {
+          return (
+            <IncomingBidCard
+              key={bidDetails.bid_id}
+              negotiationId={negotiationId}
+              noUserActions={noUserActions}
+              setIncomingBids={setIncomingBids}
+              bidDetails={bidDetails}
+              dealers={dealers}
+              incomingBids={incomingBids}
+              setEditingBidId={setEditingBidId}
+              setOpenDialog={setOpenDialog}
+              index={index}
+              handleDeleteBid={handleDeleteBid}
+              setCommentingBidId={setCommentingBidId}
+              commentingBidId={commentingBidId}
+              newComment={newComment}
+              setNewComment={setNewComment}
+              addComment={addComment}
+              bidCommentsByBidId={bidCommentsByBidId}
+              parseComment={parseComment}
+              openDialog={openDialog}
+              handleSendComment={handleSendComment}
+              handleSave={handleSave}
+              handleEdit={handleEdit}
+              editingBidId={editingBidId}
+              editedBid={editedBid}
+              setEditedBid={setEditedBid}
+              clientMode={clientMode}
+              handleBidFileUpload={handleBidFileUpload}
+              handleDeleteFile={handleDeleteFile}
+              negotiation={negotiation}
+              refetch={refetch}
+            />
+          );
+        })
+      ) : (
+        <p>No incoming bids available</p>
+      )}
+    </div>
   );
 };

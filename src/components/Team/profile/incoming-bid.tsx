@@ -189,13 +189,6 @@ export const IncomingBidCard = ({
     };
   }, [negotiation]);
 
-  console.log("got bid: details", bidDetails.verified);
-
-  useEffect(() => {
-    if (bidDetails.bid_id === "recxcMJ3pVrPskWjS9U")
-      console.log("fresh bid:", bidDetails);
-  }, [bidDetails]);
-
   const isManualBid = bidDetails.bid_source === "Manual";
   const bidVerified = isManualBid || bidDetails.verified;
 

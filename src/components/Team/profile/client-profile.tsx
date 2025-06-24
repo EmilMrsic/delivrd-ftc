@@ -35,13 +35,17 @@ import EditableTextArea from "@/components/base/editable-textarea";
 import { Loader } from "@/components/base/loader";
 import WorkLogSection from "../work-log-section";
 import { Button } from "@/components/ui/button";
-import { Share2 } from "lucide-react";
+import { FileText, Share2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import useCheckClientShareExpiry from "@/hooks/useCheckExpiration";
 import useClientShareExpired from "@/hooks/useCheckExpiration";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
-import { IncomingBidCommentType } from "@/lib/models/bids";
+import { IncomingBidCommentType, IncomingBidType } from "@/lib/models/bids";
 import { createNotification } from "@/lib/helpers/notifications";
+import ManualBidUpload from "../Manual-bid-upload-modal";
+import { TabSelector } from "@/components/base/tab-selector";
+import { useNegotiationBids } from "@/hooks/useNegotiationBids";
+import { BidList } from "./bid-list";
 
 export const ClientProfile = ({
   negotiationId,
@@ -72,6 +76,11 @@ export const ClientProfile = ({
     setDealers,
     refetch,
   } = useTeamProfile({ negotiationId });
+  const { data: clientBids, isLoading: clientBidsLoading } = useNegotiationBids(
+    {
+      negotiationId: negotiationId,
+    }
+  );
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -440,62 +449,44 @@ export const ClientProfile = ({
             allDealNegotiator={allDealNegotiator}
           />
 
-          <IncomingBids
-            setIncomingBids={setIncomingBids}
-            incomingBids={incomingBids}
-            negotiationId={negotiationId ?? ""}
-            dealers={dealers}
-            setDealers={setDealers}
-            handleDeleteBid={handleDeleteBid}
-            handleEdit={handleEdit}
-            handleSave={handleSave}
-            openDialog={openDialog}
-            setOpenDialog={setOpenDialog}
-            setEditingBidId={setEditingBidId}
-            setCommentingBidId={setCommentingBidId}
-            commentingBidId={commentingBidId}
-            newComment={newComment}
-            setNewComment={setNewComment}
-            addComment={addComment}
-            bidCommentsByBidId={bidCommentsByBidId}
-            parseComment={parseComment}
-            // @ts-ignore
-            handleSendComment={handleSendComment}
-            editingBidId={editingBidId}
-            editedBid={editedBid}
-            setEditedBid={setEditedBid}
-            clientMode={clientMode}
-            handleBidFileUpload={handleBidFileUpload}
-            handleDeleteFile={handleDeleteFile}
-            negotiation={negotiation as NegotiationDataType}
-            refetch={refetch}
-          />
+          {clientBidsLoading ? (
+            <Loader />
+          ) : (
+            <BidSection
+              setIncomingBids={setIncomingBids}
+              incomingBids={incomingBids}
+              negotiationId={negotiationId}
+              dealers={dealers}
+              setDealers={setDealers}
+              handleDeleteBid={handleDeleteBid}
+              handleEdit={handleEdit}
+              handleSave={handleSave}
+              openDialog={openDialog}
+              setOpenDialog={setOpenDialog}
+              setEditingBidId={setEditingBidId}
+              setCommentingBidId={setCommentingBidId}
+              commentingBidId={commentingBidId}
+              newComment={newComment}
+              setNewComment={setNewComment}
+              addComment={addComment}
+              bidCommentsByBidId={bidCommentsByBidId}
+              parseComment={parseComment}
+              editingBidId={editingBidId}
+              editedBid={editedBid}
+              setEditedBid={setEditedBid}
+              clientMode={clientMode}
+              handleBidFileUpload={handleBidFileUpload}
+              handleDeleteFile={handleDeleteFile}
+              negotiation={negotiation}
+              refetch={refetch}
+              showDeletedBids={showDeletedBids}
+              handleSendComment={handleSendComment}
+              clientBids={clientBids.bids}
+            />
+          )}
 
           {!clientMode && (
             <>
-              {showDeletedBids && (
-                <DeleteBidSection
-                  incomingBids={incomingBids}
-                  negotiationId={negotiationId}
-                  dealers={dealers}
-                  setCommentingBidId={setCommentingBidId}
-                  setEditedBid={setEditedBid}
-                  setEditingBidId={setEditingBidId}
-                  editedBid={editedBid}
-                  editingBidId={editingBidId}
-                  commentingBidId={commentingBidId}
-                  setNewComment={setNewComment}
-                  newComment={newComment}
-                  addComment={addComment}
-                  handleBidFileUpload={handleBidFileUpload}
-                  handleDeleteFile={handleDeleteFile}
-                  handleEdit={handleEdit}
-                  handleSave={handleSave}
-                  setOpenDialog={setOpenDialog}
-                  openDialog={openDialog}
-                  setIncomingBids={setIncomingBids}
-                />
-              )}
               <AddNoteSection
                 user={user}
                 setNegotiation={setNegotiation}
@@ -598,5 +589,143 @@ export const ClientProfile = ({
         </div>
       </div>
     </div>
+  );
+};
+
+export const BidSection = ({
+  setIncomingBids,
+  incomingBids,
+  negotiationId,
+  dealers,
+  setDealers,
+  handleDeleteBid,
+  handleEdit,
+  handleSave,
+  openDialog,
+  setOpenDialog,
+  setEditingBidId,
+  setCommentingBidId,
+  commentingBidId,
+  newComment,
+  setNewComment,
+  addComment,
+  bidCommentsByBidId,
+  parseComment,
+  editingBidId,
+  editedBid,
+  setEditedBid,
+  clientMode,
+  handleBidFileUpload,
+  handleDeleteFile,
+  negotiation,
+  refetch,
+  showDeletedBids,
+  handleSendComment,
+  noUserActions = false,
+  clientBids,
+}: any & {
+  clientBids: {
+    [key: string]: IncomingBidType[];
+  };
+}) => {
+  const [tab, setTab] = useState<"bids" | "tradeIns">("bids");
+
+  console.log("clientBids:", clientBids);
+
+  return (
+    <TailwindPlusCard
+      title={tab === "bids" ? "Incoming Bids" : "Trade Ins"}
+      icon={FileText}
+      actions={() => {
+        if (noUserActions || clientMode || tab === "tradeIns") return null;
+        return (
+          <ManualBidUpload
+            dealers={dealers}
+            setDealers={setDealers}
+            setIncomingBids={setIncomingBids}
+            incomingBids={incomingBids}
+            id={negotiationId}
+            negotiation={negotiation}
+          />
+        );
+      }}
+    >
+      <TabSelector
+        options={{
+          bids: "Incoming Bids",
+          tradeIns: "Trade Ins",
+        }}
+        value={tab}
+        setValue={(value) => setTab(value as "bids" | "tradeIns")}
+      />
+
+      {tab === "bids" && (
+        <IncomingBids
+          setIncomingBids={setIncomingBids}
+          incomingBids={incomingBids}
+          negotiationId={negotiationId ?? ""}
+          dealers={dealers}
+          setDealers={setDealers}
+          handleDeleteBid={handleDeleteBid}
+          handleEdit={handleEdit}
+          handleSave={handleSave}
+          openDialog={openDialog}
+          setOpenDialog={setOpenDialog}
+          setEditingBidId={setEditingBidId}
+          setCommentingBidId={setCommentingBidId}
+          commentingBidId={commentingBidId}
+          newComment={newComment}
+          setNewComment={setNewComment}
+          addComment={addComment}
+          bidCommentsByBidId={bidCommentsByBidId}
+          parseComment={parseComment}
+          // @ts-ignore
+          handleSendComment={handleSendComment}
+          editingBidId={editingBidId}
+          editedBid={editedBid}
+          setEditedBid={setEditedBid}
+          clientMode={clientMode}
+          handleBidFileUpload={handleBidFileUpload}
+          handleDeleteFile={handleDeleteFile}
+          negotiation={negotiation as NegotiationDataType}
+          refetch={refetch}
+        />
+      )}
+      {tab === "tradeIns" && (
+        <BidList
+          bids={clientBids.tradeIns ?? []}
+          noUserActions={noUserActions}
+          clientMode={clientMode}
+          negotiation={negotiation as NegotiationDataType}
+        />
+      )}
+      {!clientMode && (
+        <>
+          {showDeletedBids && (
+            <DeleteBidSection
+              incomingBids={incomingBids}
+              negotiationId={negotiationId}
+              dealers={dealers}
+              setCommentingBidId={setCommentingBidId}
+              setEditedBid={setEditedBid}
+              setEditingBidId={setEditingBidId}
+              editedBid={editedBid}
+              editingBidId={editingBidId}
+              commentingBidId={commentingBidId}
+              setNewComment={setNewComment}
+              newComment={newComment}
+              addComment={addComment}
+              handleBidFileUpload={handleBidFileUpload}
+              handleDeleteFile={handleDeleteFile}
+              handleEdit={handleEdit}
+              handleSave={handleSave}
+              setOpenDialog={setOpenDialog}
+              openDialog={openDialog}
+              setIncomingBids={setIncomingBids}
+            />
+          )}
+        </>
+      )}
+    </TailwindPlusCard>
   );
 };
