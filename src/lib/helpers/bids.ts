@@ -253,9 +253,11 @@ export const getBidsByNegotiationId = async (negotiationId: string) => {
   );
 
   const workingDealerIds: string[] = [];
+  const bidIds: string[] = [];
   const bids = bidsSnapshot.docs.map((doc) => {
     const data = doc.data();
     workingDealerIds.push(data.dealerId);
+    bidIds.push(data.bid_id);
     return {
       ...data,
     };
@@ -264,8 +266,19 @@ export const getBidsByNegotiationId = async (negotiationId: string) => {
   const dealerIds = Array.from(new Set(workingDealerIds)).filter(
     (id) => id && id !== "N/A"
   );
-  console.log("dealerIds:", dealerIds);
-  const dealers = await fetchBulkQuery("Dealers", "id", dealerIds);
+  const [dealers, bidComments] = await Promise.all([
+    fetchBulkQuery("Dealers", "id", dealerIds),
+    fetchBulkQuery("bid comment", "bid_id", bidIds),
+  ]);
+
+  const bidCommentsMap: Record<string, IncomingBidCommentType[]> = {};
+  bidComments.forEach((comment) => {
+    if (!bidCommentsMap[comment.bid_id]) {
+      bidCommentsMap[comment.bid_id] = [];
+    }
+    bidCommentsMap[comment.bid_id].push(comment);
+  });
+
   const dealersMap: Record<string, DealerDataType> = {};
   dealers.forEach((dealer) => {
     dealersMap[dealer.id] = dealer;
@@ -283,7 +296,9 @@ export const getBidsByNegotiationId = async (negotiationId: string) => {
     const finalBid: IncomingBidType & { bidDealer: DealerDataType } = {
       ...bid,
       bidDealer: dealersMap[bid.dealerId as string],
+      bidComments: bidCommentsMap[bid.bid_id],
     };
+
     if (bid.bidType === "tradeIn") {
       finalBids.tradeIns.push(finalBid as IncomingBidType);
     } else {
@@ -293,20 +308,3 @@ export const getBidsByNegotiationId = async (negotiationId: string) => {
 
   return finalBids;
 };
-
-// const newId = generateRandomId();
-
-// const bidObject: TradeInBidType = {
-//   id: newId,
-//   negotiationId: negotiation.id,
-//   dealerId: dealer?.id,
-//   files: fileUrls,
-//   price: values.price,
-//   comments: values.comments,
-//   timestamp: Date.now(),
-//   createdAt: new Date().toISOString(),
-//   bidType: "tradeIn",
-// };
-
-// const bidRef = doc(db, "Incoming Bids", newId);
-// await setDoc(bidRef, bidObject);

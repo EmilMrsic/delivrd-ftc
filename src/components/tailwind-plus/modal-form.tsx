@@ -27,7 +27,7 @@ interface FieldType {
   label?: string;
   name: string;
   type?: string;
-  defaultValue?: string | string[];
+  defaultValue?: string | string[] | number | number[];
   options?: { label: string; value: string }[];
   props?: Record<string, any>;
   infobox?: {

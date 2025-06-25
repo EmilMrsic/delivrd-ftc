@@ -482,6 +482,7 @@ export const ClientProfile = ({
               showDeletedBids={showDeletedBids}
               handleSendComment={handleSendComment}
               clientBids={clientBids.bids}
+              dealNegotiator={dealNegotiator}
             />
           )}
 
@@ -623,13 +624,13 @@ export const BidSection = ({
   handleSendComment,
   noUserActions = false,
   clientBids,
+  dealNegotiator,
 }: any & {
   clientBids: {
     [key: string]: IncomingBidType[];
   };
 }) => {
   const [tab, setTab] = useState<"bids" | "tradeIns">("bids");
-
   console.log("clientBids:", clientBids);
 
   return (
@@ -697,6 +698,8 @@ export const BidSection = ({
           noUserActions={noUserActions}
           clientMode={clientMode}
           negotiation={negotiation as NegotiationDataType}
+          dealCoordinator={dealNegotiator}
+          mode="tradeIns"
         />
       )}
       {!clientMode && (

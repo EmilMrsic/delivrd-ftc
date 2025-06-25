@@ -1,14 +1,26 @@
 import { ModalForm } from "@/components/tailwind-plus/modal-form";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
-import { IncomingBidType } from "@/lib/models/bids";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { handleSendComment } from "@/lib/helpers/comments";
+import { uploadFile } from "@/lib/helpers/files";
+import { createNotification } from "@/lib/helpers/notifications";
+import { IncomingBidCommentType, IncomingBidType } from "@/lib/models/bids";
 import { DealerDataType } from "@/lib/models/dealer";
-import { NegotiationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { backendRequest, callZapierWebhook } from "@/lib/request";
-import { cn, formatDate } from "@/lib/utils";
 import {
+  cn,
+  formatDate,
+  getCurrentTimestamp,
+  updateBidInFirebase,
+} from "@/lib/utils";
+import {
+  addDoc,
   collection,
   doc,
   getDocs,
@@ -17,7 +29,18 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { Plus, ThumbsDown, ThumbsUp, Trash } from "lucide-react";
+import {
+  FileText,
+  Pencil,
+  Plus,
+  Save,
+  ThumbsDown,
+  ThumbsUp,
+  Trash,
+  Upload,
+  X,
+} from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 /** replacement for <IncomingBids /> without being tightly coupled to the client profile and standard incoming bid type */
@@ -26,12 +49,17 @@ export const BidList = ({
   noUserActions,
   clientMode,
   negotiation,
+  dealCoordinator,
+  mode,
 }: {
   bids: (IncomingBidType & { bidDealer: DealerDataType })[];
   noUserActions: boolean;
   clientMode: boolean;
   negotiation: NegotiationDataType;
+  dealCoordinator: DealNegotiatorType;
+  mode: "bids" | "tradeIns";
 }) => {
+  const user = useLoggedInUser();
   const sortedBids = [...bids]
     ?.filter((bid) => !bid?.delete)
     .sort((a, b) => {
@@ -63,6 +91,9 @@ export const BidList = ({
           key={idx}
           noUserActions={noUserActions}
           clientMode={clientMode}
+          dealCoordinator={dealCoordinator}
+          user={user}
+          mode={mode}
         />
       ))}
     </div>
@@ -76,6 +107,9 @@ export const BidCard = ({
   noUserActions,
   clientMode,
   negotiation,
+  dealCoordinator,
+  user,
+  mode,
 }: {
   bid: IncomingBidType & { bidDealer: DealerDataType };
   hasAcceptedBid: boolean;
@@ -83,6 +117,9 @@ export const BidCard = ({
   noUserActions: boolean;
   clientMode: boolean;
   negotiation: NegotiationDataType;
+  dealCoordinator: DealNegotiatorType;
+  user: any;
+  mode: "bids" | "tradeIns";
 }) => {
   const [bid, setBid] = useState<
     IncomingBidType & { bidDealer: DealerDataType }
@@ -209,7 +246,7 @@ export const BidCard = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent opening the dialog
-                      handleDeleteBid(bidDetails.bid_id);
+                      // handleDeleteBid(bid.bid_id);
                     }}
                     className="text-black rounded-full p-2"
                   >
@@ -301,6 +338,13 @@ export const BidCard = ({
           parseComment={parseComment}
           clientMode={clientMode}
         /> */}
+          <ViewOfferDialog
+            bid={bid}
+            clientMode={clientMode}
+            setBid={setBid}
+            negotiation={negotiation}
+            mode={mode}
+          />
           {clientMode && (
             <>
               {bid.accept_offer ? (
@@ -361,8 +405,21 @@ export const BidCard = ({
             </>
           )}
         </div>
-        {commentForm && <BidCommentForm />}
-        <BidComments bid={bid} />
+        {commentForm && (
+          <BidCommentForm
+            bid={bid}
+            negotiation={negotiation}
+            dealCoordinator={dealCoordinator}
+            setBid={setBid}
+            user={user}
+          />
+        )}
+        <BidComments
+          bid={bid}
+          clientMode={clientMode}
+          noUserActions={noUserActions}
+          user={user}
+        />
       </div>
       {connectClientAndDealer && (
         <ModalForm
@@ -488,8 +545,69 @@ export const BidCard = ({
   );
 };
 
-export const BidCommentForm = ({}) => {
+export const BidCommentForm = ({
+  bid,
+  negotiation,
+  dealCoordinator,
+  setBid,
+  user,
+}: {
+  bid: IncomingBidType & { bidDealer: DealerDataType };
+  negotiation: NegotiationDataType;
+  dealCoordinator: DealNegotiatorType;
+  setBid: (bid: IncomingBidType & { bidDealer: DealerDataType }) => void;
+  user: any;
+}) => {
   const [comment, setComment] = useState<string>("");
+
+  const handleAddComment = async () => {
+    const useableComment = comment.trim();
+    if (!bid.bid_id || !useableComment) return;
+    const bidComments = bid.bidComments ?? [];
+
+    const newCommentData: IncomingBidCommentType = {
+      author: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        profile_pic: user.profile_pic,
+      },
+      client_phone_number: negotiation?.clientPhone ?? "",
+      bid_id: bid.bid_id,
+      client: negotiation?.clientNamefull ?? "",
+      client_id: negotiation?.userId ?? "",
+      client_name: negotiation?.clientNamefull ?? "",
+      comment: useableComment,
+      source: user.privilege === "Client" ? "Client" : "Team",
+      deal_coordinator: negotiation?.dealCoordinatorId ?? "",
+      deal_coordinator_name: dealCoordinator?.name,
+      link_status: "Active",
+      negotiation_id: negotiation.id,
+      time: getCurrentTimestamp(),
+    };
+
+    bidComments.push(newCommentData);
+    setBid({ ...bid, bidComments });
+
+    const commentRef = collection(db, "bid comment");
+    await addDoc(commentRef, newCommentData);
+
+    if (user.privilege === "Client") {
+      handleSendComment(user, newCommentData);
+    }
+
+    if (dealCoordinator?.id) {
+      await createNotification(dealCoordinator?.id, "bid_comment", {
+        bidId: bid.bid_id,
+        negotiationId: negotiation.id,
+        author: user.id,
+      });
+    }
+
+    toast({ title: "Comment added successfully" });
+  };
+
   return (
     <div className="mb-4">
       <Textarea
@@ -498,16 +616,36 @@ export const BidCommentForm = ({}) => {
         onChange={(e) => setComment(e.target.value)}
         className="mb-2"
       />
-      <Button onClick={() => {}}>Submit Comment</Button>
+      <Button onClick={handleAddComment}>Submit Comment</Button>
     </div>
   );
 };
 
-export const BidComments = ({ bid }: { bid: IncomingBidType }) => {
+export const BidComments = ({
+  bid,
+  clientMode,
+  noUserActions,
+  user,
+}: {
+  bid: IncomingBidType & { bidDealer: DealerDataType };
+  clientMode: boolean;
+  noUserActions: boolean;
+  user: any;
+}) => {
   return (
     <>
       {bid.bidComments?.length && bid.bidComments.length > 0 ? (
-        <></>
+        <>
+          {bid.bidComments.map((comment, idx) => (
+            <BidComment
+              key={idx}
+              comment={comment}
+              clientMode={clientMode}
+              noUserActions={noUserActions}
+              user={user}
+            />
+          ))}
+        </>
       ) : (
         <p className="text-sm text-gray-500">
           No comments available for this bid.
@@ -517,14 +655,62 @@ export const BidComments = ({ bid }: { bid: IncomingBidType }) => {
   );
 };
 
+export const BidComment = ({
+  comment,
+  clientMode,
+  noUserActions,
+  user,
+}: {
+  comment: IncomingBidCommentType;
+  clientMode: boolean;
+  noUserActions: boolean;
+  user: any;
+}) => {
+  return (
+    <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
+      <div className="p-2 flex flex-col  mt-1">
+        <p>
+          <strong>
+            {comment?.author?.name
+              ? comment?.author?.name
+              : comment.deal_coordinator_name === "N/A"
+              ? comment.client_name
+              : comment.deal_coordinator_name}
+            :
+          </strong>{" "}
+          {parseComment(comment.comment)}
+        </p>
+        <p className="text-sm text-gray-500">{comment.time}</p>
+      </div>
+      {!clientMode && (
+        <>
+          {comment.deal_coordinator_name === "N/A" ? (
+            <p className="pr-2">From Client</p>
+          ) : (
+            !noUserActions && (
+              <Button
+                variant="outline"
+                className="border-black"
+                onClick={() => handleSendComment(user, comment)}
+              >
+                Send To Client
+              </Button>
+            )
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
 export const BidVoteCard = ({
   clientMode,
   bid,
   setBid,
 }: {
   clientMode: boolean;
-  bid: IncomingBidType;
-  setBid: (bid: IncomingBidType) => void;
+  bid: IncomingBidType & { bidDealer: DealerDataType };
+  setBid: (bid: IncomingBidType & { bidDealer: DealerDataType }) => void;
 }) => {
   const handleVote = async (direction: "like" | "dislike") => {
     try {
@@ -593,4 +779,338 @@ export const BidVoteCard = ({
       )}
     </div>
   );
+};
+
+export const ViewOfferDialog = ({
+  bid,
+  clientMode,
+  setBid,
+  negotiation,
+  mode,
+}: {
+  bid: IncomingBidType & { bidDealer: DealerDataType };
+  clientMode: boolean;
+  setBid: (bid: IncomingBidType & { bidDealer: DealerDataType }) => void;
+  negotiation: NegotiationDataType;
+  mode: "bids" | "tradeIns";
+}) => {
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editedBid, setEditedBid] = useState<
+    IncomingBidType & { bidDealer: DealerDataType }
+  >(bid);
+
+  const handleSave = async () => {
+    setBid({
+      ...bid,
+      ...editedBid,
+      price: Number(editedBid.price),
+      discountPrice: String(editedBid.discountPrice),
+    });
+    console.log("saving bid", bid.bid_id);
+    const useableUpdateObject: any = {};
+    ["discountPrice", "inventoryStatus", "price", "files"].forEach((key) => {
+      if (editedBid[key as keyof typeof editedBid]) {
+        useableUpdateObject[key] = editedBid[key as keyof typeof editedBid];
+      }
+    });
+    updateBidInFirebase(bid.bid_id as string, useableUpdateObject as any);
+
+    // {
+    //   discountPrice: editedBid.discountPrice as string,
+    //   inventoryStatus: editedBid.inventoryStatus,
+    //   price: Number(editedBid.price),
+    //   files: editedBid.files,
+    // }
+    setEditing(false);
+    toast({ title: "Bid Updated successfully" });
+  };
+
+  const handleDeleteFile = (fileToDelete: string) => {
+    setEditedBid((prevEditedBid) => ({
+      ...prevEditedBid,
+      files: prevEditedBid.files?.filter((file) => file !== fileToDelete),
+    }));
+
+    updateBidInFirebase(bid.bid_id as string, {
+      files: editedBid.files?.filter((file) => file !== fileToDelete),
+    });
+
+    setBid({
+      ...bid,
+      files: bid.files?.filter((file) => file !== fileToDelete),
+    });
+  };
+
+  const handleBidFileUpload = async (changeFiles: FileList | null) => {
+    if (!changeFiles) return;
+
+    let fileUrls: string[] = [];
+    const fileArray = Array.from(changeFiles);
+
+    const uploadPromises = fileArray.map((file) => uploadFile(file)); // Upload files
+    fileUrls = (await Promise.all(uploadPromises)).filter(Boolean) as string[];
+
+    setEditedBid({
+      ...editedBid,
+      files: [...(editedBid?.files ?? []), ...fileUrls],
+    });
+
+    updateBidInFirebase(bid.bid_id as string, {
+      files: [...(editedBid?.files ?? []), ...fileUrls],
+    });
+
+    setBid({
+      ...bid,
+      files: [...(bid?.files ?? []), ...fileUrls],
+    });
+  };
+
+  return (
+    <Dialog
+      // open={openDialog === bidDetails.bid_id}
+      // onOpenChange={(isOpen) => {
+      //   if (!isOpen) {
+      //     setEditingBidId(null); // Reset editedBid when closing
+      //   }
+      //   setOpenDialog(isOpen ? bidDetails.bid_id ?? "" : null);
+      // }}
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <FileText className="mr-2 h-4 w-4" />
+          View Offer
+        </Button>
+      </DialogTrigger>
+      <DialogContent style={{ background: "white", zIndex: 9999 }}>
+        <div className="text-[#202125] space-y-4 w-[95%]">
+          <div className="flex items-center gap-3">
+            <p className="text-2xl font-bold">
+              {bid.bidDealer?.Dealership} Detail
+            </p>
+            {!clientMode && (
+              <>
+                {editing ? (
+                  <Button size="sm" onClick={() => handleSave()}>
+                    <Save className="h-4 w-4 mr-2" /> Save
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditing(true)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-wrap h-[150px] overflow-y-scroll gap-4 mt-4">
+            {bid.files?.map((file: string, index: number) => {
+              const isImage = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].some(
+                (ext) => file.toLowerCase().includes(ext)
+              );
+
+              return (
+                <div
+                  key={index}
+                  onClick={() => window.open(file, "_blank")}
+                  className="relative cursor-pointer w-20 h-20 flex items-center justify-center rounded-md "
+                >
+                  <div className="absolute top-0 right-0 z-[99]">
+                    {editing && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent opening file when clicking the cross
+                          handleDeleteFile(file);
+                        }}
+                        className="absolute top-0 right-0 bg-black  text-white rounded-full p-1 m-1 hover:bg-red-700"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                  {isImage ? (
+                    <img
+                      onClick={() => window.open(file, "_blank")}
+                      src={file}
+                      alt="Uploaded file"
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <embed
+                      onClick={() => window.open(file, "_blank")}
+                      type="application/pdf"
+                      width="100%"
+                      height="100%"
+                      src={file}
+                      style={{ zIndex: -1 }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+            {editing && (
+              <div className="flex items-center justify-center w-20 h-20 bg-gray-200 rounded-md cursor-pointer">
+                <label
+                  htmlFor="file-upload"
+                  className="text-center flex flex-col items-center text-gray-600"
+                >
+                  <input
+                    type="file"
+                    id="file-upload"
+                    onChange={(e) =>
+                      handleBidFileUpload(e.target.files ?? new FileList())
+                    }
+                    className="hidden cursor-pointer"
+                    multiple
+                  />
+                  <Upload className="w-8 h-8 text-gray-600" />
+                  <p>Upload</p>
+                </label>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1 mt-4">
+            <p className="font-semibold text-lg">
+              {bid.bidDealer?.SalesPersonName}
+            </p>
+            <p>
+              {bid.bidDealer?.City}
+              <br />
+              {bid.bidDealer?.State}
+            </p>
+            {mode === "bids" && (
+              <span className="inline-flex items-center px-2 py-1 text-sm font-medium text-green-700 rounded-full">
+                {editing ? (
+                  <div className="space-x-2 flex">
+                    <label className="flex p-2 rounded-full bg-green-100 items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="inventoryStatus"
+                        value="In Stock"
+                        checked={editedBid.inventoryStatus === "In Stock"}
+                        onChange={() =>
+                          setEditedBid({
+                            ...editedBid,
+                            inventoryStatus: "In Stock",
+                          })
+                        }
+                        className="w-4 h-4"
+                      />
+                      <span>In Stock</span>
+                    </label>
+
+                    <label className="flex p-2 rounded-full bg-yellow-100 items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="inventoryStatus"
+                        value="In Transit"
+                        checked={editedBid.inventoryStatus === "In Transit"}
+                        onChange={() =>
+                          setEditedBid({
+                            ...editedBid,
+                            inventoryStatus: "In Transit",
+                          })
+                        }
+                        className="w-4 h-4"
+                      />
+                      <span>In Transit</span>
+                    </label>
+                  </div>
+                ) : (
+                  <p
+                    className={`p-2 rounded-full ${
+                      bid.inventoryStatus === "In Stock"
+                        ? "bg-green-100"
+                        : "bg-yellow-100"
+                    }`}
+                  >
+                    {bid.inventoryStatus}
+                  </p>
+                )}
+              </span>
+            )}
+          </div>
+
+          <div className="flex mt-4 border-t pt-4 justify-between">
+            <div>
+              <p className="text-gray-500">Date Submitted</p>
+              {/* @ts-ignore */}
+              <p>{formatDate(bid.timestamp)}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Price</p>
+              {editing ? (
+                <Input
+                  type="number"
+                  value={editedBid.price}
+                  onChange={(e) =>
+                    setEditedBid({
+                      ...editedBid,
+                      price: parseFloat(e.target.value),
+                    })
+                  }
+                />
+              ) : (
+                <p className="text-2xl font-semibold">${bid.price}</p>
+              )}
+              <p className="text-gray-500">
+                Total Discount: $
+                {editing ? (
+                  <Input
+                    type="number"
+                    value={editedBid.discountPrice}
+                    onChange={(e) =>
+                      setEditedBid({
+                        ...editedBid,
+                        discountPrice: e.target.value,
+                      })
+                    }
+                  />
+                ) : (
+                  // @ts-ignore
+                  bid.discountPrice || bid.discountAmount
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t pt-4 flex flex-col">
+            <p className="font-semibold">Additional Comments</p>
+            <div className="break-words overflow-wrap break-words [overflow-wrap:anywhere] overflow-hidden max-w-[450px]">
+              {parseComment(bid?.comments ?? "")}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export const parseComment = (comment: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  return comment.split(urlRegex).map((part: string, index: number) => {
+    if (urlRegex.test(part)) {
+      return (
+        <Link
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline text-wrap break-words"
+        >
+          {part}
+        </Link>
+      );
+    }
+
+    return part;
+  });
 };

@@ -726,12 +726,12 @@ export const updateBidInFirebase = async (
   updatedFields: Partial<IncomingBid>
 ) => {
   if (!bidId) return;
-
+  console.log("saving bid: in update", updatedFields);
   try {
     const bid_id = bidId;
     const bidRef = doc(db, "Incoming Bids", bid_id);
     await updateDoc(bidRef, updatedFields);
-    console.log("Bid updated successfully!");
+    console.log("saving bid: Bid updated successfully!");
   } catch (error) {
     console.error("Error updating bid:", error);
   }
