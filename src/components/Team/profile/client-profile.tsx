@@ -20,7 +20,7 @@ import {
 } from "firebase/firestore";
 import { onMessage } from "firebase/messaging";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import ClientDetails from "../Client-details";
 import { IncomingBids } from "./incoming-bids";
@@ -75,12 +75,16 @@ export const ClientProfile = ({
     isLoading,
     setDealers,
     refetch,
+    fetchBidComments,
+    fetchBids,
   } = useTeamProfile({ negotiationId });
-  const { data: clientBids, isLoading: clientBidsLoading } = useNegotiationBids(
-    {
-      negotiationId: negotiationId,
-    }
-  );
+  const {
+    data: clientBids,
+    isLoading: clientBidsLoading,
+    refetch: refetchNegotiationBids,
+  } = useNegotiationBids({
+    negotiationId: negotiationId,
+  });
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -97,6 +101,12 @@ export const ClientProfile = ({
     files: [""],
   });
   const [hasScrolled, setHasScrolled] = useState<boolean>(false);
+
+  const refetchBids = async () => {
+    await fetchBids();
+    await fetchBidComments();
+    await refetchNegotiationBids();
+  };
 
   useEffect(() => {
     const bidId = params.get("bid");
@@ -478,11 +488,11 @@ export const ClientProfile = ({
               handleBidFileUpload={handleBidFileUpload}
               handleDeleteFile={handleDeleteFile}
               negotiation={negotiation}
-              refetch={refetch}
               showDeletedBids={showDeletedBids}
               handleSendComment={handleSendComment}
               clientBids={clientBids.bids}
               dealNegotiator={dealNegotiator}
+              refetch={refetchBids}
             />
           )}
 
@@ -619,19 +629,41 @@ export const BidSection = ({
   handleBidFileUpload,
   handleDeleteFile,
   negotiation,
-  refetch,
   showDeletedBids,
   handleSendComment,
   noUserActions = false,
   clientBids,
   dealNegotiator,
+  refetch,
 }: any & {
   clientBids: {
     [key: string]: IncomingBidType[];
   };
+  refetch: () => void;
 }) => {
   const [tab, setTab] = useState<"bids" | "tradeIns">("bids");
-  console.log("clientBids:", clientBids);
+  const offersInfo = useMemo(() => {
+    const allBids = [
+      ...(clientBids.bids ?? []),
+      ...(clientBids.tradeIns ?? []),
+    ];
+
+    const hasAcceptedOffer = allBids.find((bid: IncomingBidType) => {
+      const result = bid.client_offer === "accepted";
+      return result;
+    });
+
+    const hasAcceptedBid = allBids.some(
+      (bid: IncomingBidType) => bid.accept_offer === true
+    );
+
+    return {
+      hasAcceptedOffer: hasAcceptedOffer || false,
+      hasAcceptedBid: hasAcceptedBid || false,
+    };
+  }, [clientBids]);
+
+  console.log("offersInfo:", offersInfo);
 
   return (
     <TailwindPlusCard
@@ -690,6 +722,7 @@ export const BidSection = ({
           handleDeleteFile={handleDeleteFile}
           negotiation={negotiation as NegotiationDataType}
           refetch={refetch}
+          offersInfo={offersInfo}
         />
       )}
       {tab === "tradeIns" && (
@@ -700,6 +733,8 @@ export const BidSection = ({
           negotiation={negotiation as NegotiationDataType}
           dealCoordinator={dealNegotiator}
           mode="tradeIns"
+          offersInfo={offersInfo}
+          refetch={refetch}
         />
       )}
       {!clientMode && (

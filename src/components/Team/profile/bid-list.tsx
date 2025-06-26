@@ -51,6 +51,8 @@ export const BidList = ({
   negotiation,
   dealCoordinator,
   mode,
+  offersInfo,
+  refetch,
 }: {
   bids: (IncomingBidType & { bidDealer: DealerDataType })[];
   noUserActions: boolean;
@@ -58,6 +60,11 @@ export const BidList = ({
   negotiation: NegotiationDataType;
   dealCoordinator: DealNegotiatorType;
   mode: "bids" | "tradeIns";
+  offersInfo: {
+    hasAcceptedOffer: boolean;
+    hasAcceptedBid: boolean;
+  };
+  refetch: () => void;
 }) => {
   const user = useLoggedInUser();
   const sortedBids = [...bids]
@@ -73,12 +80,7 @@ export const BidList = ({
       const dateB = new Date(b?.timestamp || 0).getTime();
       return dateB - dateA; // Newest bids first
     });
-  const hasAcceptedOffer = bids.find(
-    (bid: IncomingBidType) => bid.client_offer === "accepted"
-  );
-  const hasAcceptedBid = bids.some(
-    (bid: IncomingBidType) => bid.accept_offer === true
-  );
+  const { hasAcceptedOffer, hasAcceptedBid } = offersInfo;
 
   return (
     <div className="space-y-8">

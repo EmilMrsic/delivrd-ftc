@@ -6,7 +6,7 @@ export const useNegotiationBids = ({
 }: {
   negotiationId: string;
 }) => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["client-bids"],
     queryFn: async () => {
       const response = await backendRequest(
@@ -18,5 +18,5 @@ export const useNegotiationBids = ({
     },
   });
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch };
 };

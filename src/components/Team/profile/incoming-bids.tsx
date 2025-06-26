@@ -31,6 +31,7 @@ export const IncomingBids = ({
   handleDeleteFile,
   negotiation,
   refetch,
+  offersInfo,
 }: {
   incomingBids: IncomingBid[];
   setIncomingBids: (item: IncomingBid[]) => void;
@@ -60,6 +61,10 @@ export const IncomingBids = ({
   handleDeleteFile: (file: string, bidId: string) => void;
   negotiation: NegotiationDataType;
   refetch?: () => void;
+  offersInfo: {
+    hasAcceptedOffer: boolean;
+    hasAcceptedBid: boolean;
+  };
 }) => {
   const sortedBids = [...incomingBids]
     ?.filter((bid) => !bid?.delete)
@@ -109,6 +114,7 @@ export const IncomingBids = ({
               handleDeleteFile={handleDeleteFile}
               negotiation={negotiation}
               refetch={refetch}
+              offersInfo={offersInfo}
             />
           );
         })

@@ -136,6 +136,45 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     }
   };
 
+  const getBidsByIds = async (bidIds: string[]) => {
+    if (!bidIds || bidIds.length === 0) {
+      return;
+    }
+
+    try {
+      const incomingBidsCollection = collection(db, "Incoming Bids");
+
+      const bidsPromises = bidIds.map(async (bidId: string) => {
+        const bidsQuery = query(
+          incomingBidsCollection,
+          where("bid_id", "==", bidId)
+        );
+
+        const querySnapshot = await getDocs(bidsQuery);
+
+        if (!querySnapshot.empty) {
+          return querySnapshot.docs[0].data();
+        } else {
+          return null;
+        }
+      });
+
+      const bidsData = await Promise.all(bidsPromises);
+
+      const validBids: IncomingBid[] = bidsData.filter(
+        (bid) => bid !== null
+      ) as IncomingBid[];
+
+      setIncomingBids(validBids);
+    } catch (error) {
+      console.error("Error fetching incoming bids:", error);
+    }
+  };
+
+  const fetchBids = async () => {
+    getBidsByIds(negotiation?.incomingBids ?? []);
+  };
+
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
     fetchBidComments();
@@ -145,42 +184,7 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   }, [incomingBids]);
 
   useEffect(() => {
-    const getBidsByIds = async (bidIds: string[]) => {
-      if (!bidIds || bidIds.length === 0) {
-        return;
-      }
-
-      try {
-        const incomingBidsCollection = collection(db, "Incoming Bids");
-
-        const bidsPromises = bidIds.map(async (bidId: string) => {
-          const bidsQuery = query(
-            incomingBidsCollection,
-            where("bid_id", "==", bidId)
-          );
-
-          const querySnapshot = await getDocs(bidsQuery);
-
-          if (!querySnapshot.empty) {
-            return querySnapshot.docs[0].data();
-          } else {
-            return null;
-          }
-        });
-
-        const bidsData = await Promise.all(bidsPromises);
-
-        const validBids: IncomingBid[] = bidsData.filter(
-          (bid) => bid !== null
-        ) as IncomingBid[];
-
-        setIncomingBids(validBids);
-      } catch (error) {
-        console.error("Error fetching incoming bids:", error);
-      }
-    };
-
-    getBidsByIds(negotiation?.incomingBids ?? []);
+    fetchBids();
   }, [negotiation]);
 
   useEffect(() => {
@@ -226,6 +230,8 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     setBidCommentsByBidId,
     isLoading,
     refetch,
+    fetchBidComments,
+    fetchBids,
   };
 };
 

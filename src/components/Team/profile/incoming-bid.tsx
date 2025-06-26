@@ -53,12 +53,17 @@ export const IncomingBidCard = ({
   clientMode,
   negotiation,
   refetch,
+  offersInfo,
 }: any & {
   noUserActions?: boolean;
   allowUndelete?: boolean;
   clientMode?: boolean;
   negotiation?: NegotiationDataType;
   refetch?: () => void;
+  offersInfo: {
+    hasAcceptedOffer: boolean;
+    hasAcceptedBid: boolean;
+  };
 }) => {
   const [connectClientAndDealer, setConnectClientAndDealer] = useState(false);
   const [notifyFTC, setNotifyFTC] = useState(false);
@@ -66,12 +71,13 @@ export const IncomingBidCard = ({
     return dealer.id === bidDetails.dealerId;
   });
 
-  const hasAcceptedOffer = incomingBids.find(
-    (bid: IncomingBid) => bid.client_offer === "accepted"
-  );
-  const hasAcceptedBid = incomingBids.some(
-    (bid: IncomingBid) => bid.accept_offer === true
-  );
+  // const hasAcceptedOffer = incomingBids.find(
+  //   (bid: IncomingBid) => bid.client_offer === "accepted"
+  // );
+  // const hasAcceptedBid = incomingBids.some(
+  //   (bid: IncomingBid) => bid.accept_offer === true
+  // );
+  const { hasAcceptedOffer, hasAcceptedBid } = offersInfo;
   const isAcceptedBid = bidDetails.accept_offer === true;
   const isDisabled = hasAcceptedBid && !isAcceptedBid;
 
@@ -112,6 +118,7 @@ export const IncomingBidCard = ({
 
       if (result.success) {
         toast({ title: "Offer accepted", variant: "default" });
+        refetch?.();
       } else {
         console.error("Failed to accept offer:", result.error);
         toast({
