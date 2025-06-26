@@ -98,14 +98,16 @@ export const getElapsedTime = (
   const diffTime = endDate.getTime() - start.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) {
+  if (diffDays <= 0) {
     return "Today";
-  } else if (diffDays <= 6) {
-    return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
   } else {
-    const diffWeeks = Math.floor(diffDays / 7);
-    return `${diffWeeks} week${diffWeeks !== 1 ? "s" : ""} ago`;
+    //if (diffDays <= 6) {
+    return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
   }
+  // else {
+  //   const diffWeeks = Math.floor(diffDays / 7);
+  //   return `${diffWeeks} week${diffWeeks !== 1 ? "s" : ""} ago`;
+  // }
 };
 
 export const mapNegotiationData = (data: any): EditNegotiationData => {
