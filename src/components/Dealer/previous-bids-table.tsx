@@ -10,7 +10,13 @@ import { Button } from "../ui/button";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 type PreviousBidType = IncomingBidType &
-  ClientDataType & { bidStatus: string; winningBid: any };
+  ClientDataType & {
+    bidStatus: string;
+    winningBid: any;
+    VIN: string;
+    Mileage: number;
+    ZipCode: string;
+  };
 
 //wherrera@toyotagallatin.com
 export const PreviousBidsTable = ({
