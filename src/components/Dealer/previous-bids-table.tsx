@@ -28,11 +28,6 @@ export const PreviousBidsTable = ({
     direction: string;
   }>({ key: "submittedDate", direction: "desc" });
 
-  console.log(
-    "useableBids:",
-    dealerBids.filter((bid) => bid.bidType === "tradeIn")[0]?.tradeDetails
-  );
-
   const filterVehicles = (incomingVehicles: PreviousBidType[]) => {
     if (subTab !== "tradeIn") {
       incomingVehicles = incomingVehicles.filter((vehicle) => {
