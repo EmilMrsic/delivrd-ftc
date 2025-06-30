@@ -164,10 +164,16 @@ export const getDealerBids = async (dealerId: string) => {
     return data;
   });
 
-  const [clientData, bidsWonBySomeoneElse] = await Promise.all([
+  const [clientData, negotiations, bidsWonBySomeoneElse] = await Promise.all([
     fetchBulkQuery("Clients", "negotiation_Id", negotiationIds),
+    fetchBulkQuery("delivrd_negotiations", "id", negotiationIds),
     getBidsWonBySomeoneElse(negotiationIds, dealerId),
   ]);
+
+  const negotiationsMap: Record<string, NegotiationDataType> = {};
+  negotiations.forEach((negotiation) => {
+    negotiationsMap[negotiation.id] = negotiation;
+  });
 
   const bidsWonBySomeoneElseMap: Record<string, any> = {};
   bidsWonBySomeoneElse.forEach((bid) => {
@@ -181,6 +187,7 @@ export const getDealerBids = async (dealerId: string) => {
   const finalBids: any[] = [];
   for (const bid of bids) {
     const client = clients[bid.negotiationId];
+    const negotiation = negotiationsMap[bid.negotiationId];
 
     if (client) {
       let bidStatus = "pending";
@@ -206,12 +213,19 @@ export const getDealerBids = async (dealerId: string) => {
         })
         .replaceAll("/", "-");
 
-      finalBids.push({
+      const finalBid = {
         ...bid,
         ...client,
         bidStatus,
         submittedDate: formattedDate,
-      });
+      };
+
+      if (bid.bidType === "tradeIn") {
+        finalBid.VIN = negotiation.tradeDetails?.vin;
+        finalBid.Mileage = negotiation.tradeDetails?.mileage;
+      }
+
+      finalBids.push(finalBid);
     }
   }
 

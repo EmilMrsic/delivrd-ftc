@@ -74,6 +74,7 @@ export const BidScreen = ({
                   <>
                     <TabsTrigger value="won">Won</TabsTrigger>
                     <TabsTrigger value="lost">Lost</TabsTrigger>
+                    <TabsTrigger value="tradeIn">Trade In</TabsTrigger>
                   </>
                 )}
               </TabsList>

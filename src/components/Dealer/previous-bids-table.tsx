@@ -28,7 +28,24 @@ export const PreviousBidsTable = ({
     direction: string;
   }>({ key: "submittedDate", direction: "desc" });
 
+  console.log(
+    "useableBids:",
+    dealerBids.filter((bid) => bid.bidType === "tradeIn")[0]?.tradeDetails
+  );
+
   const filterVehicles = (incomingVehicles: PreviousBidType[]) => {
+    if (subTab !== "tradeIn") {
+      incomingVehicles = incomingVehicles.filter((vehicle) => {
+        if (vehicle.bidType === "tradeIn") return false;
+        return true;
+      });
+    } else {
+      return incomingVehicles.filter((vehicle) => {
+        if (vehicle.bidType === "tradeIn") return true;
+        return false;
+      });
+    }
+
     if (subTab === "all") return incomingVehicles;
     if (subTab === "new") {
       return incomingVehicles.filter((vehicle) => {
@@ -121,11 +138,44 @@ export const PreviousBidsTable = ({
             key: "Model",
           },
         },
+      ];
+
+      if (subTab !== "tradeIn") {
+        useableHeaders = [
+          ...useableHeaders,
+          {
+            header: "Trim",
+            config: {
+              sortable: true,
+              key: "Trim",
+            },
+          },
+        ];
+      }
+    }
+
+    if (subTab === "tradeIn") {
+      useableHeaders = [
+        ...useableHeaders,
         {
-          header: "Trim",
+          header: "VIN",
           config: {
             sortable: true,
-            key: "Trim",
+            key: "VIN",
+          },
+        },
+        {
+          header: "Mileage",
+          config: {
+            sortable: true,
+            key: "Mileage",
+          },
+        },
+        {
+          header: "Zip Code",
+          config: {
+            sortable: true,
+            key: "ZipCode",
           },
         },
       ];
@@ -147,13 +197,23 @@ export const PreviousBidsTable = ({
           key: "price",
         },
       },
-      {
-        header: "Discounted Price",
-        config: {
-          sortable: true,
-          key: "discountPrice",
+    ];
+
+    if (subTab !== "tradeIn") {
+      useableHeaders = [
+        ...useableHeaders,
+        {
+          header: "Discounted Price",
+          config: {
+            sortable: true,
+            key: "discountPrice",
+          },
         },
-      },
+      ];
+    }
+
+    useableHeaders = [
+      ...useableHeaders,
       {
         header: "Inventory Status",
         config: {
@@ -187,11 +247,10 @@ export const PreviousBidsTable = ({
     ];
 
     return useableHeaders;
-  }, [isMobile]);
+  }, [isMobile, subTab]);
 
   const useableBids = useMemo(() => {
     const output = filteredBids.map((bid) => {
-      console.log("bid", bid.Model, bid.bid_id);
       const subRow: any = {
         descriptor: {} as CellDescriptor,
       };
@@ -255,15 +314,25 @@ export const PreviousBidsTable = ({
             Component: () => <MakeButton make={bid.Brand} />,
           },
           bid.Model,
-          bid.Trim,
         ];
+
+        if (subTab !== "tradeIn") {
+          rowOutput = [...rowOutput, bid.Trim];
+        }
+      }
+
+      if (subTab === "tradeIn") {
+        rowOutput = [...rowOutput, bid.VIN, bid.Mileage, bid.ZipCode];
+      }
+
+      rowOutput = [...rowOutput, bid.submittedDate, bid.price];
+
+      if (subTab !== "tradeIn") {
+        rowOutput = [...rowOutput, bid.discountPrice];
       }
 
       rowOutput = [
         ...rowOutput,
-        bid.submittedDate,
-        bid.price,
-        bid.discountPrice,
         {
           Component: () => {
             console.log(
@@ -334,7 +403,7 @@ export const PreviousBidsTable = ({
     });
 
     return output;
-  }, [filteredBids, isMobile]);
+  }, [filteredBids, isMobile, subTab]);
 
   if (!dealerBids) return <></>;
 
