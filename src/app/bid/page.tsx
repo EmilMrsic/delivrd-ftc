@@ -15,6 +15,7 @@ import {
   getDoc,
   getDocs,
   query,
+  serverTimestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -70,6 +71,7 @@ const BiddingPage = () => {
       ...values,
       radius: values?.radius?.[0],
       updated: true,
+      updatedTimestamp: serverTimestamp(),
       SalesPersonPhone: `(${values.areaCode}) ${values.phoneNumber}`,
     };
 
@@ -113,6 +115,8 @@ const BiddingPage = () => {
     });
   };
 
+  console.log("got here: dealer:", dealer);
+
   if (!dealer) return <Loader />;
 
   return (
@@ -125,6 +129,17 @@ const BiddingPage = () => {
       />
       {showModal && (
         <ModalForm
+          onFormLoad={async () => {
+            const dealerTable = collection(db, "Dealers");
+            const docSnapshot = await getDocs(
+              query(dealerTable, where("id", "==", dealer?.id))
+            );
+            const docRef = docSnapshot.docs[0].ref;
+            await updateDoc(docRef, {
+              formViewed: true,
+              formViewedTimestamp: serverTimestamp(),
+            });
+          }}
           onClose={() => {}}
           title="Update Your First-to-Call Information"
           fields={[

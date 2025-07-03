@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TailwindPlusModal } from "./modal";
 import { Formik, Form, Field, useFormikContext } from "formik";
 import { MultiButtonSelect } from "./form-widgets/multi-button-select";
@@ -89,6 +89,7 @@ export const ModalForm = ({
   onSubmit,
   height = 50,
   width = 40,
+  onFormLoad,
 }: {
   onClose: () => void;
   title: string;
@@ -97,7 +98,9 @@ export const ModalForm = ({
   onSubmit: (values: any) => Promise<void>;
   height?: number;
   width?: number;
+  onFormLoad?: () => void;
 }) => {
+  const [formLoaded, setFormLoaded] = useState(false);
   // const initialValues = useMemo(() => {
   //   return fields.reduce((acc, field) => {
   //     if (Array.isArray(field)) {
@@ -116,6 +119,13 @@ export const ModalForm = ({
   //     return { ...acc, [field.name]: field.defaultValue || "" };
   //   }, {});
   // }, [fields]);
+
+  useEffect(() => {
+    if (!formLoaded && onFormLoad) {
+      onFormLoad();
+      setFormLoaded(true);
+    }
+  }, [formLoaded, onFormLoad]);
 
   const initialValues = useMemo(() => {
     return fields.reduce((acc, field) => {

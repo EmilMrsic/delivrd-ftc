@@ -4,11 +4,20 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Lock } from "lucide-react";
 import { z } from "zod";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { generateRandomId } from "@/lib/utils";
 const emailSchema = z.object({
   email: z
     .string()
@@ -37,10 +46,11 @@ const LoginCard = () => {
     }
   };
 
-  const sendLoginEmail = async (email: string) => {
+  const sendLoginEmail = async (email: string, loginRowId: string) => {
     try {
       const emailData = {
         to: email,
+        loginRowId,
       };
       await axios.post(`/api/login`, emailData);
       setNotification(`Login email sent to ${email}`);
@@ -58,6 +68,12 @@ const LoginCard = () => {
       const parsedData = emailSchema.parse({ email });
       const { email: parsedEmail } = parsedData;
 
+      const loginRowId = generateRandomId();
+      const loginObject = {
+        id: loginRowId,
+        email: parsedEmail,
+        loginInitiationTimestamp: serverTimestamp(),
+      };
       const q = query(
         collection(db, "users"),
         where("email", "==", parsedEmail)
@@ -65,18 +81,24 @@ const LoginCard = () => {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
+        await setDoc(doc(db, "delivrd_user_logins", loginRowId), {
+          ...loginObject,
+          emailFound: true,
+          userId: userData.id,
+          userType: userData.privilege,
+        });
         const user = {
           email: userData.email,
-          // phone: userData.SalesPersonPhone,
-          // id: userData.id,
-          // displayName: userData.SalesPersonName,
-          // brand: userData.Brand,
         };
 
         localStorage.setItem("currentEmail", user.email);
 
-        sendLoginEmail(user.email);
+        sendLoginEmail(user.email, loginRowId);
       } else {
+        await setDoc(doc(db, "delivrd_user_logins", loginRowId), {
+          ...loginObject,
+          emailFound: false,
+        });
         await sendEmail(parsedEmail);
       }
     } catch (err) {

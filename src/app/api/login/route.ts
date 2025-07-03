@@ -1,10 +1,13 @@
+import { db } from "@/firebase/config";
 import { initAdmin } from "@/firebaseAdmin";
 import { MAILGUN_API_KEY, MAILGUN_DOMAIN_NAME } from "@/lib/constants/keys";
 import axios from "axios";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { to } = await req.json();
+  const { to, loginRowId } = await req.json();
+  const loginInitiationRef = doc(db, "delivrd_user_logins", loginRowId);
   const receiverEmail = process.env.TESTING_EMAIL || to;
   // const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const protocol = req.headers.get("x-forwarded-proto") || "http";
@@ -13,7 +16,7 @@ export async function POST(req: Request) {
 
   try {
     const actionCodeSettings = {
-      url: `${baseUrl}/complete-signin?email=${to}`,
+      url: `${baseUrl}/complete-signin?email=${to}&id=${loginRowId}`,
       handleCodeInApp: true, // Important for email link sign-in
     };
 
@@ -56,9 +59,18 @@ export async function POST(req: Request) {
       }
     );
     console.log(response.data);
+    await updateDoc(loginInitiationRef, {
+      emailSent: true,
+      emailSentTimestamp: serverTimestamp(),
+    });
     return NextResponse.json({ message: "Email sent successfully!" });
   } catch (error: any) {
     console.error("Error sending email:", error);
+    await updateDoc(loginInitiationRef, {
+      emailSent: false,
+      emailSentTimestamp: serverTimestamp(),
+      emailSentError: error?.message,
+    });
     return NextResponse.json(
       { message: "Error sending email", error },
       { status: error?.status || 500 }

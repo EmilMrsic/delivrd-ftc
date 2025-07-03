@@ -169,7 +169,6 @@ export const BidCard = ({
       );
 
       const result = await response.json();
-
       if (result.success) {
         toast({ title: "Offer accepted", variant: "default" });
         refetch?.();

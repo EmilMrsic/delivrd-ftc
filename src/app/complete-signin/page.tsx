@@ -6,7 +6,15 @@ import { auth, db } from "@/firebase/config";
 import { Loader } from "@/components/base/loader";
 import { z } from "zod";
 import { toast } from "@/hooks/use-toast";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 
 const emailSchema = z.object({
   email: z
@@ -38,17 +46,19 @@ const SignInContent = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
+  const loginRowId = searchParams.get("id");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (isSignInWithEmailLink(auth, window.location.href) && email) {
       window.localStorage.setItem("emailForSignIn", email);
-      handleSignIn(email);
+      handleSignIn(email, loginRowId || "");
     } else {
       setSignInStage("Failed");
     }
   }, []);
-  const handleSignIn = async (email: string) => {
+
+  const handleSignIn = async (email: string, loginRowId: string) => {
     try {
       await signInWithEmailLink(auth, email, window.location.href);
       setSignInStage("Signing In");
@@ -61,6 +71,10 @@ const SignInContent = ({
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
+        const userRef = querySnapshot.docs[0].ref;
+        await updateDoc(userRef, {
+          lastSignedIn: serverTimestamp(),
+        });
         const userData = querySnapshot.docs[0].data();
         console.log({ userData });
         localStorage.removeItem("user"); // Clear first
@@ -69,18 +83,32 @@ const SignInContent = ({
         localStorage.setItem("emailForSignIn", userData.email);
         toast({ title: "Logged in" });
         console.log("got here in signup", userData);
+        let redirectUrl = "/";
         if (userData.privilege === "Dealer") {
-          router.push("/bid");
+          redirectUrl = "/bid";
         } else if (userData.privilege === "Client") {
-          router.push(`/client/${userData.id}`);
+          redirectUrl = `/client/${userData.id}`;
         } else if (userData.privilege === "Team") {
-          router.push("/team-dashboard");
+          redirectUrl = "/team-dashboard";
         }
+
+        await updateDoc(doc(db, "delivrd_user_logins", loginRowId), {
+          loginCompleted: true,
+          loginCompletedTimestamp: serverTimestamp(),
+          redirectUrl,
+        });
+
+        router.push(redirectUrl);
       } else {
         throw new Error("User data not found");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign-in failed:", error);
+      await updateDoc(doc(db, "delivrd_user_logins", loginRowId), {
+        loginCompleted: false,
+        loginCompletedTimestamp: serverTimestamp(),
+        loginCompletedError: error?.message || "Unknown error",
+      });
       setSignInStage("Failed");
       setMessage("Failed to sign in. Please try again.");
     }

@@ -82,6 +82,6 @@ export const getDealerFromDb = async (dealerId: string) => {
   const dealerSnapshot = await getDocs(
     query(dealerTable, where("id", "==", dealerId))
   );
-  const dealer = dealerSnapshot.docs[0].data();
+  const dealer = dealerSnapshot.docs?.[0]?.data();
   return dealer;
 };
