@@ -28,7 +28,6 @@ export const ClientSideProfileScreen = () => {
   }, [id]);
 
   useEffect(() => {
-    console.log("user:", user, user?.id, id);
     if (user) {
       if (user?.privilege !== "Team") {
         if (user?.id !== id) {

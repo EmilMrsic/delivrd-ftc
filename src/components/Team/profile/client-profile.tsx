@@ -103,6 +103,7 @@ export const ClientProfile = ({
   const [hasScrolled, setHasScrolled] = useState<boolean>(false);
 
   const refetchBids = async () => {
+    console.log("rerunning: refetchBids");
     await fetchBids();
     await fetchBidComments();
     await refetchNegotiationBids();
@@ -648,22 +649,26 @@ export const BidSection = ({
       ...(clientBids.tradeIns ?? []),
     ];
 
-    const hasAcceptedOffer = allBids.find((bid: IncomingBidType) => {
-      const result = bid.client_offer === "accepted";
+    const hasAcceptedOffer = allBids.some((bid: IncomingBidType) => {
+      const result = !bid.delete && bid.client_offer === "accepted";
       return result;
     });
 
-    const hasAcceptedBid = allBids.some(
-      (bid: IncomingBidType) => bid.accept_offer === true
-    );
+    const hasAcceptedBid = allBids.some((bid: IncomingBidType) => {
+      const result = !bid.delete && bid.accept_offer === true;
+      if (result) {
+        console.log("found winner:", bid);
+      }
+      return result;
+    });
+
+    console.log("rerunning:", hasAcceptedOffer, hasAcceptedBid);
 
     return {
       hasAcceptedOffer: hasAcceptedOffer || false,
       hasAcceptedBid: hasAcceptedBid || false,
     };
-  }, [clientBids]);
-
-  console.log("offersInfo:", offersInfo);
+  }, [clientBids, incomingBids]);
 
   return (
     <TailwindPlusCard

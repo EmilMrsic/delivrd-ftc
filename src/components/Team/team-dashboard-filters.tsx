@@ -24,7 +24,6 @@ export const TeamDashboardFilters = ({
   const router = useRouter();
 
   if (!user) return null;
-  console.log("user:", user);
   const overviewMode =
     process.env.NEXT_PUBLIC_TESTING_METRICS_DASHBOARD_OVERRIDE ??
     (user?.mode || "coordinator");

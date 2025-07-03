@@ -9,6 +9,8 @@ import { useVehicles } from "@/hooks/useVehicles";
 import { useDealerBids } from "@/hooks/useDealerBids";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export const BidScreen = ({
   dealer,
@@ -44,7 +46,7 @@ export const BidScreen = ({
       )}
     >
       <Header user={user} />
-      <div className="block md:bg-transparent bg-white md:border-none border-b top-[145px] md:pt-0 pt-8 md:static sticky z-50">
+      <div className="block md:bg-transparent bg-white md:border-none border-b top-[145px] md:pt-0 pt-8 md:static sticky z-50 flex">
         <Tabs
           value={tab}
           defaultValue="account"
@@ -56,6 +58,14 @@ export const BidScreen = ({
             <TabsTrigger value="previous">Previous Bids</TabsTrigger>
           </TabsList>
         </Tabs>
+        <Link href="/dealer/trade">
+          <Button
+            variant="outline"
+            className="w-full w-fit ml-4 bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+          >
+            Trade In Marketplace
+          </Button>
+        </Link>
       </div>
       <div className="bg-white shadow-lg">
         <CardContent>

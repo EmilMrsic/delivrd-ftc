@@ -144,11 +144,19 @@ const getBidsWonBySomeoneElse = async (
 
 export const getDealerBids = async (dealerId: string) => {
   const incomingBids = collection(db, "Incoming Bids");
-  const q = query(incomingBids, where("dealerId", "==", dealerId));
+  const q = query(
+    incomingBids,
+    where("dealerId", "==", dealerId)
+    // where("delete", "!=", true)
+  );
   const snapshot = await getDocs(q);
   const negotiationIds: string[] = [];
   const bidsNotWonIds: string[] = [];
-  const bids = snapshot.docs.map((doc) => {
+  const filteredBids = snapshot.docs.filter((doc) => {
+    const data = doc.data();
+    return !data.delete;
+  });
+  const bids = filteredBids.map((doc) => {
     const data = doc.data();
     if (
       data.negotiationId &&

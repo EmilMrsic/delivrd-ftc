@@ -84,7 +84,7 @@ export const BidList = ({
 
   return (
     <div className="space-y-8">
-      {bids.map((bid, idx) => (
+      {sortedBids.map((bid, idx) => (
         <BidCard
           negotiation={negotiation}
           bid={bid}
@@ -96,6 +96,7 @@ export const BidList = ({
           dealCoordinator={dealCoordinator}
           user={user}
           mode={mode}
+          refetch={refetch}
         />
       ))}
     </div>
@@ -112,6 +113,7 @@ export const BidCard = ({
   dealCoordinator,
   user,
   mode,
+  refetch,
 }: {
   bid: IncomingBidType & { bidDealer: DealerDataType };
   hasAcceptedBid: boolean;
@@ -122,6 +124,7 @@ export const BidCard = ({
   dealCoordinator: DealNegotiatorType;
   user: any;
   mode: "bids" | "tradeIns";
+  refetch: () => void;
 }) => {
   const [bid, setBid] = useState<
     IncomingBidType & { bidDealer: DealerDataType }
@@ -169,6 +172,7 @@ export const BidCard = ({
 
       if (result.success) {
         toast({ title: "Offer accepted", variant: "default" });
+        refetch?.();
       } else {
         console.error("Failed to accept offer:", result.error);
         toast({
@@ -186,6 +190,7 @@ export const BidCard = ({
       const bidRef = doc(db, "Incoming Bids", bid.bid_id as string);
       await updateDoc(bidRef, { accept_offer: false, vote: "neutral" });
       setBid({ ...bid, accept_offer: false, vote: "neutral" });
+      refetch?.();
 
       toast({ title: "Offer canceled" });
     } catch (error) {

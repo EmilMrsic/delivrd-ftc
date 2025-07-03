@@ -40,11 +40,14 @@ export const PreviousBidsTable = ({
         if (vehicle.bidType === "tradeIn") return false;
         return true;
       });
+
+      console.log("got incomingVehicles:", incomingVehicles);
     } else {
-      return incomingVehicles.filter((vehicle) => {
+      incomingVehicles = incomingVehicles.filter((vehicle) => {
         if (vehicle.bidType === "tradeIn") return true;
         return false;
       });
+      return incomingVehicles;
     }
 
     if (subTab === "all") return incomingVehicles;
@@ -116,6 +119,7 @@ export const PreviousBidsTable = ({
   };
 
   useEffect(() => {
+    console.log("got incoming: subtab:", subTab, dealerBids);
     const filtered = filterVehicles(dealerBids);
     setFilteredBids(filtered);
   }, [subTab, dealerBids]);

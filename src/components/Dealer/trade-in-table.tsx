@@ -11,6 +11,8 @@ import { negotiationMakeColors } from "@/lib/constants/negotiations";
 
 import { DealerContext } from "@/lib/context/dealer-context";
 import { createNewBid } from "@/lib/helpers/bids";
+import { BackwardIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export const TradeInTable = ({
   negotiations,
@@ -74,6 +76,17 @@ export const TradeInTable = ({
 
   return (
     <>
+      <div className="mt-4">
+        <Link href="/bid">
+          <Button
+            variant="outline"
+            className="w-fit bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+          >
+            <BackwardIcon className="w-6 h-6 mr-2" />
+            Back
+          </Button>
+        </Link>
+      </div>
       <div className="text-xl font-bold mt-4 mb-2">
         Available Trade-in Vehicles
       </div>

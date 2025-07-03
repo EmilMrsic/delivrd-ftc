@@ -9,11 +9,11 @@ export const useNegotiationBids = ({
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["client-bids"],
     queryFn: async () => {
+      console.log("rerunning: negotiationId:", negotiationId);
       const response = await backendRequest(
         `negotiation/${negotiationId}/bids`,
         "GET"
       );
-      console.log("response:", negotiationId, response);
       return response;
     },
   });

@@ -314,8 +314,6 @@ const ManualBidUpload = ({
     data: dealership, // To access full dealership data on selection
   }));
 
-  console.log("clicked:", isDialogOpen);
-
   return (
     <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
       <>

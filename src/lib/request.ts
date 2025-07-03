@@ -11,7 +11,6 @@ export const backendRequest = async <T = object>(
   }
 
   headers["auth"] = getUserData().id;
-  console.log("user:", getUserData());
 
   const response = await fetch(`/api/${path}`, {
     method: method,

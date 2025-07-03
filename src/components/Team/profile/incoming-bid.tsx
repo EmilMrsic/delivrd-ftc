@@ -77,6 +77,7 @@ export const IncomingBidCard = ({
   // const hasAcceptedBid = incomingBids.some(
   //   (bid: IncomingBid) => bid.accept_offer === true
   // );
+
   const { hasAcceptedOffer, hasAcceptedBid } = offersInfo;
   const isAcceptedBid = bidDetails.accept_offer === true;
   const isDisabled = hasAcceptedBid && !isAcceptedBid;
@@ -105,12 +106,14 @@ export const IncomingBidCard = ({
         ...acceptedBid,
         accept_offer: true,
       };
+
+      const sendableJson = JSON.stringify(updatedBid);
       const response = await fetch(
         process.env.NEXT_PUBLIC_ACCEPT_OFFER_URL ?? "",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedBid),
+          body: sendableJson,
         }
       );
 
@@ -146,6 +149,7 @@ export const IncomingBidCard = ({
       );
 
       toast({ title: "Offer canceled" });
+      refetch?.();
     } catch (error) {
       console.error("Error accepting offer:", error);
     }
