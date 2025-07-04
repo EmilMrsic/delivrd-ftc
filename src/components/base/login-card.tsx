@@ -73,6 +73,7 @@ const LoginCard = () => {
         id: loginRowId,
         email: parsedEmail,
         loginInitiationTimestamp: serverTimestamp(),
+        host: window.location.hostname,
       };
       const q = query(
         collection(db, "users"),
