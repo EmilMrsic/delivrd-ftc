@@ -22,6 +22,7 @@ const Header: FC<IHeaderProps> = ({ user }) => {
     localStorage.removeItem("user");
     router.push("/");
   };
+
   return (
     <header className="bg-[#202125] border-b sticky top-0 z-50">
       <div className="bg-background text-foreground">

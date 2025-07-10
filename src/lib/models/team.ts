@@ -35,6 +35,7 @@ export const NegotiationDataModel = z.object({
       fileUrls: z.array(z.string()).optional(),
       comments: z.string().optional(),
       vin: z.string().optional(),
+      year: z.string().optional(),
     })
     .optional(),
   userId: z.string(),

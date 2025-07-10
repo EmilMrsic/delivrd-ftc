@@ -41,10 +41,10 @@ export const TradeInTable = ({
 
   const [sortConfig, setSortConfig] = useState<{
     brand: keyof typeof negotiationMakeColors;
-    sort: "Newest First" | "Oldest First";
+    sort: "Most Recent" | "Oldest First";
   }>({
     brand: "All",
-    sort: "Newest First",
+    sort: "Most Recent",
   });
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export const TradeInTable = ({
     });
 
     const sorted = filtered.sort((a, b) => {
-      if (sortConfig.sort === "Newest First") {
+      if (sortConfig.sort === "Most Recent") {
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
@@ -99,7 +99,7 @@ export const TradeInTable = ({
             onChange={(value) => {
               setSortConfig({
                 brand: value as keyof typeof negotiationMakeColors,
-                sort: "Newest First",
+                sort: "Most Recent",
               });
             }}
           />
@@ -107,12 +107,12 @@ export const TradeInTable = ({
         <div>
           Sort By:{" "}
           <NormalDropdown
-            options={["Newest First", "Oldest First"]}
-            default="Newest First"
+            options={["Most Recent", "Oldest First"]}
+            default="Most Recent"
             onChange={(value) => {
               setSortConfig({
                 brand: sortConfig.brand,
-                sort: value as "Newest First" | "Oldest First",
+                sort: value as "Most Recent" | "Oldest First",
               });
             }}
           />
@@ -197,7 +197,12 @@ export const TradeInCard = ({
         <hr className="my-4" />
         <div className="flex justify-between">
           <div className="text-sm text-gray-500 font-semibold my-auto">
-            Listed: {negotiation.createdAt.split("T")[0]}
+            Listed:{" "}
+            {new Date(negotiation.createdAt).toLocaleDateString("en-US", {
+              month: "2-digit",
+              day: "2-digit",
+              year: "numeric",
+            })}
           </div>
           <div>
             <Button

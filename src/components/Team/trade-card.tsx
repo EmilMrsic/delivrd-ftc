@@ -38,6 +38,20 @@ const TradeCard = ({
           }
         />
         <InputField
+          field="year"
+          parentKey="tradeDetails"
+          negotiationId={negotiationId ?? ""}
+          label="Year"
+          value={negotiation?.tradeDetails?.year ?? ""}
+          onChange={(newValue) =>
+            handleChange({
+              key: "year",
+              parentKey: "tradeDetails",
+              newValue: newValue,
+            })
+          }
+        />
+        <InputField
           field="vin"
           parentKey="tradeDetails"
           negotiationId={negotiationId ?? ""}
