@@ -46,6 +46,7 @@ import ManualBidUpload from "../Manual-bid-upload-modal";
 import { TabSelector } from "@/components/base/tab-selector";
 import { useNegotiationBids } from "@/hooks/useNegotiationBids";
 import { BidList } from "./bid-list";
+import { OpenPhoneModule } from "@/components/modules/open-phone";
 
 export const ClientProfile = ({
   negotiationId,
@@ -518,6 +519,7 @@ export const ClientProfile = ({
           {!clientMode && (
             <>
               <ActivityLogSection activityLog={activityLog ?? []} />
+              <OpenPhoneModule negotiationId={negotiationId} />
               <div className="banner bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-5 rounded-lg shadow-xl flex justify-between items-center max-w-4xl mx-auto my-4">
                 <div>
                   <p className="text-xl font-bold">Delivrd</p>
