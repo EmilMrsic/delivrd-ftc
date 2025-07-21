@@ -1,5 +1,5 @@
 import { DealerDataType } from "@/lib/models/dealer";
-import Header from "../base/header";
+import Header, { TeamHeader } from "../base/header";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { useEffect, useState } from "react";
 import { CardContent } from "../ui/card";
@@ -45,8 +45,14 @@ export const BidScreen = ({
         !isMobile && `p-4`
       )}
     >
-      <Header user={user} />
-      <div className="block md:bg-transparent bg-white md:border-none border-b top-[145px] md:pt-0 pt-8 md:static sticky z-50 flex">
+      {/* <Header user={user} /> */}
+      <TeamHeader dealerMode={true} />
+      <div
+        className={cn(
+          `block md:bg-transparent bg-white md:border-none border-b top-[145px] md:pt-0 pt-8 md:static z-50 w-full`,
+          isMobile ? `px-4` : `flex`
+        )}
+      >
         <Tabs
           value={tab}
           defaultValue="account"
@@ -58,14 +64,22 @@ export const BidScreen = ({
             <TabsTrigger value="previous">Previous Bids</TabsTrigger>
           </TabsList>
         </Tabs>
-        <Link href="/dealer/trade">
-          <Button
-            variant="outline"
-            className="w-full w-fit ml-4 bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+        <div className={cn(isMobile ? `w-full text-center mb-2` : `w-fit`)}>
+          <Link
+            href="/dealer/trade"
+            className={cn(isMobile ? `w-fit mx-auto` : ``)}
           >
-            Trade In Marketplace
-          </Button>
-        </Link>
+            <Button
+              variant="outline"
+              className={cn(
+                `w-fit ml-4 bg-blue-500 text-white hover:bg-blue-600 hover:text-white`,
+                isMobile && `ml-auto mr-0`
+              )}
+            >
+              Trade In Marketplace
+            </Button>
+          </Link>
+        </div>
       </div>
       <div className="bg-white shadow-lg">
         <CardContent>

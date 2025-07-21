@@ -17,6 +17,7 @@ interface EditableTextAreaProps {
   field: string;
   userField?: string;
   onBlur?: () => void;
+  parentKey?: string;
 }
 
 const EditableTextArea: React.FC<EditableTextAreaProps> = ({

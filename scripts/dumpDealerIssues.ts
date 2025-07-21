@@ -59,8 +59,8 @@ export const main = async () => {
   const dealers = await grabDealerRows(dealerLogins);
 
   dealers.forEach((dealer: any) => {
-    if (!dealer.user.dealer.updated) {
-      console.log("found an issue!");
+    if (!dealer.user?.dealer?.updated) {
+      console.log("found an issue!", dealer);
     }
   });
 };

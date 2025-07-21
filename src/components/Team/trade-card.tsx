@@ -29,7 +29,7 @@ const TradeCard = ({
         <EditableTextArea
           value={negotiation?.tradeInInfo ?? "No trade in info at the moment"}
           negotiationId={negotiationId ?? ""}
-          field="trade_in_info"
+          field="tradeInInfo"
           onChange={(newValue) =>
             handleChange({
               key: "tradeInInfo",
