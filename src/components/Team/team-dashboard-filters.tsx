@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Checkbox } from "../ui/checkbox";
 import { DealsOverviewBoard } from "./deals-overview/deals-overview-board";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export const TeamDashboardFilters = ({
   allDealNegotiator,
@@ -22,6 +23,7 @@ export const TeamDashboardFilters = ({
 }: any) => {
   const user = useLoggedInUser();
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   if (!user) return null;
   const overviewMode =
@@ -31,21 +33,21 @@ export const TeamDashboardFilters = ({
   return (
     <>
       <div className="items-center mb-4 mt-4">
-        <div className="flex gap-3">
+        <div className="flex gap-3 mx-auto w-fit">
           <Button onClick={() => router.push("/manager")} newDefault={true}>
-            <p>Manager View</p>
+            <p>Manager {isMobile ? "" : "View"}</p>
           </Button>
           <Button
             onClick={() => router.push("/mode/consult")}
             newDefault={true}
           >
-            <p>Consult Mode</p>
+            <p>Consult {isMobile ? "" : "Mode"}</p>
           </Button>
           <Button
             onClick={() => router.push("/mode/dealers")}
             newDefault={true}
           >
-            <p>FTC Table</p>
+            <p>FTC {isMobile ? "" : "Table"}</p>
           </Button>
         </div>
         <DealsOverviewBoard mode={overviewMode} />

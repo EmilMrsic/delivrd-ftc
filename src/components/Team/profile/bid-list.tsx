@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { handleSendComment } from "@/lib/helpers/comments";
 import { uploadFile } from "@/lib/helpers/files";
@@ -136,6 +137,7 @@ export const BidCard = ({
   const bidVerified = isManualBid || bid.verified;
   const isAcceptedBid = bid.accept_offer === true;
   const isDisabled = hasAcceptedBid && !isAcceptedBid;
+  const isMobile = useIsMobile();
 
   const defaultValues = useMemo(() => {
     return {
@@ -210,14 +212,12 @@ export const BidCard = ({
     toast({ title: "Bid verified" });
   };
 
-  console.log("got bid:", bid);
-
   return (
     <>
       <div
         id={`bid_${bid.bid_id}`}
         key={bid.bid_id}
-        className={`border-l-4 pl-4 pb-6 pt-2 pr-2 
+        className={`border-l-4 pl-4 pr-2 pb-6 pt-2 
         ${isDisabled ? "opacity-45 pointer-events-none" : ""}
 
     ${
@@ -230,14 +230,25 @@ export const BidCard = ({
             : "bg-white border-blue-600"
         }`}
       >
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold text-[#202125]">
+        <div
+          className={cn(
+            `justify-between items-center mb-2`,
+            !isMobile && "flex"
+          )}
+        >
+          <h3
+            className={cn(
+              `text-lg font-semibold text-[#202125]`,
+              isMobile && "text-center mb-2"
+            )}
+          >
             {bid.dealerName ? `${bid.dealerName} Offer` : "No Dealership"}
 
             <span
               className={cn(
                 `px-2 py-1 text-sm font-medium text-white rounded-full ml-2`,
-                bidVerified ? "bg-green-600" : "bg-red-500"
+                bidVerified ? "bg-green-600" : "bg-red-500",
+                isMobile && "block text-center"
               )}
             >
               {!bidVerified
@@ -245,7 +256,7 @@ export const BidCard = ({
                 : "Verified By The Delivrd Team"}
             </span>
           </h3>
-          <div className="items-center gap-3">
+          <div className={cn(`items-center gap-3`, isMobile && "mt-4")}>
             <div className="flex">
               {!(noUserActions || clientMode) && (
                 <>
@@ -327,7 +338,7 @@ export const BidCard = ({
         <p className="text-[#202125] mb-4">
           Price: ${bid?.price ? bid?.price : "No price available"}
         </p>
-        <div className="flex space-x-2 mb-4">
+        <div className={cn(`flex space-x-2 mb-4`, isMobile && "flex-wrap")}>
           {/* <BidDetailsDialog
           openDialog={openDialog}
           setEditingBidId={setEditingBidId}
@@ -672,11 +683,18 @@ export const BidComment = ({
   noUserActions: boolean;
   user: any;
 }) => {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="flex bg-gray-100 mb-2 rounded pr-2 items-center justify-between">
+    <div
+      className={cn(
+        "bg-gray-100 mb-2 rounded pr-2 items-center justify-between",
+        !isMobile && "flex "
+      )}
+    >
       <div className="p-2 flex flex-col  mt-1">
         <p>
-          <strong>
+          <strong className={cn(isMobile && "block")}>
             {comment?.author?.name
               ? comment?.author?.name
               : comment.deal_coordinator_name === "N/A"
@@ -696,7 +714,7 @@ export const BidComment = ({
             !noUserActions && (
               <Button
                 variant="outline"
-                className="border-black"
+                className={cn("border-black", isMobile && "w-fit mr-0 ml-auto")}
                 onClick={() => handleSendComment(user, comment)}
               >
                 Send To Client
@@ -718,6 +736,7 @@ export const BidVoteCard = ({
   bid: IncomingBidType & { bidDealer: DealerDataType };
   setBid: (bid: IncomingBidType & { bidDealer: DealerDataType }) => void;
 }) => {
+  const isMobile = useIsMobile();
   const handleVote = async (direction: "like" | "dislike") => {
     try {
       let currentVote = bid.vote;
@@ -753,7 +772,7 @@ export const BidVoteCard = ({
   };
 
   return (
-    <div className="flex space-x-2">
+    <div className={cn(`flex space-x-2`)}>
       {!(clientMode || (clientMode && bid.vote === "like")) && (
         <Button
           variant="outline"

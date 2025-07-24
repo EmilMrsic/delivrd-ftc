@@ -10,6 +10,7 @@ import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { Notifications } from "./notifications";
 import { UserAvatar } from "../ui/avatar";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { cn } from "@/lib/utils";
 interface IHeaderProps {
   user: IUser | null;
 }
@@ -97,11 +98,13 @@ export const TeamHeader = ({
       <img
         src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
         alt="DELIVRD Logo"
-        className="h-8 mb-2"
+        className={cn(`mb-2`, isMobile ? "h-6" : "h-8")}
       />
       <p className="text-white text-sm">Putting Dreams In Driveways</p>
     </div>
   );
+
+  if (!negotiatorDataToUser) return null;
 
   return (
     <>
@@ -140,24 +143,39 @@ export const TeamHeader = ({
               </span>
             )}
             {!dealerMode && (
-              <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  `items-center gap-2`,
+                  isMobile ? "flex-col" : "flex"
+                )}
+              >
+                {isMobile && (
+                  <div className="mb-2">
+                    <UserAvatar user={negotiatorDataToUser} size="small" />
+                  </div>
+                )}
                 {negotiatorDataToUser?.privilege &&
                   negotiatorDataToUser?.privilege !== "Client" && (
-                    <Notifications />
+                    <div className={cn(isMobile ? "w-fit mx-auto" : "")}>
+                      <Notifications />
+                    </div>
                   )}
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text mt-0">
-                  Client Deals Dashboard
-                </h1>
-              </div>
-            )}
-            {negotiatorDataToUser && (
-              <div className="flex gap-2 w-fit mr-0 ml-auto mt-2">
-                <UserAvatar user={negotiatorDataToUser} size="small" />
                 {!isMobile && (
-                  <h1 className="text-base font-semibold text-white text-transparent bg-clip-text mt-auto mb-auto">
-                    {negotiatorDataToUser?.name}
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-[#0989E5] to-[#E4E5E9] text-transparent bg-clip-text mt-0">
+                    Client Deals Dashboard
                   </h1>
                 )}
+              </div>
+            )}
+            {negotiatorDataToUser && !isMobile && (
+              <div className="flex gap-2 w-fit mr-0 ml-auto mt-2">
+                {negotiatorDataToUser && (
+                  <UserAvatar user={negotiatorDataToUser} size="small" />
+                )}
+
+                <h1 className="text-base font-semibold text-white text-transparent bg-clip-text mt-auto mb-auto">
+                  {negotiatorDataToUser?.name}
+                </h1>
               </div>
             )}
           </div>

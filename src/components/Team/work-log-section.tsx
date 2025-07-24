@@ -21,9 +21,10 @@ const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 import "react-quill/dist/quill.snow.css";
 import { toast } from "@/hooks/use-toast";
-import { generateRandomId, uploadFile } from "@/lib/utils";
+import { cn, generateRandomId, uploadFile } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { NegotiationDataType, WorkLogType } from "@/lib/models/team";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface WorkLogSectionProps {
   user: any;
@@ -47,6 +48,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   const [editingLog, setEditingLog] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>("");
   const [editFiles, setEditFiles] = useState<File[]>([]);
+  const isMobile = useIsMobile();
 
   const fetchWorkLogs = async (id: string | null) => {
     if (!id) return;
@@ -306,8 +308,16 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
               new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
           )
           .map((log) => (
-            <div key={log.id} className="flex items-start space-x-3">
-              <Avatar className="h-10 w-10">
+            <div
+              key={log.id}
+              className={cn(
+                `flex items-start space-x-3`,
+                isMobile && "flex-col"
+              )}
+            >
+              <Avatar
+                className={cn(`h-10 w-10`, isMobile && "mr-2 ml-auto mb-2")}
+              >
                 <AvatarImage
                   src={log?.userAvatar ?? ""}
                   alt={log?.user !== null ? log?.user?.[0] : ""}
@@ -316,8 +326,13 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                   {log?.user !== null ? log?.user?.[0] : ""}
                 </AvatarFallback>
               </Avatar>
-              <div className="p-3 rounded-lg bg-gray-100 flex-grow">
-                <div className="flex justify-between items-center mb-1">
+              <div className="p-3 rounded-lg bg-gray-100 flex-grow w-full">
+                <div
+                  className={cn(
+                    `flex justify-between mb-1`,
+                    isMobile ? "flex-col" : "items-center"
+                  )}
+                >
                   <p className="font-semibold">{log.user}</p>
                   <p className="text-xs text-gray-500">
                     {new Date(log.timestamp).toLocaleString("en-US", {
@@ -360,7 +375,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                     />
                   </div>
                 ) : (
-                  <div className="flex justify-between">
+                  <div className={cn(`justify-between`, !isMobile && "flex")}>
                     <div
                       style={{
                         wordBreak: "break-word",
@@ -375,6 +390,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
                     ></div>
                     {!noActions && (
                       <Button
+                        className={cn(isMobile && "w-fit mr-0 ml-auto")}
                         variant="ghost"
                         size="sm"
                         onClick={() => startEditing(log)}

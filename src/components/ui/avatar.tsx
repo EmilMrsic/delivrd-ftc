@@ -83,7 +83,7 @@ export const UserAvatar = ({
       }
     >
       <AvatarImage
-        src={user.profile_pic ?? "/placeholder.svg?height=40&width=40"}
+        src={user?.profile_pic ?? "/placeholder.svg?height=40&width=40"}
         alt="@example"
       />
       <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>

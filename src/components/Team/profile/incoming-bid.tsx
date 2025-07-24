@@ -21,6 +21,7 @@ import { IncomingBidCommentType } from "@/lib/models/bids";
 import { ModalForm } from "@/components/tailwind-plus/modal-form";
 import { useEffect, useMemo, useState } from "react";
 import { backendRequest, callZapierWebhook } from "@/lib/request";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -70,6 +71,7 @@ export const IncomingBidCard = ({
   const matchingDealer = dealers.find((dealer: DealNegotiatorType) => {
     return dealer.id === bidDetails.dealerId;
   });
+  const isMobile = useIsMobile();
 
   // const hasAcceptedOffer = incomingBids.find(
   //   (bid: IncomingBid) => bid.client_offer === "accepted"
@@ -223,8 +225,18 @@ export const IncomingBidCard = ({
             : "bg-white border-blue-600"
         }`}
       >
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold text-[#202125]">
+        <div
+          className={cn(
+            `justify-between items-center mb-2`,
+            !isMobile && "flex"
+          )}
+        >
+          <h3
+            className={cn(
+              `text-lg font-semibold text-[#202125]`,
+              isMobile && "text-center mb-2"
+            )}
+          >
             {matchingDealer?.Dealership
               ? `${matchingDealer.Dealership} Offer`
               : "No Dealership"}
@@ -232,7 +244,8 @@ export const IncomingBidCard = ({
             <span
               className={cn(
                 `px-2 py-1 text-sm font-medium text-white rounded-full ml-2`,
-                bidVerified ? "bg-green-600" : "bg-red-500"
+                bidVerified ? "bg-green-600" : "bg-red-500",
+                isMobile && "block text-center"
               )}
             >
               {!bidVerified
@@ -241,7 +254,7 @@ export const IncomingBidCard = ({
             </span>
           </h3>
 
-          <div className="items-center gap-3">
+          <div className={cn(`items-center gap-3`, isMobile && "mt-4")}>
             <div className="flex">
               {!(noUserActions || clientMode) && (
                 <>

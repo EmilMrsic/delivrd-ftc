@@ -29,6 +29,7 @@ import {
 import { db, messaging } from "@/firebase/config";
 import { ActivityLog, BidComments, IncomingBid } from "@/types";
 import {
+  cn,
   formatDate,
   generateRandomId,
   getCurrentTimestamp,
@@ -69,16 +70,23 @@ import { TailwindPlusCard } from "@/components/tailwind-plus/card";
 import { IncomingBidCard } from "@/components/Team/profile/incoming-bid";
 import { IncomingBids } from "@/components/Team/profile/incoming-bids";
 import { ClientProfile } from "@/components/Team/profile/client-profile";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 function Profile() {
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const params = useSearchParams();
   const negotiationId = params.get("id");
+  const isMobile = useIsMobile();
 
   return (
     <Suspense fallback={"Loading"}>
       {negotiationId && (
-        <div className="container mx-auto p-4 space-y-6 min-h-screen w-[90vw]">
+        <div
+          className={cn(
+            `container mx-auto space-y-6 min-h-screen w-[90vw]`,
+            isMobile ? "" : "p-4"
+          )}
+        >
           <TeamHeader
           // negotiatorData={dealNegotiator as unknown as DealNegotiatorType}
           />

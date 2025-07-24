@@ -1,3 +1,4 @@
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { clsx } from "clsx";
 
 type HeadingProps = {
@@ -33,6 +34,8 @@ export function Subheading({
   size = "small",
   ...props
 }: HeadingProps) {
+  const isMobile = useIsMobile();
+
   return (
     <Element
       {...props}

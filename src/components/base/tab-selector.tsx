@@ -11,7 +11,7 @@ export const TabSelector = ({
   setValue: (value: string) => void;
 }) => {
   return (
-    <div className="block md:bg-transparent bg-white md:border-none border-b top-[145px] md:pt-0 pt-8 md:static sticky z-50">
+    <div className="block md:bg-transparent bg-white md:border-none border-b top-[145px] md:pt-0 pt-8 md:static z-50">
       <Tabs
         className="md:text-start text-center mb-2"
         value={value}
