@@ -61,26 +61,31 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   }, [negotiationsFromUseNegotiations]);
 
   const fetchDealers = async () => {
-    const dealersData = [];
+    const bidDealerIds = incomingBids.map((bid) => bid.dealerId);
+    const dealers = await getDocs(collection(db, "Dealers"));
+    const dealersData = dealers.docs.map((doc) => doc.data());
+    const filteredDealers = dealersData.filter((dealer) => {
+      return bidDealerIds.includes(dealer.id);
+    });
 
-    for (const bid of incomingBids) {
-      const id = bid.dealerId;
-      if (id !== "N/A" && id)
-        try {
-          const dealerRef = doc(db, "Dealers", id);
-          const dealerSnap = await getDoc(dealerRef);
+    // for (const bid of incomingBids) {
+    //   const id = bid.dealerId;
+    //   if (id !== "N/A" && id)
+    //     try {
+    //       const dealerRef = doc(db, "Dealers", id);
+    //       const dealerSnap = await getDoc(dealerRef);
 
-          if (dealerSnap.exists()) {
-            dealersData.push(dealerSnap.data());
-          } else {
-            console.warn(`Dealer with ID ${id} not found`);
-          }
-        } catch (error) {
-          console.error(`Error fetching dealer data for ID ${id}:`, error);
-        }
-    }
+    //       if (dealerSnap.exists()) {
+    //         dealersData.push(dealerSnap.data());
+    //       } else {
+    //         console.warn(`Dealer with ID ${id} not found`);
+    //       }
+    //     } catch (error) {
+    //       console.error(`Error fetching dealer data for ID ${id}:`, error);
+    //     }
+    // }
 
-    return dealersData;
+    return filteredDealers;
   };
 
   const fetchBidComments = async () => {

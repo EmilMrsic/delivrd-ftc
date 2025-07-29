@@ -196,6 +196,8 @@ const ManualBidUpload = ({
         setDealers && dealers && setDealers([...dealers, newDealer]);
       }
 
+      console.log("dealerData", dealerId, selectedDealership);
+
       // Create Bid Data Object
       const bidData: any = {
         bid_id,
@@ -225,6 +227,8 @@ const ManualBidUpload = ({
         }),
         bid_source: "Manual",
       };
+
+      console.log("bidData", bidData);
 
       const bidRef = doc(db, "Incoming Bids", bid_id);
 
