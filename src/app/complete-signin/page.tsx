@@ -87,7 +87,7 @@ const SignInContent = ({
         if (userData.privilege === "Dealer") {
           redirectUrl = "/bid";
         } else if (userData.privilege === "Client") {
-          redirectUrl = `/client/${userData.id}`;
+          redirectUrl = `/client`;
         } else if (userData.privilege === "Team") {
           redirectUrl = "/team-dashboard";
         }
