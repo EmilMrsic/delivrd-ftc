@@ -125,7 +125,11 @@ export const POST = async (
       }
     }
 
-    if (["Paid", "Deal Started", "Actively Negotiating"].includes(deal.stage)) {
+    if (
+      ["Paid", "Deal Started", "Actively Negotiating"].includes(
+        deal.stage as string
+      )
+    ) {
       // if assigned, make sure the coordinator is "visible" e.g. not a dev
       if (
         mode === "coordinator" &&

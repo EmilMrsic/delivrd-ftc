@@ -211,14 +211,15 @@ export const getActiveDealDocuments = async (dealQuery: {
 
   const negotiations = negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();
-    try {
-      const parsed = NegotiationDataModel.parse(data);
-      return parsed;
-    } catch (error) {
-      console.error("Error parsing negotiation data:", data.id);
-      console.error(error);
-      return null;
-    }
+    return data as NegotiationDataType;
+    // try {
+    //   const parsed = NegotiationDataModel.parse(data);
+    //   return parsed;
+    // } catch (error) {
+    //   console.error("Error parsing negotiation data:", data.id);
+    //   console.error(error);
+    //   return null;
+    // }
   });
 
   const filteredNegotiations = negotiations.filter(
