@@ -69,7 +69,6 @@ export const IncomingBidCard = ({
   const [connectClientAndDealer, setConnectClientAndDealer] = useState(false);
   const [notifyFTC, setNotifyFTC] = useState(false);
   const matchingDealer = dealers.find((dealer: DealNegotiatorType) => {
-    console.log("bid dealer lookup", dealer, bidDetails);
     return dealer.id === bidDetails.dealerId;
   });
   const isMobile = useIsMobile();

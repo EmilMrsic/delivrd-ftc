@@ -216,6 +216,7 @@ export const getActiveDealDocuments = async (dealQuery: {
       return parsed;
     } catch (error) {
       console.error("Error parsing negotiation data:", data.id);
+      console.error(error);
       return null;
     }
   });
@@ -225,11 +226,13 @@ export const getActiveDealDocuments = async (dealQuery: {
       if (!negotiation) return false;
       if (dealQuery.profile) return true;
       if (dealQuery.archive) {
-        return ["Closed", "Closed No Review"].includes(negotiation.stage);
+        return ["Closed", "Closed No Review"].includes(
+          negotiation.stage as string
+        );
       } else if (dealQuery.mode === "consult") {
-        return consultModeStatusOrder.includes(negotiation.stage);
+        return consultModeStatusOrder.includes(negotiation.stage as string);
       } else {
-        return negotiationStatusOrder.includes(negotiation.stage);
+        return negotiationStatusOrder.includes(negotiation.stage as string);
       }
     }
   ) as NegotiationDataType[];
@@ -239,17 +242,25 @@ export const getActiveDealDocuments = async (dealQuery: {
 
 export const getNegotiationsByClientId = async (clientId: string) => {
   const negotiationsCollectionRef = collection(db, "delivrd_negotiations");
-  const queryConditions: QueryConstraint[] = [where("userId", "==", clientId)];
+  const queryConditions: QueryConstraint[] = [
+    where("userId", "==", clientId.trim()),
+  ];
   queryConditions.push(orderBy("createdAt", "desc"));
-  queryConditions.push(limit(1));
+  // queryConditions.push(limit(1));
 
   const negotiationsQuery = query(
     negotiationsCollectionRef,
+    // where("userId", "==", "3fz6TO4HGd48fEdXqaXJ")
     ...queryConditions
   );
 
+  console.log("got client", clientId);
   const negotiationsSnapshot = await getDocs(negotiationsQuery);
-  return negotiationsSnapshot.docs.map((doc) => doc.data());
+  console.log("got negotiations", negotiationsSnapshot.docs.length);
+  return negotiationsSnapshot.docs.map((doc) => {
+    const data = doc.data() as NegotiationDataType;
+    return data;
+  });
 };
 
 export const mapNegotiationsToTeam = (
@@ -272,7 +283,9 @@ export const mapNegotiationsToTeam = (
 
       teamIdToObject[deal.dealCoordinatorId].push(deal);
     } else if (
-      ["Actively Negotiating", "Paid", "Deal Started"].includes(deal.stage)
+      ["Actively Negotiating", "Paid", "Deal Started"].includes(
+        deal.stage as string
+      )
     ) {
       dealsWithoutCoordinator.push(deal);
     }

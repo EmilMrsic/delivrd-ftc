@@ -52,6 +52,7 @@ interface Cell {
 
 interface RowConfig {
   backgroundColor?: string;
+  onClick?: () => void;
 }
 
 export const TailwindPlusTable = ({
@@ -137,7 +138,7 @@ export const TailwindPlusTable = ({
               ) : (
                 useableRows.map((row, rowIdx) => {
                   const rowConfig = rowConfigs?.[rowIdx] ?? {};
-                  const { backgroundColor } = rowConfig;
+                  const { backgroundColor, onClick } = rowConfig;
                   let useableRow = row;
                   let SubRow: any = null;
                   if (row[0]?.descriptor) {
@@ -187,7 +188,10 @@ export const TailwindPlusTable = ({
                   const CTA = row[0]?.descriptor?.cta;
                   const MobileHeader = row[0]?.descriptor?.mobileHeader;
                   return isMobile ? (
-                    <div className="border-2 rounded-md border-gray-200 mb-4 relative">
+                    <div
+                      className="border-2 rounded-md border-gray-200 mb-4 relative"
+                      onClick={onClick}
+                    >
                       <div className="flex flex-wrap mb-4 bg-[#F9FAFB] p-2">
                         {row[0]?.descriptor?.mobileHeader && (
                           <div
@@ -226,8 +230,10 @@ export const TailwindPlusTable = ({
                             ? backgroundColor
                             : rowIdx % 2 === 0
                             ? "bg-white"
-                            : "bg-gray-50"
+                            : "bg-gray-50",
+                          onClick ? "cursor-pointer hover:bg-gray-100" : ""
                         )}
+                        onClick={onClick}
                       >
                         {rowCells}
                       </tr>

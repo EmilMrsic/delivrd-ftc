@@ -15,6 +15,8 @@ import { toast } from "@/hooks/use-toast";
 import { NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { formatDateToLocal } from "@/lib/helpers/dates";
+import { Button } from "../ui/button";
+import { callZapierWebhook } from "@/lib/request";
 
 type FeatureDetailsProps = {
   negotiation: NegotiationDataType | null;
@@ -26,6 +28,7 @@ type FeatureDetailsProps = {
   }) => void;
   setShowStickyHeader?: (item: boolean) => void;
   clientMode?: boolean;
+  clientDeals?: string[] | null;
 };
 
 const FeatureDetails = ({
@@ -34,6 +37,7 @@ const FeatureDetails = ({
   handleChange,
   setShowStickyHeader,
   clientMode,
+  clientDeals,
 }: FeatureDetailsProps) => {
   const dealDetailsRef = useRef(null);
   const [dealStartDate, setDealStartDate] = useState<Date | null>();
@@ -406,21 +410,42 @@ const FeatureDetails = ({
           readOnly={clientMode}
         />
         {!clientMode && (
-          <InputField
-            negotiations={negotiation}
-            label="Onboarding Link"
-            value={negotiation?.onboardingLink ?? "No preference"}
-            negotiationId={negotiationId ?? ""}
-            field="onboardingLink"
-            onChange={(newValue) =>
-              handleChange({
-                key: "onboardingLink",
-                newValue: newValue,
-              })
-            }
-            icon={X}
-            readOnly={clientMode}
-          />
+          <>
+            <InputField
+              negotiations={negotiation}
+              label="Onboarding Link"
+              value={negotiation?.onboardingLink ?? "No preference"}
+              negotiationId={negotiationId ?? ""}
+              field="onboardingLink"
+              onChange={(newValue) =>
+                handleChange({
+                  key: "onboardingLink",
+                  newValue: newValue,
+                })
+              }
+              icon={X}
+              readOnly={clientMode}
+            />
+            <Button
+              variant="outline"
+              className="w-full mt-4"
+              onClick={async () => {
+                if (negotiationId) {
+                  const response = await callZapierWebhook(
+                    process.env.NEXT_PUBLIC_GENERATE_ONBOARDING_URL as string,
+                    negotiation
+                  );
+
+                  toast({
+                    title: "Zapier called successfully",
+                    description: response.message,
+                  });
+                }
+              }}
+            >
+              Generate Onboarding Link
+            </Button>
+          </>
         )}
       </div>
     </TailwindPlusCard>

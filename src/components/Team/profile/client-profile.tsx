@@ -14,9 +14,12 @@ import {
   addDoc,
   collection,
   doc,
+  getDocs,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { onMessage } from "firebase/messaging";
 import Link from "next/link";
@@ -46,6 +49,7 @@ import ManualBidUpload from "../Manual-bid-upload-modal";
 import { TabSelector } from "@/components/base/tab-selector";
 import { useNegotiationBids } from "@/hooks/useNegotiationBids";
 import { BidList } from "./bid-list";
+import { DealSelection } from "./deal-selection";
 
 export const ClientProfile = ({
   negotiationId,
@@ -60,6 +64,14 @@ export const ClientProfile = ({
     clientModeProp ?? false
   );
   const [openDialog, setOpenDialog] = useState<string | null>(null);
+  const [clientDeals, setClientDeals] = useState<
+    | {
+        id: string;
+        make: string;
+        model: string;
+      }[]
+    | null
+  >(null);
 
   const {
     dealNegotiator,
@@ -108,6 +120,29 @@ export const ClientProfile = ({
     await fetchBidComments();
     await refetchNegotiationBids();
   };
+
+  useEffect(() => {
+    if (negotiation && !clientDeals) {
+      (async () => {
+        const deals = await getDocs(
+          query(
+            collection(db, "delivrd_negotiations"),
+            where("userId", "==", negotiation.userId)
+          )
+        );
+        const dealIds = deals.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            make: data.brand,
+            model: data.model,
+          };
+        });
+        console.log("dealIds:", dealIds);
+        setClientDeals(dealIds);
+      })();
+    }
+  }, [negotiation]);
 
   useEffect(() => {
     const bidId = params.get("bid");
@@ -540,6 +575,12 @@ export const ClientProfile = ({
       <div className="md:col-span-1">
         {/* md:sticky  */}
         <div className="space-y-6">
+          {!clientMode && clientDeals && (
+            <DealSelection
+              currentDeal={negotiation}
+              clientDeals={clientDeals}
+            />
+          )}
           <FeatureDetails
             negotiation={negotiation}
             negotiationId={negotiationId}

@@ -11,30 +11,40 @@ export const NormalDropdown = ({
   options,
   default: defaultValue,
   onChange,
+  className,
+  maxDisplayChars,
 }: {
-  options: string[];
-  default: string;
-  onChange: (value: string) => void;
+  options: (string | ({ key: string; value: any } & any))[];
+  default: any;
+  onChange: (value: any) => void;
+  className?: string;
+  maxDisplayChars?: number;
 }) => {
-  const [selectedValue, setSelectedValue] = useState<string>(defaultValue);
+  const [selectedValue, setSelectedValue] = useState<any>(defaultValue);
 
   useEffect(() => {
     onChange(selectedValue);
   }, [selectedValue]);
 
+  useEffect(() => {
+    setSelectedValue(defaultValue);
+  }, [defaultValue]);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{selectedValue}</Button>
+        <Button variant="outline" className={className}>
+          {selectedValue instanceof Object ? selectedValue.key : selectedValue}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {options.map((option) => (
+        {options.map((option, idx) => (
           <DropdownMenuCheckboxItem
-            key={option}
+            key={option instanceof Object ? option.key : option}
             checked={selectedValue === option}
             onCheckedChange={() => setSelectedValue(option)}
           >
-            {option}
+            {option instanceof Object ? option.key : option}
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>
