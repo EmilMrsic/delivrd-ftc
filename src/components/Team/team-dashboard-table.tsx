@@ -489,6 +489,10 @@ export const DashboardTable = ({
                   output.backgroundColor = "bg-red-100";
                 }
 
+                if (deal.priority) {
+                  output.backgroundColor = "bg-[#e6f9e6]";
+                }
+
                 return output;
               })
             : []

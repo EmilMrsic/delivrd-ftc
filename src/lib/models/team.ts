@@ -84,6 +84,7 @@ export const NegotiationDataModel = z.object({
   consultDate: z.string().optional(),
   shippingSelectedCoordinatorId: z.union([z.string(), z.null()]).optional(),
   pickingUpSelectedCoordinatorId: z.union([z.string(), z.null()]).optional(),
+  priority: z.boolean().default(false),
 });
 
 export const DealNegotiatorModel = z.object({

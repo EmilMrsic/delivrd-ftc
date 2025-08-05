@@ -31,6 +31,7 @@ import {
 import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
 import { v4 as uuidv4 } from "uuid";
 import { createNotification } from "@/lib/helpers/notifications";
+import { TailwindPlusToggle } from "../tailwind-plus/toggle";
 
 type AddNoteSectionProps = {
   user: any;
@@ -188,7 +189,27 @@ const AddNoteSection = ({
   };
 
   return (
-    <TailwindPlusCard title="Internal Notes" icon={FileText}>
+    <TailwindPlusCard
+      title="Internal Notes"
+      icon={FileText}
+      actions={() => (
+        <>
+          <TailwindPlusToggle
+            label="Flagged"
+            checked={negotiation?.priority}
+            onToggle={async (value) => {
+              if (negotiation) {
+                setNegotiation({ ...negotiation, priority: value });
+                await updateDoc(
+                  doc(db, "delivrd_negotiations", negotiation.id),
+                  { priority: value }
+                );
+              }
+            }}
+          />
+        </>
+      )}
+    >
       <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
         {negotiation?.internalNotes
           ?.sort((a, b) => {
@@ -238,6 +259,7 @@ const AddNoteSection = ({
             value={newInternalNote}
             onChange={handleInputChange}
             onKeyDown={handleKeyboardNavigation}
+
             // className="flex-grow"
           />
           {isMentioning && mentionSuggestions.length > 0 && (
