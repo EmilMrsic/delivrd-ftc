@@ -207,6 +207,7 @@ const TeamDashboardTable = ({
     const { key, direction } = sortConfig;
     const filtered = allNegotiations
       ? allNegotiations.filter((item) => {
+          console.log("got item:", item);
           if (item.dealCoordinatorId || item.dealCoordinatorId !== "") {
             return false;
           }

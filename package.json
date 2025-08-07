@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "postinstall": "husky init",
-    "dev": "NODE_OPTIONS=--max-old-space-size=1024 next dev",
+    "dev": "NODE_OPTIONS=--max-old-space-size=2048 next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -63,7 +63,8 @@
     "ts-node": "^10.9.2",
     "uuid": "^11.1.0",
     "zod": "^3.23.8",
-    "zod-formik-adapter": "^1.3.0"
+    "zod-formik-adapter": "^1.3.0",
+    "zustand": "^5.0.7"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.14",

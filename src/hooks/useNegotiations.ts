@@ -1,4 +1,5 @@
 import { backendRequest } from "@/lib/request";
+import { useNegotiationStore } from "@/lib/state/negotiation";
 import { getUserData } from "@/lib/user";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -13,6 +14,7 @@ export const useNegotiations = (
     archive?: boolean;
   } = {}
 ) => {
+  const setNegotiation = useNegotiationStore((state) => state.setNegotiation);
   const loggedInUserId = getUserData()?.deal_coordinator_id;
   const [id, setId] = useState<string>(config.id || loggedInUserId);
 
@@ -22,7 +24,7 @@ export const useNegotiations = (
 
   const cacheKey = config.all ? `negotiations` : `negotiation-${id}`;
 
-  const negotiationsQuery = useQuery({
+  const negotiationsQuery = useQuery<any>({
     queryKey: [cacheKey, filters],
     queryFn: async () => {
       const path = config.all
@@ -39,6 +41,14 @@ export const useNegotiations = (
       return request;
     },
   });
+
+  useEffect(() => {
+    if (negotiationsQuery.data?.negotiations) {
+      negotiationsQuery.data?.negotiations.forEach((negotiation: any) => {
+        setNegotiation(negotiation.id, negotiation);
+      });
+    }
+  }, [negotiationsQuery.data]);
 
   const handleIdChange = (
     newId?: string,

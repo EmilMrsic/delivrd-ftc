@@ -1,8 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, use } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { useNegotiations } from "./useNegotiations";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
+import { useNegotiationStore } from "@/lib/state/negotiation";
+import { useTeamDashboardStore } from "@/lib/state/team-dashboard";
 
 const useTeamDashboard = (
   config: {
@@ -29,6 +31,21 @@ const useTeamDashboard = (
   archive: boolean;
   setArchive: (archive: boolean) => void;
 } => {
+  const allStoredNegotiations = useNegotiationStore(
+    (state) => state.negotiations
+  );
+  const setStoredNegotiationIds = useTeamDashboardStore(
+    (state) => state.setNegotiations
+  );
+  const storedNegotiationIds = useTeamDashboardStore(
+    (state) => state.negotiations
+  );
+  const setAllStoredNegotiationIds = useTeamDashboardStore(
+    (state) => state.setAllNegotiations
+  );
+  const storedAllNegotiationIds = useTeamDashboardStore(
+    (state) => state.allNegotiations
+  );
   const [archive, setArchive] = useState(false);
   const [searchAll, setSearchAll] = useState(false);
   const [userFilters, allFilters] = useMemo(() => {
@@ -41,13 +58,18 @@ const useTeamDashboard = (
     return [userFilters, allFilters];
   }, [config, searchAll]);
 
-  const { negotiations, refetch, team, isLoading } = useNegotiations({
+  const {
+    negotiations: fetchedNegotiations,
+    refetch,
+    team,
+    isLoading,
+  } = useNegotiations({
     archive: archive,
     ...userFilters,
   });
 
   const {
-    negotiations: allNegotiations,
+    negotiations: fetchedAllNegotiations,
     refetch: refetchAll,
     isLoading: isLoadingAll,
   } = useNegotiations({
@@ -55,6 +77,22 @@ const useTeamDashboard = (
     all: true,
     ...allFilters,
   });
+
+  useEffect(() => {
+    if (fetchedNegotiations) {
+      setStoredNegotiationIds(
+        fetchedNegotiations.map((n: NegotiationDataType) => n.id)
+      );
+    }
+  }, [fetchedNegotiations]);
+
+  useEffect(() => {
+    if (fetchedAllNegotiations) {
+      setAllStoredNegotiationIds(
+        fetchedAllNegotiations.map((n: NegotiationDataType) => n.id)
+      );
+    }
+  }, [fetchedAllNegotiations]);
 
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiatorType>();
   const [allDealNegotiator, setAllDealNegotiator] = useState<
@@ -83,8 +121,12 @@ const useTeamDashboard = (
   }, []);
 
   return {
-    allNegotiations: allNegotiations,
-    negotiations: negotiations,
+    allNegotiations: storedAllNegotiationIds
+      .map((id) => allStoredNegotiations[id])
+      .filter((n) => n),
+    negotiations: storedNegotiationIds
+      .map((id) => allStoredNegotiations[id])
+      .filter((n) => n),
     team: team,
     setAllDealNegotiator,
     allDealNegotiator,

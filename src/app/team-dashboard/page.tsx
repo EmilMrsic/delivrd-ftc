@@ -27,6 +27,8 @@ import {
 } from "@/lib/constants/negotiations";
 import { DealsOverviewBoard } from "@/components/Team/deals-overview/deals-overview-board";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { Button } from "@/components/ui/button";
+import { useTeamDashboardStore } from "@/lib/state/team-dashboard";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -263,6 +265,13 @@ export default function DealList() {
     <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
       <TeamHeader />
       <Card className="bg-white shadow-lg">
+        <Button
+          onClick={() => {
+            useTeamDashboardStore.persist.clearStorage();
+          }}
+        >
+          Clear store
+        </Button>
         <CardContent>
           <TeamDashboardFilters
             allDealNegotiator={allDealNegotiator}
