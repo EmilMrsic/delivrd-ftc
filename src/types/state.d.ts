@@ -4,6 +4,7 @@ export interface NegotiationState {
   negotiations: Record<string, NegotiationDataType>;
   setNegotiation: (id: string, data: NegotiationDataType) => void;
   getNegotiation: (id: string) => NegotiationDataType | undefined;
+  mergeInNegotiations: (byId: Record<string, NegotiationDataType>) => void;
   hasNegotiation: (id: string) => boolean;
   removeNegotiation: (id: string) => void;
   clearNegotiations: () => void;

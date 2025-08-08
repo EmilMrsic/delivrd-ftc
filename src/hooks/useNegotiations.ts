@@ -14,7 +14,9 @@ export const useNegotiations = (
     archive?: boolean;
   } = {}
 ) => {
-  const setNegotiation = useNegotiationStore((state) => state.setNegotiation);
+  const mergeInNegotiations = useNegotiationStore(
+    (state) => state.mergeInNegotiations
+  );
   const loggedInUserId = getUserData()?.deal_coordinator_id;
   const [id, setId] = useState<string>(config.id || loggedInUserId);
 
@@ -31,6 +33,8 @@ export const useNegotiations = (
         ? `negotiation`
         : `negotiation/${id || loggedInUserId}`;
 
+      console.log("setting: requesting", config.all);
+
       const request = await backendRequest(path, "POST", {
         archive: config.archive,
         filter: filters,
@@ -38,15 +42,22 @@ export const useNegotiations = (
         mode: config.mode,
       });
 
+      console.log("setting: requesting done", config.all);
+
       return request;
     },
   });
 
   useEffect(() => {
     if (negotiationsQuery.data?.negotiations) {
+      console.log("got negotiations and setting:", config.all);
+      const byId: Record<string, any> = {};
       negotiationsQuery.data?.negotiations.forEach((negotiation: any) => {
-        setNegotiation(negotiation.id, negotiation);
+        byId[negotiation.id] = negotiation;
       });
+
+      mergeInNegotiations(byId);
+      console.log("finished setting: negotiations");
     }
   }, [negotiationsQuery.data]);
 

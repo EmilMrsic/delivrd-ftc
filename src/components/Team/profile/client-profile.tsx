@@ -50,6 +50,7 @@ import { TabSelector } from "@/components/base/tab-selector";
 import { useNegotiationBids } from "@/hooks/useNegotiationBids";
 import { BidList } from "./bid-list";
 import { DealSelection } from "./deal-selection";
+import { useNegotiationStore } from "@/lib/state/negotiation";
 
 export const ClientProfile = ({
   negotiationId,
@@ -60,6 +61,12 @@ export const ClientProfile = ({
   clientMode?: boolean;
   allowClientModeToggle?: boolean;
 }) => {
+  const setNegotiationInStore = useNegotiationStore(
+    (state) => state.setNegotiation
+  );
+  const setNegotiation = (updatedNegotiation: NegotiationDataType) => {
+    setNegotiationInStore(negotiationId, updatedNegotiation);
+  };
   const [clientMode, setClientMode] = useState<boolean>(
     clientModeProp ?? false
   );
@@ -79,7 +86,6 @@ export const ClientProfile = ({
     user,
     allDealNegotiator,
     negotiation,
-    setNegotiation,
     incomingBids,
     setIncomingBids,
     bidCommentsByBidId,
@@ -228,22 +234,26 @@ export const ClientProfile = ({
     newValue: string;
     parentKey?: string;
   }) => {
-    setNegotiation((prevState: any) => {
-      const { key, newValue, parentKey } = updateObject;
+    // (prevState: any) => {
+    const { key, newValue, parentKey } = updateObject;
 
-      let value = newValue;
-      let keyName = parentKey ? parentKey : key;
-      if (parentKey) {
-        value = {
-          ...prevState[parentKey],
-          [key]: newValue,
-        };
-      }
-
-      return {
-        ...prevState,
-        [keyName]: value,
+    let value = newValue;
+    let keyName = parentKey ? parentKey : key;
+    if (parentKey) {
+      value = {
+        ...negotiation[parentKey],
+        [key]: newValue,
       };
+    }
+
+    //   return {
+    //     ...prevState,
+    //     [keyName]: value,
+    //   };
+    // }
+    setNegotiation({
+      ...negotiation,
+      [keyName]: value,
     });
   };
 
@@ -463,7 +473,7 @@ export const ClientProfile = ({
     });
   }, [negotiationId]);
 
-  if (isLoading) {
+  if (isLoading || !negotiation) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader className="w-10 h-10 animate-spin" />

@@ -138,7 +138,7 @@ const useTeamDashboard = (
     refetch: refetch,
     searchAll,
     setSearchAll,
-    refetchAll,
+    refetchAll: refetchAll,
     archive,
     setArchive,
   };

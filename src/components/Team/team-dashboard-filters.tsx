@@ -50,7 +50,7 @@ export const TeamDashboardFilters = ({
             <p>FTC {isMobile ? "" : "Table"}</p>
           </Button>
         </div>
-        <DealsOverviewBoard mode={overviewMode} />
+        {/* <DealsOverviewBoard mode={overviewMode} /> */}
         <div className="flex gap-3 mt-4">
           <div className="w-fit mr-0 ml-auto gap-2">
             <div className="flex gap-2">

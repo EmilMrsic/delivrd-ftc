@@ -1,6 +1,7 @@
 import { NegotiationState } from "@/types/state";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { NegotiationDataType } from "../models/team";
 
 export const useNegotiationStore = create<NegotiationState>()(
   persist(
@@ -13,6 +14,14 @@ export const useNegotiationStore = create<NegotiationState>()(
             [id]: data,
           },
         })),
+      mergeInNegotiations: (byId: Record<string, NegotiationDataType>) => {
+        set((state) => ({
+          negotiations: {
+            ...state.negotiations,
+            ...byId,
+          },
+        }));
+      },
       getNegotiation: (id) => get().negotiations[id],
       hasNegotiation: (id) =>
         Object.prototype.hasOwnProperty.call(get().negotiations, id),

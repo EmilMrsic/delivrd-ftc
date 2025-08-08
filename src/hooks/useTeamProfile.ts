@@ -22,12 +22,17 @@ import { useDispatch } from "react-redux";
 import { useNegotiations } from "./useNegotiations";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { useLoggedInUser } from "./useLoggedInUser";
+import { useNegotiationStore } from "@/lib/state/negotiation";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
 };
 
 const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
+  // const getNegotiation = useNegotiationStore((state) => state.getNegotiation);
+  const storedNegotiation = useNegotiationStore(
+    (state) => state.negotiations[negotiationId]
+  );
   const user = useLoggedInUser();
   const [bidCommentsByBidId, setBidCommentsByBidId] =
     useState<GroupedBidComments>({});
@@ -67,23 +72,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     const filteredDealers = dealersData.filter((dealer) => {
       return bidDealerIds.includes(dealer.id);
     });
-
-    // for (const bid of incomingBids) {
-    //   const id = bid.dealerId;
-    //   if (id !== "N/A" && id)
-    //     try {
-    //       const dealerRef = doc(db, "Dealers", id);
-    //       const dealerSnap = await getDoc(dealerRef);
-
-    //       if (dealerSnap.exists()) {
-    //         dealersData.push(dealerSnap.data());
-    //       } else {
-    //         console.warn(`Dealer with ID ${id} not found`);
-    //       }
-    //     } catch (error) {
-    //       console.error(`Error fetching dealer data for ID ${id}:`, error);
-    //     }
-    // }
 
     return filteredDealers;
   };
@@ -226,7 +214,7 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     user,
     allDealNegotiator,
     setAllDealNegotiator,
-    negotiation,
+    negotiation: storedNegotiation,
     setNegotiation,
     negotiationId,
     incomingBids,
