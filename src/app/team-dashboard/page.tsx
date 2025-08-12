@@ -265,13 +265,13 @@ export default function DealList() {
     <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
       <TeamHeader />
       <Card className="bg-white shadow-lg">
-        <Button
+        {/* <Button
           onClick={() => {
             useTeamDashboardStore.persist.clearStorage();
           }}
         >
           Clear store
-        </Button>
+        </Button> */}
         <CardContent>
           <TeamDashboardFilters
             allDealNegotiator={allDealNegotiator}
