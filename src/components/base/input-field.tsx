@@ -136,14 +136,11 @@ export const InputField = (props: {
       value,
     } = props;
 
-    console.log("got here: handleUpdate:");
-
     if (disabled) {
       return;
     }
 
     if (negotiationId && field) {
-      console.log("saving to db", field, value);
       try {
         // const usersQuery = query(
         //   collection(db, "delivrd_users"),
@@ -200,7 +197,6 @@ export const InputField = (props: {
         }
 
         const result = await updateDoc(negotiationDocRef, updateObject);
-        console.log("result", result);
 
         toast({
           title: "Field Updated",
@@ -256,7 +252,6 @@ export const InputField = (props: {
       <DatePicker
         selected={props.selected}
         onChange={(date) => {
-          console.log("got here: onDateChange");
           props.onDateChange?.(date);
         }}
         className={clsx(

@@ -33,8 +33,6 @@ export const useNegotiations = (
         ? `negotiation`
         : `negotiation/${id || loggedInUserId}`;
 
-      console.log("setting: requesting", config.all);
-
       const request = await backendRequest(path, "POST", {
         archive: config.archive,
         filter: filters,
@@ -42,22 +40,18 @@ export const useNegotiations = (
         mode: config.mode,
       });
 
-      console.log("setting: requesting done", config.all);
-
       return request;
     },
   });
 
   useEffect(() => {
     if (negotiationsQuery.data?.negotiations) {
-      console.log("got negotiations and setting:", config.all);
       const byId: Record<string, any> = {};
       negotiationsQuery.data?.negotiations.forEach((negotiation: any) => {
         byId[negotiation.id] = negotiation;
       });
 
       mergeInNegotiations(byId);
-      console.log("finished setting: negotiations");
     }
   }, [negotiationsQuery.data]);
 

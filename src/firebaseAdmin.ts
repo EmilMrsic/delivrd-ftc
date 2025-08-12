@@ -33,8 +33,6 @@ export function createFirebaseAdminApp(params: FirebaseAdminAppParams) {
 }
 
 export async function initAdmin() {
-  console.log("got private key:", process.env.NEXT_PUBLIC_PRIVATE_KEY);
-
   const params = {
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID as string,
     clientEmail: process.env.NEXT_PUBLIC_CLIENT_EMAIL as string,

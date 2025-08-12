@@ -10,8 +10,6 @@ export const getDealerDocuments = async (
     all?: boolean;
   } = {}
 ): Promise<any> => {
-  console.log("got variable:", process.env.NEXT_PUBLIC_COMMENT_FUNC_URL);
-
   const dealerTable = collection(db, "delivrd_dealers");
   // const dealerSnapshot = await getDocs(dealerTable);
   const dealerQueryList: any = [];
@@ -38,7 +36,6 @@ export const getDealerDocuments = async (
         const parsed = DealerModel.parse(data);
         return parsed;
       } catch (e: any) {
-        console.log("error:", e, "from:", data);
         return null;
       }
     })

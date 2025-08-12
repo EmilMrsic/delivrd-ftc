@@ -30,7 +30,6 @@ export const ContextProviders = ({
   //   if (path !== "/" && path !== "/complete-signin") {
   //     const loggedInUserData = getUserData()?.deal_coordinator_id;
   //     if (!loggedInUserData) {
-  //       console.log("found it");
   //       // router.push("/");
   //     }
   //   }

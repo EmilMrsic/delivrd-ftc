@@ -17,7 +17,6 @@ import { NextRequest, NextResponse } from "next/server";
 export const GET = async (request: NextRequest) => {
   const headers = request.headers;
   const userData = await getUserDataFromDb(headers.get("auth") as string);
-  // console.log("got here", headers.get("auth"));
   // const twentyFourHoursAgo = Timestamp.fromDate(
   //   new Date(Date.now() - 24 * 60 * 60 * 1000)
   // );
@@ -153,8 +152,6 @@ export const GET = async (request: NextRequest) => {
     Array.from(negotiationIds)
   );
 
-  // console.log("bidsSnapshot", bidsSnapshot);
-
   const authors: Record<string, any> = {};
   const bids: Record<string, any> = {};
   const negotiations: Record<string, any> = {};
@@ -191,7 +188,6 @@ export const GET = async (request: NextRequest) => {
 
     // switch (notification.type) {
     //   case "bid_comment":
-    //     console.log("got here", notification.data.bidId, bids);
     //     break;
     // }
 

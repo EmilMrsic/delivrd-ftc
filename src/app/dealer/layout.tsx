@@ -21,7 +21,6 @@ export default function DealerLayout({
     if (user) {
       (async () => {
         const dealerTable = collection(db, "Dealers");
-        console.log("got here:", user);
         const q = query(
           dealerTable,
           where("id", "==", user?.dealer_id?.[0] || user?.dealer_id)

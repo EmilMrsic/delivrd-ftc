@@ -194,7 +194,6 @@ export const ConsultModeTable = ({
                                 field="trade"
                                 negotiationId={negotiation.id}
                                 onToggle={(e) => {
-                                  console.log("e:", e);
                                   // setTrade(e);
                                 }}
                               />

@@ -54,7 +54,6 @@ export const POST = async (req: Request) => {
 
   //   const bid = await getDoc(doc(bidTable, bidId));
   //   const bidData = bid.data() as IncomingBidType;
-  //   console.log(data);
   const subject = `Update on Recent Bid - Outcome Notification`;
 
   const messagesToSend = bids.map((bid) => {
@@ -77,7 +76,6 @@ Understanding what wins can help you improve future submissions. We appreciate y
   });
 
   const responses = await Promise.all(messagesToSend);
-  console.log("responses:", responses);
   return NextResponse.json({});
 };
 

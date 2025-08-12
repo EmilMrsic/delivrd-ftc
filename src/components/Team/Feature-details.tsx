@@ -67,11 +67,11 @@ const FeatureDetails = ({
     const id = negotiation?.id;
     try {
       const docRef = doc(db, "delivrd_negotiations", id ?? "");
-      console.log("got here: handleDateChange", id);
+
       await updateDoc(docRef, {
         [fieldPath]: formatDateToLocal(date),
       });
-      console.log(`${fieldPath} updated successfully.`);
+
       toast({ title: "Date update successfully" });
     } catch (error) {
       console.error(`Error updating ${fieldPath}:`, error);

@@ -9,7 +9,6 @@ export const GET = async (
   { params }: { params: { nid: string } }
 ) => {
   const { nid } = params;
-  console.log("nid:", nid);
   if (!nid) {
     return NextResponse.json(
       { error: "No negotiation ID provided" },

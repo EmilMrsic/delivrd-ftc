@@ -42,11 +42,6 @@ export const VehicleTable = ({
         if (!dealer.Brand) return false;
         const result =
           vehicle.NewOrUsed === "New" && dealer.Brand.includes(vehicle.Brand);
-        if (!result) {
-          if (vehicle.NewOrUsed === "New") {
-            console.log("vehicle", vehicle.Brand);
-          }
-        }
         return result;
       });
     }

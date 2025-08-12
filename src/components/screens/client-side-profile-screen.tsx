@@ -30,11 +30,9 @@ export const ClientSideProfileScreen = () => {
 
   // useEffect(() => {
   //   if (user) {
-  //     console.log("user:", user);
   //     if (user?.privilege !== "Team") {
   //       if (user?.id.trim() !== (id as string).trim()) {
   //         // if (!shared || shared !== data?.id || user.id !== data?.clientId) {
-  //         //   console.log("redirecting to home", user?.id, data?.clientId, data);
   //         router.push("/");
   //         //   return;
   //         // }

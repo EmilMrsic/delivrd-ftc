@@ -90,7 +90,6 @@ export default function BiddingSection({
       const storageRef = ref(storage, `uploads/${timestamp}_${file.name}`);
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
-      console.log("File available at:", downloadURL);
       return downloadURL;
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -161,8 +160,6 @@ export default function BiddingSection({
         // source: "firebase",
         bid_source: "FTC",
       };
-
-      console.log("newBid", vehicleId, newBid);
 
       await addDoc(bidRef, newBid);
       await updateDoc(doc(db, "delivrd_negotiations", negotiationId ?? ""), {

@@ -20,7 +20,6 @@ export const DealSelection = ({
 }) => {
   const router = useRouter();
   const createNewDeal = async () => {
-    console.log("got here:", currentDeal);
     const newId = generateRandomId();
 
     const newDeal: any = {

@@ -21,7 +21,6 @@ export const ShippingInfoModule = ({
   close: () => void;
   onBlur?: () => void;
 }) => {
-  console.log("deal", deal);
   return (
     <TailwindPlusCard
       title="Shipping Info"
@@ -82,7 +81,6 @@ export const ShippingInfoModule = ({
 //       const updatedDeal = { ...deal, shipping_info: shippingInfo };
 
 //       await updateDoc(docRef, { shippingInfo: newInfo });
-//       console.log("Shipping info updated!");
 //       toast({ title: "Shipping info updated" });
 //       // const updatedDeals = currentDeals.map((d) =>
 //       //   d.id === deal.id ? updatedDeal : d

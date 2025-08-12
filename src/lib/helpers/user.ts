@@ -17,7 +17,6 @@ export const getUserDataFromDb = async (id: string) => {
   const userDoc = docs?.[0];
   // const userDoc = await getDoc(userRef);
   if (!userDoc) {
-    console.log("user", id, "doesn't exist");
   }
   return userDoc;
 };

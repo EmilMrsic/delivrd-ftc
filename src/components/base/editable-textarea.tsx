@@ -42,7 +42,6 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
 
   const handleBlur = async () => {
     if (negotiationId && field) {
-      console.log("handleBlur", negotiationId, field, value);
       try {
         // const usersQuery = query(
         //   collection(db, "users"),
@@ -60,7 +59,6 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
         // }
 
         // const userDoc = userSnapshot.docs[0];
-        // console.log("User found:", userDoc.id, userDoc.data());
         // const userDocRef = doc(db, "users", userDoc.id);
         // if (userField)
         //   await updateDoc(userDocRef, {
@@ -80,8 +78,6 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
         toast({
           title: "Field Updated",
         });
-
-        console.log("Updated negotiation field:", field, "with value:", value);
       } catch (error) {
         console.error("Error handling blur operation:", error);
       }

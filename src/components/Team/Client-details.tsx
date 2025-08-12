@@ -352,9 +352,7 @@ const ClientDetails = ({
                 negotiationId={negotiationId ?? ""}
                 label="Deal Negotiator"
                 value={negotiation?.dealCoordinatorId}
-                onChange={(newValue) => {
-                  console.log("got new value:", newValue);
-                }}
+                onChange={(newValue) => {}}
                 icon={User2}
                 as={() => (
                   <DealNegotiatorDropdown

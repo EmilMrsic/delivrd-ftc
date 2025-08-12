@@ -65,7 +65,6 @@ const SearchableDropdown: React.FC<EditableDropdownProps> = ({
       //   await updateDoc(userDocRef, {
       //     [userField]: value,
       //   });
-      console.log("Updated negotiation with new value:", newValue);
     } catch (error) {
       console.error("Error updating negotiation:", error);
     }

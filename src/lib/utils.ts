@@ -596,7 +596,6 @@ export const fetchAllPaidHoldingNegotiations = async () => {
       allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
     }
 
-    console.log("Filtered Negotiations:", allFilteredNegotiations);
     return allFilteredNegotiations;
   } catch (error) {
     console.error("Error fetching negotiations in batches:", error);
@@ -618,7 +617,6 @@ export const fetchAllOldNegotiations = async () => {
     const paidNegotiationIds = negotiationsSnapshot.docs.map((doc) => doc.id);
 
     if (paidNegotiationIds.length === 0) {
-      console.log("No negotiations with status PAID found.");
       return [];
     }
 
@@ -648,7 +646,6 @@ export const fetchAllOldNegotiations = async () => {
       allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
     }
 
-    console.log("Filtered Negotiations:", allFilteredNegotiations);
     return allFilteredNegotiations;
   } catch (error) {
     console.error("Error fetching negotiations in batches:", error);
@@ -667,7 +664,6 @@ export const fetchAllNotClosedNegotiations = async () => {
     const negotiationIds = negotiationsSnapshot.docs.map((doc) => doc.id);
 
     if (negotiationIds.length === 0) {
-      console.log("No active negotiations found.");
       return [];
     }
 
@@ -702,7 +698,6 @@ export const fetchAllNotClosedNegotiations = async () => {
       allFilteredNegotiations = [...allFilteredNegotiations, ...filteredData];
     }
 
-    console.log("Filtered Negotiations:", allFilteredNegotiations);
     return allFilteredNegotiations;
   } catch (error) {
     console.error("Error fetching negotiations in batches:", error);
@@ -733,7 +728,6 @@ export const updateBidInFirebase = async (
     const bid_id = bidId;
     const bidRef = doc(db, "Incoming Bids", bid_id);
     await updateDoc(bidRef, updatedFields);
-    console.log("saving bid: Bid updated successfully!");
   } catch (error) {
     console.error("Error updating bid:", error);
   }
@@ -745,7 +739,6 @@ export const uploadFile = async (file: File): Promise<string | null> => {
     const storageRef = ref(storage, `uploads/${timestamp}_${file.name}`);
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
-    console.log("File available at:", downloadURL);
     return downloadURL;
   } catch (error) {
     console.error("Error uploading file:", error);
@@ -790,8 +783,6 @@ export const getReviewDealsWithoutCoordinator = async () => {
     const deals: any = querySnapshot.docs
       .map((doc) => ({ id: doc.id, ...doc.data() }))
       .filter((deal: any) => !deal.negotiations_deal_coordinator); // Filter null or empty values manually
-
-    console.log(deals);
     return deals;
   } catch (error) {
     console.error("Error fetching deals:", error);

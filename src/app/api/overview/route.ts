@@ -189,12 +189,10 @@ export const POST = async (
     }
 
     if (deal.datePaid && isThisWeek(new Date(deal.datePaid))) {
-      // console.log("salesThisWeek", deal.datePaid);
       salesThisWeek++;
     }
 
     if (deal.datePaid && isThisMonth(new Date(deal.datePaid))) {
-      // console.log("salesThisMonth", deal.datePaid, salesThisMonth);
       salesThisMonth++;
     }
   });
@@ -206,8 +204,6 @@ export const POST = async (
     coordinatorSalesThisWeek[dealCoordinatorId].coordinatorName =
       coordinators[dealCoordinatorId].name;
   }
-
-  console.log("activeDeals", activeDeals);
 
   return NextResponse.json({
     activeDeals,
@@ -257,15 +253,6 @@ const countClosedDeals = async (
       }
 
       const closeDate = new Date(useableDate);
-      if (deal.id === "recI0FkP4s") {
-        console.log("same day: normal", deal.id, closeDate, new Date());
-        console.log(
-          "same day: formatted",
-          deal.id,
-          formatDateToTimezone(closeDate),
-          formatDateToTimezone(new Date())
-        );
-      }
       if (isSameDay(closeDate, new Date())) {
         dailyClosedDeals.count++;
         // @ts-ignore
@@ -316,11 +303,6 @@ const isSameDay = (date1: Date, date2: Date) => {
   // );
 
   // if (date1.toISOString().includes("6-10")) {
-  //   console.log(
-  //     "same day",
-  //     formatDateToTimezone(date1),
-  //     formatDateToTimezone(date2)
-  //   );
   // }
 
   return formatDateToTimezone(date1) === formatDateToTimezone(date2);
@@ -328,10 +310,6 @@ const isSameDay = (date1: Date, date2: Date) => {
 
 // const isSameDay = (date1: Date, date2: Date) => {
 //   const formatter = dateTimeFormatter();
-//   // console.log(
-//   //   "looking at day",
-//   //   formatter.format(date1) === formatter.format(date2)
-//   // );
 
 //   return formatter.format(date1) === formatter.format(date2);
 

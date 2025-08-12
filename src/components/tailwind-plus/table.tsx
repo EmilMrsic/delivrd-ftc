@@ -271,7 +271,6 @@ export const TailwindTableExpandedPopover = ({
   expanded: [number, number] | null;
 }) => {
   const Component = cell.config?.expandedComponent;
-  console.log("expandedComponent:", cell);
 
   return (
     <TailwindPlusModal

@@ -262,7 +262,7 @@ export const TeamDealersTable = ({
                           },
                         ]}
                         // onChange={(value: any) => {
-                        //   console.log("got updated value", value);
+
                         // }}
                       />
                       <div className="w-full justify-end">
@@ -296,7 +296,6 @@ export const TeamDealersTable = ({
                 return (
                   <div>
                     {dealer.bids?.map((bid: any) => {
-                      console.log("bid", bid);
                       return (
                         <div key={bid.id}>
                           <div>{bid.id}</div>

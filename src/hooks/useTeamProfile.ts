@@ -20,7 +20,6 @@ type GroupedBidComments = {
 
 const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   const { dealNegotiators } = useDealNegotiators();
-  // const getNegotiation = useNegotiationStore((state) => state.getNegotiation);
   const storedNegotiation = useNegotiationStore(
     (state) => state.negotiations[negotiationId]
   );
@@ -31,9 +30,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
 
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [dealers, setDealers] = useState<DealerData[]>([]);
-  // const [allDealNegotiator, setAllDealNegotiator] = useState<
-  //   DealNegotiatorType[]
-  // >([]);
   const [negotiation, setNegotiation] = useState<NegotiationDataType | null>(
     null
   );
@@ -103,23 +99,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     setBidCommentsByBidId(groupedBidComments);
   };
 
-  // const getAllDealNegotiator = async () => {
-  //   try {
-  //     const teamCollection = collection(db, "team delivrd");
-
-  //     const querySnapshot = await getDocs(teamCollection);
-
-  //     const negotiatiatorData = querySnapshot.docs.map((doc) => ({
-  //       id: doc.id,
-  //       ...doc.data(),
-  //     }));
-
-  //     return negotiatiatorData as DealNegotiatorType[];
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
   const getBidsByIds = async (bidIds: string[]) => {
     if (!bidIds || bidIds.length === 0) {
       return;
@@ -162,9 +141,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
     fetchBidComments();
-    // getAllDealNegotiator().then((res) =>
-    //   setAllDealNegotiator(res as DealNegotiatorType[])
-    // );
   }, [incomingBids]);
 
   useEffect(() => {
@@ -187,7 +163,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
           const firstDoc = querySnapshot.docs[0];
           setDealNegotiator(firstDoc.data() as DealNegotiator);
         } else {
-          console.log("No deal negotiator!");
         }
       } catch (error) {
         console.error("Error fetching negotiation:", error);

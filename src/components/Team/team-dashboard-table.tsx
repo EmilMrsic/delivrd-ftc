@@ -207,7 +207,6 @@ const TeamDashboardTable = ({
     const { key, direction } = sortConfig;
     const filtered = allNegotiations
       ? allNegotiations.filter((item) => {
-          console.log("got item:", item);
           if (item.dealCoordinatorId || item.dealCoordinatorId !== "") {
             return false;
           }
@@ -229,7 +228,6 @@ const TeamDashboardTable = ({
 
   useEffect(() => {
     if (negotiations) {
-      console.log("got fresh negotiations:");
       const negotiationsByColumn = mapNegotiationsByColumn(
         negotiations,
         "stage",
@@ -263,7 +261,6 @@ const TeamDashboardTable = ({
       const sortedColumns = orderNegotiationsByColumns(
         finalNegotiationGrouping
       );
-      console.log("got fresh negotiations: done");
       setNegotiationsByColumn(sortedColumns);
     }
   }, [negotiations, searchTerm, searchAll]);
@@ -304,17 +301,6 @@ const TeamDashboardTable = ({
       );
     }
   }
-
-  // if (name === "team-dashboard-all") {
-  //   console.log(
-  //     ":negotiations:",
-  //     negotiations.find((negotiation) => negotiation.id === "recaQ1jmRlqiSfVaG")
-  //   );
-  // }
-
-  // if (name === "team-dashboard-negotiator") {
-  //   console.log("paid negotiations:", paidNegotiations);
-  // }
 
   let rows: any = [...scopedRows];
   if (displayAllPaid && paidNegotiations.length > 0) {

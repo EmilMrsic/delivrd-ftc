@@ -52,10 +52,8 @@ export const Notifications = () => {
 export const NotificationItem = ({ item }: { item: NotificationDataType }) => {
   const { data, read } = item;
   const { author, negotiation, bid } = data;
-  console.log("notification item:", data);
 
   const markRead = async () => {
-    // console.log("test:", item);
     await updateDoc(doc(db, "delivrd_notifications", item.id), {
       read: true,
     });

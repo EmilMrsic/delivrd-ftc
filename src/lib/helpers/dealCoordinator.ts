@@ -21,7 +21,6 @@ export const updateDealNegotiator = async (
     refetch();
 
     toast({ title: "Negotiator updated successfully" });
-    console.log("Negotiator updated successfully!");
   } catch (error) {
     console.error("Error updating negotiator: ", error);
   }

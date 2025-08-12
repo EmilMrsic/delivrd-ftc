@@ -127,7 +127,6 @@ function ReceivedCar() {
       for (const index in team) {
         const member = team[index];
         const teamMemberDeals = teamIdToObject[member.id] ?? [];
-        console.log(member.id, member.name, teamMemberDeals);
         const groupedByStatus = teamMemberDeals.reduce(
           (acc: any, negotiation: any) => {
             const status = negotiation.stage || "Unknown";
@@ -148,13 +147,10 @@ function ReceivedCar() {
 
   const sortData = (key: string, direction: string) => {
     setSortConfig((prevConfig) => {
-      // console.log("prevConfig:", prevConfig);
       // const newDirection =
       //   prevConfig.key === key && prevConfig.direction === "ascending"
       //     ? "descending"
       //     : "ascending";
-
-      // console.log(key);
 
       const sortedTeams = teamData.map((team) => {
         const sortedNegotiationsGrouped: NegotiationsGroupedType =

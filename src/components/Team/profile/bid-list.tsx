@@ -832,7 +832,6 @@ export const ViewOfferDialog = ({
       price: Number(editedBid.price),
       discountPrice: String(editedBid.discountPrice),
     });
-    console.log("saving bid", bid.bid_id);
     const useableUpdateObject: any = {};
     ["discountPrice", "inventoryStatus", "price", "files"].forEach((key) => {
       if (editedBid[key as keyof typeof editedBid]) {

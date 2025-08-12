@@ -78,8 +78,6 @@ const OldDeals = () => {
     setLoading(false);
   }, [negotiationsFromTeamDashboard]);
 
-  console.log(negotiations);
-
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
       <TeamHeader />

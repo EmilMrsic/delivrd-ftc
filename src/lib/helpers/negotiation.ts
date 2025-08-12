@@ -255,9 +255,8 @@ export const getNegotiationsByClientId = async (clientId: string) => {
     ...queryConditions
   );
 
-  console.log("got client", clientId);
   const negotiationsSnapshot = await getDocs(negotiationsQuery);
-  console.log("got negotiations", negotiationsSnapshot.docs.length);
+
   return negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data() as NegotiationDataType;
     return data;

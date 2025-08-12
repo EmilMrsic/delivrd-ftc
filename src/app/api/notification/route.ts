@@ -27,8 +27,6 @@ export async function POST(req: Request) {
 
     // Send the notification
     const response = await admin.messaging().send(message);
-
-    console.log("Successfully sent message:", response);
     return NextResponse.json({ success: true, response }, { status: 200 });
   } catch (error) {
     console.error("Error sending message:", error);

@@ -121,7 +121,6 @@ export const ClientProfile = ({
   const [hasScrolled, setHasScrolled] = useState<boolean>(false);
 
   const refetchBids = async () => {
-    console.log("rerunning: refetchBids");
     await fetchBids();
     await fetchBidComments();
     await refetchNegotiationBids();
@@ -144,7 +143,6 @@ export const ClientProfile = ({
             model: data.model,
           };
         });
-        console.log("dealIds:", dealIds);
         setClientDeals(dealIds);
       })();
     }
@@ -290,8 +288,6 @@ export const ClientProfile = ({
         const newData = { ...data.notification, ...data.data };
         if (newData) dispatch(setAllNotifications(newData));
       });
-
-      console.log("Notification listener initialized");
     }, 3000);
 
     return () => clearTimeout(timeoutId);
@@ -342,7 +338,6 @@ export const ClientProfile = ({
 
     try {
       await updateDoc(bidDocRef, { delete: true });
-      console.log("Bid marked as deleted in Firebase");
       toast({ title: "Bid marked as deleted" });
     } catch (error) {
       console.error("Error updating bid in Firebase: ", error);
@@ -402,7 +397,6 @@ export const ClientProfile = ({
     const useableActivityLog = activityLog ?? [];
 
     setActivityLog([...useableActivityLog, newActivityLog]);
-    console.log(activityLog);
     await addDoc(collection(db, "activity log"), newActivityLog);
   };
 
@@ -713,13 +707,8 @@ export const BidSection = ({
 
     const hasAcceptedBid = allBids.some((bid: IncomingBidType) => {
       const result = !bid.delete && bid.accept_offer === true;
-      if (result) {
-        console.log("found winner:", bid);
-      }
       return result;
     });
-
-    console.log("rerunning:", hasAcceptedOffer, hasAcceptedBid);
 
     return {
       hasAcceptedOffer: hasAcceptedOffer || false,

@@ -176,8 +176,6 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
     if (!newWorkLog.trim() && localFiles.length === 0) return;
 
     try {
-      console.log("Starting file uploads:", localFiles);
-
       // Upload files and filter out any failed uploads
       let fileUrls: string[] = [];
 
@@ -188,7 +186,6 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
       ) as string[];
 
       const validFileUrls = fileUrls.filter((url) => url); // Remove null values
-      console.log("Uploaded file URLs:", validFileUrls);
 
       // recos5ry1A7L7rFo7
 
@@ -204,8 +201,6 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         negotiation_id: negotiationId!,
         timestamp: new Date().toISOString(),
       };
-
-      console.log("Adding WorkLog to Firestore:", logEntry);
 
       const negotiationRef = doc(db, "delivrd_negotiations", id ?? "");
 

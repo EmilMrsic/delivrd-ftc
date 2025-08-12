@@ -158,7 +158,6 @@ export const IncomingBidCard = ({
   };
 
   const restoreBid = async () => {
-    console.log("restoreBid");
     try {
       const bidRef = doc(db, "Incoming Bids", bidDetails.bid_id);
       await updateDoc(bidRef, { delete: false });

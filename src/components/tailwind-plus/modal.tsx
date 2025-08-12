@@ -29,18 +29,15 @@ export const TailwindPlusModal = ({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      // console.log("Modal showModal value:", showModal); // Add this if you can access showModal here
-
       if (ref.current && !ref.current.contains(event.target as Node)) {
         if (!noClose) {
           close();
           onCloseTrigger?.();
         }
       } else {
-        console.log("NOT closing modal: clicked inside");
       }
       // if (ref.current && !ref.current.contains(event.target as Node)) {
-      //   console.log("closing modal: clicked outside");
+
       //   close();
       //   onCloseTrigger?.();
       // }

@@ -58,7 +58,6 @@ export async function POST(req: Request) {
         },
       }
     );
-    console.log(response.data);
     await updateDoc(loginInitiationRef, {
       emailSent: true,
       emailSentTimestamp: serverTimestamp(),

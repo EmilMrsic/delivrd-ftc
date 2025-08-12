@@ -32,9 +32,6 @@ const FcmTokenProvider = () => {
               });
               const updatedUser = { ...user, fcmToken: token };
               localStorage.setItem("user", JSON.stringify(updatedUser));
-              console.log(
-                "FCM token successfully updated for the user in Firestore."
-              );
             }
           }
         }

@@ -157,13 +157,10 @@ const AddNoteSection = ({
           text: newInternalNote,
           noteId: uuidv4(),
         };
-        console.log("adding new note:", newNote);
         setNegotiation({
           ...negotiation,
           internalNotes: [...(negotiation.internalNotes ?? []), newNote],
         });
-
-        console.log(negotiation.id);
 
         const notesRef = doc(db, "delivrd_negotiations", negotiation.id);
         await updateDoc(notesRef, {

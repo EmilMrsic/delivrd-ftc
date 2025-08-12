@@ -96,7 +96,7 @@ export const fetchDealers = async (incomingBids: IncomingBidType[]) => {
 
   for (const bid of incomingBids) {
     const id = bid.dealerId;
-    console.log("maching dealer: bid", bid);
+
     if (id !== "N/A" && id)
       try {
         const dealerRef = doc(db, "Dealers", id);
@@ -249,7 +249,7 @@ export const createNewBid = async (
   const newId = generateRandomId();
   const bidRef = doc(db, "Incoming Bids", newId);
   const fileUrls = await filesToUploadedUrls(newBidValues.files);
-  console.log("new bid values", newBidValues);
+
   const bidObject: IncomingBidType = {
     id: newId,
     bid_id: newId,

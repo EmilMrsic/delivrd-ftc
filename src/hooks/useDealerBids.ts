@@ -11,8 +11,6 @@ export const useDealerBids = ({ dealerId }: { dealerId: string }) => {
     },
   });
 
-  // console.log("data", data);
-
   return {
     bids: data?.bids,
     isLoading,

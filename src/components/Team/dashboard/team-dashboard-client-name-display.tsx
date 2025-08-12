@@ -58,7 +58,6 @@ export const TeamDashboardClientNameDisplay = ({
         const updatedDeal = { ...deal, shipping_info: newInfo };
 
         await updateDoc(docRef, { shippingInfo: newInfo });
-        console.log("Shipping info updated!");
         toast({ title: "Shipping info updated" });
         refetch();
       } else {

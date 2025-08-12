@@ -27,7 +27,6 @@ export const getUserFromFirebase = async (id: string) => {
       const userData = snapshot.docs[0].data();
       return userData;
     } else {
-      console.log("No user found with the given ID");
       return null;
     }
   } catch (error) {

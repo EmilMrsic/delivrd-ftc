@@ -7,11 +7,9 @@ export const useDealers = ({ all }: { all: boolean } = { all: false }) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["dealers"],
     queryFn: async () => {
-      console.log("refetching dealers");
       const request = await backendRequest("dealers", "POST", {
         all: false, //all,
       });
-      console.log("refetching dealers done", request === data);
       return request;
     },
     refetchOnMount: true,

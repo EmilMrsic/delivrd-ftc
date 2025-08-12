@@ -174,7 +174,6 @@ export const ModalForm = ({
         <Formik
           initialValues={initialValues}
           onSubmit={async (values) => {
-            console.log("values", values);
             if (onSubmit) await onSubmit(values);
           }}
           validationSchema={toFormikValidationSchema(formSchema)}

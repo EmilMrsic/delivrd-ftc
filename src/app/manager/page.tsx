@@ -111,7 +111,6 @@ function Manager() {
   };
 
   useEffect(() => {
-    console.log("got updated data");
     if (negotiationsFromTeamDashboard) {
       const { team: teamWithNegotiations, dealsWithoutCoordinator } =
         mapNegotiationsToTeam(

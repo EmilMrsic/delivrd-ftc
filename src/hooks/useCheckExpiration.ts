@@ -13,7 +13,6 @@ const useClientShareStatus = (id: string | null): ShareStatus => {
 
   useEffect(() => {
     const checkExpiration = async () => {
-      console.log({ id });
       if (!id) return;
 
       try {

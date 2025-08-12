@@ -21,11 +21,9 @@ export const FileUpload = ({ name }: { name: string }) => {
         ref={ref}
         className="hidden"
         onChange={(e) => {
-          console.log("file:");
           if (e.target.files) {
             const file = e.target.files[0];
             if (!file) {
-              console.log("something went wrong in file upload");
               return;
             }
 

@@ -76,13 +76,11 @@ const SignInContent = ({
           lastSignedIn: serverTimestamp(),
         });
         const userData = querySnapshot.docs[0].data();
-        console.log({ userData });
         localStorage.removeItem("user"); // Clear first
 
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("emailForSignIn", userData.email);
         toast({ title: "Logged in" });
-        console.log("got here in signup", userData);
         let redirectUrl = "/";
         if (userData.privilege === "Dealer") {
           redirectUrl = "/bid";

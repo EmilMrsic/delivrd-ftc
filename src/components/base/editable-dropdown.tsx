@@ -71,12 +71,6 @@ const EditableDropdown: React.FC<EditableDropdownProps> = ({
         //     [userField]: value,
         //   });
 
-        console.log(
-          "Updated negotiation field:",
-          field,
-          "with value:",
-          newValue
-        );
         toast({ title: "Field Updated" });
       } catch (error) {
         console.error("Error updating negotiation:", error);

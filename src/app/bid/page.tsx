@@ -43,7 +43,6 @@ const BiddingPage = () => {
   useEffect(() => {
     if (dealer) {
       if (!dealer?.updated) {
-        console.log("showing modal");
         document.body.style.overflow = "hidden";
         setShowModal(true);
       } else {
@@ -114,8 +113,6 @@ const BiddingPage = () => {
       description: "Your information has been updated",
     });
   };
-
-  console.log("got here: dealer:", dealer);
 
   if (!dealer) return <Loader />;
 

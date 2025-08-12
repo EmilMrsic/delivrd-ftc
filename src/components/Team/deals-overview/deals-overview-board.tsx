@@ -544,8 +544,6 @@ export const DealDisplay = ({
     }
   };
 
-  console.log("checked:", checked ? false : true);
-
   return (
     <div
       key={deal.id}

@@ -40,8 +40,6 @@ export const PreviousBidsTable = ({
         if (vehicle.bidType === "tradeIn") return false;
         return true;
       });
-
-      console.log("got incomingVehicles:", incomingVehicles);
     } else {
       incomingVehicles = incomingVehicles.filter((vehicle) => {
         if (vehicle.bidType === "tradeIn") return true;
@@ -119,7 +117,6 @@ export const PreviousBidsTable = ({
   };
 
   useEffect(() => {
-    console.log("got incoming: subtab:", subTab, dealerBids);
     const filtered = filterVehicles(dealerBids);
     setFilteredBids(filtered);
   }, [subTab, dealerBids]);
@@ -340,11 +337,6 @@ export const PreviousBidsTable = ({
         ...rowOutput,
         {
           Component: () => {
-            console.log(
-              "bid.inventoryStatus:",
-              bid.bid_id,
-              bid.inventoryStatus
-            );
             return (
               <div
                 className={cn(
@@ -384,7 +376,6 @@ export const PreviousBidsTable = ({
               return (
                 <>
                   {bid.files?.map((file, idx) => {
-                    console.log("file:", file);
                     return (
                       <div>
                         <Link target="_blank" href={file}>

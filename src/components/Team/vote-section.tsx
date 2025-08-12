@@ -36,13 +36,10 @@ const VoteSection = ({
       const querySnapshot = await getDocs(bidsQuery);
 
       if (querySnapshot.empty) {
-        console.log("No matching bids found for bid_id:", bid_id);
         return;
       }
 
       const docSnap = querySnapshot.docs[0];
-
-      console.log("Document data:", docSnap.data());
 
       let currentVote = null;
 
