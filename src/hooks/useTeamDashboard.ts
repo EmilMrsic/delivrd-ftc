@@ -5,6 +5,7 @@ import { useNegotiations } from "./useNegotiations";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { useNegotiationStore } from "@/lib/state/negotiation";
 import { useTeamDashboardStore } from "@/lib/state/team-dashboard";
+import { useDealNegotiators } from "./useDealNegotiators";
 
 const useTeamDashboard = (
   config: {
@@ -31,6 +32,7 @@ const useTeamDashboard = (
   archive: boolean;
   setArchive: (archive: boolean) => void;
 } => {
+  const { dealNegotiators } = useDealNegotiators();
   const allStoredNegotiations = useNegotiationStore(
     (state) => state.negotiations
   );
@@ -95,30 +97,6 @@ const useTeamDashboard = (
   }, [fetchedAllNegotiations]);
 
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiatorType>();
-  const [allDealNegotiator, setAllDealNegotiator] = useState<
-    DealNegotiatorType[]
-  >([]);
-
-  const getAllDealNegotiator = async () => {
-    try {
-      const teamCollection = collection(db, "team delivrd");
-
-      const querySnapshot = await getDocs(teamCollection);
-
-      const negotiatiatorData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      return negotiatiatorData as DealNegotiatorType[];
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    getAllDealNegotiator().then((res) => setAllDealNegotiator(res ?? []));
-  }, []);
 
   return {
     allNegotiations: storedAllNegotiationIds
@@ -128,8 +106,8 @@ const useTeamDashboard = (
       .map((id) => allStoredNegotiations[id])
       .filter((n) => n),
     team: team,
-    setAllDealNegotiator,
-    allDealNegotiator,
+    setAllDealNegotiator: (allDealNegotiator: DealNegotiatorType[]) => {},
+    allDealNegotiator: dealNegotiators,
     // @ts-ignore
     negotiatorData: negotiatorData,
     setNegotiatorData,

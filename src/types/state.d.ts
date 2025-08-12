@@ -1,4 +1,4 @@
-import { NegotiationDataType } from "@/lib/models/team";
+import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 
 export interface NegotiationState {
   negotiations: Record<string, NegotiationDataType>;
@@ -18,4 +18,12 @@ export interface TeamDashboardState {
   setAllNegotiations: (negotiations: string[]) => void;
   negotiations: string[];
   setNegotiations: (negotiations: string[]) => void;
+}
+
+export interface DealNegotiatorsState {
+  dealNegotiators: Record<string, DealNegotiatorType>;
+  setDealNegotiators: (
+    dealNegotiators: Record<string, DealNegotiatorType>
+  ) => void;
+  getDealNegotiators: () => DealNegotiatorType[];
 }

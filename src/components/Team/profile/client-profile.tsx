@@ -235,15 +235,21 @@ export const ClientProfile = ({
     parentKey?: string;
   }) => {
     // (prevState: any) => {
+    if (!negotiation) return;
+
     const { key, newValue, parentKey } = updateObject;
 
     let value = newValue;
     let keyName = parentKey ? parentKey : key;
     if (parentKey) {
-      value = {
-        ...negotiation[parentKey],
-        [key]: newValue,
-      };
+      const parentVal = negotiation[parentKey as keyof NegotiationDataType];
+      if (typeof parentVal === "object" && parentVal !== null) {
+        // @ts-ignore
+        value = {
+          ...(parentVal as Record<string, unknown>),
+          [key]: newValue,
+        };
+      }
     }
 
     //   return {

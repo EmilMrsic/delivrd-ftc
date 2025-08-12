@@ -1,7 +1,4 @@
-import { setNotificationCount } from "@/app/redux/Slice/notificationSlice";
-import { useAppSelector } from "@/app/redux/store";
 import { db } from "@/firebase/config";
-import { mapNegotiationData } from "@/lib/utils";
 import {
   BidComments,
   DealerData,
@@ -9,26 +6,20 @@ import {
   EditNegotiationData,
   IncomingBid,
 } from "@/types";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
-import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { useNegotiations } from "./useNegotiations";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { useLoggedInUser } from "./useLoggedInUser";
 import { useNegotiationStore } from "@/lib/state/negotiation";
+import { useDealNegotiators } from "./useDealNegotiators";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
 };
 
 const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
+  const { dealNegotiators } = useDealNegotiators();
   // const getNegotiation = useNegotiationStore((state) => state.getNegotiation);
   const storedNegotiation = useNegotiationStore(
     (state) => state.negotiations[negotiationId]
@@ -40,9 +31,9 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
 
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [dealers, setDealers] = useState<DealerData[]>([]);
-  const [allDealNegotiator, setAllDealNegotiator] = useState<
-    DealNegotiatorType[]
-  >([]);
+  // const [allDealNegotiator, setAllDealNegotiator] = useState<
+  //   DealNegotiatorType[]
+  // >([]);
   const [negotiation, setNegotiation] = useState<NegotiationDataType | null>(
     null
   );
@@ -112,22 +103,22 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     setBidCommentsByBidId(groupedBidComments);
   };
 
-  const getAllDealNegotiator = async () => {
-    try {
-      const teamCollection = collection(db, "team delivrd");
+  // const getAllDealNegotiator = async () => {
+  //   try {
+  //     const teamCollection = collection(db, "team delivrd");
 
-      const querySnapshot = await getDocs(teamCollection);
+  //     const querySnapshot = await getDocs(teamCollection);
 
-      const negotiatiatorData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+  //     const negotiatiatorData = querySnapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
 
-      return negotiatiatorData as DealNegotiatorType[];
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  //     return negotiatiatorData as DealNegotiatorType[];
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const getBidsByIds = async (bidIds: string[]) => {
     if (!bidIds || bidIds.length === 0) {
@@ -171,9 +162,9 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   useEffect(() => {
     fetchDealers().then((res) => setDealers(res as DealerData[]));
     fetchBidComments();
-    getAllDealNegotiator().then((res) =>
-      setAllDealNegotiator(res as DealNegotiatorType[])
-    );
+    // getAllDealNegotiator().then((res) =>
+    //   setAllDealNegotiator(res as DealNegotiatorType[])
+    // );
   }, [incomingBids]);
 
   useEffect(() => {
@@ -212,8 +203,8 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     setDealers,
     dealers,
     user,
-    allDealNegotiator,
-    setAllDealNegotiator,
+    allDealNegotiator: dealNegotiators,
+    setAllDealNegotiator: () => {},
     negotiation: storedNegotiation,
     setNegotiation,
     negotiationId,
