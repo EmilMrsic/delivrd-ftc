@@ -16,7 +16,10 @@ import { cn } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusToggle } from "../tailwind-plus/toggle";
-import { negotiationStatusOrder } from "@/lib/constants/negotiations";
+import {
+  ArchivedStatuses,
+  negotiationStatusOrder,
+} from "@/lib/constants/negotiations";
 import { DealNegotiatorDropdown } from "./deal-negotiator-dropdown";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
@@ -222,6 +225,11 @@ const ClientDetails = ({
           <div className={cn(`space-y-4`, isBlur && `blur-sm`)}>
             <InputField
               type="searchableDropdown"
+              tableOverride={
+                ArchivedStatuses.includes(negotiation?.stage as string)
+                  ? "delivrd_archive"
+                  : undefined
+              }
               options={[
                 ...negotiationStatusOrder,
                 "Refunded",

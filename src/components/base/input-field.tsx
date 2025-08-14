@@ -118,6 +118,7 @@ export const InputField = (props: {
   checked?: boolean;
   onToggle?: (newValue: boolean) => void;
   as?: React.ComponentType<any>;
+  tableOverride?: string;
 }) => {
   const { toast } = useToast();
   const { as: AsComponent } = props;
@@ -177,7 +178,7 @@ export const InputField = (props: {
 
         const negotiationDocRef = doc(
           db,
-          "delivrd_negotiations",
+          props.tableOverride ?? "delivrd_negotiations",
           negotiationId
         );
 
@@ -297,6 +298,7 @@ export const InputField = (props: {
           handleUpdate(e);
         }}
         checked={props.checked}
+        tableOverride={props.tableOverride}
       />
     );
 

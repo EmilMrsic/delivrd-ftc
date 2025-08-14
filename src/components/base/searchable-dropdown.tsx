@@ -18,6 +18,7 @@ interface EditableDropdownProps {
   negotiationId: string;
   field: string;
   userField?: string;
+  tableOverride?: string; // Optional override for the table name
 }
 
 const SearchableDropdown: React.FC<EditableDropdownProps> = ({
@@ -27,6 +28,7 @@ const SearchableDropdown: React.FC<EditableDropdownProps> = ({
   negotiationId,
   field,
   userField,
+  tableOverride,
 }) => {
   const [selectedValue, setSelectedValue] = useState<string>(value);
 
@@ -55,7 +57,11 @@ const SearchableDropdown: React.FC<EditableDropdownProps> = ({
       // }
 
       // const userDoc = userSnapshot.docs[0];
-      const negotiationRef = doc(db, "delivrd_negotiations", negotiationId);
+      const negotiationRef = doc(
+        db,
+        tableOverride ?? "delivrd_negotiations",
+        negotiationId
+      );
       await updateDoc(negotiationRef, {
         [field]: newValue,
       });
