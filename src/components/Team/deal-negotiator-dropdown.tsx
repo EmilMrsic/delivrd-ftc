@@ -61,19 +61,26 @@ export const DealNegotiatorDropdown = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 h-56 overflow-scroll z-[9999]">
-          {allDealNegotiator.map((negotiator: DealNegotiatorType, index) => (
-            <DropdownMenuItem
-              key={index}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                updateDealNegotiator(deal.id, negotiator.id);
-                setOpenNegotiatorState(false);
-              }}
-            >
-              {negotiator.name}
-            </DropdownMenuItem>
-          ))}
+          {allDealNegotiator
+            .filter((negotiator: DealNegotiatorType) => {
+              const isVisible =
+                process.env.NEXT_PUBLIC_MODE === "development" ||
+                negotiator.visible !== false;
+              return isVisible;
+            })
+            .map((negotiator: DealNegotiatorType, index) => (
+              <DropdownMenuItem
+                key={index}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  updateDealNegotiator(deal.id, negotiator.id);
+                  setOpenNegotiatorState(false);
+                }}
+              >
+                {negotiator.name}
+              </DropdownMenuItem>
+            ))}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
