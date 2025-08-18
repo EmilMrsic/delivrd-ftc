@@ -3,8 +3,12 @@ import { DealNegotiatorType } from "@/lib/models/team";
 import { useDealNeogiatorStore } from "@/lib/state/deal-negotiatior";
 import { useQuery } from "@tanstack/react-query";
 import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import { useMemo } from "react";
 
 export const useDealNegotiators = () => {
+  const dealNegotiators = useDealNeogiatorStore(
+    (state) => state.dealNegotiators
+  );
   const setDealNegotiators = useDealNeogiatorStore(
     (state) => state.setDealNegotiators
   );
@@ -29,7 +33,11 @@ export const useDealNegotiators = () => {
     refetchOnWindowFocus: false,
   });
 
+  const listedDealNegotiations = useMemo(() => {
+    return getDealNegotiators();
+  }, [data.data]);
+
   return {
-    dealNegotiators: getDealNegotiators(),
+    dealNegotiators: listedDealNegotiations,
   };
 };

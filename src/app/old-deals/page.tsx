@@ -30,7 +30,7 @@ import { DealNegotiator, NegotiationData } from "@/types";
 import { Calendar, ChevronDown, Expand, StickyNote, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const trimPackageFields = [
   { label: "Client", field: "negotiations_Client", icon: <User size={14} /> },
@@ -53,16 +53,17 @@ const trimPackageFields = [
 ];
 
 const OldDeals = () => {
+  const configToPass = useMemo(
+    () => ({
+      all: true,
+    }),
+    []
+  );
   const {
     negotiatorData,
     allDealNegotiator,
     negotiations: negotiationsFromTeamDashboard,
-  } = useTeamDashboard({
-    all: true,
-    // filter: {
-    //   status: ["Actively Negotiating", "Deal Started", "Paid"],
-    // },
-  });
+  } = useTeamDashboard(configToPass);
   const [loading, setLoading] = useState<boolean>(true);
   const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);
 
@@ -87,6 +88,8 @@ const OldDeals = () => {
           <Loader />
         ) : (
           <TailwindPlusTable
+            pagination={true}
+            pageLimit={10}
             headers={[
               {
                 header: "#",

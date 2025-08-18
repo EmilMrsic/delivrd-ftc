@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const fields = [
   {
@@ -71,16 +71,21 @@ const fields = [
   { label: "Model", field: "model_of_interest", icon: <Car size={14} /> },
 ];
 const PaidHolding = () => {
+  const configToPass = useMemo(
+    () => ({
+      all: true,
+      filter: {
+        stage: "Paid Holding",
+      },
+    }),
+    []
+  );
   const {
     negotiatorData,
     allDealNegotiator,
     negotiations: negotiationsFromTeamDashboard,
-  } = useTeamDashboard({
-    all: true,
-    filter: {
-      stage: "Paid Holding",
-    },
-  });
+  } = useTeamDashboard(configToPass);
+
   const [loading, setLoading] = useState<boolean>(true);
   // const [isOpen, setIsOpen] = useState<boolean>(false);
   const [negotiations, setNegotiations] = useState<NegotiationDataType[]>([]);

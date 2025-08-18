@@ -55,6 +55,8 @@ import { MakeButton } from "@/components/Team/make-button";
 import { StageDropdown } from "@/components/Team/stage-dropdown";
 import { ClientProfile } from "@/components/Team/profile/client-profile";
 import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
+import { useDealNegotiators } from "@/hooks/useDealNegotiators";
+import { useNegotiations } from "@/hooks/useNegotiations";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -85,18 +87,29 @@ function Manager() {
   const [dealsWithoutCoordinator, setDealsWithoutCoordinator] = useState<
     NegotiationDataType[]
   >([]);
-  const [loading, setLoading] = useState(false);
+  const { dealNegotiators: allDealNegotiator } = useDealNegotiators();
+
   const {
-    allDealNegotiator,
-    // setFilteredDeals,
-    // setOriginalDeals,
-    // negotiatorData,
     negotiations: negotiationsFromTeamDashboard,
-    team: teamFromTeamDashboard,
     refetch,
-  } = useTeamDashboard({
+    isLoading,
+    team: teamFromTeamDashboard,
+  } = useNegotiations({
     all: true,
   });
+
+  const [loading, setLoading] = useState(false);
+  // const {
+  //   allDealNegotiator,
+  //   // setFilteredDeals,
+  //   // setOriginalDeals,
+  //   // negotiatorData,
+  //   negotiations: negotiationsFromTeamDashboard,
+  //   team: teamFromTeamDashboard,
+  //   refetch,
+  // } = useTeamDashboard({
+  //   all: true,
+  // });
 
   const toggleRow = (teamId: string) => {
     setExpandedRows((prevExpandedRows) => {
@@ -123,59 +136,6 @@ function Manager() {
       setLoading(false);
     }
   }, [negotiationsFromTeamDashboard]);
-
-  // const fetchTeamAndDeals = async () => {
-  //   try {
-  //     setLoading(true);
-
-  //     // Fetch all team members
-  //     const teamSnapshot = await getDocs(collection(db, "team delivrd"));
-
-  //     // Map teams and fetch negotiations in parallel
-  //     const teamsWithDeals = await Promise.all(
-  //       teamSnapshot.docs.map(async (teamDoc) => {
-  //         const teamMember = { id: teamDoc.id, ...teamDoc.data() } as any;
-  //         const activeDeals = teamMember.active_deals?.filter(Boolean) || [];
-
-  //         if (activeDeals.length === 0) {
-  //           return { ...teamMember, negotiations: [] };
-  //         }
-
-  //         // Chunk the activeDeals array to avoid Firestore query limit issues
-  //         const chunkedDeals = Array.from(
-  //           { length: Math.ceil(activeDeals.length / 30) },
-  //           (_, i) => activeDeals.slice(i * 30, i * 30 + 30)
-  //         );
-
-  //         // Fetch negotiations for each chunk in parallel
-  //         const negotiations = (
-  //           await Promise.all(
-  //             chunkedDeals.map(async (chunk) => {
-  //               const negotiationsSnapshot = await getDocs(
-  //                 query(
-  //                   collection(db, "negotiations"),
-  //                   where("__name__", "in", chunk)
-  //                 )
-  //               );
-  //               return negotiationsSnapshot.docs.map((doc) => ({
-  //                 id: doc.id,
-  //                 ...doc.data(),
-  //               }));
-  //             })
-  //           )
-  //         ).flat(); // Flatten the results
-
-  //         return { ...teamMember, negotiations };
-  //       })
-  //     );
-
-  //     setTeamData(teamsWithDeals);
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   useEffect(() => {
     const user = localStorage.getItem("user");

@@ -81,6 +81,7 @@ export const TailwindPlusTable = ({
 }) => {
   const isMobile = useIsMobile();
   const [expanded, setExpanded] = useState<null | [number, number]>(null);
+  const [page, setPage] = useState(0);
 
   const table = useReactTable({
     data: rows,
@@ -105,7 +106,9 @@ export const TailwindPlusTable = ({
     enableColumnResizing: true,
   });
 
-  const useableRows = pagination ? rows.slice(0, pageLimit) : rows;
+  const useableRows = pagination
+    ? rows.slice(page * (pageLimit || 0), pageLimit)
+    : rows;
 
   return (
     <>
@@ -248,6 +251,10 @@ export const TailwindPlusTable = ({
               )}
             </tbody>
           </table>
+        </div>
+        <div className="text-center w-full flex justify-between p-4">
+          <div>Previous</div>
+          <div>Next</div>
         </div>
       </div>
       {expanded && (

@@ -46,6 +46,7 @@ export const useNegotiations = (
 
   useEffect(() => {
     if (negotiationsQuery.data?.negotiations) {
+      console.log("updating the store");
       const byId: Record<string, any> = {};
       negotiationsQuery.data?.negotiations.forEach((negotiation: any) => {
         byId[negotiation.id] = negotiation;

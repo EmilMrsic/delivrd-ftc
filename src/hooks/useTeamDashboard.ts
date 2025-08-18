@@ -33,6 +33,7 @@ const useTeamDashboard = (
   setArchive: (archive: boolean) => void;
 } => {
   const { dealNegotiators } = useDealNegotiators();
+
   const allStoredNegotiations = useNegotiationStore(
     (state) => state.negotiations
   );
@@ -48,9 +49,11 @@ const useTeamDashboard = (
   const storedAllNegotiationIds = useTeamDashboardStore(
     (state) => state.allNegotiations
   );
+
   const [archive, setArchive] = useState(false);
   const [searchAll, setSearchAll] = useState(false);
   const [userFilters, allFilters] = useMemo(() => {
+    console.log("rerunning again and again");
     const userFilters = { ...config };
     const allFilters = searchAll ? { ...config } : {};
     if (searchAll) {
@@ -97,6 +100,19 @@ const useTeamDashboard = (
   }, [fetchedAllNegotiations]);
 
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiatorType>();
+
+  useEffect(
+    () => {
+      console.log("running");
+    },
+    [
+      // fetchedNegotiations,
+      // fetchedAllNegotiations,
+      // dealNegotiators,
+      // team,
+      // config,
+    ]
+  );
 
   return {
     allNegotiations: storedAllNegotiationIds
