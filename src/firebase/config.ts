@@ -42,7 +42,7 @@ const initMessaging = async () => {
 };
 
 // Call the function to initialize messaging
-initMessaging();
+// initMessaging();
 
 export { db, auth, storage, messaging };
 
@@ -66,7 +66,7 @@ export const requestForToken = async () => {
       return null;
     }
   } catch (err) {
-    alert("An error occurred while retrieving token: " + err);
+    alert("An error occurred while retrieving token: ");
     return null;
   }
 };
