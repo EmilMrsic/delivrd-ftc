@@ -16,6 +16,7 @@ export const GET = async (request: NextRequest) => {
   const userData = await getUserDataFromDb(headers.get("auth") as string);
   const dealer = await getDealerFromDb(userData?.dealer_id?.[0]);
   const negotiationsById: Record<string, NegotiationDataType> = {};
+  console.log("got dealer:", dealer);
   const requests = Promise.all([
     getDocs(collection(db, "delivrd_negotiations")),
     getDocs(
