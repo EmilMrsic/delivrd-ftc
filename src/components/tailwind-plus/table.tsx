@@ -11,6 +11,8 @@ import { Expand } from "lucide-react";
 import Link from "next/link";
 import { TailwindPlusModal } from "./modal";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { randomInt } from "crypto";
+import { useTableExpandedRow } from "@/lib/state/table-expanded-row";
 
 interface HeaderConfig {
   sortable?: boolean;
@@ -55,7 +57,12 @@ interface RowConfig {
   onClick?: () => void;
 }
 
+function getRandomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 export const TailwindPlusTable = ({
+  id: incomingId,
   headers,
   rows,
   sortConfig,
@@ -66,6 +73,7 @@ export const TailwindPlusTable = ({
   pagination,
   pageLimit,
 }: {
+  id?: string;
   headers: (string | HeaderWithConfig)[];
   rows: (Cell | string | number | undefined | null | any)[][];
   sortConfig?: {
@@ -79,8 +87,13 @@ export const TailwindPlusTable = ({
   pagination?: boolean;
   pageLimit?: number;
 }) => {
+  const expanded = useTableExpandedRow((state) => state.expanded);
+  const setExpanded = useTableExpandedRow((state) => state.setExpanded);
+  const storedTableId = useTableExpandedRow((state) => state.tableId);
+
+  const [id, setId] = useState(incomingId || `table-${getRandomInt(0, 1000000)}`);
   const isMobile = useIsMobile();
-  const [expanded, setExpanded] = useState<null | [number, number]>(null);
+  // const [expanded, setExpanded] = useState<null | [number, number]>(null);
   const [page, setPage] = useState(0);
 
   const table = useReactTable({
@@ -166,6 +179,7 @@ export const TailwindPlusTable = ({
 
                         return (
                           <TailwindTableCell
+                            tableId={id}
                             key={`table-cell-${rowIdx}-${cellIdx}`}
                             cell={cell}
                             rowIdx={rowIdx}
@@ -274,14 +288,16 @@ export const TailwindTableExpandedPopover = ({
   expanded,
 }: {
   cell: Cell;
-  setExpanded: (expanded: [number, number] | null) => void;
+  setExpanded: (tableId: string | null, expanded: [number, number] | null) => void;
   expanded: [number, number] | null;
 }) => {
   const Component = cell.config?.expandedComponent;
 
   return (
     <TailwindPlusModal
-      close={() => setExpanded(null)}
+      close={() => {
+        setExpanded(null, null)
+      }}
       width={cell.config?.expandedSize === "full" ? 90 : 40}
       height={90}
       onCloseTrigger={cell.config?.onExpandedClose}
@@ -292,7 +308,7 @@ export const TailwindTableExpandedPopover = ({
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             onClick={() => {
-              setExpanded(null);
+              setExpanded(null, null);
               cell.config?.onExpandedClose?.();
             }}
           >
@@ -382,6 +398,7 @@ export const TailwindTableHeader = ({
 };
 
 export const TailwindTableCell = ({
+  tableId,
   cell,
   rowIdx,
   cellIdx,
@@ -389,10 +406,11 @@ export const TailwindTableCell = ({
   isMobile,
   headerName,
 }: {
+  tableId: string;
   cell: Cell | string | number | null | undefined;
   rowIdx: number;
   cellIdx: number;
-  setExpanded: (expanded: [number, number] | null) => void;
+  setExpanded: (tableId: string, expanded: [number, number] | null) => void;
   isMobile: boolean;
   headerName: string;
 }) => {
@@ -419,8 +437,8 @@ export const TailwindTableCell = ({
             <button
               className="transform  text-gray-500 hover:text-gray-700"
               title="Expand"
-              onClick={() => {
-                setExpanded([rowIdx, cellIdx]);
+              onClick={() => {  
+                setExpanded(tableId, [rowIdx, cellIdx]);
               }}
             >
               <Expand size={16} className="text-gray-500 hover:text-gray-700" />
@@ -430,7 +448,7 @@ export const TailwindTableCell = ({
       {Component ? (
         <Component
           expand={() => {
-            setExpanded([rowIdx, cellIdx]);
+            setExpanded(tableId, [rowIdx, cellIdx]);
           }}
         />
       ) : (

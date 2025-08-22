@@ -7,12 +7,13 @@ export const useDealNeogiatorStore = create<DealNegotiatorsState>()(
     (set, get) => ({
       dealNegotiators: {},
       setDealNegotiators: (dealNegotiators) =>
-        set(() => ({
-          dealNegotiators: {
-            ...get().dealNegotiators,
-            ...dealNegotiators,
-          },
-        })),
+        set((state) => {
+          const merged = { ...state.dealNegotiators, ...dealNegotiators };
+          if (JSON.stringify(state.dealNegotiators) !== JSON.stringify(merged)) {
+            return { dealNegotiators: merged };
+          }
+          return state;
+        }),
       getDealNegotiators: () => Object.values(get().dealNegotiators),
     }),
     {

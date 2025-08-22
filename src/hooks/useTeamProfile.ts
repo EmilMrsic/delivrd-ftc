@@ -7,12 +7,13 @@ import {
   IncomingBid,
 } from "@/types";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNegotiations } from "./useNegotiations";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { useLoggedInUser } from "./useLoggedInUser";
 import { useNegotiationStore } from "@/lib/state/negotiation";
 import { useDealNegotiators } from "./useDealNegotiators";
+import {shallow} from 'zustand/shallow'
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -30,27 +31,32 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
 
   const [incomingBids, setIncomingBids] = useState<IncomingBid[]>([]);
   const [dealers, setDealers] = useState<DealerData[]>([]);
-  const [negotiation, setNegotiation] = useState<NegotiationDataType | null>(
-    null
-  );
+  // const [negotiation, setNegotiation] = useState<NegotiationDataType | null>(
+  //   null
+  // );
 
-  const {
-    negotiations: negotiationsFromUseNegotiations,
-    isLoading,
-    refetch,
-  } = useNegotiations({
+  const config = useMemo(() => {
+    return {
     all: true,
     profile: true,
     filter: {
       id: negotiationId,
     },
-  });
+  }
+  }, [negotiationId])
+  
 
-  useEffect(() => {
-    if (negotiationsFromUseNegotiations) {
-      setNegotiation(negotiationsFromUseNegotiations[0]);
-    }
-  }, [negotiationsFromUseNegotiations]);
+  const {
+    negotiations: negotiationsFromUseNegotiations,
+    isLoading,
+    refetch,
+  } = useNegotiations(config);
+
+  // useEffect(() => {
+  //   if (negotiationsFromUseNegotiations) {
+  //     setNegotiation(negotiationsFromUseNegotiations[0]);
+  //   }
+  // }, [negotiationsFromUseNegotiations]);
 
   const fetchDealers = async () => {
     const bidDealerIds = incomingBids.map((bid) => bid.dealerId);
@@ -135,7 +141,7 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
   };
 
   const fetchBids = async () => {
-    getBidsByIds(negotiation?.incomingBids ?? []);
+    getBidsByIds(storedNegotiation?.incomingBids ?? []);
   };
 
   useEffect(() => {
@@ -145,16 +151,16 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
 
   useEffect(() => {
     fetchBids();
-  }, [negotiation]);
+  }, [storedNegotiation]);
 
   useEffect(() => {
     const getDealNegotiatorData = async () => {
-      if (!negotiation?.dealCoordinatorId) return;
+      if (!storedNegotiation?.dealCoordinatorId) return;
 
       try {
         const teamDocRef = query(
           collection(db, "team delivrd"),
-          where("id", "==", negotiation?.dealCoordinatorId)
+          where("id", "==", storedNegotiation?.dealCoordinatorId)
         );
 
         const querySnapshot = await getDocs(teamDocRef);
@@ -170,7 +176,8 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     };
 
     getDealNegotiatorData();
-  }, [negotiation]);
+  }, [storedNegotiation]);
+
 
   return {
     dealNegotiator,
@@ -181,7 +188,7 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     allDealNegotiator: dealNegotiators,
     setAllDealNegotiator: () => {},
     negotiation: storedNegotiation,
-    setNegotiation,
+    setNegotiation: () => {},
     negotiationId,
     incomingBids,
     setIncomingBids,

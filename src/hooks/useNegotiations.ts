@@ -2,6 +2,7 @@ import { backendRequest } from "@/lib/request";
 import { useNegotiationStore } from "@/lib/state/negotiation";
 import { getUserData } from "@/lib/user";
 import { useQuery } from "@tanstack/react-query";
+import { isEqual } from "lodash";
 import { useEffect, useMemo, useState } from "react";
 
 export const useNegotiations = (
@@ -33,6 +34,8 @@ export const useNegotiations = (
         ? `negotiation`
         : `negotiation/${id || loggedInUserId}`;
 
+      console.log("rerunning network request")
+
       const request = await backendRequest(path, "POST", {
         archive: config.archive,
         filter: filters,
@@ -46,7 +49,6 @@ export const useNegotiations = (
 
   useEffect(() => {
     if (negotiationsQuery.data?.negotiations) {
-      console.log("updating the store");
       const byId: Record<string, any> = {};
       negotiationsQuery.data?.negotiations.forEach((negotiation: any) => {
         byId[negotiation.id] = negotiation;

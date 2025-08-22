@@ -27,3 +27,13 @@ export interface DealNegotiatorsState {
   ) => void;
   getDealNegotiators: () => DealNegotiatorType[];
 }
+
+export interface TableExpandedRowState {
+  tableId: string | null;
+  expanded: null | [number, number];
+  setExpanded: (tableId: null | string, expanded: null | [number, number]) => void;
+  // cell: null | any;
+  // component: null | React.ComponentType<any>;
+  // open: (tableId: string, row: any, component: React.ComponentType<any>) => void;
+  // close: () => void;
+};

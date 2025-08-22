@@ -96,6 +96,7 @@ export const ClientProfile = ({
     fetchBidComments,
     fetchBids,
   } = useTeamProfile({ negotiationId });
+
   const {
     data: clientBids,
     isLoading: clientBidsLoading,
@@ -282,16 +283,16 @@ export const ClientProfile = ({
     });
   };
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      onMessage(messaging, (data: any) => {
-        const newData = { ...data.notification, ...data.data };
-        if (newData) dispatch(setAllNotifications(newData));
-      });
-    }, 3000);
+  // useEffect(() => {
+  //   const timeoutId = setTimeout(() => {
+  //     onMessage(messaging, (data: any) => {
+  //       const newData = { ...data.notification, ...data.data };
+  //       if (newData) dispatch(setAllNotifications(newData));
+  //     });
+  //   }, 3000);
 
-    return () => clearTimeout(timeoutId);
-  }, [dispatch]);
+  //   return () => clearTimeout(timeoutId);
+  // }, [dispatch]);
 
   const handleEdit = (bid: any) => {
     setEditingBidId(bid.bid_id);
@@ -473,13 +474,16 @@ export const ClientProfile = ({
     });
   }, [negotiationId]);
 
-  if (isLoading || !negotiation) {
+
+  if (isLoading && !negotiation) {
+    console.log("yeah we're loading", negotiation)
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader className="w-10 h-10 animate-spin" />
       </div>
     );
   }
+
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-[98%] mx-auto">

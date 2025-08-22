@@ -53,7 +53,6 @@ const useTeamDashboard = (
   const [archive, setArchive] = useState(false);
   const [searchAll, setSearchAll] = useState(false);
   const [userFilters, allFilters] = useMemo(() => {
-    console.log("rerunning again and again");
     const userFilters = { ...config };
     const allFilters = searchAll ? { ...config } : {};
     if (searchAll) {
@@ -66,7 +65,7 @@ const useTeamDashboard = (
   const {
     negotiations: fetchedNegotiations,
     refetch,
-    team,
+    // team,
     isLoading,
   } = useNegotiations({
     archive: archive,
@@ -101,27 +100,22 @@ const useTeamDashboard = (
 
   const [negotiatorData, setNegotiatorData] = useState<DealNegotiatorType>();
 
-  useEffect(
-    () => {
-      console.log("running");
-    },
-    [
-      // fetchedNegotiations,
-      // fetchedAllNegotiations,
-      // dealNegotiators,
-      // team,
-      // config,
-    ]
-  );
+  const allNegotiations = useMemo(() => {
+    return storedAllNegotiationIds
+      .map((id) => allStoredNegotiations[id])
+      .filter((n) => n)
+  }, [storedAllNegotiationIds, allStoredNegotiations])
+
+  const negotiations = useMemo(() => {
+    return storedNegotiationIds
+      .map((id) => allStoredNegotiations[id])
+      .filter((n) => n)
+  }, [storedNegotiationIds, allStoredNegotiations])
 
   return {
-    allNegotiations: storedAllNegotiationIds
-      .map((id) => allStoredNegotiations[id])
-      .filter((n) => n),
-    negotiations: storedNegotiationIds
-      .map((id) => allStoredNegotiations[id])
-      .filter((n) => n),
-    team: team,
+    allNegotiations: allNegotiations,
+    negotiations: negotiations,
+    team: dealNegotiators,
     setAllDealNegotiator: (allDealNegotiator: DealNegotiatorType[]) => {},
     allDealNegotiator: dealNegotiators,
     // @ts-ignore

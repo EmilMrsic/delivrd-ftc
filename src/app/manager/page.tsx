@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -88,28 +88,30 @@ function Manager() {
     NegotiationDataType[]
   >([]);
   const { dealNegotiators: allDealNegotiator } = useDealNegotiators();
+  const teamFromTeamDashboard = allDealNegotiator;
 
-  const {
-    negotiations: negotiationsFromTeamDashboard,
-    refetch,
-    isLoading,
-    team: teamFromTeamDashboard,
-  } = useNegotiations({
-    all: true,
-  });
-
-  const [loading, setLoading] = useState(false);
   // const {
-  //   allDealNegotiator,
-  //   // setFilteredDeals,
-  //   // setOriginalDeals,
-  //   // negotiatorData,
   //   negotiations: negotiationsFromTeamDashboard,
-  //   team: teamFromTeamDashboard,
   //   refetch,
-  // } = useTeamDashboard({
+  //   isLoading,
+  //   team: teamFromTeamDashboard,
+  // } = useNegotiations({
   //   all: true,
   // });
+
+  const [loading, setLoading] = useState(false);
+  const configToPass = useMemo(() => ({
+    all: true
+  }), [])
+  const {
+    // allDealNegotiator,
+    // setFilteredDeals,
+    // setOriginalDeals,
+    // negotiatorData,
+    negotiations: negotiationsFromTeamDashboard,
+    // team: teamFromTeamDashboard,
+    refetch,
+  } = useTeamDashboard(configToPass);
 
   const toggleRow = (teamId: string) => {
     setExpandedRows((prevExpandedRows) => {
@@ -135,7 +137,7 @@ function Manager() {
       setDealsWithoutCoordinator(dealsWithoutCoordinator);
       setLoading(false);
     }
-  }, [negotiationsFromTeamDashboard]);
+  }, [negotiationsFromTeamDashboard, teamFromTeamDashboard]);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -188,6 +190,7 @@ function Manager() {
       return { key, direction: direction };
     });
   };
+
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
