@@ -10,6 +10,7 @@ import { ContextProviders } from "@/components/context-providers";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import ProtectedRoute from "@/components/ProtectedRoutes/ProtectedRoute";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -52,6 +53,7 @@ export default function RootLayout({
           </ProtectedRoute>
         </ContextProviders>
       </body>
+      <GoogleAnalytics gaId="G-C8BHC9K2PS" />
     </html>
   );
 }
