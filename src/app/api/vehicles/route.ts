@@ -1,6 +1,7 @@
 import { db } from "@/firebase/config";
 import { getClients } from "@/lib/helpers/clients";
 import { getDealerFromDb } from "@/lib/helpers/dealer";
+import { withErrorLogging } from "@/lib/helpers/errors";
 import { getUserDataFromDb } from "@/lib/helpers/user";
 import { NegotiationDataType } from "@/lib/models/team";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -11,7 +12,8 @@ import { NextRequest, NextResponse } from "next/server";
 //   return negotiations.docs.map((doc) => doc.data());
 // };
 
-export const GET = async (request: NextRequest) => {
+// export const GET = async (request: NextRequest) => {
+export const GET = withErrorLogging(async (request) => {
   const headers = request.headers;
   const userData = await getUserDataFromDb(headers.get("auth") as string);
   const dealer = await getDealerFromDb(userData?.dealer_id?.[0]);
@@ -24,6 +26,9 @@ export const GET = async (request: NextRequest) => {
     ),
     getDocs(collection(db, "Clients")),
   ]);
+
+  const test = undefined;
+  console.log("got:", test.toLowerCase());
 
   const [negotiations, incomingBids, clients] = await requests;
 
@@ -58,4 +63,4 @@ export const GET = async (request: NextRequest) => {
   }
 
   return NextResponse.json({ clients: finalClients });
-};
+});

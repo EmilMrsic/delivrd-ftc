@@ -1,3 +1,4 @@
+import { ClientDataType } from "@/lib/models/client";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 
 export interface NegotiationState {
@@ -31,9 +32,20 @@ export interface DealNegotiatorsState {
 export interface TableExpandedRowState {
   tableId: string | null;
   expanded: null | [number, number];
-  setExpanded: (tableId: null | string, expanded: null | [number, number]) => void;
+  setExpanded: (
+    tableId: null | string,
+    expanded: null | [number, number]
+  ) => void;
   // cell: null | any;
   // component: null | React.ComponentType<any>;
   // open: (tableId: string, row: any, component: React.ComponentType<any>) => void;
   // close: () => void;
-};
+}
+
+export interface DealerVehiclesState {
+  vehicles: Record<string, ClientDataType>;
+  setVehicle: (id: string, data: ClientDataType) => void;
+  getVehicle: (id: string) => ClientDataType | undefined;
+  mergeInVehicles: (byId: Record<string, ClientDataType>) => void;
+  hasVehicle: (id: string) => boolean;
+}
