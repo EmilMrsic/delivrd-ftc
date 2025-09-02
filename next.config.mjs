@@ -7,6 +7,9 @@ if (process.env.DEV) {
 }
 
 const nextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
   reactStrictMode: false,
   env: env,
   images: {

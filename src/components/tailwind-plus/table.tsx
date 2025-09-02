@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { TableSortButton } from "./table-sort-button";
 import {
@@ -45,7 +47,7 @@ export interface CellDescriptor {
   };
 }
 
-interface Cell {
+export interface Cell {
   text?: string | null | number;
   Component?: React.ComponentType<any>;
   config?: CellConfig;
@@ -91,9 +93,10 @@ export const TailwindPlusTable = ({
   const setExpanded = useTableExpandedRow((state) => state.setExpanded);
   const storedTableId = useTableExpandedRow((state) => state.tableId);
 
-  const [id, setId] = useState(incomingId || `table-${getRandomInt(0, 1000000)}`);
+  const [id, setId] = useState(
+    incomingId || `table-${getRandomInt(0, 1000000)}`
+  );
   const isMobile = useIsMobile();
-  // const [expanded, setExpanded] = useState<null | [number, number]>(null);
   const [page, setPage] = useState(0);
 
   const table = useReactTable({
@@ -271,13 +274,13 @@ export const TailwindPlusTable = ({
           <div>Next</div>
         </div>
       </div>
-      {expanded && (
+      {/* {id === storedTableId && expanded && (
         <TailwindTableExpandedPopover
           cell={rows[expanded[0]][expanded[1]] as Cell}
           setExpanded={setExpanded}
           expanded={expanded}
         />
-      )}
+      )} */}
     </>
   );
 };
@@ -288,7 +291,10 @@ export const TailwindTableExpandedPopover = ({
   expanded,
 }: {
   cell: Cell;
-  setExpanded: (tableId: string | null, expanded: [number, number] | null) => void;
+  setExpanded: (
+    tableId: string | null,
+    expanded: [number, number] | null
+  ) => void;
   expanded: [number, number] | null;
 }) => {
   const Component = cell.config?.expandedComponent;
@@ -296,7 +302,7 @@ export const TailwindTableExpandedPopover = ({
   return (
     <TailwindPlusModal
       close={() => {
-        setExpanded(null, null)
+        setExpanded(null, null);
       }}
       width={cell.config?.expandedSize === "full" ? 90 : 40}
       height={90}
@@ -410,7 +416,11 @@ export const TailwindTableCell = ({
   cell: Cell | string | number | null | undefined;
   rowIdx: number;
   cellIdx: number;
-  setExpanded: (tableId: string, expanded: [number, number] | null) => void;
+  setExpanded: (
+    tableId: string,
+    expanded: [number, number] | null,
+    cell?: any | null
+  ) => void;
   isMobile: boolean;
   headerName: string;
 }) => {
@@ -437,8 +447,8 @@ export const TailwindTableCell = ({
             <button
               className="transform  text-gray-500 hover:text-gray-700"
               title="Expand"
-              onClick={() => {  
-                setExpanded(tableId, [rowIdx, cellIdx]);
+              onClick={() => {
+                setExpanded(tableId, [rowIdx, cellIdx], cell);
               }}
             >
               <Expand size={16} className="text-gray-500 hover:text-gray-700" />
@@ -448,7 +458,7 @@ export const TailwindTableCell = ({
       {Component ? (
         <Component
           expand={() => {
-            setExpanded(tableId, [rowIdx, cellIdx]);
+            setExpanded(tableId, [rowIdx, cellIdx], cell);
           }}
         />
       ) : (
@@ -493,5 +503,28 @@ export const TailwindTableCell = ({
     >
       {cellContent}
     </td>
+  );
+};
+
+export const GlobalTableComponentWrapper = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const expanded = useTableExpandedRow((state) => state.expanded);
+  const setExpanded = useTableExpandedRow((state) => state.setExpanded);
+  const storedTableCell = useTableExpandedRow((state) => state.cell);
+
+  return (
+    <>
+      {children}
+      {expanded && storedTableCell && (
+        <TailwindTableExpandedPopover
+          cell={storedTableCell as Cell}
+          setExpanded={setExpanded}
+          expanded={expanded}
+        />
+      )}
+    </>
   );
 };

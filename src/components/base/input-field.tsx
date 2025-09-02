@@ -122,6 +122,7 @@ export const InputField = (props: {
 }) => {
   const { toast } = useToast();
   const { as: AsComponent } = props;
+  const [value, setValue] = useState<any>(props.value ?? "");
 
   const handleUpdate = async (valueOverride?: any) => {
     // TODO: find some way to make this generic or move out to a component
@@ -134,7 +135,6 @@ export const InputField = (props: {
       parentKey,
       firstName,
       lastName,
-      value,
     } = props;
 
     if (disabled) {
@@ -264,13 +264,9 @@ export const InputField = (props: {
     ) : (
       <InputComponent
         label={props.label}
-        value={(props.value ?? "") as string}
+        value={(value ?? "") as string}
         onChange={(value: any) => {
-          if (props.type === "datePicker") {
-            props.onDateChange?.(value as Date | null);
-          } else {
-            props.onChange?.(value as string);
-          }
+          setValue(value);
         }}
         negotiationId={props.negotiationId ?? ""}
         field={props.field ?? ""}
@@ -285,12 +281,24 @@ export const InputField = (props: {
           if (!props.type || props.type === "text") {
             handleUpdate();
           }
+
+          if (props.type === "datePicker") {
+            props.onDateChange?.(value as Date | null);
+          } else {
+            props.onChange?.(value as string);
+          }
         }}
         onToggle={(e: boolean) => {
           if (props.onToggle) {
             props.onToggle(e);
           }
           handleUpdate(e);
+
+          if (props.type === "datePicker") {
+            props.onDateChange?.(value as Date | null);
+          } else {
+            props.onChange?.(value as string);
+          }
         }}
         checked={props.checked}
         tableOverride={props.tableOverride}
