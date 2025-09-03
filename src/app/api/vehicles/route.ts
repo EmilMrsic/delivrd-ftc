@@ -27,9 +27,6 @@ export const GET = withErrorLogging(async (request) => {
     getDocs(collection(db, "Clients")),
   ]);
 
-  const test = undefined;
-  console.log("got:", test.toLowerCase());
-
   const [negotiations, incomingBids, clients] = await requests;
 
   negotiations.docs.map((doc) => {
@@ -49,17 +46,20 @@ export const GET = withErrorLogging(async (request) => {
   for (const doc of clients.docs) {
     const client = doc.data();
     const negotiation = negotiationsById[client.negotiation_Id];
+    let dealerHasBid = false;
     for (const bid of negotiation?.incomingBids || []) {
       if (dealerBidIds.has(bid)) {
-        continue;
+        dealerHasBid = true;
+        break;
       }
     }
 
-    finalClients.push({
-      ...client,
-      trade: negotiation?.trade,
-      bidNum: negotiation?.incomingBids?.length,
-    });
+    if (!dealerHasBid)
+      finalClients.push({
+        ...client,
+        trade: negotiation?.trade,
+        bidNum: negotiation?.incomingBids?.length,
+      });
   }
 
   return NextResponse.json({ clients: finalClients });
