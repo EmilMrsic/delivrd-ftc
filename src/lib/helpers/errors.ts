@@ -40,7 +40,7 @@ export const sendErrorEmail = async (
     ? `Name: ${user.name}, Email: ${user.email}, Privilege: ${user.privilege}`
     : "No user recognized";
 
-  const to = ["dylaneholland@gmail.com", "salinson1138@gmail.com"];
+  const to = ["dylaneholland@gmail.com", "emil@thankyuu.com"];
   const receiverEmail = to;
   const subject = "Sign up for Delivrd";
   const html = `<!DOCTYPE html>
