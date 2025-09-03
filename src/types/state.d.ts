@@ -34,12 +34,10 @@ export interface TableExpandedRowState {
   expanded: null | [number, number];
   setExpanded: (
     tableId: null | string,
-    expanded: null | [number, number]
+    expanded: null | [number, number],
+    cell?: any | null
   ) => void;
-  // cell: null | any;
-  // component: null | React.ComponentType<any>;
-  // open: (tableId: string, row: any, component: React.ComponentType<any>) => void;
-  // close: () => void;
+  cell: any | null;
 }
 
 export interface DealerVehiclesState {

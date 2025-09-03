@@ -34,8 +34,6 @@ export const useNegotiations = (
         ? `negotiation`
         : `negotiation/${id || loggedInUserId}`;
 
-      console.log("rerunning network request")
-
       const request = await backendRequest(path, "POST", {
         archive: config.archive,
         filter: filters,

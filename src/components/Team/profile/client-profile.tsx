@@ -256,6 +256,7 @@ export const ClientProfile = ({
     //     [keyName]: value,
     //   };
     // }
+    // console.log("in handle update:");
     setNegotiation({
       ...negotiation,
       [keyName]: value,
@@ -474,16 +475,14 @@ export const ClientProfile = ({
     });
   }, [negotiationId]);
 
-
   if (isLoading && !negotiation) {
-    console.log("yeah we're loading", negotiation)
+    console.log("yeah we're loading", negotiation);
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader className="w-10 h-10 animate-spin" />
       </div>
     );
   }
-
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 w-[98%] mx-auto">

@@ -11,6 +11,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import ProtectedRoute from "@/components/ProtectedRoutes/ProtectedRoute";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { GlobalTableComponentWrapper } from "@/components/tailwind-plus/table";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -49,7 +50,9 @@ export default function RootLayout({
           <ProtectedRoute>
             <FcmTokenProvider />
             <Toaster />
+            <GlobalTableComponentWrapper>
             {children}
+            </GlobalTableComponentWrapper>
           </ProtectedRoute>
         </ContextProviders>
       </body>
