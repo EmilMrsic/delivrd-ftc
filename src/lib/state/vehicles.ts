@@ -1,7 +1,7 @@
-import { Vehicle } from "@/types";
 import { DealerVehiclesState } from "@/types/state";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { ClientDataType } from "../models/client";
 
 export const useVehiclesStore = create<DealerVehiclesState>()(
   persist(
@@ -17,7 +17,7 @@ export const useVehiclesStore = create<DealerVehiclesState>()(
       getVehicle: (id) => get().vehicles[id],
       mergeInVehicles: (byId) => {
         // only merge in if we have new vehicles
-        const newVehicles: Record<string, Vehicle> = {};
+        const newVehicles: Record<string, ClientDataType> = {};
         let hasNewVehicles = false;
         for (const [id, data] of Object.entries(byId)) {
           if (!get().vehicles[id]) {

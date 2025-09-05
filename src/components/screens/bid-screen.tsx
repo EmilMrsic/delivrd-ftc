@@ -11,6 +11,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { ClientDataType } from "@/lib/models/client";
 
 export const BidScreen = ({
   dealer,

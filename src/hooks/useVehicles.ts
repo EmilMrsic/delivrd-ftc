@@ -1,3 +1,4 @@
+import { ClientDataType } from "@/lib/models/client";
 import { backendRequest } from "@/lib/request";
 import { useVehiclesStore } from "@/lib/state/vehicles";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +26,11 @@ export const useVehicles = () => {
     return {
       clients:
         Object.entries(vehiclesFromStore).map(([id, client]) => {
+          const typedClient: ClientDataType & {
+            bidNum: number;
+            trade: boolean;
+          } = client;
+
           return { ...client };
         }) ||
         data?.clients ||
@@ -32,7 +38,10 @@ export const useVehicles = () => {
     };
   }, [vehiclesFromStore]);
 
-  console.log("in useVehicles:", vehicles);
-
-  return { data: vehicles, isLoading, error, refetch };
+  return {
+    data: vehicles,
+    isLoading,
+    error,
+    refetch,
+  };
 };

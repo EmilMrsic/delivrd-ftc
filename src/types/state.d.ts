@@ -40,10 +40,15 @@ export interface TableExpandedRowState {
   cell: any | null;
 }
 
+interface DealerVehicleType extends ClientDataType {
+  bidNum: number;
+  trade: boolean;
+}
+
 export interface DealerVehiclesState {
-  vehicles: Record<string, ClientDataType>;
-  setVehicle: (id: string, data: ClientDataType) => void;
-  getVehicle: (id: string) => ClientDataType | undefined;
-  mergeInVehicles: (byId: Record<string, ClientDataType>) => void;
+  vehicles: Record<string, DealerVehicleType>;
+  setVehicle: (id: string, data: DealerVehicleType) => void;
+  getVehicle: (id: string) => DealerVehicleType | undefined;
+  mergeInVehicles: (byId: Record<string, DealerVehicleType>) => void;
   hasVehicle: (id: string) => boolean;
 }
