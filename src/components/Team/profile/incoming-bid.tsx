@@ -22,6 +22,7 @@ import { ModalForm } from "@/components/tailwind-plus/modal-form";
 import { useEffect, useMemo, useState } from "react";
 import { backendRequest, callZapierWebhook } from "@/lib/request";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -108,6 +109,8 @@ export const IncomingBidCard = ({
         ...acceptedBid,
         accept_offer: true,
       };
+
+      await cacheBidTypeCounts(negotiation?.id);
 
       const sendableJson = JSON.stringify(updatedBid);
       const response = await fetch(

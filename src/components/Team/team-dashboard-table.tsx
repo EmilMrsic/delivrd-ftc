@@ -24,6 +24,7 @@ import {
 } from "@/lib/helpers/negotiation";
 import { StageButton } from "./stage-button";
 import { MakeButton } from "./make-button";
+import { useTeamDashboardFiltersState } from "@/lib/state/team-dashboard-filters";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 const DEFAULT_OPEN_STAGE = "Actively Negotiating";
@@ -76,6 +77,12 @@ const TeamDashboardTable = ({
   refetchAll,
   name,
 }: TeamDashboardTableProps) => {
+  const hasIncomingBids = useTeamDashboardFiltersState(
+    (state) => state.hasIncomingBids
+  );
+  const hasTradeInBids = useTeamDashboardFiltersState(
+    (state) => state.hasTradeInBids
+  );
   const [paidNegotiations, setPaidNegotiations] = useState<
     NegotiationDataType[]
   >([]);
@@ -207,6 +214,20 @@ const TeamDashboardTable = ({
     const { key, direction } = sortConfig;
     const filtered = allNegotiations
       ? allNegotiations.filter((item) => {
+          if (
+            hasTradeInBids &&
+            (!item?.totalTradeInBids || item.totalTradeInBids <= 0)
+          ) {
+            return false;
+          }
+
+          if (
+            hasIncomingBids &&
+            (!item?.totalRegularBids || item.totalRegularBids <= 0)
+          ) {
+            return false;
+          }
+
           if (item.dealCoordinatorId || item.dealCoordinatorId !== "") {
             return false;
           }
@@ -224,14 +245,31 @@ const TeamDashboardTable = ({
     ) as NegotiationDataType[];
 
     setPaidNegotiations(sorted);
-  }, [allNegotiations, searchTerm]);
+  }, [allNegotiations, searchTerm, hasIncomingBids, hasTradeInBids]);
 
   useEffect(() => {
     if (negotiations) {
       const negotiationsByColumn = mapNegotiationsByColumn(
         negotiations,
         "stage",
-        (deal) => performSearch(deal, searchTerm)
+        (deal) => {
+          if (
+            hasTradeInBids &&
+            (!deal?.totalTradeInBids || deal.totalTradeInBids <= 0)
+          ) {
+            return false;
+          }
+
+          if (
+            hasIncomingBids &&
+            (!deal?.totalRegularBids || deal.totalRegularBids <= 0)
+          ) {
+            return false;
+          }
+
+          const searchMatch = performSearch(deal, searchTerm);
+          return searchMatch;
+        }
       );
 
       const { key, direction } = sortConfig;
@@ -263,7 +301,7 @@ const TeamDashboardTable = ({
       );
       setNegotiationsByColumn(sortedColumns);
     }
-  }, [negotiations, searchTerm, searchAll]);
+  }, [negotiations, searchTerm, searchAll, hasIncomingBids, hasTradeInBids]);
 
   let defaultOpenRow = negotiationsByColumn.findIndex((row: any) => {
     return row.stage === DEFAULT_OPEN_STAGE;

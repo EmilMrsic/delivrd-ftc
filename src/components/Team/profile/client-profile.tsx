@@ -23,7 +23,7 @@ import {
 } from "firebase/firestore";
 import { onMessage } from "firebase/messaging";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { cache, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import ClientDetails from "../Client-details";
 import { IncomingBids } from "./incoming-bids";
@@ -51,6 +51,8 @@ import { useNegotiationBids } from "@/hooks/useNegotiationBids";
 import { BidList } from "./bid-list";
 import { DealSelection } from "./deal-selection";
 import { useNegotiationStore } from "@/lib/state/negotiation";
+import { cacheBidTypeCounts } from "@/lib/helpers/bids";
+import { ArchivedStatuses } from "@/lib/constants/negotiations";
 
 export const ClientProfile = ({
   negotiationId,
@@ -323,6 +325,11 @@ export const ClientProfile = ({
       inventoryStatus: editedBid.inventoryStatus,
       price: Number(editedBid.price),
       files: editedBid.files,
+    }).then(() => {
+      cacheBidTypeCounts(
+        negotiation?.id,
+        ArchivedStatuses.includes(negotiation?.stage)
+      ).then(() => {});
     });
     setOpenDialog(null);
     setEditingBidId(null);
@@ -345,6 +352,10 @@ export const ClientProfile = ({
       console.error("Error updating bid in Firebase: ", error);
     }
     logActivity(user.name, "A bid has been deleted");
+    await cacheBidTypeCounts(
+      negotiationId,
+      ArchivedStatuses.includes(negotiation?.stage)
+    );
   };
 
   const handleBidFileUpload = async (
@@ -366,6 +377,11 @@ export const ClientProfile = ({
 
     updateBidInFirebase(bidId, {
       files: [...editedBid.files, ...fileUrls],
+    }).then(() => {
+      cacheBidTypeCounts(
+        negotiation?.id,
+        ArchivedStatuses.includes(negotiation?.stage)
+      ).then(() => {});
     });
 
     setIncomingBids((incomingBids) => {
@@ -410,6 +426,11 @@ export const ClientProfile = ({
 
     updateBidInFirebase(bidId, {
       files: editedBid.files.filter((file) => file !== fileToDelete),
+    }).then(() => {
+      cacheBidTypeCounts(
+        negotiation?.id,
+        ArchivedStatuses.includes(negotiation?.stage)
+      ).then(() => {});
     });
 
     setIncomingBids((incomingBids) => {

@@ -57,6 +57,7 @@ import { ClientProfile } from "@/components/Team/profile/client-profile";
 import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
 import { useDealNegotiators } from "@/hooks/useDealNegotiators";
 import { useNegotiations } from "@/hooks/useNegotiations";
+import Link from "next/link";
 
 type TeamDataType = {
   activeDeals: string[];
@@ -100,9 +101,12 @@ function Manager() {
   // });
 
   const [loading, setLoading] = useState(false);
-  const configToPass = useMemo(() => ({
-    all: true
-  }), [])
+  const configToPass = useMemo(
+    () => ({
+      all: true,
+    }),
+    []
+  );
   const {
     // allDealNegotiator,
     // setFilteredDeals,
@@ -190,7 +194,6 @@ function Manager() {
       return { key, direction: direction };
     });
   };
-
 
   return (
     <div className="container mx-auto p-4 space-y-6 min-h-screen">
@@ -442,7 +445,14 @@ const ManagerTable = ({
       ]}
       rows={deals.map((deal, idx) => [
         {
-          text: deal.clientNamefull,
+          Component: () => (
+            <Link
+              href={`/team-profile?id=${deal.id}`}
+              className="text-blue-700"
+            >
+              {deal.clientNamefull}
+            </Link>
+          ),
           config: {
             expandable: true,
             expandedComponent: () => <ClientProfile negotiationId={deal.id} />,

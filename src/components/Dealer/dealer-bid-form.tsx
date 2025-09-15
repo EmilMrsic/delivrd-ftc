@@ -19,6 +19,7 @@ import { createNotification } from "@/lib/helpers/notifications";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { toast } from "@/hooks/use-toast";
 import { uploadFile } from "@/lib/helpers/files";
+import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 
 export const DealerBidForm = ({
   vehicle,
@@ -94,6 +95,8 @@ export const DealerBidForm = ({
         author: user?.id,
       }
     );
+
+    await cacheBidTypeCounts(vehicle.negotiation_Id);
 
     toast({
       title: "Bid submitted successfully",

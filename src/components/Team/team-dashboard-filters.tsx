@@ -8,6 +8,7 @@ import { Checkbox } from "../ui/checkbox";
 import { DealsOverviewBoard } from "./deals-overview/deals-overview-board";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useTeamDashboardFiltersState } from "@/lib/state/team-dashboard-filters";
 
 export const TeamDashboardFilters = ({
   allDealNegotiator,
@@ -21,6 +22,18 @@ export const TeamDashboardFilters = ({
   archive,
   setArchive,
 }: any) => {
+  const updateFilter = useTeamDashboardFiltersState(
+    (state) => state.updateFilter
+  );
+  const hasIncomingBids = useTeamDashboardFiltersState(
+    (state) => state.hasIncomingBids
+  );
+  const hasTradeInBids = useTeamDashboardFiltersState(
+    (state) => state.hasTradeInBids
+  );
+  // const clearFilterState = useTeamDashboardFiltersState(
+  //   (state) => state.clearFilters
+  // );
   const user = useLoggedInUser();
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -81,6 +94,28 @@ export const TeamDashboardFilters = ({
                   Archive
                 </label>
               </div>
+            </div>
+            <div className="flex w-fit mr-0 ml-auto gap-2">
+              <Checkbox
+                id="incoming_bids"
+                checked={hasIncomingBids}
+                onCheckedChange={(checked) =>
+                  updateFilter({ hasIncomingBids: checked as boolean })
+                }
+              />
+              <label htmlFor="incoming_bids" className="text-nowrap">
+                Has Incoming Bids
+              </label>
+              <Checkbox
+                id="trade_ins"
+                checked={hasTradeInBids}
+                onCheckedChange={(checked) =>
+                  updateFilter({ hasTradeInBids: checked as boolean })
+                }
+              />
+              <label htmlFor="trade_ins" className="text-nowrap">
+                Has Trade-In Bids
+              </label>
             </div>
             <div className="mt-2 mr-0 ml-auto w-fit">
               <Button onClick={clearFilters} newDefault={true}>

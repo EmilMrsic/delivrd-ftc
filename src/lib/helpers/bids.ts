@@ -6,6 +6,7 @@ import {
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import {
@@ -329,4 +330,24 @@ export const getBidsByNegotiationId = async (negotiationId: string) => {
   });
 
   return finalBids;
+};
+
+/**
+ * Grab the different bids and cache the total number of each type e.g. trade in or regular
+ * on the negotiation.  Reduces the need to calculate this on the fly in the UI + reduces reads
+ */
+export const cacheBidTypeCounts = async (
+  negotiationId: string,
+  archived = false
+) => {
+  const bids = await getBidsByNegotiationId(negotiationId);
+  const negotiationRef = doc(
+    db,
+    archived ? "delivrd_archive" : "delivrd_negotiations",
+    negotiationId
+  );
+  await updateDoc(negotiationRef, {
+    totalTradeInBids: bids.tradeIns.filter((bid) => !bid.delete).length,
+    totalRegularBids: bids.bids.filter((bid) => !bid.delete).length,
+  });
 };

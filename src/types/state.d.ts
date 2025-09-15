@@ -52,3 +52,10 @@ export interface DealerVehiclesState {
   mergeInVehicles: (byId: Record<string, DealerVehicleType>) => void;
   hasVehicle: (id: string) => boolean;
 }
+
+export interface TeamDashboardFiltersState {
+  hasIncomingBids: boolean;
+  hasTradeInBids: boolean;
+  updateFilter: (filter: Partial<TeamDashboardFiltersState>) => void;
+  clearFilters: () => void;
+}

@@ -7,6 +7,8 @@ import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { ArchivedStatuses } from "@/lib/constants/negotiations";
+import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 import { handleSendComment } from "@/lib/helpers/comments";
 import { uploadFile } from "@/lib/helpers/files";
 import { createNotification } from "@/lib/helpers/notifications";
@@ -838,7 +840,11 @@ export const ViewOfferDialog = ({
         useableUpdateObject[key] = editedBid[key as keyof typeof editedBid];
       }
     });
-    updateBidInFirebase(bid.bid_id as string, useableUpdateObject as any);
+    await updateBidInFirebase(bid.bid_id as string, useableUpdateObject as any);
+    await cacheBidTypeCounts(
+      negotiation?.id,
+      ArchivedStatuses.includes(negotiation?.stage)
+    );
 
     // {
     //   discountPrice: editedBid.discountPrice as string,
@@ -858,6 +864,11 @@ export const ViewOfferDialog = ({
 
     updateBidInFirebase(bid.bid_id as string, {
       files: editedBid.files?.filter((file) => file !== fileToDelete),
+    }).then(() => {
+      cacheBidTypeCounts(
+        negotiation?.id,
+        ArchivedStatuses.includes(negotiation?.stage)
+      ).then(() => {});
     });
 
     setBid({
@@ -880,9 +891,14 @@ export const ViewOfferDialog = ({
       files: [...(editedBid?.files ?? []), ...fileUrls],
     });
 
-    updateBidInFirebase(bid.bid_id as string, {
+    await updateBidInFirebase(bid.bid_id as string, {
       files: [...(editedBid?.files ?? []), ...fileUrls],
     });
+
+    await cacheBidTypeCounts(
+      negotiation?.id,
+      ArchivedStatuses.includes(negotiation?.stage)
+    );
 
     setBid({
       ...bid,

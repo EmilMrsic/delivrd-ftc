@@ -41,6 +41,7 @@ import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { PreviousBidsTable } from "../Dealer/previous-bids-table";
 import { DealerDataType } from "@/lib/models/dealer";
 import { useDealerBids } from "@/hooks/useDealerBids";
+import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 
 const headers = [
   { label: "Make", column: "carMake" },
@@ -175,6 +176,8 @@ export default function BiddingSection({
           author: user.id,
         }
       );
+
+      await cacheBidTypeCounts(negotiationId);
 
       toast({
         title: "Bid submitted successfully",

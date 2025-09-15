@@ -140,6 +140,9 @@ export const TeamDashboardClientNameDisplay = ({
             dealers={allDealNegotiator}
             negotiation={negotiation}
           />
+          <span className="text-red-400">
+            {(deal?.totalRegularBids || 0) + (deal?.totalTradeInBids || 0)}
+          </span>
         </div>
       </div>
       {showModal && (

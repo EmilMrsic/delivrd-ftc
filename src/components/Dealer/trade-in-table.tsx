@@ -125,17 +125,26 @@ export const TradeInTable = ({
             `grid gap-4 ${screenSize > 2000 ? "grid-cols-3" : "grid-cols-2"}`
         )}
       >
-        {filteredNegotiations.map((negotiation, idx) => {
-          return (
-            // max-w-[800px]
-            <div key={idx} className="basis-1/2 min-w-0">
-              <TradeInCard
-                negotiation={negotiation}
-                setSelectedNegotiation={setSelectedNegotiation}
-              />
-            </div>
-          );
-        })}
+        {filteredNegotiations
+          .filter((negotiation) => {
+            const noFiles =
+              negotiation?.tradeDetails == null ||
+              negotiation?.tradeDetails?.fileUrls == null ||
+              negotiation?.tradeDetails?.fileUrls.length === 0;
+
+            return !noFiles;
+          })
+          .map((negotiation, idx) => {
+            return (
+              // max-w-[800px]
+              <div key={idx} className="basis-1/2 min-w-0">
+                <TradeInCard
+                  negotiation={negotiation}
+                  setSelectedNegotiation={setSelectedNegotiation}
+                />
+              </div>
+            );
+          })}
       </div>
       {selectedNegotiation && (
         <TradeInBidForm

@@ -85,6 +85,8 @@ export const NegotiationDataModel = z.object({
   shippingSelectedCoordinatorId: z.union([z.string(), z.null()]).optional(),
   pickingUpSelectedCoordinatorId: z.union([z.string(), z.null()]).optional(),
   priority: z.boolean().default(false),
+  totalTradeInBids: z.number().default(0),
+  totalRegularBids: z.number().default(0),
 });
 
 export const DealNegotiatorModel = z.object({
