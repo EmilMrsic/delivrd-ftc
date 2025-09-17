@@ -9,10 +9,14 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationDataType } from "@/lib/models/notification";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { useNotificationsState } from "@/lib/state/notifications";
 
 export const Notifications = () => {
-  const { notification, notificationCount, handleBellClick } =
-    useNotifications();
+  const notifications = useNotificationsState((state) => state.notifications);
+  const notificationCount = useNotificationsState(
+    (state) => state.notificationCount
+  );
+  const { handleBellClick } = useNotifications();
 
   return (
     <DropdownMenu onOpenChange={handleBellClick}>
@@ -30,13 +34,14 @@ export const Notifications = () => {
       <DropdownMenuContent className="z-50 ">
         <div
           className={`bg-white flex flex-col ${
-            notification.length ? "max-h-[300px]" : "h-auto"
+            notifications.length ? "max-h-[300px]" : "h-auto"
           }  overflow-y-scroll gap-3 p-2 z-10 rounded-xl`}
         >
-          {notification.length ? (
-            notification.map((item, index) => (
+          {notifications.length ? (
+            notifications.map((item, index) => (
               <NotificationItem
                 item={item as unknown as NotificationDataType}
+                index={index}
                 key={index}
               />
             ))
@@ -49,11 +54,24 @@ export const Notifications = () => {
   );
 };
 
-export const NotificationItem = ({ item }: { item: NotificationDataType }) => {
+export const NotificationItem = ({
+  item,
+  index,
+}: {
+  item: NotificationDataType;
+  index: number;
+}) => {
   const { data, read } = item;
   const { author, negotiation, bid } = data;
+  const notifications = useNotificationsState((state) => state.notifications);
+  const setNotifications = useNotificationsState(
+    (state) => state.setNotifications
+  );
 
   const markRead = async () => {
+    const newNotifications = [...notifications];
+    newNotifications[index].read = true;
+    setNotifications(newNotifications);
     await updateDoc(doc(db, "delivrd_notifications", item.id), {
       read: true,
     });

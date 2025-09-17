@@ -1,4 +1,5 @@
 import { ClientDataType } from "@/lib/models/client";
+import { NotificationDataType } from "@/lib/models/notification";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 
 export interface NegotiationState {
@@ -58,4 +59,13 @@ export interface TeamDashboardFiltersState {
   hasTradeInBids: boolean;
   updateFilter: (filter: Partial<TeamDashboardFiltersState>) => void;
   clearFilters: () => void;
+}
+
+export interface NotificationsState {
+  lastPolledTime: number | null;
+  setLastPolledTime: (time: number) => void;
+  notifications: NotificationDataType[];
+  setNotifications: (notifications: NotificationDataType[]) => void;
+  notificationCount: number;
+  setNotificationCount: (count: number) => void;
 }

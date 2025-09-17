@@ -34,6 +34,7 @@ import {
   Cell,
   TailwindTableExpandedPopover,
 } from "@/components/tailwind-plus/table";
+import { useNotificationsState } from "@/lib/state/notifications";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -272,12 +273,13 @@ export default function DealList() {
         <TeamHeader />
         <Card className="bg-white shadow-lg">
           {/* <Button
-          onClick={() => {
-            useTeamDashboardStore.persist.clearStorage();
-          }}
-        >
-          Clear store
-        </Button> */}
+            onClick={() => {
+              useNotificationsState.persist.clearStorage();
+              window.location.reload();
+            }}
+          >
+            Clear store
+          </Button> */}
           <CardContent>
             <TeamDashboardFilters
               allDealNegotiator={allDealNegotiator}

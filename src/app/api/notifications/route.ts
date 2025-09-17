@@ -14,26 +14,32 @@ import {
 } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";
 
-export const GET = async (request: NextRequest) => {
+export const POST = async (request: NextRequest) => {
   const headers = request.headers;
   const userData = await getUserDataFromDb(headers.get("auth") as string);
-  // const twentyFourHoursAgo = Timestamp.fromDate(
-  //   new Date(Date.now() - 24 * 60 * 60 * 1000)
-  // );
 
   if (!userData?.deal_coordinator_id) {
     return NextResponse.json({ notificationData: [] });
   }
 
+  const body = await request.json();
+
+  const lastPolledTime = new Date(body.lastPolledTime).toISOString();
   const twentyFourHoursAgo = new Date(
     Date.now() - 24 * 60 * 60 * 1000
   ).toISOString();
+
+  const whereClausesForUnread = [];
+  if (lastPolledTime) {
+    whereClausesForUnread.push(where("createdAt", ">", lastPolledTime));
+  }
 
   // Query 1: All unread items
   const unreadQuery = query(
     collection(db, "delivrd_notifications"),
     where("read", "==", false),
     where("dealCoordinatorId", "==", userData?.deal_coordinator_id || ""),
+    ...whereClausesForUnread,
     orderBy("createdAt", "desc")
   );
 
@@ -41,7 +47,11 @@ export const GET = async (request: NextRequest) => {
   const recentReadQuery = query(
     collection(db, "delivrd_notifications"),
     where("read", "==", true),
-    where("createdAt", ">", twentyFourHoursAgo),
+    where(
+      "createdAt",
+      ">",
+      body.lastPolledTime ? lastPolledTime : twentyFourHoursAgo
+    ),
     where("dealCoordinatorId", "==", userData?.deal_coordinator_id || ""),
     orderBy("createdAt", "desc")
   );
