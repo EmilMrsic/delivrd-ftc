@@ -41,6 +41,44 @@ export interface OverviewDashboardData {
   };
 }
 
+//OverviewDashboardData
+export const POST = async (
+  request: NextRequest
+): Promise<NextResponse<any>> => {
+  const user = await getUserDataFromDb(request.headers.get("auth") as string);
+  let mode = user.mode || "coordinator";
+  if (mode === "deal coordinator") {
+    mode = "coordinator";
+  }
+  const metricsTable = collection(db, "metrics");
+  const metricsCacheTable = collection(db, "delivrd_metrics_cache");
+  const metricsQuery = getDocs(query(metricsTable));
+  const metricsCacheQuery = getDoc(
+    doc(metricsCacheTable, user?.deal_coordinator_id)
+  );
+
+  const [metricsSnapshot, metricsCacheSnapshot] = await Promise.all([
+    metricsQuery,
+    metricsCacheQuery,
+  ]);
+  // const metricsData = metricsSnapshot.docs.map((doc) => doc.data());
+  const cachedMetrics = metricsCacheSnapshot.data();
+  const metrics =
+    mode === "coordinator"
+      ? {
+          dailyGoal: user?.dailyGoal || 0,
+          monthlyGoal: user?.weeklyGoal || 0,
+        }
+      : metricsSnapshot.docs.map((doc) => doc.data())[0];
+
+  return NextResponse.json({
+    ...cachedMetrics,
+    metrics,
+    mode: mode,
+  });
+};
+
+/**
 export const POST = async (
   request: NextRequest
 ): Promise<NextResponse<OverviewDashboardData>> => {
@@ -219,6 +257,7 @@ export const POST = async (
     shippingAndPickingUpTodayByCoordinator,
   });
 };
+*/
 
 const countClosedDeals = async (
   deals: NegotiationDataType[],

@@ -20,10 +20,13 @@ import { Button } from "@/components/ui/button";
 // https://thankyuu.notion.site/Dashboards-1e5aa77aecd1805ea5b6c55bdaef2fb9
 
 export const DealsOverviewBoard = ({
-  mode,
+  mode: incomingMode,
 }: {
   mode: "coordinator" | "owner" | "reviewer";
 }) => {
+  const [mode, setMode] = useState<"coordinator" | "owner" | "reviewer" | null>(
+    null
+  );
   const user = useLoggedInUser();
   const [expanded, setExpanded] = useState(true);
   const [selectedCoordinator, setSelectedCoordinator] = useState<string | null>(
@@ -45,6 +48,10 @@ export const DealsOverviewBoard = ({
     },
   });
 
+  useEffect(() => {
+    if (result.data?.mode) setMode(result.data.mode);
+  }, [result.data]);
+
   const updateField = useCallback(
     (field: string, value: string) => {
       (async () => {
@@ -63,7 +70,8 @@ export const DealsOverviewBoard = ({
     [result.data]
   );
 
-  if (!result.data) return null;
+  if (!result.data || !mode) return null;
+  console.log("result:", result.data);
   return (
     <>
       <div
