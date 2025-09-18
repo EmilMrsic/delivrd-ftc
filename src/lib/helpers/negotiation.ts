@@ -352,3 +352,29 @@ export const removeNegotiatorFromNegotiations = async (
     return false;
   }
 };
+
+/**
+ * get all notifications including archived
+ */
+export const getAllNegotiations = async () => {
+  const negotiationsTable = collection(db, "delivrd_negotiations");
+  const archivedTable = collection(db, "delivrd_archive");
+
+  const dealsQuery = getDocs(query(negotiationsTable));
+  const archivedDealsQuery = getDocs(query(archivedTable));
+
+  const [dealsSnapshot, archivedSnapshot] = await Promise.all([
+    dealsQuery,
+    archivedDealsQuery,
+  ]);
+
+  const deals = dealsSnapshot.docs.map(
+    (doc) => doc.data() as NegotiationDataType
+  );
+  const archivedDeals = archivedSnapshot.docs.map(
+    (doc) => doc.data() as NegotiationDataType
+  );
+
+  const allDeals: NegotiationDataType[] = [...deals, ...archivedDeals];
+  return allDeals;
+};
