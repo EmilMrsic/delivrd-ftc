@@ -1,8 +1,9 @@
 import { NegotiationState } from "@/types/state";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { NegotiationDataType } from "../models/team";
 import { isEqual } from "lodash";
+import { idbStorage } from "../helpers/state";
 
 export const useNegotiationStore = create<NegotiationState>()(
   persist(
@@ -16,23 +17,23 @@ export const useNegotiationStore = create<NegotiationState>()(
           },
         })),
       mergeInNegotiations: (byId: Record<string, NegotiationDataType>) => {
-        set((state => {
-          const updatedNegotiations = {...state.negotiations};
+        set((state) => {
+          const updatedNegotiations = { ...state.negotiations };
           let changed = false;
 
           Object.entries(byId).forEach(([id, negotiation]) => {
-            if(!isEqual(updatedNegotiations[id], negotiation)) {
+            if (!isEqual(updatedNegotiations[id], negotiation)) {
               updatedNegotiations[id] = negotiation;
               changed = true;
             }
-          })
+          });
 
-          if(changed) {
+          if (changed) {
             return { negotiations: updatedNegotiations };
           }
 
-          return {}
-        }))
+          return {};
+        });
         // set((state) => ({
         //   negotiations: {
         //     ...state.negotiations,
@@ -50,6 +51,9 @@ export const useNegotiationStore = create<NegotiationState>()(
         }),
       clearNegotiations: () => set({ negotiations: {} }),
     }),
-    { name: "negotiation-storage" }
+    {
+      name: "negotiation-storage",
+      storage: createJSONStorage(() => idbStorage),
+    }
   )
 );
