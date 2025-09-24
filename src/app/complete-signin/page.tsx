@@ -15,6 +15,10 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Lock } from "lucide-react";
+import { useLogin } from "@/hooks/use-login";
 
 const emailSchema = z.object({
   email: z
@@ -25,15 +29,50 @@ const emailSchema = z.object({
 
 export default function CompleteSignIn() {
   const [signInStage, setSignInStage] = useState("Verifying");
+  const searchParams = useSearchParams();
+  const emailFromParams = searchParams.get("email");
+
+  const { handleSubmit, email, setEmail, error, notification } = useLogin();
+
+  useEffect(() => {
+    setEmail(emailFromParams || "");
+  }, [emailFromParams]);
+
   return (
     <div className="bg-[#202125] h-screen w-screen flex flex-col gap-4 justify-center items-center">
       <div className="bg-white max-w-[400px] lg:w-[400px]  flex flex-col rounded-xl p-5 gap-5">
-        <h1 className="text-3xl font-bold text-center">{signInStage}</h1>
+        <h1 className="text-3xl font-bold text-center">
+          {signInStage === "Failed" ? "Link Expired" : signInStage}
+        </h1>
+        {signInStage === "Failed" && (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <p className="w-fit mx-auto">{email}</p>
+            <Button
+              type="submit"
+              className="bg-blue-500 flex gap-5 hover:bg-blue-600 w-fit mx-auto text-white text-lg"
+            >
+              {/* <Lock className="w-4" stroke="#2B5CAD" /> */}
+              Send New Login Link
+            </Button>
+          </form>
+        )}
         {signInStage !== "Failed" && <Loader />}
         <Suspense fallback={<Loader />}>
           <SignInContent setSignInStage={setSignInStage} />
         </Suspense>
       </div>
+      {notification && (
+        <div className="mt-3 bg-blue-100 text-blue-900 p-3 rounded shadow-md">
+          {notification}
+        </div>
+      )}
+      <span className="text-sm font-medium text-center text-white">
+        We're in Beta & looking for your feedback.<br></br>
+        <div className="font-bold">
+          Bugs or ideas? Text{" "}
+          <Link href={"tel:9807587488"}>(980) 758-7488</Link>
+        </div>
+      </span>
     </div>
   );
 }

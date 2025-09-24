@@ -164,6 +164,7 @@ export const TradeInCard = ({
   negotiation: NegotiationDataType;
   setSelectedNegotiation: (negotiation: NegotiationDataType) => void;
 }) => {
+  console.log("got negotiation:", negotiation);
   return (
     <div className="rounded-lg border border-gray-200">
       <ImageCarousel
@@ -172,7 +173,7 @@ export const TradeInCard = ({
       />
       <div className="mt-4 p-4">
         <GridDisplay
-          title={`${negotiation.brand} ${negotiation.model}`}
+          title={`${negotiation.tradeInInfo}`} //${negotiation.brand} ${negotiation.model}`}
           columns={[
             [
               {

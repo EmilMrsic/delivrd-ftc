@@ -228,7 +228,7 @@ export const FormField = ({ field }: { field: FieldType }) => {
 
   if (type === "video") {
     return (
-      <div className="w-full mb-4">
+      <div className="w-full mb-4 h-[300px]">
         {props && <LoomVideo url={props.url} />}
       </div>
     );
