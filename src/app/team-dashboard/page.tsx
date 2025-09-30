@@ -35,6 +35,7 @@ import {
   TailwindTableExpandedPopover,
 } from "@/components/tailwind-plus/table";
 import { useNotificationsState } from "@/lib/state/notifications";
+import { useUserState } from "@/lib/state/user";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -97,6 +98,7 @@ export default function DealList() {
 
   const [stopPropagation, setStopPropagation] = useState<boolean>(false);
   const user = useLoggedInUser();
+  const loginId = useUserState((state) => state.loginId);
 
   const {
     allNegotiations,
@@ -266,6 +268,8 @@ export default function DealList() {
       console.error("Error updating negotiator: ", error);
     }
   };
+
+  console.log("loginId", loginId);
 
   return (
     <>

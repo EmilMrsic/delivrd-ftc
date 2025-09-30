@@ -468,6 +468,7 @@ export const ClientProfile = ({
         bidId: string;
         comment: string;
       }>("bid_comment", negotiation.id, eventData);
+
       if (result.success) {
         toast({
           title: `Comment sent to ${
