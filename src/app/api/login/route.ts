@@ -5,6 +5,14 @@ import axios from "axios";
 import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
+function normalizeIp(ip: string) {
+  // handle IPv6 mapped IPv4
+  if (ip.startsWith("::ffff:")) {
+    return ip.substring(7);
+  }
+  return ip;
+}
+
 export async function POST(req: Request) {
   const { to, loginRowId } = await req.json();
   const loginInitiationRef = doc(db, "delivrd_user_logins", loginRowId);
@@ -13,6 +21,10 @@ export async function POST(req: Request) {
   const protocol = req.headers.get("x-forwarded-proto") || "http";
   const host = req.headers.get("host");
   const baseUrl = `${protocol}://${host}`;
+  const forwarded = req.headers.get("x-forwarded-for");
+  const ip = forwarded?.split(",")[0] || "unknown";
+
+  console.log("got login id:", loginRowId);
 
   try {
     const actionCodeSettings = {
@@ -61,6 +73,8 @@ export async function POST(req: Request) {
     await updateDoc(loginInitiationRef, {
       emailSent: true,
       emailSentTimestamp: serverTimestamp(),
+      ipv6: ip,
+      ipv4: normalizeIp(ip),
     });
     return NextResponse.json({ message: "Email sent successfully!" });
   } catch (error: any) {
@@ -69,6 +83,8 @@ export async function POST(req: Request) {
       emailSent: false,
       emailSentTimestamp: serverTimestamp(),
       emailSentError: error?.message,
+      ipv6: ip,
+      ipv4: normalizeIp(ip),
     });
     return NextResponse.json(
       { message: "Error sending email", error },

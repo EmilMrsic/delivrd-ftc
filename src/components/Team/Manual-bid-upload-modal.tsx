@@ -27,6 +27,7 @@ import { TailwindPlusDialogContent } from "../tailwind-plus/dialog";
 import { NegotiationDataType } from "@/lib/models/team";
 import { createNotification } from "@/lib/helpers/notifications";
 import { useLoggedInUser } from "@/hooks/useLoggedInUser";
+import { logClientEvent } from "@/lib/helpers/events";
 
 interface FormData {
   dealerName: string;
@@ -228,30 +229,50 @@ const ManualBidUpload = ({
 
       const bidRef = doc(db, "Incoming Bids", bid_id);
 
-      await setDoc(bidRef, { ...bidData, bid_id });
-      setIncomingBids &&
-        incomingBids &&
-        setIncomingBids([...incomingBids, bidData]);
+      const eventData = {
+        amount: bidData.price,
+        otd: bidData.discountPrice,
+        dealer: bidData.dealerName,
+        dealerId: bidData.dealerId,
+        contact: bidData.salesPersonName,
+        contactEmail: bidData.salesPersonEmail,
+        notes: bidData.comments,
+      };
 
-      await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
-        incomingBids: arrayUnion(bid_id),
-      });
+      await logClientEvent<{
+        amount: number;
+        otd: number;
+        dealer: string;
+        dealerId: string;
+        contact: string;
+        contactEmail: string;
+        notes: string;
+      }>("incoming_bid", negotiation.id, eventData);
 
-      if (negotiation.dealCoordinatorId) {
-        await createNotification(
-          negotiation.dealCoordinatorId,
-          "new_manual_bid",
-          {
-            bidId: bid_id,
-            negotiationId: id,
-            author: user.id,
-          }
-        );
-      }
+      // await setDoc(bidRef, { ...bidData, bid_id });
+      // setIncomingBids &&
+      //   incomingBids &&
+      //   setIncomingBids([...incomingBids, bidData]);
 
-      resetForm();
-      toast({ title: "Bid created successfully" });
-      closeDialog();
+      // await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
+      //   incomingBids: arrayUnion(bid_id),
+      // });
+
+      // if (negotiation.dealCoordinatorId) {
+      //   await createNotification(
+      //     negotiation.dealCoordinatorId,
+      //     "new_manual_bid",
+      //     {
+      //       bidId: bid_id,
+      //       negotiationId: id,
+      //       author: user.id,
+      //     }
+      //   );
+      // }
+
+      // resetForm();
+      // toast({ title: "Bid created successfully" });
+      // closeDialog();
     } catch (error) {
       console.error("Error uploading bid: ", error);
     } finally {

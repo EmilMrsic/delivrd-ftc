@@ -25,6 +25,7 @@ import { cn, generateRandomId, uploadFile } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { NegotiationDataType, WorkLogType } from "@/lib/models/team";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { logClientEvent } from "@/lib/helpers/events";
 
 interface WorkLogSectionProps {
   user: any;
@@ -79,6 +80,7 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   };
 
   const saveEdit = async (negotiationId: string | null, logId: string) => {
+    console.log("got here");
     try {
       // Step 1: Fetch the negotiation document from Firestore
       const negotiationRef = doc(
@@ -87,6 +89,8 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         negotiationId ?? ""
       );
       const negotiationSnap = await getDoc(negotiationRef);
+
+      console.log("got here in work log");
 
       if (!negotiationSnap.exists()) {
         console.error("No negotiation found with ID:", negotiationId);
@@ -152,6 +156,24 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
 
       await updateDoc(negotiationRef, { workLogs: updatedWorkLogs });
 
+      if (negotiationId) {
+        const eventData = {
+          workLogId: logId,
+          content: editContent,
+          attachments: [
+            ...updatedWorkLogs[workLogIndex].attachments,
+            ...newFileUrls,
+          ],
+          edit: true,
+        };
+        await logClientEvent<{
+          workLogId: string;
+          content: string;
+          attachments: string[];
+          edit: boolean;
+        }>("work_log", negotiationId, eventData);
+      }
+
       // Step 6: Reset editing state
       cancelEditing();
       toast({ title: "Work log updated successfully" });
@@ -207,6 +229,20 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
       await updateDoc(negotiationRef, {
         workLogs: arrayUnion(logEntry),
       });
+
+      if (negotiationId) {
+        const eventData = {
+          workLogId: logEntry.id,
+          content: editContent,
+          attachments: validFileUrls,
+        };
+        await logClientEvent<{
+          workLogId: string;
+          content: string;
+          attachments: string[];
+        }>("work_log", negotiationId, eventData);
+      }
+
       // Reset fields
       setNewWorkLog("");
       setLocalFiles([]);

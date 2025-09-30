@@ -17,8 +17,8 @@ import {
 } from "firebase/firestore";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Lock } from "lucide-react";
 import { useLogin } from "@/hooks/use-login";
+import { useUserState } from "@/lib/state/user";
 
 const emailSchema = z.object({
   email: z
@@ -87,6 +87,8 @@ const SignInContent = ({
   const email = searchParams.get("email");
   const loginRowId = searchParams.get("id");
   const [message, setMessage] = useState("");
+  const setUserId = useUserState((state) => state.setUserId);
+  const setLoginId = useUserState((state) => state.setLoginId);
 
   useEffect(() => {
     if (isSignInWithEmailLink(auth, window.location.href) && email) {
@@ -134,6 +136,9 @@ const SignInContent = ({
           loginCompletedTimestamp: serverTimestamp(),
           redirectUrl,
         });
+
+        setUserId(userRef.id);
+        setLoginId(loginRowId);
 
         router.push(redirectUrl);
       } else {

@@ -31,7 +31,6 @@ export const useNotifications = () => {
     queryKey: ["notifications", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      console.log("last polled at:", lastPolledTime);
 
       const request = await fetch("/api/notifications", {
         method: "POST",

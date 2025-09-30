@@ -72,6 +72,8 @@ export const UserAvatar = ({
   };
   size?: "small" | "medium" | "large";
 }) => {
+  if (!user?.name) return null;
+
   return (
     <Avatar
       className={

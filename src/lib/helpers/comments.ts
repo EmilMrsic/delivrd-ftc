@@ -1,6 +1,7 @@
 import { toast } from "@/hooks/use-toast";
 import { IncomingBidCommentType } from "../models/bids";
 import Link from "next/link";
+import { logClientEvent } from "./events";
 
 export const handleSendComment = async (
   user: any,
@@ -17,6 +18,16 @@ export const handleSendComment = async (
     );
 
     const result = await response.json();
+    const eventData = {
+      bidId: data.bid_id,
+      comment: data.comment,
+    };
+
+    await logClientEvent<{
+      bidId: string;
+      comment: string;
+    }>("bid_comment", data.negotiation_id, eventData);
+
     if (result.success) {
       toast({
         title: `Comment sent to ${

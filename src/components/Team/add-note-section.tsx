@@ -32,6 +32,7 @@ import { TailwindPlusTextarea } from "../tailwind-plus/textarea";
 import { v4 as uuidv4 } from "uuid";
 import { createNotification } from "@/lib/helpers/notifications";
 import { TailwindPlusToggle } from "../tailwind-plus/toggle";
+import { logClientEvent } from "@/lib/helpers/events";
 
 type AddNoteSectionProps = {
   user: any;
@@ -166,6 +167,16 @@ const AddNoteSection = ({
         await updateDoc(notesRef, {
           internalNotes: [...(negotiation.internalNotes ?? []), newNote],
         });
+
+        const eventData = {
+          noteId: newNote.noteId,
+          text: newNote.text,
+        };
+
+        await logClientEvent<{
+          noteId: string;
+          text: string;
+        }>("message_sent", negotiation.id, eventData);
 
         mentionedUsers.forEach(async (mentionedUser) => {
           await createNotification(mentionedUser.id, "internal_note", {

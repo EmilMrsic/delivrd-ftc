@@ -23,6 +23,7 @@ import { useEffect, useMemo, useState } from "react";
 import { backendRequest, callZapierWebhook } from "@/lib/request";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { cacheBidTypeCounts } from "@/lib/helpers/bids";
+import { logClientEvent } from "@/lib/helpers/events";
 
 export const IncomingBidCard = ({
   setEditedBid,
@@ -111,6 +112,13 @@ export const IncomingBidCard = ({
       };
 
       await cacheBidTypeCounts(negotiation?.id);
+      await logClientEvent<{
+        bidId: string;
+        dealer: string;
+      }>("bid_accepted", negotiation.id, {
+        bidId: acceptedBid.bid_id as string,
+        dealer: matchingDealer?.Dealership || "Unknown Dealer",
+      });
 
       const sendableJson = JSON.stringify(updatedBid);
       const response = await fetch(
@@ -152,6 +160,14 @@ export const IncomingBidCard = ({
           vote: bid.bid_id === acceptedBid.bid_id ? "neutral" : bid.vote,
         }))
       );
+
+      await logClientEvent<{
+        bidId: string;
+        dealer: string;
+      }>("bid_cancelled", negotiation.id, {
+        bidId: acceptedBid.bid_id as string,
+        dealer: matchingDealer?.Dealership || "Unknown Dealer",
+      });
 
       toast({ title: "Offer canceled" });
       refetch?.();

@@ -10,6 +10,7 @@ import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { ArchivedStatuses } from "@/lib/constants/negotiations";
 import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 import { handleSendComment } from "@/lib/helpers/comments";
+import { logClientEvent } from "@/lib/helpers/events";
 import { uploadFile } from "@/lib/helpers/files";
 import { createNotification } from "@/lib/helpers/notifications";
 import { IncomingBidCommentType, IncomingBidType } from "@/lib/models/bids";
@@ -173,6 +174,13 @@ export const BidCard = ({
       );
 
       const result = await response.json();
+      await logClientEvent<{
+        bidId: string;
+        dealer: string;
+      }>("bid_accepted", negotiation.id, {
+        bidId: bid.bid_id as string,
+        dealer: bid.bidDealer?.Dealership || "Unknown Dealer",
+      });
       if (result.success) {
         toast({ title: "Offer accepted", variant: "default" });
         refetch?.();
@@ -193,6 +201,14 @@ export const BidCard = ({
       const bidRef = doc(db, "Incoming Bids", bid.bid_id as string);
       await updateDoc(bidRef, { accept_offer: false, vote: "neutral" });
       setBid({ ...bid, accept_offer: false, vote: "neutral" });
+      await logClientEvent<{
+        bidId: string;
+        dealer: string;
+      }>("bid_cancelled", negotiation.id, {
+        bidId: bid.bid_id as string,
+        dealer: bid?.bidDealer?.Dealership || "Unknown Dealer",
+      });
+
       refetch?.();
 
       toast({ title: "Offer canceled" });

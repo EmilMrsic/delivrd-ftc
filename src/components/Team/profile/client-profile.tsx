@@ -53,6 +53,7 @@ import { DealSelection } from "./deal-selection";
 import { useNegotiationStore } from "@/lib/state/negotiation";
 import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 import { ArchivedStatuses } from "@/lib/constants/negotiations";
+import { logClientEvent } from "@/lib/helpers/events";
 
 export const ClientProfile = ({
   negotiationId,
@@ -458,6 +459,15 @@ export const ClientProfile = ({
       );
 
       const result = await response.json();
+      const eventData = {
+        bidId: data.bid_id,
+        comment: data.comment,
+      };
+
+      await logClientEvent<{
+        bidId: string;
+        comment: string;
+      }>("bid_comment", negotiation.id, eventData);
       if (result.success) {
         toast({
           title: `Comment sent to ${
@@ -497,7 +507,6 @@ export const ClientProfile = ({
   }, [negotiationId]);
 
   if (isLoading && !negotiation) {
-    console.log("yeah we're loading", negotiation);
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader className="w-10 h-10 animate-spin" />

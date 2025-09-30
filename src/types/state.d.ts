@@ -69,3 +69,10 @@ export interface NotificationsState {
   notificationCount: number;
   setNotificationCount: (count: number) => void;
 }
+
+export interface UserState {
+  loginId?: string;
+  setLoginId: (id: string) => void;
+  userId?: string;
+  setUserId: (id: string) => void;
+}
