@@ -249,30 +249,30 @@ const ManualBidUpload = ({
         notes: string;
       }>("incoming_bid", negotiation.id, eventData);
 
-      // await setDoc(bidRef, { ...bidData, bid_id });
-      // setIncomingBids &&
-      //   incomingBids &&
-      //   setIncomingBids([...incomingBids, bidData]);
+      await setDoc(bidRef, { ...bidData, bid_id });
+      setIncomingBids &&
+        incomingBids &&
+        setIncomingBids([...incomingBids, bidData]);
 
-      // await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
-      //   incomingBids: arrayUnion(bid_id),
-      // });
+      await updateDoc(doc(db, "delivrd_negotiations", id ?? ""), {
+        incomingBids: arrayUnion(bid_id),
+      });
 
-      // if (negotiation.dealCoordinatorId) {
-      //   await createNotification(
-      //     negotiation.dealCoordinatorId,
-      //     "new_manual_bid",
-      //     {
-      //       bidId: bid_id,
-      //       negotiationId: id,
-      //       author: user.id,
-      //     }
-      //   );
-      // }
+      if (negotiation.dealCoordinatorId) {
+        await createNotification(
+          negotiation.dealCoordinatorId,
+          "new_manual_bid",
+          {
+            bidId: bid_id,
+            negotiationId: id,
+            author: user.id,
+          }
+        );
+      }
 
-      // resetForm();
-      // toast({ title: "Bid created successfully" });
-      // closeDialog();
+      resetForm();
+      toast({ title: "Bid created successfully" });
+      closeDialog();
     } catch (error) {
       console.error("Error uploading bid: ", error);
     } finally {
