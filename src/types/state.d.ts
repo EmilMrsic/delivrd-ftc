@@ -75,4 +75,6 @@ export interface UserState {
   setLoginId: (id: string) => void;
   userId?: string;
   setUserId: (id: string) => void;
+  name: string;
+  setName: (name: string) => void;
 }

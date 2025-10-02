@@ -5,6 +5,8 @@ import { persist } from "zustand/middleware";
 export const useUserState = create<UserState>()(
   persist(
     (set, get) => ({
+      name: "",
+      setName: (name: string) => set({ name }),
       loginId: "",
       setLoginId: (id: string) => set({ loginId: id }),
       userId: "",

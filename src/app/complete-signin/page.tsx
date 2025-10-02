@@ -89,6 +89,7 @@ const SignInContent = ({
   const [message, setMessage] = useState("");
   const setUserId = useUserState((state) => state.setUserId);
   const setLoginId = useUserState((state) => state.setLoginId);
+  const setName = useUserState((state) => state.setName);
 
   useEffect(() => {
     if (isSignInWithEmailLink(auth, window.location.href) && email) {
@@ -137,6 +138,7 @@ const SignInContent = ({
           redirectUrl,
         });
 
+        setName(userData.name || "");
         setUserId(userRef.id);
         setLoginId(loginRowId);
 
