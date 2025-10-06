@@ -34,7 +34,6 @@ export const EventLog = ({ negotiationId }: { negotiationId: string }) => {
       {data && data.length > 0 && (
         <ul className="space-y-4 h-[250px] overflow-y-auto pr-2">
           {data.map((event, idx) => {
-            console.log("got event:", event);
             return (
               <li key={idx}>
                 {event.at.toDate().toLocaleString()}{" "}

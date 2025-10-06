@@ -40,6 +40,14 @@ type ClientDetailsProps = {
   allDealNegotiator: DealNegotiatorType[];
 };
 
+const isVimeoLink = (url: string): boolean => {
+  return url.includes("vimeo.com");
+};
+
+const isYouTubeLink = (url: string): boolean => {
+  return url.includes("youtube.com") || url.includes("youtu.be");
+};
+
 const ClientDetails = ({
   negotiation,
   negotiationId,
@@ -54,9 +62,6 @@ const ClientDetails = ({
   const [isBlur, setIsBlur] = useState(
     localStorage.getItem("streamMode") === "true"
   );
-  const isVimeoLink = (url: string): boolean => {
-    return url.includes("vimeo.com");
-  };
 
   const formatPhoneNumber = (val: string) => {
     const cleaned = val.replace(/\D/g, "");
@@ -66,10 +71,6 @@ const ClientDetails = ({
       )}`;
     }
     return val;
-  };
-
-  const isYouTubeLink = (url: string): boolean => {
-    return url.includes("youtube.com") || url.includes("youtu.be");
   };
 
   return (
@@ -186,37 +187,10 @@ const ClientDetails = ({
             />
           </div>
           {negotiation?.dealCoordinatorId && dealNegotiator ? (
-            <div className="flex items-center space-x-4 w-full">
-              <Avatar className="h-16 w-16">
-                <AvatarImage
-                  src={
-                    dealNegotiator?.profile_pic ??
-                    "/placeholder.svg?height=60&width=60"
-                  }
-                  alt="Staff"
-                  className="rounded-full"
-                />
-                <AvatarFallback>
-                  {dealNegotiator?.name.split(" ")[0] ??
-                    "" + dealNegotiator?.name.split(" ")[1] ??
-                    ""}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-semibold text-lg text-[#202125]">
-                  {dealNegotiator?.name ?? ""}
-                </div>
-                <div className="text-[#202125]">
-                  {dealNegotiator?.role ?? ""}
-                </div>
-                <div className="mt-1 text-sm text-[#202125]">
-                  <p>Contact Delivrd (text messages preferred)</p>
-                  <p className={cn(`font-semibold`, isBlur && `blur-sm`)}>
-                    (386) 270-3530
-                  </p>
-                </div>
-              </div>
-            </div>
+            <CoordinatorDetails
+              dealNegotiator={dealNegotiator as unknown as DealNegotiatorType}
+              isBlur={isBlur}
+            />
           ) : (
             <p>No deal coordinator is assigned</p>
           )}
@@ -394,47 +368,147 @@ const ClientDetails = ({
             )}
           </div>
           {negotiation?.dealCoordinatorId && dealNegotiator && (
-            <div className="flex space-x-2 ml-auto mt-[20px]">
-              <>
-                {dealNegotiator?.video_link && (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div className="relative w-full h-[320px]">
-                        {isVimeoLink(dealNegotiator?.video_link ?? "") ? (
-                          <iframe
-                            src={`https://player.vimeo.com/video/${
-                              dealNegotiator?.video_link.split("/")[3]
-                            }`}
-                            width="100%"
-                            height="100%"
-                            frameBorder="0"
-                            allow="autoplay; fullscreen"
-                          />
-                        ) : isYouTubeLink(dealNegotiator?.video_link) ? (
-                          <iframe
-                            src={`https://www.youtube.com/embed/${
-                              dealNegotiator?.video_link
-                                .split("v=")[1]
-                                ?.split("&")[0]
-                            }`}
-                            width="100%"
-                            height="100%"
-                            frameBorder="0"
-                            allow="autoplay; fullscreen"
-                          />
-                        ) : (
-                          <p>Video not available</p>
-                        )}
-                      </div>
-                    </DialogTrigger>
-                  </Dialog>
-                )}
-              </>
-            </div>
+            <CoordinatorVideo
+              dealNegotiator={dealNegotiator as unknown as DealNegotiatorType}
+            />
           )}
         </div>
       </div>
+      {negotiation && <SupportAgents negotiation={negotiation} />}
     </TailwindPlusCard>
+  );
+};
+
+export const SupportAgents = ({
+  dealNegotiator,
+  negotiation,
+}: {
+  dealNegotiator?: DealNegotiatorType;
+  negotiation?: NegotiationDataType;
+}) => {
+  if (!negotiation) return null;
+
+  return (
+    <div className="mt-4">
+      {negotiation.dealCoordinatorId !== "recos5ry1A7L7rFo7" && (
+        <>
+          <hr />
+          <div className="text-2xl mt-4">Final Review and Deal Approver</div>
+          <div className={cn(`grid grid-cols-1 md:grid-cols-2 gap-4 mt-4`)}>
+            <div className="space-y-4">
+              <span className="text-sm">
+                Tomi reviews and approves every deal before your Deal
+                Coordinator presents the deal.
+              </span>
+              <CoordinatorDetails
+                dealNegotiator={
+                  {
+                    name: "Tomislav Mikula",
+                    role: "Founder",
+                    profile_pic:
+                      "https://firebasestorage.googleapis.com/v0/b/delivrd-first-to-call-bids.appspot.com/o/profile_pic%2FTomi%20Icon%20Image%20(2).png?alt=media&token=99586261-fd6e-4b5b-83c1-65ae79f6db23",
+                  } as DealNegotiatorType
+                }
+                isBlur={false}
+              />
+            </div>
+            <div className="space-y-4">
+              <CoordinatorVideo
+                dealNegotiator={
+                  {
+                    video_link:
+                      "https://vimeo.com/937785873/5766f39363?share=copy",
+                  } as DealNegotiatorType
+                }
+              />
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export const CoordinatorDetails = ({
+  dealNegotiator,
+  isBlur,
+}: {
+  dealNegotiator: DealNegotiatorType;
+  isBlur: boolean;
+}) => {
+  return (
+    <div className="flex items-center space-x-4 w-full">
+      <Avatar className="h-16 w-16">
+        <AvatarImage
+          src={
+            dealNegotiator?.profile_pic ?? "/placeholder.svg?height=60&width=60"
+          }
+          alt="Staff"
+          className="rounded-full"
+        />
+        <AvatarFallback>
+          {dealNegotiator?.name.split(" ")[0] ??
+            "" + dealNegotiator?.name.split(" ")[1] ??
+            ""}
+        </AvatarFallback>
+      </Avatar>
+      <div>
+        <div className="font-semibold text-lg text-[#202125]">
+          {dealNegotiator?.name ?? ""}
+        </div>
+        <div className="text-[#202125]">{dealNegotiator?.role ?? ""}</div>
+        <div className="mt-1 text-sm text-[#202125]">
+          <p>Contact Delivrd (text messages preferred)</p>
+          <p className={cn(`font-semibold`, isBlur && `blur-sm`)}>
+            (386) 270-3530
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const CoordinatorVideo = ({
+  dealNegotiator,
+}: {
+  dealNegotiator: DealNegotiatorType;
+}) => {
+  return (
+    <div className="flex space-x-2 ml-auto mt-[20px]">
+      <>
+        {dealNegotiator?.video_link && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="relative w-full h-[320px]">
+                {isVimeoLink(dealNegotiator?.video_link ?? "") ? (
+                  <iframe
+                    src={`https://player.vimeo.com/video/${
+                      dealNegotiator?.video_link.split("/")[3]
+                    }`}
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen"
+                  />
+                ) : isYouTubeLink(dealNegotiator?.video_link) ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${
+                      dealNegotiator?.video_link.split("v=")[1]?.split("&")[0]
+                    }`}
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen"
+                  />
+                ) : (
+                  <p>Video not available</p>
+                )}
+              </div>
+            </DialogTrigger>
+          </Dialog>
+        )}
+      </>
+    </div>
   );
 };
 
