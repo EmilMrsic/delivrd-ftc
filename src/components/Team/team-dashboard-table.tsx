@@ -25,6 +25,7 @@ import {
 import { StageButton } from "./stage-button";
 import { MakeButton } from "./make-button";
 import { useTeamDashboardFiltersState } from "@/lib/state/team-dashboard-filters";
+import { DealSupportDropdown } from "./deal-support-dropdown";
 
 const NOW = new Date(new Date().toISOString().split("T")[0]);
 const DEFAULT_OPEN_STAGE = "Actively Negotiating";
@@ -41,6 +42,7 @@ type TeamDashboardTableProps = {
   // allInternalNotes: Record<string, InternalNotes[]>;
   allDealNegotiator: DealNegotiatorType[];
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  updateDealSupportAgent: (id: string, newSupportId: string) => void;
   negotiatorData?: DealNegotiatorType;
   loading: boolean;
   // negotiationsByColumn: Record<string, Record<string, NegotiationDataType[]>>;
@@ -67,6 +69,7 @@ const TeamDashboardTable = ({
   updateDealNegotiator,
   negotiatorData,
   loading,
+  updateDealSupportAgent,
   // setCurrentDeals,
   // negotiationsByColumn,
   negotiations,
@@ -326,6 +329,7 @@ const TeamDashboardTable = ({
           handleStageChange,
           allDealNegotiator,
           updateDealNegotiator,
+          updateDealSupportAgent,
           handleDateChange,
           handleAskForReview,
           setStopPropagation,
@@ -366,6 +370,7 @@ const TeamDashboardTable = ({
             handleStageChange={handleStageChange}
             allDealNegotiator={allDealNegotiator}
             updateDealNegotiator={updateDealNegotiator}
+            updateDealSupportAgent={updateDealSupportAgent}
             handleDateChange={handleDateChange}
             handleAskForReview={handleAskForReview}
             setStopPropagation={setStopPropagation}
@@ -401,6 +406,7 @@ export const DashboardTable = ({
   handleStageChange,
   allDealNegotiator,
   updateDealNegotiator,
+  updateDealSupportAgent,
   handleDateChange,
   handleAskForReview,
   setStopPropagation,
@@ -416,6 +422,7 @@ export const DashboardTable = ({
   handleStageChange: (id: string, newStage: string) => void;
   allDealNegotiator: DealNegotiatorType[];
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  updateDealSupportAgent: (id: string, newSupportId: string) => void;
   handleDateChange: (date: string, dealId: string, dateType: string) => void;
   handleAskForReview: (id: string) => void;
   setStopPropagation: (item: boolean) => void;
@@ -468,6 +475,9 @@ export const DashboardTable = ({
               sortable: true,
               key: "dealCoordinatorId",
             },
+          },
+          {
+            header: "Deal Support",
           },
           {
             header: "Start Date",
@@ -585,6 +595,15 @@ export const DashboardTable = ({
                 },
                 {
                   Component: () => (
+                    <DealSupportDropdown
+                      negotiation={deal}
+                      allDealNegotiator={allDealNegotiator}
+                      updateDealSupportAgent={updateDealSupportAgent}
+                    />
+                  ),
+                },
+                {
+                  Component: () => (
                     <DatePickerCell
                       initialDate={deal.dealStartDate ?? ""}
                       onDateChange={(date) =>
@@ -650,6 +669,7 @@ export const dashboardTableRowParser = ({
   handleStageChange,
   allDealNegotiator,
   updateDealNegotiator,
+  updateDealSupportAgent,
   handleDateChange,
   handleAskForReview,
   setStopPropagation,
@@ -668,6 +688,7 @@ export const dashboardTableRowParser = ({
   handleStageChange: (id: string, newStage: string) => void;
   allDealNegotiator: DealNegotiatorType[];
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  updateDealSupportAgent: (id: string, newSupportId: string) => void;
   handleDateChange: (date: string, dealId: string, dateType: string) => void;
   handleAskForReview: (id: string) => void;
   setStopPropagation: (item: boolean) => void;
@@ -689,6 +710,7 @@ export const dashboardTableRowParser = ({
         handleStageChange,
         allDealNegotiator,
         updateDealNegotiator,
+        updateDealSupportAgent,
         handleDateChange,
         handleAskForReview,
         setStopPropagation,
@@ -726,6 +748,7 @@ export const dashbaordTableRowGrouped = ({
   handleStageChange,
   allDealNegotiator,
   updateDealNegotiator,
+  updateDealSupportAgent,
   handleDateChange,
   handleAskForReview,
   setStopPropagation,
@@ -744,6 +767,7 @@ export const dashbaordTableRowGrouped = ({
   handleStageChange: (id: string, newStage: string) => void;
   allDealNegotiator: DealNegotiatorType[];
   updateDealNegotiator: (id: string, newNegotiatorId: string) => void;
+  updateDealSupportAgent: (id: string, newSupportId: string) => void;
   handleDateChange: (date: string, dealId: string, dateType: string) => void;
   handleAskForReview: (id: string) => void;
   setStopPropagation: (item: boolean) => void;
@@ -807,6 +831,7 @@ export const dashbaordTableRowGrouped = ({
               handleDateChange={handleDateChange}
               handleAskForReview={handleAskForReview}
               setStopPropagation={setStopPropagation}
+              updateDealSupportAgent={updateDealSupportAgent}
               // setCurrentDeals={setCurrentDeals}
               negotiatorData={negotiatorData as DealNegotiatorType}
               sortConfig={sortConfig}

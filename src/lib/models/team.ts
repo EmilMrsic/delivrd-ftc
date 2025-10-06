@@ -87,6 +87,7 @@ export const NegotiationDataModel = z.object({
   priority: z.boolean().default(false),
   totalTradeInBids: z.number().default(0),
   totalRegularBids: z.number().default(0),
+  supportAgentId: z.union([z.string(), z.null()]).optional(),
 });
 
 export const DealNegotiatorModel = z.object({

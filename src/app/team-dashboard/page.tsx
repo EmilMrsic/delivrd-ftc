@@ -269,6 +269,36 @@ export default function DealList() {
     }
   };
 
+  const updateDealSupportAgent = async (id: string, agentId: string) => {
+    try {
+      const dealRef = doc(db, "delivrd_negotiations", id);
+
+      const dealSnap = await getDoc(dealRef);
+      if (!dealSnap.exists()) {
+        throw new Error("Deal not found");
+      }
+
+      await updateDoc(dealRef, {
+        supportAgentId: agentId ?? "",
+      });
+
+      refetch(
+        formattedCachedFilters?.dealCoordinatorId as string,
+        formattedCachedFilters
+      );
+
+      const allFormattedFilters = {
+        ...formattedCachedFilters,
+      };
+      delete allFormattedFilters.dealCoordinatorId;
+      refetchAll(undefined, allFormattedFilters);
+
+      toast({ title: "Support Agent updated successfully" });
+    } catch (error) {
+      console.error("Error updating support agent: ", error);
+    }
+  };
+
   return (
     <>
       <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
@@ -319,6 +349,7 @@ export default function DealList() {
               searchTerm={searchTerm}
               searchAll={searchTerm !== ""} // searchAll}
               refetchAll={refetchAll}
+              updateDealSupportAgent={updateDealSupportAgent}
               name="team-dashboard-negotiator"
             />
             {searchTerm !== "" && (
@@ -338,6 +369,7 @@ export default function DealList() {
                   }
                   handleStageChange={handleStageChange}
                   updateDealNegotiator={updateDealNegotiator}
+                  updateDealSupportAgent={updateDealSupportAgent}
                   // negotiationsByColumn={negotiationsByColumn}
                   negotiations={allNegotiations}
                   sortConfig={sortConfig}
