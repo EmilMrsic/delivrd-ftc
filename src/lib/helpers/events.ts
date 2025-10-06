@@ -15,6 +15,7 @@ export type ClientEventType =
   | "login"
   | "bid_accepted"
   | "bid_cancelled"
+  | "bid_deleted"
   | "message_sent"
   | "bid_comment";
 export interface EventDataType<T = object> {
@@ -24,9 +25,10 @@ export interface EventDataType<T = object> {
   data: T;
   actor_uid: string;
   actor_name: string;
-  // summary: string;
+  summary: string;
   // details:
   ref_user_login_event_id: string;
+  ip: string;
 }
 
 /**
@@ -43,6 +45,9 @@ export const logClientEvent = async <T = object>(
     return;
   }
 
+  const requestIP = await fetch("https://api.ipify.org?format=json");
+  const ipData = await requestIP.json();
+
   console.log("Client event logged", { type, data, userState });
   console.log("userState:", userState);
   const eventObject: EventDataType<T> = {
@@ -53,6 +58,8 @@ export const logClientEvent = async <T = object>(
     actor_uid: userState.userId,
     actor_name: userState.name || "Unknown",
     ref_user_login_event_id: userState.loginId,
+    ip: ipData.ip || "unknown",
+    summary: `${type} ${new Date().toISOString()} ${ipData.ip || "unknown"}`,
   };
 
   const eventTable = collection(

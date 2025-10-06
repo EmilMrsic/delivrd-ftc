@@ -54,6 +54,7 @@ import { useNegotiationStore } from "@/lib/state/negotiation";
 import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 import { ArchivedStatuses } from "@/lib/constants/negotiations";
 import { logClientEvent } from "@/lib/helpers/events";
+import { EventLog } from "./event-log";
 
 export const ClientProfile = ({
   negotiationId,
@@ -348,6 +349,14 @@ export const ClientProfile = ({
 
     try {
       await updateDoc(bidDocRef, { delete: true });
+      const eventData = {
+        bidId: bid_id,
+      };
+      await logClientEvent<{ bidId: string }>(
+        "bid_deleted",
+        negotiationId,
+        eventData
+      );
       toast({ title: "Bid marked as deleted" });
     } catch (error) {
       console.error("Error updating bid in Firebase: ", error);
@@ -613,6 +622,7 @@ export const ClientProfile = ({
               </div>
             </>
           )}
+          <EventLog negotiationId={negotiationId} />
         </div>
       </div>
 

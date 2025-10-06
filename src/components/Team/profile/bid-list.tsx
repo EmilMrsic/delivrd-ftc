@@ -281,7 +281,7 @@ export const BidCard = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation(); // Prevent opening the dialog
-                      // handleDeleteBid(bid.bid_id);
+                      //handleDeleteBid(bid.bid_id);
                     }}
                     className="text-black rounded-full p-2"
                   >
