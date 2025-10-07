@@ -1,7 +1,8 @@
 import { NotificationsState } from "@/types/state";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { NotificationDataType } from "../models/notification";
+import { idbStorage } from "../helpers/state";
 
 export const useNotificationsState = create<NotificationsState>()(
   persist(
@@ -15,6 +16,6 @@ export const useNotificationsState = create<NotificationsState>()(
       setNotificationCount: (count: number) =>
         set({ notificationCount: count }),
     }),
-    { name: "notifications" }
+    { name: "notifications", storage: createJSONStorage(() => idbStorage) }
   )
 );
