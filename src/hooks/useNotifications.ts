@@ -21,6 +21,9 @@ export const useNotifications = () => {
   const setNotificationCount = useNotificationsState(
     (state) => state.setNotificationCount
   );
+  const pruneNotifications = useNotificationsState(
+    (state) => state.pruneNotifications
+  );
 
   // const { notification } = useAppSelector((state) => state.notification);
   // const { notificationCount } = useAppSelector((state) => state.notification);
@@ -54,14 +57,18 @@ export const useNotifications = () => {
 
   useEffect(() => {
     if (data?.notificationData) {
-      const finalNotificationsList = notifications.concat(
-        data.notificationData
-      );
-      setNotifications(finalNotificationsList);
-      const count = finalNotificationsList.filter(
-        (notification: any) => !notification.read
-      ).length;
-      setNotificationCount(count);
+      if (!data?.notificationData.length) {
+        pruneNotifications();
+      } else {
+        const finalNotificationsList = notifications.concat(
+          data.notificationData
+        );
+        setNotifications(finalNotificationsList);
+        const count = finalNotificationsList.filter(
+          (notification: any) => !notification.read
+        ).length;
+        setNotificationCount(count);
+      }
     }
   }, [data?.notificationData]);
 

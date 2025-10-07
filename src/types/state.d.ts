@@ -68,6 +68,7 @@ export interface NotificationsState {
   setNotifications: (notifications: NotificationDataType[]) => void;
   notificationCount: number;
   setNotificationCount: (count: number) => void;
+  pruneNotifications: () => void;
 }
 
 export interface UserState {
