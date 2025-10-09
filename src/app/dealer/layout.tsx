@@ -37,7 +37,7 @@ export default function DealerLayout({
 
   return (
     <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
-      <TeamHeader />
+      <TeamHeader dealerMode={true} />
       <Card className="bg-white shadow-lg">
         <CardContent>
           <DealerContext.Provider value={dealer}>
