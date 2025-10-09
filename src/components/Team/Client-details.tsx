@@ -73,6 +73,12 @@ const ClientDetails = ({
     return val;
   };
 
+  const supportAgent = negotiation?.supportAgentId
+    ? allDealNegotiator.find(
+        (agent) => agent.id === negotiation?.supportAgentId
+      )
+    : undefined;
+
   return (
     <TailwindPlusCard
       title="Client Overview"
@@ -374,7 +380,9 @@ const ClientDetails = ({
           )}
         </div>
       </div>
-      {negotiation && <SupportAgents negotiation={negotiation} />}
+      {negotiation && (
+        <SupportAgents negotiation={negotiation} supportAgent={supportAgent} />
+      )}
     </TailwindPlusCard>
   );
 };
@@ -382,14 +390,39 @@ const ClientDetails = ({
 export const SupportAgents = ({
   dealNegotiator,
   negotiation,
+  supportAgent,
 }: {
   dealNegotiator?: DealNegotiatorType;
   negotiation?: NegotiationDataType;
+  supportAgent?: DealNegotiatorType;
 }) => {
   if (!negotiation) return null;
 
   return (
     <div className="mt-4">
+      {supportAgent && (
+        <>
+          <hr />
+          <div className="text-2xl mt-4">Your Deal Support</div>
+          <div
+            className={cn(`grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 mb-4`)}
+          >
+            <div className="space-y-4">
+              <span className="text-sm">
+                Tomi reviews and approves every deal before your Deal
+                Coordinator presents the deal.
+              </span>
+              <CoordinatorDetails
+                dealNegotiator={supportAgent}
+                isBlur={false}
+              />
+            </div>
+            <div className="space-y-4">
+              <CoordinatorVideo dealNegotiator={supportAgent} />
+            </div>
+          </div>
+        </>
+      )}
       {negotiation.dealCoordinatorId !== "recos5ry1A7L7rFo7" && (
         <>
           <hr />
