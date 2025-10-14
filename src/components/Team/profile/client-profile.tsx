@@ -55,6 +55,7 @@ import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 import { ArchivedStatuses } from "@/lib/constants/negotiations";
 import { logClientEvent } from "@/lib/helpers/events";
 import { EventLog } from "./event-log";
+import { ClientChecklist } from "@/components/Client/Checklist/client-checklist";
 
 export const ClientProfile = ({
   negotiationId,
@@ -547,6 +548,8 @@ export const ClientProfile = ({
             allowClientModeToggle={allowClientModeToggle}
             allDealNegotiator={allDealNegotiator}
           />
+
+          <ClientChecklist negotiation={negotiation} />
 
           {clientBidsLoading ? (
             <Loader />
