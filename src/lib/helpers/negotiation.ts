@@ -352,3 +352,24 @@ export const removeNegotiatorFromNegotiations = async (
     return false;
   }
 };
+
+export const removeDealSupportAgentFromNegotiation = async (
+  negotiationId: string,
+  refetch?: () => void
+) => {
+  try {
+    const negotiationRef = doc(db, "delivrd_negotiations", negotiationId);
+    await updateDoc(negotiationRef, {
+      supportAgentId: "",
+    });
+
+    if (refetch) {
+      refetch();
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error removing negotiator:", error);
+    return false;
+  }
+};

@@ -7,19 +7,28 @@ import {
 } from "../ui/dropdown-menu";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { Button } from "../ui/button";
+import { X } from "lucide-react";
 
 export const DealSupportDropdown = ({
   negotiation,
   allDealNegotiator,
   updateDealSupportAgent,
+  onRemoveAgent,
 }: {
   negotiation: NegotiationDataType;
   allDealNegotiator: DealNegotiatorType[];
   updateDealSupportAgent: (id: string, newSupportId: string) => void;
+  onRemoveAgent: (id: string) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
+      {onRemoveAgent && (
+        <X
+          className="cursor-pointer w-fit mr-0 ml-auto"
+          onClick={() => onRemoveAgent(negotiation.id)}
+        />
+      )}
       <DropdownMenu open={isOpen} onOpenChange={(isOpen) => setIsOpen(isOpen)}>
         <DropdownMenuTrigger asChild>
           <Button
