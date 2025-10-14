@@ -119,10 +119,15 @@ export const InputField = (props: {
   onToggle?: (newValue: boolean) => void;
   as?: React.ComponentType<any>;
   tableOverride?: string;
+  evalFn?: (value: string) => {
+    pass: boolean;
+    message?: string;
+  };
 }) => {
   const { toast } = useToast();
   const { as: AsComponent } = props;
   const [value, setValue] = useState<any>(props.value ?? "");
+  const [error, setError] = useState<string | null>(null);
 
   const handleUpdate = async (valueOverride?: any) => {
     // TODO: find some way to make this generic or move out to a component
@@ -135,6 +140,7 @@ export const InputField = (props: {
       parentKey,
       firstName,
       lastName,
+      evalFn,
     } = props;
 
     if (disabled) {
@@ -142,6 +148,17 @@ export const InputField = (props: {
     }
 
     if (negotiationId && field) {
+      if (evalFn) {
+        console.log("running evaluation", evalFn);
+        const result = evalFn(value);
+        console.log("got eval result", result);
+        if (!result.pass) {
+          setError(result.message || "Invalid value");
+          return;
+        } else {
+          setError(null);
+        }
+      }
       try {
         // const usersQuery = query(
         //   collection(db, "delivrd_users"),
@@ -308,24 +325,27 @@ export const InputField = (props: {
   const FieldDisplay = <>{ComponentDisplay}</>;
 
   return (
-    <div className="flex items-center space-x-2 text-[#202125]">
-      {props.type === "datePicker" || props.type === "textarea" ? (
-        <>
-          {Icon && <Icon className="h-5 w-5 text-gray-400" />}
-          <Field className="w-full">
-            {props.label && (
-              <Label className="font-bold text-[15px]">{props.label}:</Label>
-            )}
-            <div className="w-full">{FieldDisplay}</div>
-          </Field>
-        </>
-      ) : (
-        <>
-          {Icon && <Icon className="h-5 w-5 text-gray-400" />}
-          {FieldDisplay}
-        </>
-      )}
-    </div>
+    <>
+      <div className="flex items-center space-x-2 text-[#202125]">
+        {props.type === "datePicker" || props.type === "textarea" ? (
+          <>
+            {Icon && <Icon className="h-5 w-5 text-gray-400" />}
+            <Field className="w-full">
+              {props.label && (
+                <Label className="font-bold text-[15px]">{props.label}:</Label>
+              )}
+              <div className="w-full">{FieldDisplay}</div>
+            </Field>
+          </>
+        ) : (
+          <>
+            {Icon && <Icon className="h-5 w-5 text-gray-400" />}
+            {FieldDisplay}
+          </>
+        )}
+      </div>
+      {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
+    </>
   );
 };
 

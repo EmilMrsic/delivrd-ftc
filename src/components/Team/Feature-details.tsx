@@ -96,6 +96,39 @@ const FeatureDetails = ({
     <TailwindPlusCard title="Deal Details" icon={Car}>
       <div className="space-y-4">
         <InputField
+          //type="searchableDropdown"
+          // options={["New", "Used"]}
+          label="Loom Link"
+          value={negotiation?.initialLoomLink ?? ""}
+          negotiationId={negotiationId ?? ""}
+          field="initialLoomLink"
+          onChange={(newValue) =>
+            handleChange({
+              key: "initialLoomLink",
+              newValue: newValue,
+            })
+          }
+          icon={Car}
+          readOnly={clientMode}
+          evalFn={(testUrl: string) => {
+            const urlPattern = new RegExp(
+              "^(https?:\\/\\/)?" + // protocol
+                "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+                "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+                "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+                "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+                "(\\#[-a-z\\d_]*)?$",
+              "i"
+            ); // fragment locator
+            const pass = !!urlPattern.test(testUrl);
+
+            return {
+              pass,
+              message: pass ? undefined : "Please enter a valid URL",
+            };
+          }}
+        />
+        <InputField
           type="searchableDropdown"
           options={["New", "Used"]}
           label="Condition"
