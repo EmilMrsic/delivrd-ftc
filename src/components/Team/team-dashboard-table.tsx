@@ -18,6 +18,7 @@ import { TeamDashboardClientNameDisplay } from "./dashboard/team-dashboard-clien
 import {
   mapNegotiationsByColumn,
   orderNegotiationsByColumns,
+  removeDealSupportAgentFromNegotiation,
   removeNegotiatorFromNegotiations,
   sortDataHelper,
   sortMappedDataHelper,
@@ -599,6 +600,12 @@ export const DashboardTable = ({
                       negotiation={deal}
                       allDealNegotiator={allDealNegotiator}
                       updateDealSupportAgent={updateDealSupportAgent}
+                      onRemoveAgent={(id) => {
+                        removeDealSupportAgentFromNegotiation(id, () => {
+                          refetch();
+                          refetchAll();
+                        });
+                      }}
                     />
                   ),
                 },
