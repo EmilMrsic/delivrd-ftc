@@ -131,7 +131,7 @@ export const BidCard = ({
   refetch: () => void;
 }) => {
   const [bid, setBid] = useState<
-    IncomingBidType & { bidDealer: DealerDataType }
+    IncomingBidType & { bidDealer: DealerDataType; Dealership?: string }
   >(incomingBid);
   const [connectClientAndDealer, setConnectClientAndDealer] = useState(false);
   const [notifyFTC, setNotifyFTC] = useState(false);
@@ -230,6 +230,8 @@ export const BidCard = ({
     toast({ title: "Bid verified" });
   };
 
+  const dealerName = bid?.dealerName || bid?.Dealership;
+
   return (
     <>
       <div
@@ -260,7 +262,7 @@ export const BidCard = ({
               isMobile && "text-center mb-2"
             )}
           >
-            {bid.dealerName ? `${bid.dealerName} Offer` : "No Dealership"}
+            {dealerName ? `${dealerName} Offer` : "No Dealership"}
 
             <span
               className={cn(

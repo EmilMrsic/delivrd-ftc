@@ -222,6 +222,7 @@ export const IncomingBidCard = ({
 
   const isManualBid = bidDetails.bid_source === "Manual";
   const bidVerified = isManualBid || bidDetails.verified;
+  const dealerName = bidDetails.dealerName || matchingDealer?.Dealership || "";
 
   return (
     <>
@@ -255,9 +256,7 @@ export const IncomingBidCard = ({
               isMobile && "text-center mb-2"
             )}
           >
-            {matchingDealer?.Dealership
-              ? `${matchingDealer.Dealership} Offer`
-              : "No Dealership"}
+            {dealerName ? `${dealerName} Offer` : "No Dealership"}
 
             <span
               className={cn(
