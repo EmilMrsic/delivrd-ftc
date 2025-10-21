@@ -56,6 +56,8 @@ import { TeamDashboardViewSelector } from "@/components/Team/dashboard/team-dash
 import { mapNegotiationsToTeam } from "@/lib/helpers/negotiation";
 import { dateFormat } from "@/lib/helpers/dates";
 import { DEFAULT_SORTED_COLUMN } from "@/lib/constants/negotiations";
+import Link from "next/link";
+import { ClientProfile } from "@/components/Team/profile/client-profile";
 
 // type TeamDataType = {
 //   activeDeals: string[];
@@ -703,8 +705,21 @@ const ReviewTable = ({
           },
         },
         {
-          text: deal.clientNamefull,
+          Component: () => (
+            <Link
+              href={`/team-profile?id=${deal.id}`}
+              className="text-blue-700"
+            >
+              {deal.clientNamefull}
+            </Link>
+          ),
+          config: {
+            expandable: true,
+            expandedComponent: () => <ClientProfile negotiationId={deal.id} />,
+            expandedSize: "full",
+          },
         },
+        ,
         {
           text: deal.brand,
         },
