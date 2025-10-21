@@ -1,10 +1,14 @@
+import { InputField } from "@/components/base/input-field";
 import { TailwindPlusCard } from "@/components/tailwind-plus/card";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { db } from "@/firebase/config";
 import { toast } from "@/hooks/use-toast";
 import { NegotiationDataType } from "@/lib/models/team";
+import { callZapier, callZapierWebhook } from "@/lib/request";
 import { collection, doc, updateDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { Car } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 const Steps: Record<
   string,
@@ -13,26 +17,76 @@ const Steps: Record<
     | {
         text: string;
         action: (negotiation: NegotiationDataType) => Promise<void>;
+        Component?: React.FC<{
+          negotiation: NegotiationDataType;
+          clientMode?: boolean;
+          handleChange: (updateObject: {
+            key: string;
+            newValue: string;
+            parentKey?: string;
+          }) => void;
+        }>;
       }
   )[]
 > = {
   "Send Intro Loom & Tag Client": [
     "Record/Send personalized Loom (confirm preferences, introduce self, set expectations)",
-    "Tag client in <b>OpenPhone</b> to assigned DC + DICS",
-    "Tag client in <b>CRM</b> to assigned DC + DICS",
+    "Tag client in <b>OpenPhone</b> to assigned DC + DCS",
+    "Tag client in <b>CRM</b> to assigned DC + DCS",
     {
       text: "Paste Loom link in CRM notes",
       action: async (negotiation) => {
-        await fetch(process.env.NEXT_PUBLIC_LOOM_LINK_ADDED_URL!, {
-          method: "POST",
-          body: JSON.stringify({
+        // await fetch(process.env.NEXT_PUBLIC_LOOM_LINK_ADDED_URL!, {
+        //   method: "POST",
+        //   body: JSON.stringify({
+        //     negotiationId: negotiation.id,
+        //   }),
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        // });
+
+        const result = await callZapier(
+          process.env.NEXT_PUBLIC_LOOM_LINK_ADDED_URL!,
+          {
             negotiationId: negotiation.id,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+          }
+        );
+        console.log("Loom link added zapier result:", result);
       },
+      Component: ({ negotiation, clientMode, handleChange }) => (
+        <InputField
+          label="Loom Link"
+          value={negotiation?.initialLoomLink ?? ""}
+          negotiationId={negotiation.id ?? ""}
+          field="initialLoomLink"
+          onChange={(newValue) =>
+            handleChange({
+              key: "initialLoomLink",
+              newValue: newValue,
+            })
+          }
+          icon={Car}
+          readOnly={clientMode}
+          evalFn={(testUrl: string) => {
+            const urlPattern = new RegExp(
+              "^(https?:\\/\\/)?" + // protocol
+                "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+                "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+                "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+                "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+                "(\\#[-a-z\\d_]*)?$",
+              "i"
+            ); // fragment locator
+            const pass = !!urlPattern.test(testUrl);
+
+            return {
+              pass,
+              message: pass ? undefined : "Please enter a valid URL",
+            };
+          }}
+        />
+      ),
     },
   ],
   "Verify Client": [
@@ -75,14 +129,62 @@ const Steps: Record<
     "Confirm financing/paperwork complete",
     "DCS coordinates shipping/pickup logistics",
     "Schedule delivery + verify ETA with client",
-    "Capture client photo + request Google review",
+    {
+      text: "Capture client photo + request Google review",
+      action: async (negotiation) => {
+        try {
+          const dealData = negotiation;
+
+          const updatedDeal = {
+            ...dealData,
+            review: "Review Request Sent",
+          };
+
+          // Send the updated deal to the Cloud Function
+          const response = await fetch(
+            process.env.NEXT_PUBLIC_REVIEW_FUNC_URL ?? "",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(updatedDeal),
+            }
+          );
+
+          const result = await response.json();
+
+          if (result.success) {
+            toast({ title: "Review Request Sent" });
+          } else {
+            console.error("Failed to send review request:", result.error);
+            toast({
+              title: "Failed to send review request",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error requesting review:", error);
+          toast({
+            title: "Failed to send review request",
+            variant: "destructive",
+          });
+        }
+      },
+    },
   ],
 };
 
 export const ClientChecklist = ({
   negotiation,
+  clientMode,
+  handleChange,
 }: {
   negotiation: NegotiationDataType;
+  clientMode?: boolean;
+  handleChange: (updateObject: {
+    key: string;
+    newValue: string;
+    parentKey?: string;
+  }) => void;
 }) => {
   const [pendingCount, setPendingCount] = useState(0);
   const [checkedItems, setCheckedItems] = useState<
@@ -129,8 +231,47 @@ export const ClientChecklist = ({
     }
   };
 
+  const resetItems = async () => {
+    // reset all checked items after step 2
+    setPendingCount((n) => n + 1);
+    try {
+      const resetChecklist: Record<string, Record<number, boolean>> = {};
+      const stepNames = Object.keys(Steps);
+      for (let i = 0; i < stepNames.length; i++) {
+        const stepName = stepNames[i];
+        if (i <= 1) {
+          // keep steps 0 and 1
+          resetChecklist[stepName] = checkedItems[stepName] || {};
+        } else {
+          resetChecklist[stepName] = {};
+        }
+      }
+
+      const negotiationRef = doc(db, "delivrd_negotiations", negotiation.id);
+      await updateDoc(negotiationRef, {
+        checklist: resetChecklist,
+      });
+      setCheckedItems(resetChecklist);
+
+      toast({
+        title: "Checklist reset",
+      });
+    } finally {
+      setPendingCount((n) => n - 1);
+    }
+  };
+
   return (
-    <TailwindPlusCard>
+    <TailwindPlusCard
+      title="Client Checklist"
+      actions={() => (
+        <>
+          <Button variant="outline" onClick={() => resetItems()}>
+            Reset
+          </Button>
+        </>
+      )}
+    >
       {Object.keys(Steps).map((stepName, idx) => (
         <div className="mt-4">
           <div className="text-lg mb-2">
@@ -139,26 +280,38 @@ export const ClientChecklist = ({
           {Steps[stepName].map((step, stepIdx) => {
             const stepText = typeof step === "string" ? step : step.text;
             const stepAction = typeof step === "string" ? null : step.action;
+            const Component = typeof step !== "string" && step.Component;
             return (
-              <div key={stepIdx} className="text-sm">
-                <div className="ml-4">
-                  <Checkbox
-                    checked={checkedItems[stepName]?.[stepIdx] || false}
-                    onCheckedChange={async (e) => {
-                      updateCheckedItemInState(stepName, stepIdx, e === true);
-                      await setItemChecked(stepName, stepIdx, e === true);
+              <>
+                <div key={stepIdx} className="text-sm">
+                  <div className="ml-4">
+                    <Checkbox
+                      checked={checkedItems[stepName]?.[stepIdx] || false}
+                      onCheckedChange={async (e) => {
+                        updateCheckedItemInState(stepName, stepIdx, e === true);
+                        await setItemChecked(stepName, stepIdx, e === true);
 
-                      if (stepAction) {
-                        if (e) {
-                          // only peform action when checking the box
-                          await stepAction(negotiation);
+                        if (stepAction) {
+                          if (e) {
+                            // only peform action when checking the box
+                            await stepAction(negotiation);
+                          }
                         }
-                      }
-                    }}
-                  />{" "}
-                  {stepText}
+                      }}
+                    />{" "}
+                    <span dangerouslySetInnerHTML={{ __html: stepText }}></span>
+                  </div>
                 </div>
-              </div>
+                <div className="ml-8 mb-2 w-[60%]">
+                  {Component && (
+                    <Component
+                      negotiation={negotiation}
+                      clientMode={clientMode}
+                      handleChange={handleChange}
+                    />
+                  )}
+                </div>
+              </>
             );
           })}
         </div>

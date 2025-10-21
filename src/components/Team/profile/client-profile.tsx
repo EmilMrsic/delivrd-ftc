@@ -56,6 +56,7 @@ import { ArchivedStatuses } from "@/lib/constants/negotiations";
 import { logClientEvent } from "@/lib/helpers/events";
 import { EventLog } from "./event-log";
 import { ClientChecklist } from "@/components/Client/Checklist/client-checklist";
+import { InputField } from "@/components/base/input-field";
 
 export const ClientProfile = ({
   negotiationId,
@@ -549,7 +550,13 @@ export const ClientProfile = ({
             allDealNegotiator={allDealNegotiator}
           />
 
-          <ClientChecklist negotiation={negotiation} />
+          {!clientMode && (
+            <ClientChecklist
+              negotiation={negotiation}
+              handleChange={handleChange}
+              clientMode={clientMode}
+            />
+          )}
 
           {clientBidsLoading ? (
             <Loader />
@@ -644,6 +651,35 @@ export const ClientProfile = ({
             handleChange={handleChange}
             clientMode={clientMode}
           />
+
+          <TailwindPlusCard title="Search Results">
+            {/* <EditableTextArea
+              value={
+                negotiation?.searchResultsUrl ??
+                "No search results at the moment"
+              }
+              negotiationId={negotiationId ?? ""}
+              field="searchResultsUrl"
+              onChange={(newValue) =>
+                handleChange({
+                  key: "searchResultsUrl",
+                  newValue: newValue,
+                })
+              }
+            /> */}
+            <InputField
+              value={negotiation?.searchResultsUrl ?? ""}
+              placeholderText="Enter search results URL"
+              negotiationId={negotiationId ?? ""}
+              field="searchResultsUrl"
+              onChange={(newValue) =>
+                handleChange({
+                  key: "searchResultsUrl",
+                  newValue: newValue,
+                })
+              }
+            />
+          </TailwindPlusCard>
 
           {/* {clientMode && !shared && (
             <Button

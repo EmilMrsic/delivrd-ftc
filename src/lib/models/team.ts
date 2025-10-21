@@ -90,6 +90,7 @@ export const NegotiationDataModel = z.object({
   supportAgentId: z.union([z.string(), z.null()]).optional(),
   checklist: z.record(z.string(), z.record(z.string(), z.boolean())).optional(),
   initialLoomLink: z.string().optional(),
+  searchResultsUrl: z.string().optional(),
 });
 
 export const DealNegotiatorModel = z.object({

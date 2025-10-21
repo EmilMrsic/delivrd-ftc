@@ -80,6 +80,7 @@ const TradeCard = ({
           }
         />
         <InputField
+          type="textarea"
           field="comments"
           parentKey="tradeDetails"
           negotiationId={negotiationId ?? ""}

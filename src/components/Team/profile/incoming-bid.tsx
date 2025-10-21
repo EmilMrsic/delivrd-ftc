@@ -20,7 +20,7 @@ import { toast } from "@/hooks/use-toast";
 import { IncomingBidCommentType } from "@/lib/models/bids";
 import { ModalForm } from "@/components/tailwind-plus/modal-form";
 import { useEffect, useMemo, useState } from "react";
-import { backendRequest, callZapierWebhook } from "@/lib/request";
+import { backendRequest, callZapier, callZapierWebhook } from "@/lib/request";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { cacheBidTypeCounts } from "@/lib/helpers/bids";
 import { logClientEvent } from "@/lib/helpers/events";
@@ -535,7 +535,7 @@ export const IncomingBidCard = ({
               custom_message: values.message || "",
             };
 
-            await callZapierWebhook(
+            await callZapier(
               process.env.NEXT_PUBLIC_CONNECT_CLIENT_DEALER_FUNC_URL ?? "",
               webhookData
             );

@@ -29,3 +29,15 @@ export const callZapierWebhook = async (webhook: string, webhookData: any) => {
   const data = await response.json();
   return data;
 };
+
+export const callZapier = async <T = object>(path: string, postData: T) => {
+  const response = await fetch(`/api/zapier`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ path, postData }),
+  });
+  const data = await response.json();
+  return data;
+};

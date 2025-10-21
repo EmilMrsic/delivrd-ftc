@@ -24,6 +24,7 @@ import { DealNegotiatorDropdown } from "./deal-negotiator-dropdown";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { removeNegotiatorFromNegotiations } from "@/lib/helpers/negotiation";
+import { Accordion } from "../ui/accordion";
 
 type ClientDetailsProps = {
   negotiation: NegotiationDataType | null;
@@ -381,7 +382,11 @@ const ClientDetails = ({
         </div>
       </div>
       {negotiation && (
-        <SupportAgents negotiation={negotiation} supportAgent={supportAgent} />
+        <SupportAgents
+          negotiation={negotiation}
+          supportAgent={supportAgent}
+          isBlur={clientMode}
+        />
       )}
     </TailwindPlusCard>
   );
@@ -391,42 +396,117 @@ export const SupportAgents = ({
   dealNegotiator,
   negotiation,
   supportAgent,
+  isBlur,
 }: {
   dealNegotiator?: DealNegotiatorType;
   negotiation?: NegotiationDataType;
   supportAgent?: DealNegotiatorType;
+  isBlur?: boolean;
 }) => {
   if (!negotiation) return null;
-
   return (
     <div className="mt-4">
       {supportAgent && (
         <>
           <hr />
-          <div className="text-2xl mt-4">Your Deal Support</div>
-          <div
-            className={cn(`grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 mb-4`)}
+          <Accordion
+            header={() => (
+              <div className="flex my-2">
+                <div className="w-16 h-16 mr-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage
+                      src={
+                        supportAgent?.profile_pic ??
+                        "/placeholder.svg?height=60&width=60"
+                      }
+                      alt="Staff"
+                      className="rounded-full"
+                    />
+                    <AvatarFallback>
+                      {supportAgent?.name.split(" ")[0] ??
+                        "" + supportAgent?.name.split(" ")[1] ??
+                        ""}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div>
+                  <div className="text-xl my-auto">Your Deal Support</div>
+                  <div>
+                    <div className="font-semibold text-lg text-[#202125]">
+                      {supportAgent?.name ?? ""}
+                    </div>
+                    <div className="text-[#202125]">
+                      {supportAgent?.role ?? ""}
+                    </div>
+                    <div className="mt-1 text-sm text-[#202125]">
+                      <p>Contact Delivrd (text messages preferred)</p>
+                      <p className={cn(`font-semibold`, isBlur && `blur-sm`)}>
+                        (386) 270-3530
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           >
-            <div className="space-y-4">
-              <span className="text-sm">
-                Tomi reviews and approves every deal before your Deal
-                Coordinator presents the deal.
-              </span>
-              <CoordinatorDetails
-                dealNegotiator={supportAgent}
-                isBlur={false}
-              />
-            </div>
-            <div className="space-y-4">
-              <CoordinatorVideo dealNegotiator={supportAgent} />
-            </div>
-          </div>
+            <CoordinatorVideo dealNegotiator={supportAgent} />
+          </Accordion>
         </>
       )}
       {negotiation.dealCoordinatorId !== "recos5ry1A7L7rFo7" && (
         <>
           <hr />
-          <div className="text-2xl mt-4">Final Review and Deal Approver</div>
+          <Accordion
+            header={() => (
+              <div className="flex my-2">
+                <div className="w-16 h-16 mr-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage
+                      src={
+                        "https://firebasestorage.googleapis.com/v0/b/delivrd-first-to-call-bids.appspot.com/o/profile_pic%2FTomi%20Icon%20Image%20(2).png?alt=media&token=99586261-fd6e-4b5b-83c1-65ae79f6db23"
+                      }
+                      alt="Staff"
+                      className="rounded-full"
+                    />
+                    <AvatarFallback>Tomi M</AvatarFallback>
+                  </Avatar>
+                </div>
+                <div>
+                  <div className="text-xl my-auto">
+                    Final Review and Deal Approver
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg text-[#202125]">
+                      Tomislav Mikula
+                    </div>
+                    <div className="text-[#202125]">Founder</div>
+                    <div className="mt-1 text-sm text-[#202125]">
+                      <p>Contact Delivrd (text messages preferred)</p>
+                      <p className={cn(`font-semibold`, isBlur && `blur-sm`)}>
+                        (386) 270-3530
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          >
+            <div className="text-center">
+              <span className="text-smcenter">
+                Tomi reviews and approves every deal before your Deal
+                Coordinator presents the deal.
+              </span>
+            </div>
+            <CoordinatorVideo
+              dealNegotiator={
+                {
+                  video_link:
+                    "https://vimeo.com/937785873/5766f39363?share=copy",
+                } as DealNegotiatorType
+              }
+            />
+          </Accordion>
+          {/* <div className="text-2xl mt-4">Final Review and Deal Approver</div>
           <div className={cn(`grid grid-cols-1 md:grid-cols-2 gap-4 mt-4`)}>
             <div className="space-y-4">
               <span className="text-sm">
@@ -455,7 +535,7 @@ export const SupportAgents = ({
                 }
               />
             </div>
-          </div>
+          </div> */}
         </>
       )}
     </div>

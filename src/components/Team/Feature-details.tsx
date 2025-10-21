@@ -16,7 +16,7 @@ import { NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { formatDateToLocal } from "@/lib/helpers/dates";
 import { Button } from "../ui/button";
-import { callZapierWebhook } from "@/lib/request";
+import { callZapier, callZapierWebhook } from "@/lib/request";
 
 type FeatureDetailsProps = {
   negotiation: NegotiationDataType | null;
@@ -95,7 +95,7 @@ const FeatureDetails = ({
   return (
     <TailwindPlusCard title="Deal Details" icon={Car}>
       <div className="space-y-4">
-        <InputField
+        {/* <InputField
           //type="searchableDropdown"
           // options={["New", "Used"]}
           label="Loom Link"
@@ -127,7 +127,7 @@ const FeatureDetails = ({
               message: pass ? undefined : "Please enter a valid URL",
             };
           }}
-        />
+        /> */}
         <InputField
           type="searchableDropdown"
           options={["New", "Used"]}
@@ -464,7 +464,7 @@ const FeatureDetails = ({
               className="w-full mt-4"
               onClick={async () => {
                 if (negotiationId) {
-                  const response = await callZapierWebhook(
+                  const response = await callZapier(
                     process.env.NEXT_PUBLIC_GENERATE_ONBOARDING_URL as string,
                     negotiation
                   );

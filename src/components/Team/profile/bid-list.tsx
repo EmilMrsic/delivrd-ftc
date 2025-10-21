@@ -16,7 +16,7 @@ import { createNotification } from "@/lib/helpers/notifications";
 import { IncomingBidCommentType, IncomingBidType } from "@/lib/models/bids";
 import { DealerDataType } from "@/lib/models/dealer";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
-import { backendRequest, callZapierWebhook } from "@/lib/request";
+import { backendRequest, callZapier, callZapierWebhook } from "@/lib/request";
 import {
   cn,
   formatDate,
@@ -484,7 +484,7 @@ export const BidCard = ({
               custom_message: values.message || "",
             };
 
-            await callZapierWebhook(
+            await callZapier(
               process.env.NEXT_PUBLIC_CONNECT_CLIENT_DEALER_FUNC_URL ?? "",
               webhookData
             );
