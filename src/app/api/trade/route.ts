@@ -8,9 +8,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
   const headers = req.headers;
-  const userData = await getUserDataFromDb(headers.get("auth") as string);
-  const dealerId = userData?.dealer_id?.[0] || userData?.dealer_id;
+  let userData;
+  if (headers.get("auth")) {
+    userData = await getUserDataFromDb(headers.get("auth") as string);
+  }
 
+  const dealerId = userData?.dealer_id?.[0] || userData?.dealer_id;
   const negotiationsTable = collection(db, "delivrd_negotiations");
   const bidsTable = collection(db, "Incoming Bids");
   const negotiationsSnapshot = await getDocs(negotiationsTable);
@@ -22,35 +25,50 @@ export const GET = async (req: NextRequest) => {
     }
   });
 
-  const [clients, bidsSnapshot] = await Promise.all([
+  const promises: any[] = [
     fetchBulkQuery(
       "Clients",
       "negotiation_Id",
       tradeIns.map((trade) => trade.id)
     ),
-    getDocs(query(bidsTable, where("dealerId", "==", dealerId))),
-  ]);
+  ];
 
-  const submittedBidNegotiations = new Set(
-    bidsSnapshot.docs.map((doc) => doc.data().negotiationId)
-  );
+  if (dealerId) {
+    promises.push(getDocs(query(bidsTable, where("dealerId", "==", dealerId))));
+  }
+
+  const [clients, bidsSnapshot] = await Promise.all(promises);
+  let submittedBidNegotiations = null;
+
+  if (bidsSnapshot) {
+    submittedBidNegotiations = new Set(
+      bidsSnapshot.docs.map((doc: any) => doc.data().negotiationId)
+    );
+  }
   const clientById: Record<string, ClientDataType> = {};
 
   const clientToNegotiation: (NegotiationDataType & {
     client: ClientDataType;
   })[] = [];
 
-  clients.forEach((client) => {
+  clients.forEach((client: ClientDataType) => {
     clientById[client.id] = client;
   });
 
   // @ts-ignore
   tradeIns.forEach((trade: NegotiationDataType) => {
-    if (clientById[trade.id] && !submittedBidNegotiations.has(trade.id)) {
-      clientToNegotiation.push({
-        ...trade,
-        client: clientById[trade.id],
-      });
+    if (clientById[trade.id]) {
+      if (
+        !submittedBidNegotiations ||
+        !submittedBidNegotiations.has(trade.id)
+      ) {
+        const outputRow = {
+          ...trade,
+          client: clientById[trade.id],
+        };
+
+        clientToNegotiation.push(outputRow);
+      }
     }
   });
 

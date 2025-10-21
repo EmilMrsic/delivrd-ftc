@@ -6,7 +6,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 export const getUserData = () => {
   const userData = localStorage.getItem("user");
   if (!userData) {
-    console.error("No user data found in localStorage");
+    // console.error("No user data found in localStorage");
     return;
   }
 

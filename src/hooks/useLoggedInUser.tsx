@@ -7,7 +7,7 @@ export const useLoggedInUser = () => {
     queryKey: ["loggedInUser"],
     queryFn: async () => {
       const user = await getUserData();
-      return user;
+      return user || null;
     },
   });
 

@@ -2,38 +2,43 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import FcmTokenProvider from "../FcmTokenProvider";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [useFcm, setUseFcm] = useState(false);
   const path = usePathname();
   const router = useRouter();
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
-    if (!userData) {
-      router.push("/");
-      return;
-    }
-
     let parsed;
-    try {
-      parsed = JSON.parse(userData);
-    } catch (err) {
+    if (!userData && !path.includes("/dealer/trade")) {
       router.push("/");
+
+      try {
+        parsed = JSON.parse(userData as string);
+      } catch (err) {
+        router.push("/");
+        return;
+      }
       return;
     }
 
-    const { privilege } = parsed;
-
-    const isValidClientPath =
-      path.includes("client") ||
-      path.includes("complete-signin") ||
-      path.includes("apiKey") ||
-      path === "/";
-
-    if (!isValidClientPath) {
-      if (privilege === "Client") {
-        router.push("/");
+    if (userData && parsed) {
+      const { privilege } = parsed;
+      const isValidClientPath =
+        path.includes("client") ||
+        path.includes("complete-signin") ||
+        path.includes("apiKey") ||
+        path.includes("/dealer/trade") ||
+        path === "/";
+      if (!isValidClientPath) {
+        if (privilege === "Client") {
+          router.push("/");
+        }
+      } else {
+        setUseFcm(true);
       }
     }
 
@@ -44,7 +49,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   //   return null;
   // }
 
-  return <>{children}</>;
+  return (
+    <>
+      {useFcm && <FcmTokenProvider />}
+      {children}
+    </>
+  );
 };
 
 export default ProtectedRoute;

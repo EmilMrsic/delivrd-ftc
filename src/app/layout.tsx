@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import ProtectedRoute from "@/components/ProtectedRoutes/ProtectedRoute";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { GlobalTableComponentWrapper } from "@/components/tailwind-plus/table";
+import { headers } from "next/headers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,8 +32,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: any;
 }>) {
   return (
     <html lang="en">
@@ -48,10 +51,9 @@ export default function RootLayout({
       >
         <ContextProviders>
           <ProtectedRoute>
-            <FcmTokenProvider />
             <Toaster />
             <GlobalTableComponentWrapper>
-            {children}
+              {children}
             </GlobalTableComponentWrapper>
           </ProtectedRoute>
         </ContextProviders>

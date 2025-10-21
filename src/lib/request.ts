@@ -10,7 +10,9 @@ export const backendRequest = async <T = object>(
     headers["Content-Type"] = "application/json";
   }
 
-  headers["auth"] = getUserData().id;
+  if (getUserData()) {
+    headers["auth"] = getUserData().id;
+  }
 
   const response = await fetch(`/api/${path}`, {
     method: method,

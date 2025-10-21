@@ -84,10 +84,12 @@ export const TeamHeader = ({
   negotiatorData,
   clientMode = false,
   dealerMode = false,
+  publicMode = false,
 }: {
   negotiatorData?: DealNegotiatorType;
   clientMode?: boolean;
   dealerMode?: boolean;
+  publicMode?: boolean;
 }) => {
   const [showAllBrands, setShowAllBrands] = useState(false);
   const user = useLoggedInUser();
@@ -104,7 +106,7 @@ export const TeamHeader = ({
     </div>
   );
 
-  if (!negotiatorDataToUser) return null;
+  if (!publicMode && !negotiatorDataToUser) return null;
 
   return (
     <>
@@ -195,6 +197,33 @@ export const TeamHeader = ({
         </motion.div>
       )}
     </>
+  );
+};
+
+export const PublicHeader = () => {
+  const isMobile = useIsMobile();
+  return (
+    <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
+      <div className="flex flex-col items-start">
+        <img
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-JoIhMlHLZk8imAGedndft4tH9e057R.png"
+          alt="DELIVRD Logo"
+          className={cn(`mb-2`, isMobile ? "h-6" : "h-8")}
+        />
+        <p className="text-white text-sm">Putting Dreams In Driveways</p>
+      </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className=" z-50 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-2"
+      >
+        <span className="text-xs font-medium text-center">
+          We're in Beta & looking for your feedback.<br></br> Bugs or ideas?
+          Text <Link href={"tel:9807587488"}>(980) 758-7488</Link>
+        </span>
+      </motion.div>
+    </div>
   );
 };
 

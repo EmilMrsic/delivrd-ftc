@@ -1,5 +1,5 @@
 "use client";
-import { TeamHeader } from "@/components/base/header";
+import { PublicHeader, TeamHeader } from "@/components/base/header";
 import { Loader } from "@/components/base/loader";
 import { Card, CardContent } from "@/components/ui/card";
 import { db } from "@/firebase/config";
@@ -7,6 +7,7 @@ import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { DealerContext } from "@/lib/context/dealer-context";
 import { DealerDataType } from "@/lib/models/dealer";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function DealerLayout({
@@ -14,6 +15,7 @@ export default function DealerLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const path = usePathname();
   const user = useLoggedInUser();
   const [dealer, setDealer] = useState<DealerDataType | null>(null);
 
@@ -33,11 +35,15 @@ export default function DealerLayout({
     }
   }, [user]);
 
-  if (!dealer) return <Loader />;
+  if (path !== "/dealer/trade" && !dealer) return <Loader />;
 
   return (
     <div className="mx-auto p-4 space-y-6 min-h-screen w-full">
-      <TeamHeader dealerMode={true} />
+      {path !== "/dealer/trade" ? (
+        <TeamHeader dealerMode={true} />
+      ) : (
+        <PublicHeader />
+      )}
       <Card className="bg-white shadow-lg">
         <CardContent>
           <DealerContext.Provider value={dealer}>

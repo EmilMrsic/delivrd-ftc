@@ -17,9 +17,11 @@ import Link from "next/link";
 export const TradeInTable = ({
   negotiations,
   refetch,
+  selectedTradeIn,
 }: {
   negotiations: NegotiationDataType[];
   refetch: () => void;
+  selectedTradeIn: string | null;
 }) => {
   const screenSize = useScreenSize();
   const isMobile = useIsMobile();
@@ -141,6 +143,7 @@ export const TradeInTable = ({
                 <TradeInCard
                   negotiation={negotiation}
                   setSelectedNegotiation={setSelectedNegotiation}
+                  selectedTradeIn={selectedTradeIn}
                 />
               </div>
             );
@@ -160,13 +163,17 @@ export const TradeInTable = ({
 export const TradeInCard = ({
   negotiation,
   setSelectedNegotiation,
+  selectedTradeIn,
 }: {
   negotiation: NegotiationDataType;
   setSelectedNegotiation: (negotiation: NegotiationDataType) => void;
+  selectedTradeIn: string | null;
 }) => {
-  console.log("got negotiation:", negotiation);
-  return (
-    <div className="rounded-lg border border-gray-200">
+  const mainCard = (
+    <div
+      className={cn(`rounded-lg border border-gray-200`)}
+      id={negotiation.id}
+    >
       <ImageCarousel
         images={negotiation.tradeDetails?.fileUrls || []}
         className="rounded-t-lg"
@@ -225,6 +232,21 @@ export const TradeInCard = ({
         </div>
       </div>
     </div>
+  );
+
+  return window.location.hash === `#${negotiation.id}` ? (
+    <div
+      style={{
+        position: "relative",
+        borderRadius: "12px",
+        padding: "2px",
+        background: "linear-gradient(135deg, gold, goldenrod, #ffecb3)",
+      }}
+    >
+      {mainCard}
+    </div>
+  ) : (
+    mainCard
   );
 };
 
