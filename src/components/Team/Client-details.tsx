@@ -5,6 +5,7 @@ import {
   FileText,
   Mail,
   Phone,
+  Play,
   User,
   User2,
 } from "lucide-react";
@@ -161,6 +162,24 @@ const ClientDetails = ({
               icon={User}
               readOnly={clientMode}
             />
+            <InputField
+              label="Phone"
+              value={
+                formatPhoneNumber(negotiation?.clientPhone ?? ("" as string)) ??
+                ""
+              }
+              userField="phone"
+              field="clientPhone"
+              negotiationId={negotiationId ?? ""}
+              onChange={(newValue) =>
+                handleChange({
+                  key: "clientPhone",
+                  newValue: formatPhoneNumber(newValue),
+                })
+              }
+              icon={Phone}
+              readOnly={clientMode}
+            />
           </div>
           {/* {negotiation?.dealCoordinatorId && dealNegotiator ? (
             <CoordinatorDetails
@@ -221,7 +240,13 @@ const ClientDetails = ({
               )}
               readOnly={clientMode}
             />
-            <div className="flex justify-between mb-0">
+            <div
+              className="mt-4 flex justify-between mb-0"
+              style={{
+                marginTop: "24px",
+                marginBottom: "24px",
+              }}
+            >
               <div className="flex items-center gap-2 font-semibold">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -304,24 +329,6 @@ const ClientDetails = ({
                 />
               </div>
             )}
-            <InputField
-              label="Phone"
-              value={
-                formatPhoneNumber(negotiation?.clientPhone ?? ("" as string)) ??
-                ""
-              }
-              userField="phone"
-              field="clientPhone"
-              negotiationId={negotiationId ?? ""}
-              onChange={(newValue) =>
-                handleChange({
-                  key: "clientPhone",
-                  newValue: formatPhoneNumber(newValue),
-                })
-              }
-              icon={Phone}
-              readOnly={clientMode}
-            />
             <InputField
               label="Email"
               userField="email"
@@ -459,6 +466,11 @@ export const SupportAgents = ({
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-center">{member.name}</div>
+                <div>
+                  <span className="bg-[#00B8F2] hover:bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-2 mt-2 mx-auto w-fit">
+                    <Play />
+                  </span>
+                </div>
               </div>
             </>
           );
