@@ -485,7 +485,7 @@ export const SupportAgents = ({
         >
           <span className="font-medium text-center">Questions or issues?</span>
           <span className="text-xl">
-            Text <Link href={"tel:9807587488"}>(980) 758-7488</Link>
+            Text <Link href={"tel:3862703530"}>(386) 270-3530</Link>
           </span>
         </motion.div>
       </div>
