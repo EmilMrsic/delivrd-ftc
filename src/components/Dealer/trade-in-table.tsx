@@ -18,10 +18,12 @@ export const TradeInTable = ({
   negotiations,
   refetch,
   selectedTradeIn,
+  publicMode = false,
 }: {
   negotiations: NegotiationDataType[];
   refetch: () => void;
   selectedTradeIn: string | null;
+  publicMode?: boolean;
 }) => {
   const screenSize = useScreenSize();
   const isMobile = useIsMobile();
@@ -78,17 +80,19 @@ export const TradeInTable = ({
 
   return (
     <>
-      <div className="mt-4">
-        <Link href="/bid">
-          <Button
-            variant="outline"
-            className="w-fit bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
-          >
-            <BackwardIcon className="w-6 h-6 mr-2" />
-            Back
-          </Button>
-        </Link>
-      </div>
+      {!publicMode && (
+        <div className="mt-4">
+          <Link href="/bid">
+            <Button
+              variant="outline"
+              className="w-fit bg-blue-500 text-white hover:bg-blue-600 hover:text-white"
+            >
+              <BackwardIcon className="w-6 h-6 mr-2" />
+              Back
+            </Button>
+          </Link>
+        </div>
+      )}
       <div className="text-xl font-bold mt-4 mb-2">
         Available Trade-in Vehicles
       </div>
@@ -144,6 +148,7 @@ export const TradeInTable = ({
                   negotiation={negotiation}
                   setSelectedNegotiation={setSelectedNegotiation}
                   selectedTradeIn={selectedTradeIn}
+                  publicMode={publicMode}
                 />
               </div>
             );
@@ -164,14 +169,16 @@ export const TradeInCard = ({
   negotiation,
   setSelectedNegotiation,
   selectedTradeIn,
+  publicMode,
 }: {
   negotiation: NegotiationDataType;
   setSelectedNegotiation: (negotiation: NegotiationDataType) => void;
   selectedTradeIn: string | null;
+  publicMode: boolean;
 }) => {
   const mainCard = (
     <div
-      className={cn(`rounded-lg border border-gray-200`)}
+      className={cn(`rounded-lg border border-gray-200 bg-white`)}
       id={negotiation.id}
     >
       <ImageCarousel
@@ -224,7 +231,13 @@ export const TradeInCard = ({
           <div>
             <Button
               className="bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-              onClick={() => setSelectedNegotiation(negotiation)}
+              onClick={() => {
+                if (publicMode) {
+                  window.location.href = "/";
+                } else {
+                  setSelectedNegotiation(negotiation);
+                }
+              }}
             >
               Place Bid
             </Button>
@@ -239,8 +252,8 @@ export const TradeInCard = ({
       style={{
         position: "relative",
         borderRadius: "12px",
-        padding: "2px",
-        background: "linear-gradient(135deg, gold, goldenrod, #ffecb3)",
+        padding: "8px",
+        background: "linear-gradient(100deg, gold, goldenrod, #ffecb3)",
       }}
     >
       {mainCard}

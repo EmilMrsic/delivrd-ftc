@@ -1,6 +1,7 @@
 "use client";
 import { Loader } from "@/components/base/loader";
 import { TradeInTable } from "@/components/Dealer/trade-in-table";
+import { useLoggedInUser } from "@/hooks/useLoggedInUser";
 import { useNegotiations } from "@/hooks/useNegotiations";
 import { backendRequest } from "@/lib/request";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { useEffect, useState } from "react";
 
 export default function TradePage() {
   const [selectedTradeIn, setSelectedTradeIn] = useState<string | null>(null);
+  const user = useLoggedInUser();
 
   const {
     data: tradeIns,
@@ -37,6 +39,7 @@ export default function TradePage() {
       negotiations={tradeIns.tradeIns}
       refetch={refetch}
       selectedTradeIn={selectedTradeIn}
+      publicMode={!user}
     />
   );
 }
