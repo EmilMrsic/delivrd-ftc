@@ -67,7 +67,7 @@ export const GET = async (req: NextRequest) => {
           client: clientById[trade.id],
         };
 
-        console.log("outputRow", outputRow.id, outputRow.tradeDetails.vin);
+        // console.log("outputRow", outputRow.id, outputRow.tradeDetails.vin);
 
         clientToNegotiation.push(outputRow);
       }
