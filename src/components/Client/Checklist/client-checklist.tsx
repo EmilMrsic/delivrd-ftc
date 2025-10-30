@@ -52,7 +52,6 @@ const Steps: Record<
             negotiationId: negotiation.id,
           }
         );
-        console.log("Loom link added zapier result:", result);
       },
       Component: ({ negotiation, clientMode, handleChange }) => (
         <InputField

@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -110,9 +111,14 @@ const SignInContent = ({
         collection(db, "users"),
         where("email", "==", parsedEmail)
       );
+
+      const loginRowQuery = await getDoc(
+        doc(db, "delivrd_user_logins", loginRowId)
+      );
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
+        const loginRow = loginRowQuery.data();
         const userRef = querySnapshot.docs[0].ref;
         await updateDoc(userRef, {
           lastSignedIn: serverTimestamp(),
@@ -124,7 +130,9 @@ const SignInContent = ({
         localStorage.setItem("emailForSignIn", userData.email);
         toast({ title: "Logged in" });
         let redirectUrl = "/";
-        if (userData.privilege === "Dealer") {
+        if (loginRow && loginRow.tradeIn) {
+          redirectUrl = `/dealer/trade#${loginRow.tradeIn}`;
+        } else if (userData.privilege === "Dealer") {
           redirectUrl = "/bid";
         } else if (userData.privilege === "Client") {
           redirectUrl = `/client`;

@@ -5,6 +5,9 @@ import EditableInput, { InputField } from "../base/input-field";
 import { NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { UploadFileSection } from "./profile/upload-file-section";
+import { FileUploadRoller } from "../base/file-upload-roller";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
 
 type TradeCardProps = {
   handleChange: (updateObject: {
@@ -93,6 +96,26 @@ const TradeCard = ({
               newValue: newValue,
             })
           }
+        />
+        <FileUploadRoller
+          label="Cover Photo"
+          value={negotiation?.tradeDetails?.coverPhoto ?? ""}
+          onChange={async (newValue) => {
+            if (negotiation === null) return;
+
+            const bidRef = doc(db, "delivrd_negotiations", negotiation.id);
+            handleChange({
+              key: "coverPhoto",
+              parentKey: "tradeDetails",
+              newValue: newValue as string,
+            });
+            await updateDoc(bidRef, {
+              tradeDetails: {
+                ...(negotiation.tradeDetails ?? {}),
+                coverPhoto: newValue,
+              },
+            });
+          }}
         />
         <UploadFileSection
           negotiation={negotiation as NegotiationDataType}

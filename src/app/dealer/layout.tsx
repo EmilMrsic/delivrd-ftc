@@ -42,7 +42,7 @@ export default function DealerLayout({
       {path !== "/dealer/trade" ? (
         <TeamHeader dealerMode={true} />
       ) : (
-        <PublicHeader />
+        <PublicHeader userIsLoggedIn={!!user} />
       )}
       <Card className="bg-white shadow-lg">
         <CardContent>

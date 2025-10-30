@@ -16,10 +16,6 @@ export const useDealerBids = ({ dealerId }: { dealerId: string }) => {
     },
   });
 
-  useEffect(() => {
-    console.log("got new bids");
-  }, [data?.bids]);
-
   return {
     bids: data?.bids,
     isLoading,

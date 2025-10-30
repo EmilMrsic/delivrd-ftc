@@ -10,6 +10,7 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -24,6 +25,7 @@ export const useLogin = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [notification, setNotification] = useState<string | null>(null);
+  const params = useSearchParams();
 
   const sendEmail = async (email: string) => {
     try {
@@ -77,15 +79,23 @@ export const useLogin = () => {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
-        await setDoc(doc(db, "delivrd_user_logins", loginRowId), {
+        const loginRow: Record<string, any> = {
           ...loginObject,
           emailFound: true,
           userId: userData.id,
           userType: userData.privilege,
-        });
+        };
+
+        if (params.get("tradeIn")) {
+          loginRow["tradeIn"] = params.get("tradeIn");
+        }
+
+        await setDoc(doc(db, "delivrd_user_logins", loginRowId), loginRow);
         const user = {
           email: userData.email,
         };
+
+        // console.log("got login row id:", loginRowId);
 
         localStorage.setItem("currentEmail", user.email);
 

@@ -13,6 +13,8 @@ import { DealerContext } from "@/lib/context/dealer-context";
 import { createNewBid } from "@/lib/helpers/bids";
 import { BackwardIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { TailwindPlusModal } from "../tailwind-plus/modal";
+import { useRouter } from "next/navigation";
 
 export const TradeInTable = ({
   negotiations,
@@ -25,6 +27,8 @@ export const TradeInTable = ({
   selectedTradeIn: string | null;
   publicMode?: boolean;
 }) => {
+  const router = useRouter();
+  const [loginModalOpen, setLoginModalOpen] = useState<boolean | string>(false);
   const screenSize = useScreenSize();
   const isMobile = useIsMobile();
   const [selectedNegotiation, setSelectedNegotiation] =
@@ -133,12 +137,13 @@ export const TradeInTable = ({
       >
         {filteredNegotiations
           .filter((negotiation) => {
-            const noFiles =
-              negotiation?.tradeDetails == null ||
-              negotiation?.tradeDetails?.fileUrls == null ||
-              negotiation?.tradeDetails?.fileUrls.length === 0;
+            const hasFiles =
+              negotiation?.tradeDetails !== null &&
+              (negotiation?.tradeDetails?.coverPhoto ||
+                (negotiation?.tradeDetails?.fileUrls &&
+                  negotiation?.tradeDetails?.fileUrls.length > 0));
 
-            return !noFiles;
+            return hasFiles;
           })
           .map((negotiation, idx) => {
             return (
@@ -149,6 +154,7 @@ export const TradeInTable = ({
                   setSelectedNegotiation={setSelectedNegotiation}
                   selectedTradeIn={selectedTradeIn}
                   publicMode={publicMode}
+                  setLoginModalOpen={setLoginModalOpen}
                 />
               </div>
             );
@@ -161,6 +167,31 @@ export const TradeInTable = ({
           refetch={refetch}
         />
       )}
+      {loginModalOpen && (
+        <TailwindPlusModal
+          close={() => setLoginModalOpen(false)}
+          className="border-4 border-blue-600 p-0 rounded-[10px] overflow-x-hidden"
+        >
+          <div className="bg-blue-600 text-xl text-white font-bold p-4">
+            Trade in bid
+          </div>
+          <div className={cn("p-4")}>You must be logged in to place a bid</div>
+          <Button
+            className="bg-blue-500 flex gap-5 hover:bg-blue-600 w-fit mx-auto mb-4"
+            onClick={() => {
+              router.push(
+                `/${
+                  typeof loginModalOpen === "string"
+                    ? `?tradeIn=${loginModalOpen}`
+                    : ""
+                }`
+              );
+            }}
+          >
+            Go to login
+          </Button>
+        </TailwindPlusModal>
+      )}
     </>
   );
 };
@@ -170,21 +201,35 @@ export const TradeInCard = ({
   setSelectedNegotiation,
   selectedTradeIn,
   publicMode,
+  setLoginModalOpen,
 }: {
   negotiation: NegotiationDataType;
   setSelectedNegotiation: (negotiation: NegotiationDataType) => void;
   selectedTradeIn: string | null;
   publicMode: boolean;
+  setLoginModalOpen: (open: boolean | string) => void;
 }) => {
+  const displayImages = useMemo(() => {
+    const images: string[] = [];
+    if (negotiation.tradeDetails?.coverPhoto) {
+      images.push(negotiation.tradeDetails.coverPhoto);
+    }
+    if (negotiation.tradeDetails?.fileUrls) {
+      negotiation.tradeDetails.fileUrls.forEach((url) => {
+        if (url !== negotiation.tradeDetails?.coverPhoto) {
+          images.push(url);
+        }
+      });
+    }
+    return images;
+  }, [negotiation]);
+
   const mainCard = (
     <div
       className={cn(`rounded-lg border border-gray-200 bg-white`)}
       id={negotiation.id}
     >
-      <ImageCarousel
-        images={negotiation.tradeDetails?.fileUrls || []}
-        className="rounded-t-lg"
-      />
+      <ImageCarousel images={displayImages} className="rounded-t-lg" />
       <div className="mt-4 p-4">
         <GridDisplay
           title={`${negotiation.tradeInInfo}`} //${negotiation.brand} ${negotiation.model}`}
@@ -233,7 +278,7 @@ export const TradeInCard = ({
               className="bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
               onClick={() => {
                 if (publicMode) {
-                  window.location.href = "/";
+                  setLoginModalOpen(negotiation.id);
                 } else {
                   setSelectedNegotiation(negotiation);
                 }

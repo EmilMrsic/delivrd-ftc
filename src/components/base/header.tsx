@@ -200,7 +200,11 @@ export const TeamHeader = ({
   );
 };
 
-export const PublicHeader = () => {
+export const PublicHeader = ({
+  userIsLoggedIn,
+}: {
+  userIsLoggedIn: boolean;
+}) => {
   const isMobile = useIsMobile();
   return (
     <div className="flex justify-between items-center bg-[#202125] p-6 rounded-lg shadow-lg">
@@ -212,17 +216,19 @@ export const PublicHeader = () => {
         />
         <p className="text-white text-sm">Putting Dreams In Driveways</p>
       </div>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className=" z-50 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-2"
-      >
-        <span className="text-xs font-medium text-center">
-          We're in Beta & looking for your feedback.<br></br> Bugs or ideas?
-          Text <Link href={"tel:9807587488"}>(980) 758-7488</Link>
-        </span>
-      </motion.div>
+      {userIsLoggedIn && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className=" z-50 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center space-x-2"
+        >
+          <span className="text-xs font-medium text-center">
+            We're in Beta & looking for your feedback.<br></br> Bugs or ideas?
+            Text <Link href={"tel:9807587488"}>(980) 758-7488</Link>
+          </span>
+        </motion.div>
+      )}
     </div>
   );
 };

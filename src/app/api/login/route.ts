@@ -24,8 +24,6 @@ export async function POST(req: Request) {
   const forwarded = req.headers.get("x-forwarded-for");
   const ip = forwarded?.split(",")[0] || "unknown";
 
-  console.log("got login id:", loginRowId);
-
   try {
     const actionCodeSettings = {
       url: `${baseUrl}/complete-signin?email=${to}&id=${loginRowId}`,

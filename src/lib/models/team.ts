@@ -36,6 +36,7 @@ export const NegotiationDataModel = z.object({
       comments: z.string().optional(),
       vin: z.string().optional(),
       year: z.string().optional(),
+      coverPhoto: z.string().optional(),
     })
     .optional(),
   userId: z.string(),

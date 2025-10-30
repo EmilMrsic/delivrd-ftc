@@ -48,8 +48,6 @@ export const logClientEvent = async <T = object>(
   const requestIP = await fetch("https://api.ipify.org?format=json");
   const ipData = await requestIP.json();
 
-  console.log("Client event logged", { type, data, userState });
-  console.log("userState:", userState);
   const eventObject: EventDataType<T> = {
     id: generateRandomId(),
     at: serverTimestamp(),

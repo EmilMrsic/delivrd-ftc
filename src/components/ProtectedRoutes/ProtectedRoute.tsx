@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const userData = localStorage.getItem("user");
     let parsed;
-    if (!userData && !path.includes("/dealer/trade")) {
+    if (!userData && !path.includes("/dealer/trade") && path !== "/") {
       router.push("/");
 
       try {

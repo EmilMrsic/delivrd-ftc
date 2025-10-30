@@ -16,7 +16,7 @@ import {
 import { db } from "@/firebase/config";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { generateRandomId } from "@/lib/utils";
 import { useLogin } from "@/hooks/use-login";
 

@@ -149,9 +149,7 @@ export const InputField = (props: {
 
     if (negotiationId && field) {
       if (evalFn) {
-        console.log("running evaluation", evalFn);
         const result = evalFn(value);
-        console.log("got eval result", result);
         if (!result.pass) {
           setError(result.message || "Invalid value");
           return;

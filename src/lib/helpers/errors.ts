@@ -35,7 +35,6 @@ export const sendErrorEmail = async (
   error: Error,
   user: null | any
 ) => {
-  console.log("request:", user);
   const userString = user
     ? `Name: ${user.name}, Email: ${user.email}, Privilege: ${user.privilege}`
     : "No user recognized";

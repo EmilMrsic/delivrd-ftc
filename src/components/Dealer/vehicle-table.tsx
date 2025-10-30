@@ -282,8 +282,6 @@ export const VehicleTable = ({
     return output;
   }, [filterVehicles, isMobile]);
 
-  console.log("in vehicle table:", vehicles);
-
   if (!filteredVehicles)
     return (
       <div>

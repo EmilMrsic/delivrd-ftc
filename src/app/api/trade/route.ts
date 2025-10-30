@@ -25,6 +25,8 @@ export const GET = async (req: NextRequest) => {
     }
   });
 
+  // console.log(tradeIns.filter((trade) => trade.id === "recH85js7w4MRVDru"));
+
   const promises: any[] = [
     fetchBulkQuery(
       "Clients",
@@ -59,6 +61,7 @@ export const GET = async (req: NextRequest) => {
   tradeIns.forEach((trade: NegotiationDataType) => {
     if (clientById[trade.id]) {
       if (
+        process.env.IGNORE_SUBMITTED_BIDS ||
         !submittedBidNegotiations ||
         !submittedBidNegotiations.has(trade.id)
       ) {
@@ -66,8 +69,6 @@ export const GET = async (req: NextRequest) => {
           ...trade,
           client: clientById[trade.id],
         };
-
-        // console.log("outputRow", outputRow.id, outputRow.tradeDetails.vin);
 
         clientToNegotiation.push(outputRow);
       }

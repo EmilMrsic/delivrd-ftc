@@ -28,7 +28,6 @@ export default function TradePage() {
       setSelectedTradeIn(window.location.hash);
       const el = document.querySelector(window.location.hash);
       if (el) el.scrollIntoView({ behavior: "smooth" });
-      console.log(el);
     }
   }, [tradeIns, isLoading]);
 

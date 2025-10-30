@@ -80,7 +80,6 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
   };
 
   const saveEdit = async (negotiationId: string | null, logId: string) => {
-    console.log("got here");
     try {
       // Step 1: Fetch the negotiation document from Firestore
       const negotiationRef = doc(
@@ -89,8 +88,6 @@ const WorkLogSection: React.FC<WorkLogSectionProps> = ({
         negotiationId ?? ""
       );
       const negotiationSnap = await getDoc(negotiationRef);
-
-      console.log("got here in work log");
 
       if (!negotiationSnap.exists()) {
         console.error("No negotiation found with ID:", negotiationId);
