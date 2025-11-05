@@ -441,8 +441,6 @@ export const SupportAgents = ({
     <>
       <div className="flex justify-between space-x-4 mt-4 justify-content-evenly p-6">
         {supportTeam.map((member, index) => {
-          console.log("member", member);
-
           return (
             <>
               <div

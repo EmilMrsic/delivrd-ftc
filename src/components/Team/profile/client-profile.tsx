@@ -518,7 +518,7 @@ export const ClientProfile = ({
     });
   }, [negotiationId]);
 
-  if (isLoading && !negotiation) {
+  if (isLoading || !negotiation) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader className="w-10 h-10 animate-spin" />
