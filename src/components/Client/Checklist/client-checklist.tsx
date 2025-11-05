@@ -172,6 +172,153 @@ const Steps: Record<
   ],
 };
 
+// export const ClientChecklist = ({
+//   negotiation,
+//   clientMode,
+//   handleChange,
+// }: {
+//   negotiation: NegotiationDataType;
+//   clientMode?: boolean;
+//   handleChange: (updateObject: {
+//     key: string;
+//     newValue: string;
+//     parentKey?: string;
+//   }) => void;
+// }) => {
+//   const [pendingCount, setPendingCount] = useState(0);
+//   const [checkedItems, setCheckedItems] = useState<
+//     Record<string, Record<number, boolean>>
+//   >(negotiation.checklist || {});
+
+//   const updateCheckedItemInState = (
+//     stepName: string,
+//     step: number,
+//     checked: boolean
+//   ) => {
+//     setCheckedItems((prev) => {
+//       const updated = { ...prev };
+//       if (!updated[stepName]) {
+//         updated[stepName] = {};
+//       }
+//       updated[stepName][step] = checked;
+//       return updated;
+//     });
+//   };
+
+//   const setItemChecked = async (
+//     stepName: string,
+//     step: number,
+//     checked: boolean
+//   ) => {
+//     setPendingCount((n) => n + 1);
+//     try {
+//       const currentChecklist = negotiation.checklist || {};
+//       const stepItems = currentChecklist[stepName] || {};
+//       stepItems[step] = checked;
+//       currentChecklist[stepName] = stepItems;
+
+//       const negotiationRef = doc(db, "delivrd_negotiations", negotiation.id);
+//       await updateDoc(negotiationRef, {
+//         checklist: currentChecklist,
+//       });
+
+//       toast({
+//         title: "Checklist item updated",
+//       });
+//     } finally {
+//       setPendingCount((n) => n - 1);
+//     }
+//   };
+
+//   const resetItems = async () => {
+//     // reset all checked items after step 2
+//     setPendingCount((n) => n + 1);
+//     try {
+//       const resetChecklist: Record<string, Record<number, boolean>> = {};
+//       const stepNames = Object.keys(Steps);
+//       for (let i = 0; i < stepNames.length; i++) {
+//         const stepName = stepNames[i];
+//         if (i <= 1) {
+//           // keep steps 0 and 1
+//           resetChecklist[stepName] = checkedItems[stepName] || {};
+//         } else {
+//           resetChecklist[stepName] = {};
+//         }
+//       }
+
+//       const negotiationRef = doc(db, "delivrd_negotiations", negotiation.id);
+//       await updateDoc(negotiationRef, {
+//         checklist: resetChecklist,
+//       });
+//       setCheckedItems(resetChecklist);
+
+//       toast({
+//         title: "Checklist reset",
+//       });
+//     } finally {
+//       setPendingCount((n) => n - 1);
+//     }
+//   };
+
+//   return (
+//     <TailwindPlusCard
+//       title="Client Checklist"
+//       actions={() => (
+//         <>
+//           <Button variant="outline" onClick={() => resetItems()}>
+//             Reset
+//           </Button>
+//         </>
+//       )}
+//     >
+//       {Object.keys(Steps).map((stepName, idx) => (
+//         <div className="mt-4">
+//           <div className="text-lg mb-2">
+//             {idx + 1}. {stepName}
+//           </div>
+//           {Steps[stepName].map((step, stepIdx) => {
+//             const stepText = typeof step === "string" ? step : step.text;
+//             const stepAction = typeof step === "string" ? null : step.action;
+//             const Component = typeof step !== "string" && step.Component;
+//             return (
+//               <>
+//                 <div key={stepIdx} className="text-sm">
+//                   <div className="ml-4">
+//                     <Checkbox
+//                       checked={checkedItems[stepName]?.[stepIdx] || false}
+//                       onCheckedChange={async (e) => {
+//                         updateCheckedItemInState(stepName, stepIdx, e === true);
+//                         await setItemChecked(stepName, stepIdx, e === true);
+
+//                         if (stepAction) {
+//                           if (e) {
+//                             // only peform action when checking the box
+//                             await stepAction(negotiation);
+//                           }
+//                         }
+//                       }}
+//                     />{" "}
+//                     <span dangerouslySetInnerHTML={{ __html: stepText }}></span>
+//                   </div>
+//                 </div>
+//                 <div className="ml-8 mb-2 w-[60%]">
+//                   {Component && (
+//                     <Component
+//                       negotiation={negotiation}
+//                       clientMode={clientMode}
+//                       handleChange={handleChange}
+//                     />
+//                   )}
+//                 </div>
+//               </>
+//             );
+//           })}
+//         </div>
+//       ))}
+//     </TailwindPlusCard>
+//   );
+// };
+
 export const ClientChecklist = ({
   negotiation,
   clientMode,
@@ -188,7 +335,19 @@ export const ClientChecklist = ({
   const [pendingCount, setPendingCount] = useState(0);
   const [checkedItems, setCheckedItems] = useState<
     Record<string, Record<number, boolean>>
-  >(negotiation.checklist || {});
+  >(negotiation?.checklist || {});
+
+  // keep in sync with any changes in negotiation prop (e.g. refresh)
+  useEffect(() => {
+    setCheckedItems(negotiation?.checklist || {});
+  }, [negotiation?.checklist]);
+
+  const updateFirestoreChecklist = async (
+    newChecklist: Record<string, Record<number, boolean>>
+  ) => {
+    const negotiationRef = doc(db, "delivrd_negotiations", negotiation.id);
+    await updateDoc(negotiationRef, { checklist: newChecklist });
+  };
 
   const updateCheckedItemInState = (
     stepName: string,
@@ -196,10 +355,8 @@ export const ClientChecklist = ({
     checked: boolean
   ) => {
     setCheckedItems((prev) => {
-      const updated = { ...prev };
-      if (!updated[stepName]) {
-        updated[stepName] = {};
-      }
+      const updated = structuredClone(prev);
+      if (!updated[stepName]) updated[stepName] = {};
       updated[stepName][step] = checked;
       return updated;
     });
@@ -212,49 +369,29 @@ export const ClientChecklist = ({
   ) => {
     setPendingCount((n) => n + 1);
     try {
-      const currentChecklist = negotiation.checklist || {};
-      const stepItems = currentChecklist[stepName] || {};
-      stepItems[step] = checked;
-      currentChecklist[stepName] = stepItems;
-
-      const negotiationRef = doc(db, "delivrd_negotiations", negotiation.id);
-      await updateDoc(negotiationRef, {
-        checklist: currentChecklist,
-      });
-
-      toast({
-        title: "Checklist item updated",
-      });
+      const newChecklist = structuredClone(checkedItems);
+      if (!newChecklist[stepName]) newChecklist[stepName] = {};
+      newChecklist[stepName][step] = checked;
+      setCheckedItems(newChecklist);
+      await updateFirestoreChecklist(newChecklist);
+      toast({ title: "Checklist item updated" });
     } finally {
       setPendingCount((n) => n - 1);
     }
   };
 
   const resetItems = async () => {
-    // reset all checked items after step 2
     setPendingCount((n) => n + 1);
     try {
-      const resetChecklist: Record<string, Record<number, boolean>> = {};
       const stepNames = Object.keys(Steps);
+      const resetChecklist: Record<string, Record<number, boolean>> = {};
       for (let i = 0; i < stepNames.length; i++) {
         const stepName = stepNames[i];
-        if (i <= 1) {
-          // keep steps 0 and 1
-          resetChecklist[stepName] = checkedItems[stepName] || {};
-        } else {
-          resetChecklist[stepName] = {};
-        }
+        resetChecklist[stepName] = i <= 1 ? checkedItems[stepName] || {} : {};
       }
-
-      const negotiationRef = doc(db, "delivrd_negotiations", negotiation.id);
-      await updateDoc(negotiationRef, {
-        checklist: resetChecklist,
-      });
       setCheckedItems(resetChecklist);
-
-      toast({
-        title: "Checklist reset",
-      });
+      await updateFirestoreChecklist(resetChecklist);
+      toast({ title: "Checklist reset" });
     } finally {
       setPendingCount((n) => n - 1);
     }
@@ -264,15 +401,13 @@ export const ClientChecklist = ({
     <TailwindPlusCard
       title="Client Checklist"
       actions={() => (
-        <>
-          <Button variant="outline" onClick={() => resetItems()}>
-            Reset
-          </Button>
-        </>
+        <Button variant="outline" onClick={resetItems}>
+          Reset
+        </Button>
       )}
     >
       {Object.keys(Steps).map((stepName, idx) => (
-        <div className="mt-4">
+        <div key={stepName} className="mt-4">
           <div className="text-lg mb-2">
             {idx + 1}. {stepName}
           </div>
@@ -280,37 +415,33 @@ export const ClientChecklist = ({
             const stepText = typeof step === "string" ? step : step.text;
             const stepAction = typeof step === "string" ? null : step.action;
             const Component = typeof step !== "string" && step.Component;
+            const checked = checkedItems[stepName]?.[stepIdx] || false;
             return (
-              <>
-                <div key={stepIdx} className="text-sm">
+              <React.Fragment key={stepIdx}>
+                <div className="text-sm">
                   <div className="ml-4">
                     <Checkbox
-                      checked={checkedItems[stepName]?.[stepIdx] || false}
+                      checked={checked}
                       onCheckedChange={async (e) => {
-                        updateCheckedItemInState(stepName, stepIdx, e === true);
-                        await setItemChecked(stepName, stepIdx, e === true);
-
-                        if (stepAction) {
-                          if (e) {
-                            // only peform action when checking the box
-                            await stepAction(negotiation);
-                          }
-                        }
+                        const newChecked = e === true;
+                        await setItemChecked(stepName, stepIdx, newChecked);
+                        if (stepAction && newChecked)
+                          await stepAction(negotiation);
                       }}
                     />{" "}
-                    <span dangerouslySetInnerHTML={{ __html: stepText }}></span>
+                    <span dangerouslySetInnerHTML={{ __html: stepText }} />
                   </div>
                 </div>
-                <div className="ml-8 mb-2 w-[60%]">
-                  {Component && (
+                {Component && (
+                  <div className="ml-8 mb-2 w-[60%]">
                     <Component
                       negotiation={negotiation}
                       clientMode={clientMode}
                       handleChange={handleChange}
                     />
-                  )}
-                </div>
-              </>
+                  </div>
+                )}
+              </React.Fragment>
             );
           })}
         </div>
