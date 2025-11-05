@@ -221,7 +221,7 @@ const FeatureDetails = ({
             "All-wheel drive",
           ]}
           label="Drivetrain"
-          value={negotiation?.drivetrain ?? ""}
+          value={negotiation?.drivetrain ?? "test"}
           negotiationId={negotiationId ?? ""}
           field="drivetrain"
           onChange={(newValue) =>
