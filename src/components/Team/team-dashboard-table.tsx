@@ -557,6 +557,7 @@ export const DashboardTable = ({
                       <ClientProfile
                         negotiationId={deal.id}
                         allowClientModeToggle={true}
+                        popupMode={true}
                       />
                     ),
                     onExpandedClose: () => {

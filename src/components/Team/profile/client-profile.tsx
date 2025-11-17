@@ -62,10 +62,12 @@ export const ClientProfile = ({
   negotiationId,
   clientMode: clientModeProp,
   allowClientModeToggle,
+  popupMode,
 }: {
   negotiationId: string;
   clientMode?: boolean;
   allowClientModeToggle?: boolean;
+  popupMode?: boolean;
 }) => {
   const setNegotiationInStore = useNegotiationStore(
     (state) => state.setNegotiation
@@ -548,6 +550,7 @@ export const ClientProfile = ({
             setClientMode={setClientMode}
             allowClientModeToggle={allowClientModeToggle}
             allDealNegotiator={allDealNegotiator}
+            popupMode={popupMode}
           />
 
           {!clientMode && (

@@ -42,6 +42,7 @@ type ClientDetailsProps = {
   setClientMode: (clientMode: boolean) => void;
   allowClientModeToggle?: boolean;
   allDealNegotiator: DealNegotiatorType[];
+  popupMode?: boolean;
 };
 
 const isVimeoLink = (url: string): boolean => {
@@ -61,6 +62,7 @@ const ClientDetails = ({
   setClientMode,
   allowClientModeToggle,
   allDealNegotiator,
+  popupMode,
 }: ClientDetailsProps) => {
   const [expandedAddress, setExpandedAddress] = useState(false);
   const [isBlur, setIsBlur] = useState(
@@ -390,7 +392,7 @@ const ClientDetails = ({
           )} */}
         </div>
       </div>
-      {negotiation && (
+      {!popupMode && negotiation && (
         <SupportAgents
           negotiation={negotiation}
           supportAgent={supportAgent}
@@ -419,13 +421,16 @@ export const SupportAgents = ({
   const supportTeam = useMemo(() => {
     const team: DealNegotiatorType[] = [dealNegotiator as DealNegotiatorType];
     if (supportAgent) {
-      team.push(supportAgent);
+      team.push({
+        ...supportAgent,
+        role: "Support",
+      });
     }
 
     if (negotiation?.dealCoordinatorId !== "recos5ry1A7L7rFo7") {
       team.push({
         name: "Tomislav Mikula",
-        role: "Founder",
+        role: "Deal Lead",
         profile_pic:
           "https://firebasestorage.googleapis.com/v0/b/delivrd-first-to-call-bids.appspot.com/o/profile_pic%2FTomi%20Icon%20Image%20(2).png?alt=media&token=99586261-fd6e-4b5b-83c1-65ae79f6db23",
         video_link: "https://vimeo.com/937785873/5766f39363?share=copy",
