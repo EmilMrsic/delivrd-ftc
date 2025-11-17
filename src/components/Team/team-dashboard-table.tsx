@@ -314,6 +314,7 @@ const TeamDashboardTable = ({
   if (displayAllPaid && paidNegotiations.length > 0) {
     defaultOpenRow += 1;
   }
+  console.log("got here:", updateDealSupportAgent);
 
   const scopedRows: any[] = [];
   for (const statusIdx in negotiationsByColumn) {
@@ -737,6 +738,7 @@ export const dashboardTableRowParser = ({
         handleStageChange,
         allDealNegotiator,
         updateDealNegotiator,
+        updateDealSupportAgent,
         handleDateChange,
         handleAskForReview,
         setStopPropagation,
@@ -860,6 +862,7 @@ export const dashbaordTableRowUngrouped = ({
   handleStageChange,
   allDealNegotiator,
   updateDealNegotiator,
+  updateDealSupportAgent,
   handleDateChange,
   handleAskForReview,
   setStopPropagation,
@@ -887,6 +890,7 @@ export const dashbaordTableRowUngrouped = ({
   sortData: (key: string, direction: string) => void;
   refetch: (id?: string, filters?: any, reset?: boolean) => void;
   refetchAll: (id?: string, filters?: any, reset?: boolean) => void;
+  updateDealSupportAgent: (id: string, newSupportId: string) => void;
 }) => {
   const { stage, deals } = row;
   const total = deals.length;
@@ -906,6 +910,7 @@ export const dashbaordTableRowUngrouped = ({
       handleStageChange: handleStageChange,
       allDealNegotiator: allDealNegotiator,
       updateDealNegotiator: updateDealNegotiator,
+      updateDealSupportAgent: updateDealSupportAgent,
       handleDateChange: handleDateChange,
       handleAskForReview: handleAskForReview,
       setStopPropagation: setStopPropagation,

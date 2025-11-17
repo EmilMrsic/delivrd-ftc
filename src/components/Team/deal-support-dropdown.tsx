@@ -21,6 +21,7 @@ export const DealSupportDropdown = ({
   onRemoveAgent: (id: string) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   return (
     <>
       {onRemoveAgent && (

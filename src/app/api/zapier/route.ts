@@ -17,6 +17,5 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
   });
-  console.log("got path:", response);
   return NextResponse.json({ success: true });
 }
