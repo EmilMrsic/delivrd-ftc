@@ -69,12 +69,12 @@ const FeatureDetails = ({
       const docRef = doc(db, "delivrd_negotiations", id ?? "");
 
       await updateDoc(docRef, {
-        [fieldPath]: formatDateToLocal(date),
+        [fieldPath]: !date ? "" : formatDateToLocal(date),
       });
 
       toast({ title: "Date update successfully" });
     } catch (error) {
-      console.error(`Error updating ${fieldPath}:`, error);
+      console.error(`Error updating here ${fieldPath}:`, error);
     }
   };
 
@@ -354,6 +354,7 @@ const FeatureDetails = ({
           label="Arrival To Client"
           selected={arrivalToClient}
           onDateChange={(date) => {
+            console.log("got date change:");
             setArrivalToClient(date);
             handleDateChange(date, "arrivalToClient");
           }}
