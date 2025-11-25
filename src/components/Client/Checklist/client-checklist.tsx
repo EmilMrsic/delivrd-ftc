@@ -45,46 +45,61 @@ const Steps: Record<
         //     "Content-Type": "application/json",
         //   },
         // });
-
-        const result = await callZapier(
-          process.env.NEXT_PUBLIC_LOOM_LINK_ADDED_URL!,
-          {
-            negotiationId: negotiation.id,
-          }
-        );
+        // const result = await callZapier(
+        //   process.env.NEXT_PUBLIC_LOOM_LINK_ADDED_URL!,
+        //   {
+        //     negotiationId: negotiation.id,
+        //   }
+        // );
       },
       Component: ({ negotiation, clientMode, handleChange }) => (
-        <InputField
-          label="Loom Link"
-          value={negotiation?.initialLoomLink ?? ""}
-          negotiationId={negotiation.id ?? ""}
-          field="initialLoomLink"
-          onChange={(newValue) =>
-            handleChange({
-              key: "initialLoomLink",
-              newValue: newValue,
-            })
-          }
-          icon={Car}
-          readOnly={clientMode}
-          evalFn={(testUrl: string) => {
-            const urlPattern = new RegExp(
-              "^(https?:\\/\\/)?" + // protocol
-                "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-                "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-                "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-                "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-                "(\\#[-a-z\\d_]*)?$",
-              "i"
-            ); // fragment locator
-            const pass = !!urlPattern.test(testUrl);
+        <>
+          <InputField
+            label="Loom Link"
+            value={negotiation?.initialLoomLink ?? ""}
+            negotiationId={negotiation.id ?? ""}
+            field="initialLoomLink"
+            onChange={(newValue) =>
+              handleChange({
+                key: "initialLoomLink",
+                newValue: newValue,
+              })
+            }
+            icon={Car}
+            readOnly={clientMode}
+            evalFn={(testUrl: string) => {
+              const urlPattern = new RegExp(
+                "^(https?:\\/\\/)?" + // protocol
+                  "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+                  "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+                  "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+                  "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+                  "(\\#[-a-z\\d_]*)?$",
+                "i"
+              ); // fragment locator
+              const pass = !!urlPattern.test(testUrl);
 
-            return {
-              pass,
-              message: pass ? undefined : "Please enter a valid URL",
-            };
-          }}
-        />
+              return {
+                pass,
+                message: pass ? undefined : "Please enter a valid URL",
+              };
+            }}
+          />
+          <div className="w-fit mr-0 ml-auto mt-2">
+            <Button
+              onClick={async () => {
+                const result = await callZapier(
+                  process.env.NEXT_PUBLIC_LOOM_LINK_ADDED_URL!,
+                  {
+                    negotiationId: negotiation.id,
+                  }
+                );
+              }}
+            >
+              Send to Client
+            </Button>
+          </div>
+        </>
       ),
     },
   ],
