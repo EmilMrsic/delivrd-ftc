@@ -22,6 +22,7 @@ import {
 import { db } from "@/firebase/config";
 import { chunk } from "lodash";
 import { Dispatch, SetStateAction } from "react";
+import { useNegotiationStore } from "../state/negotiation";
 
 export const sortNegotiationsByStatus = (
   negotiations: NegotiationDataType[],
@@ -211,7 +212,11 @@ export const getActiveDealDocuments = async (dealQuery: {
 
   const negotiations = negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();
-    return data as NegotiationDataType;
+    const negotiation = data as NegotiationDataType;
+    if (dealQuery.archive) {
+      negotiation.fromArchive = true;
+    }
+    return negotiation;
     // try {
     //   const parsed = NegotiationDataModel.parse(data);
     //   return parsed;
@@ -363,6 +368,8 @@ export const removeDealSupportAgentFromNegotiation = async (
       supportAgentId: "",
     });
 
+    updateNegotiationInStore(negotiationId, { supportAgentId: "" });
+
     if (refetch) {
       refetch();
     }
@@ -372,4 +379,16 @@ export const removeDealSupportAgentFromNegotiation = async (
     console.error("Error removing negotiator:", error);
     return false;
   }
+};
+
+export const updateNegotiationInStore = (
+  negotiationId: string,
+  negotiation: Partial<NegotiationDataType>
+) => {
+  const existingNegotiation =
+    useNegotiationStore.getState().negotiations[negotiationId];
+  useNegotiationStore.getState().setNegotiation(negotiationId, {
+    ...existingNegotiation,
+    ...negotiation,
+  });
 };

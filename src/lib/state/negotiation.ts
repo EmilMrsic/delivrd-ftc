@@ -1,3 +1,4 @@
+"use client";
 import { NegotiationState } from "@/types/state";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -8,6 +9,8 @@ import { idbStorage } from "../helpers/state";
 export const useNegotiationStore = create<NegotiationState>()(
   persist(
     (set, get) => ({
+      refreshedAt: null,
+      setRefreshedAt: (time: number) => set({ refreshedAt: time }),
       negotiations: {},
       setNegotiation: (id, data) =>
         set((state) => ({
@@ -28,18 +31,22 @@ export const useNegotiationStore = create<NegotiationState>()(
             }
           });
 
+          const incomingIds = new Set(Object.keys(byId));
+          let foundOld = 0;
+          for (const id of Object.keys(updatedNegotiations)) {
+            if (!incomingIds.has(id)) {
+              delete updatedNegotiations[id];
+              changed = true;
+              foundOld++;
+            }
+          }
+
           if (changed) {
             return { negotiations: updatedNegotiations };
           }
 
           return {};
         });
-        // set((state) => ({
-        //   negotiations: {
-        //     ...state.negotiations,
-        //     ...byId,
-        //   },
-        // }));
       },
       getNegotiation: (id) => get().negotiations[id],
       hasNegotiation: (id) =>
@@ -50,10 +57,18 @@ export const useNegotiationStore = create<NegotiationState>()(
           return { negotiations: rest };
         }),
       clearNegotiations: () => set({ negotiations: {} }),
+      pruneNegotiations: () => {
+        // console.log("pruning negotiations", );
+
+        const newNegotiations = {};
+        for (const negotiation of Object.values(get().negotiations)) {
+          console.log(negotiation);
+        }
+      },
     }),
     {
       name: "negotiation-storage",
-      storage: createJSONStorage(() => idbStorage),
+      storage: createJSONStorage(() => ({ ...idbStorage })),
     }
   )
 );

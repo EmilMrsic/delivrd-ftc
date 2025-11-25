@@ -1,9 +1,17 @@
+"use client";
 import { backendRequest } from "@/lib/request";
 import { useNegotiationStore } from "@/lib/state/negotiation";
 import { getUserData } from "@/lib/user";
 import { useQuery } from "@tanstack/react-query";
 import { isEqual } from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import crypto from "crypto";
+
+export const hashJson = (obj: unknown) => {
+  const json = JSON.stringify(obj);
+  return crypto.createHash("sha256").update(json).digest("hex");
+};
 
 export const useNegotiations = (
   config: {
@@ -15,8 +23,15 @@ export const useNegotiations = (
     archive?: boolean;
   } = {}
 ) => {
+  const hashRef = useRef<string | null>(null);
+  const cachedNegotiations = useNegotiationStore((state) => state.negotiations);
+  const refreshedAt = useNegotiationStore((state) => state.refreshedAt);
+  const setRefreshedAt = useNegotiationStore((state) => state.setRefreshedAt);
   const mergeInNegotiations = useNegotiationStore(
     (state) => state.mergeInNegotiations
+  );
+  const pruneNegotiations = useNegotiationStore(
+    (state) => state.pruneNegotiations
   );
   const loggedInUserId = getUserData()?.deal_coordinator_id;
   const [id, setId] = useState<string>(config.id || loggedInUserId);
@@ -34,6 +49,8 @@ export const useNegotiations = (
         ? `negotiation`
         : `negotiation/${id || loggedInUserId}`;
 
+      console.log("calling backend...");
+
       const request = await backendRequest(path, "POST", {
         archive: config.archive,
         filter: filters,
@@ -43,12 +60,23 @@ export const useNegotiations = (
 
       return request;
     },
+    enabled: false, //refreshedAt === null,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
   });
+
+  // useEffect(() => {
+  //   negotiationsQuery.refetch();
+  //   setRefreshedAt(Date.now());
+  // }, []);
 
   useEffect(() => {
     if (negotiationsQuery.data?.negotiations) {
       const byId: Record<string, any> = {};
       negotiationsQuery.data?.negotiations.forEach((negotiation: any) => {
+        negotiation.cachedAt = new Date().toISOString();
         byId[negotiation.id] = negotiation;
       });
 
@@ -80,7 +108,14 @@ export const useNegotiations = (
   };
 
   useEffect(() => {
-    negotiationsQuery.refetch();
+    const potentialNewHash = hashJson([id, config.filter ?? {}]);
+    // console.log("comparing", "new", potentialNewHash, "old", hashRef.current);
+    if (potentialNewHash !== hashRef.current) {
+      hashRef.current = potentialNewHash;
+      negotiationsQuery.refetch();
+    }
+    // console.log("running the effect", id, filters, config.archive);
+    // negotiationsQuery.refetch();
   }, [id, filters, config.archive]);
 
   useEffect(() => {

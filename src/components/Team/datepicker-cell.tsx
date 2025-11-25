@@ -6,6 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { X } from "lucide-react";
 
 interface DatePickerCellProps {
   initialDate: string; // Expected format: "yyyy-MM-dd"
@@ -29,10 +30,10 @@ const DatePickerCell = ({ initialDate, onDateChange }: DatePickerCellProps) => {
   };
 
   const handleDateChange = (date: Date | null) => {
-    if (date) {
-      setSelectedDate(date);
-      onDateChange(formatDateToLocal(date)); // Format as "yyyy-MM-dd"
-    }
+    //if (date) {
+    setSelectedDate(date);
+    onDateChange(formatDateToLocal(date)); // Format as "yyyy-MM-dd"
+    //}
     setIsEditing(false);
   };
 
@@ -42,6 +43,10 @@ const DatePickerCell = ({ initialDate, onDateChange }: DatePickerCellProps) => {
 
   return (
     <div className="relative">
+      <X
+        className="cursor-pointer w-fit mr-0 ml-auto"
+        onClick={() => handleDateChange(null)}
+      />
       <DropdownMenu open={isEditing} onOpenChange={setIsEditing}>
         <DropdownMenuTrigger asChild>
           <button

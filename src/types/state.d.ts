@@ -3,13 +3,16 @@ import { NotificationDataType } from "@/lib/models/notification";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 
 export interface NegotiationState {
+  refreshedAt: number | null;
   negotiations: Record<string, NegotiationDataType>;
+  setRefreshedAt: (time: number) => void;
   setNegotiation: (id: string, data: NegotiationDataType) => void;
   getNegotiation: (id: string) => NegotiationDataType | undefined;
   mergeInNegotiations: (byId: Record<string, NegotiationDataType>) => void;
   hasNegotiation: (id: string) => boolean;
   removeNegotiation: (id: string) => void;
   clearNegotiations: () => void;
+  pruneNegotiations: () => void;
 }
 
 /**
@@ -78,4 +81,9 @@ export interface UserState {
   setUserId: (id: string) => void;
   name: string;
   setName: (name: string) => void;
+}
+
+export interface FiltersState {
+  supportAgent: string | null;
+  setSupportAgent: (agent: string | null) => void;
 }

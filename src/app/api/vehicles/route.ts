@@ -53,12 +53,13 @@ export const GET = withErrorLogging(async (request) => {
       }
     }
 
-    if (!dealerHasBid)
+    if (negotiation && !dealerHasBid) {
       finalClients.push({
         ...client,
         trade: negotiation?.trade,
         bidNum: negotiation?.incomingBids?.length,
       });
+    }
   }
 
   return NextResponse.json({ clients: finalClients });

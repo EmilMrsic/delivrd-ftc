@@ -10,6 +10,7 @@ import {
 import { dealStageOptions, vehicleOfInterest } from "@/lib/utils";
 import Link from "next/link";
 import { DealNegotiatorType } from "@/lib/models/team";
+import { useFiltersStore } from "@/lib/state/filters";
 
 type FilterPopupProps = {
   filters: any;
@@ -41,6 +42,10 @@ const FilterPopup = ({
   const searchStageInputRef = useRef<HTMLInputElement>(null);
   const searchCoordinatorInputRef = useRef<HTMLInputElement>(null);
   const searchMakeInputRef = useRef<HTMLInputElement>(null);
+  const supportAgent = useFiltersStore((state) => state.supportAgent);
+  const setSupportAgent = useFiltersStore((state) => state.setSupportAgent);
+
+  console.log("got filters:", filters);
 
   return (
     <div className="flex flex-wrap gap-4 items-start w-full">
@@ -74,6 +79,53 @@ const FilterPopup = ({
                     onCheckedChange={() =>
                       handleFilterChange("dealCoordinators", coordinator.id)
                     }
+                  >
+                    {coordinator.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="space-y-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              Select Support Agent
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-auto">
+            {/* <input
+              ref={searchCoordinatorInputRef}
+              autoFocus
+              type="text"
+              placeholder="Search coordinators..."
+              className="w-full px-2 py-1 border border-gray-300 rounded-md mb-2"
+              onChange={
+                (e) => setSearchCoordinators(e.target.value.toLowerCase()) // Update search state
+              }
+            /> */}
+            <div className="max-h-56 overflow-scroll">
+              {dealCoordinators
+                .filter((coordinator) => coordinator.visible)
+                .map((coordinator, index) => (
+                  <DropdownMenuCheckboxItem
+                    key={index}
+                    onFocus={() => searchCoordinatorInputRef.current?.focus()}
+                    checked={filters.supportAgent.includes(coordinator.id)}
+                    onCheckedChange={() => {
+                      if (filters.supportAgent.includes(coordinator.id)) {
+                        handleFilterChange(
+                          // @ts-ignore
+                          "supportAgent",
+                          ""
+                        );
+                      } else {
+                        // @ts-ignore
+                        handleFilterChange("supportAgent", coordinator.id);
+                      }
+                    }}
                   >
                     {coordinator.name}
                   </DropdownMenuCheckboxItem>

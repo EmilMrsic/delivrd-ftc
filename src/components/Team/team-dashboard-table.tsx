@@ -22,6 +22,7 @@ import {
   removeNegotiatorFromNegotiations,
   sortDataHelper,
   sortMappedDataHelper,
+  updateNegotiationInStore,
 } from "@/lib/helpers/negotiation";
 import { StageButton } from "./stage-button";
 import { MakeButton } from "./make-button";
@@ -140,6 +141,7 @@ const TeamDashboardTable = ({
       await updateDoc(negotiationRef, {
         [dateType]: date,
       });
+      updateNegotiationInStore(id, { [dateType]: date });
       refetch();
       refetchAll();
     }
@@ -314,7 +316,6 @@ const TeamDashboardTable = ({
   if (displayAllPaid && paidNegotiations.length > 0) {
     defaultOpenRow += 1;
   }
-  console.log("got here:", updateDealSupportAgent);
 
   const scopedRows: any[] = [];
   for (const statusIdx in negotiationsByColumn) {

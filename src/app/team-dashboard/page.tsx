@@ -19,6 +19,7 @@ import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import {
   mapNegotiationsByColumn,
   sortMappedDataHelper,
+  updateNegotiationInStore,
 } from "@/lib/helpers/negotiation";
 import { useRouter } from "next/navigation";
 import {
@@ -42,6 +43,7 @@ const DEFAULT_FILTERS = {
   makes: [] as string[],
   models: [] as string[],
   dealCoordinators: "" as string,
+  supportAgent: "" as string,
   onboarding: [] as string[],
 };
 
@@ -51,6 +53,10 @@ const formatFiltersForNegotiationsEndpoint = (
   const refetchFilterObject: { [key: string]: string | string[] } = {};
   if (filters.dealCoordinators) {
     refetchFilterObject.dealCoordinatorId = filters.dealCoordinators;
+  }
+
+  if (filters.supportAgent) {
+    refetchFilterObject.supportAgentId = filters.supportAgent;
   }
 
   if (filters?.makes?.length) {
@@ -167,6 +173,11 @@ export default function DealList() {
         if (updatedFilters.dealCoordinators !== value) {
           updatedFilters.dealCoordinators = value;
         }
+      } else if (filterType === "supportAgent") {
+        //updatedFilters.stages = "";
+        if (updatedFilters.supportAgent !== value) {
+          updatedFilters.supportAgent = value;
+        }
       } else if (filterType === "stages") {
         if (updatedFilters.stages === value) {
           updatedFilters.stages = "";
@@ -281,6 +292,8 @@ export default function DealList() {
       await updateDoc(dealRef, {
         supportAgentId: agentId ?? "",
       });
+
+      updateNegotiationInStore(id, { supportAgentId: agentId ?? "" });
 
       refetch(
         formattedCachedFilters?.dealCoordinatorId as string,

@@ -103,14 +103,14 @@ const useTeamDashboard = (
   const allNegotiations = useMemo(() => {
     return storedAllNegotiationIds
       .map((id) => allStoredNegotiations[id])
-      .filter((n) => n)
-  }, [storedAllNegotiationIds, allStoredNegotiations])
+      .filter((n) => n);
+  }, [storedAllNegotiationIds, allStoredNegotiations]);
 
   const negotiations = useMemo(() => {
     return storedNegotiationIds
       .map((id) => allStoredNegotiations[id])
-      .filter((n) => n)
-  }, [storedNegotiationIds, allStoredNegotiations])
+      .filter((n) => n);
+  }, [storedNegotiationIds, allStoredNegotiations]);
 
   return {
     allNegotiations: allNegotiations,
@@ -121,7 +121,7 @@ const useTeamDashboard = (
     // @ts-ignore
     negotiatorData: negotiatorData,
     setNegotiatorData,
-    loading: isLoading,
+    loading: !negotiations && isLoading,
     loadingAll: isLoadingAll,
     refetch: refetch,
     searchAll,
