@@ -43,7 +43,7 @@ const DEFAULT_FILTERS = {
   stages: "" as string,
   makes: [] as string[],
   models: [] as string[],
-  dealCoordinators: getUserData()?.deal_coordinator_id || "",
+  dealCoordinators: "",
   supportAgent: "" as string,
   onboarding: [] as string[],
 };

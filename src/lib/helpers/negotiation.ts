@@ -161,7 +161,6 @@ export const getActiveDealDocuments = async (dealQuery: {
     activityLog?: boolean;
   };
 }): Promise<NegotiationDataType[]> => {
-  console.log("in active deal documents: 1");
   const negotiationsCollectionRef = collection(
     db,
     dealQuery.archive ? "delivrd_archive" : "delivrd_negotiations"
@@ -191,7 +190,6 @@ export const getActiveDealDocuments = async (dealQuery: {
           if (Array.isArray(dealQuery.filter[key])) {
             queryConditions.push(where(key, "in", dealQuery.filter[key]));
           } else {
-            console.log("here");
             queryConditions.push(where(key, "==", dealQuery.filter[key]));
           }
         }
@@ -199,23 +197,17 @@ export const getActiveDealDocuments = async (dealQuery: {
     });
   }
 
-  console.log(queryConditions);
-
   const negotiationsQuery = query(
     negotiationsCollectionRef,
     ...queryConditions
   );
 
-  console.log("in active deal documents: 2 before query");
   let negotiationsSnapshot = await getDocs(negotiationsQuery);
-  console.log("in active deal documents: 3 after query");
-  console.log("in active deal documents: 4 before query 2");
   if (dealQuery.profile && !negotiationsSnapshot.docs.length) {
     negotiationsSnapshot = await getDocs(
       query(collection(db, "delivrd_archive"), ...queryConditions)
     );
   }
-  console.log("in active deal documents: 4 after query 2");
 
   const negotiations = negotiationsSnapshot.docs.map((doc) => {
     const data = doc.data();

@@ -65,7 +65,6 @@ export const POST = async (
   const archivedDealsQuery = getDocs(query(archivedTable));
   const metricsQuery = getDocs(query(metricsTable));
   const teamDelivrdQuery = getDocs(query(teamDelivrdTable));
-
   const [
     dealsSnapshot,
     archivedDealsSnapshot,
@@ -100,6 +99,7 @@ export const POST = async (
   let salesThisMonth = 0;
 
   const activeDealsByNegotiator: { [key: string]: number } = {};
+  const activeDealsBySupportAgent: { [key: string]: number } = {};
 
   const coordinators: { [key: string]: DealNegotiatorType } = {};
   teamDelivrdSnapshot.docs.forEach((doc) => {
@@ -145,6 +145,24 @@ export const POST = async (
           activeDealsByNegotiator[coordinatorName]++;
 
           activeDeals++;
+        }
+      }
+
+      if (deal.supportAgentId) {
+        if (
+          mode === "coordinator" &&
+          userData?.deal_coordinator_id !== deal.dealCoordinatorId
+        ) {
+        } else {
+          if (coordinator?.visible || !coordinator) {
+            const coordinatorName =
+              coordinators[deal.supportAgentId]?.name ?? "Unassigned";
+
+            if (!activeDealsBySupportAgent[coordinatorName]) {
+              activeDealsBySupportAgent[coordinatorName] = 0;
+            }
+            activeDealsBySupportAgent[coordinatorName]++;
+          }
         }
       }
     }
@@ -216,6 +234,7 @@ export const POST = async (
     salesThisMonth,
     coordinatorSalesThisWeek,
     activeDealsByNegotiator,
+    activeDealsBySupportAgent,
     shippingAndPickingUpTodayByCoordinator,
   });
 };

@@ -41,6 +41,9 @@ export const DealsOverviewBoard = ({
       const res = await backendRequest("overview", "POST", {
         mode: mode,
       });
+
+      console.log("got res:", res);
+
       return res;
     },
   });
@@ -402,6 +405,16 @@ export const ActiveDealsCard = ({
                 </div>
               ))}
           </div>
+          <hr />
+          <div className="text-lg text-center mt-4 mb-4">Support Agents</div>
+          {Object.keys(result.data.activeDealsBySupportAgent || {}).map(
+            (supportAgentName: string, idx: number) => (
+              <div key={supportAgentName}>
+                {supportAgentName}:{" "}
+                {result.data.activeDealsBySupportAgent[supportAgentName]}
+              </div>
+            )
+          )}
         </>
       )}
     </MinimalCard>
