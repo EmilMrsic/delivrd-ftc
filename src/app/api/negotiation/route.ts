@@ -22,12 +22,14 @@ export const POST = async (request: Request) => {
   };
 
   const { filter, archive, mode, profile } = await request.json();
+  console.log("looking up filters", filter);
   const deals = await getActiveDealDocuments({
     filter,
     archive,
     mode,
     profile,
   });
+  console.log("finished filters", filter);
 
   if (deals) {
     output.negotiations = deals;

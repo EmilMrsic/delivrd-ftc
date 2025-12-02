@@ -43,13 +43,11 @@ export const useNegotiations = (
   const cacheKey = config.all ? `negotiations` : `negotiation-${id}`;
 
   const negotiationsQuery = useQuery<any>({
-    queryKey: [cacheKey, filters],
+    queryKey: [cacheKey], //, filters],
     queryFn: async () => {
       const path = config.all
         ? `negotiation`
         : `negotiation/${id || loggedInUserId}`;
-
-      console.log("calling backend...");
 
       const request = await backendRequest(path, "POST", {
         archive: config.archive,
@@ -108,7 +106,12 @@ export const useNegotiations = (
   };
 
   useEffect(() => {
-    const potentialNewHash = hashJson([id, config.filter ?? {}]);
+    const potentialNewHash = hashJson([
+      id,
+      config.filter ?? {},
+      config.archive,
+      config.all,
+    ]);
     // console.log("comparing", "new", potentialNewHash, "old", hashRef.current);
     if (potentialNewHash !== hashRef.current) {
       hashRef.current = potentialNewHash;
@@ -116,7 +119,7 @@ export const useNegotiations = (
     }
     // console.log("running the effect", id, filters, config.archive);
     // negotiationsQuery.refetch();
-  }, [id, filters, config.archive]);
+  }, [id, filters, config.archive, config.all]);
 
   useEffect(() => {
     setFilters(config.filter ?? {});

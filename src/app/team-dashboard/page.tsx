@@ -339,32 +339,34 @@ export default function DealList() {
               archive={archive}
               setArchive={setArchive}
             />
-            <TeamDashboardTable
-              // setCurrentDeals={setCurrentDeals}
-              allNegotiations={allNegotiations}
-              loading={loading}
-              setStopPropagation={setStopPropagation}
-              stopPropagation={stopPropagation}
-              negotiatorData={negotiatorData as unknown as DealNegotiatorType}
-              allDealNegotiator={
-                allDealNegotiator as unknown as DealNegotiatorType[]
-              }
-              // allInternalNotes={allInternalNotes}
-              // currentDeals={currentDeals}
-              handleStageChange={handleStageChange}
-              updateDealNegotiator={updateDealNegotiator}
-              // negotiationsByColumn={negotiationsByColumn}
-              sortConfig={sortConfig}
-              setSortConfig={setSortConfig}
-              refetch={refetch}
-              displayAllPaid={true} //!searchAll}
-              negotiations={negotiations}
-              searchTerm={searchTerm}
-              searchAll={searchTerm !== ""} // searchAll}
-              refetchAll={refetchAll}
-              updateDealSupportAgent={updateDealSupportAgent}
-              name="team-dashboard-negotiator"
-            />
+            {searchTerm === "" && (
+              <TeamDashboardTable
+                // setCurrentDeals={setCurrentDeals}
+                allNegotiations={allNegotiations}
+                loading={loading}
+                setStopPropagation={setStopPropagation}
+                stopPropagation={stopPropagation}
+                negotiatorData={negotiatorData as unknown as DealNegotiatorType}
+                allDealNegotiator={
+                  allDealNegotiator as unknown as DealNegotiatorType[]
+                }
+                // allInternalNotes={allInternalNotes}
+                // currentDeals={currentDeals}
+                handleStageChange={handleStageChange}
+                updateDealNegotiator={updateDealNegotiator}
+                // negotiationsByColumn={negotiationsByColumn}
+                sortConfig={sortConfig}
+                setSortConfig={setSortConfig}
+                refetch={refetch}
+                displayAllPaid={true} //!searchAll}
+                negotiations={negotiations}
+                searchTerm={searchTerm}
+                searchAll={searchTerm !== ""} // searchAll}
+                refetchAll={refetchAll}
+                updateDealSupportAgent={updateDealSupportAgent}
+                name="team-dashboard-negotiator"
+              />
+            )}
             {searchTerm !== "" && (
               <>
                 <div className="border-t border-blue-200 mt-4 border-[4px]"></div>

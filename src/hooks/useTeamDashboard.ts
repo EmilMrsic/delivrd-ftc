@@ -6,6 +6,7 @@ import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { useNegotiationStore } from "@/lib/state/negotiation";
 import { useTeamDashboardStore } from "@/lib/state/team-dashboard";
 import { useDealNegotiators } from "./useDealNegotiators";
+import { getUserData } from "@/lib/user";
 
 const useTeamDashboard = (
   config: {
@@ -59,6 +60,15 @@ const useTeamDashboard = (
       delete allFilters.id;
     }
 
+    console.log("updating filters", userFilters, allFilters);
+    if (Object.keys(userFilters.filter || {}).length === 0 && !config.id) {
+      if (!userFilters.filter) {
+        userFilters.filter = {};
+      }
+
+      userFilters.filter.dealCoordinatorId = getUserData()?.deal_coordinator_id;
+    }
+
     return [userFilters, allFilters];
   }, [config, searchAll]);
 
@@ -68,6 +78,7 @@ const useTeamDashboard = (
     // team,
     isLoading,
   } = useNegotiations({
+    all: true,
     archive: archive,
     ...userFilters,
   });
@@ -122,11 +133,11 @@ const useTeamDashboard = (
     negotiatorData: negotiatorData,
     setNegotiatorData,
     loading: !negotiations && isLoading,
-    loadingAll: isLoadingAll,
+    loadingAll: false, //isLoadingAll,
     refetch: refetch,
     searchAll,
     setSearchAll,
-    refetchAll: refetchAll,
+    refetchAll: () => {}, //refetchAll,
     archive,
     setArchive,
   };
