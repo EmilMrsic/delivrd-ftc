@@ -37,12 +37,13 @@ import {
 } from "@/components/tailwind-plus/table";
 import { useNotificationsState } from "@/lib/state/notifications";
 import { useUserState } from "@/lib/state/user";
+import { getUserData } from "@/lib/user";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
   makes: [] as string[],
   models: [] as string[],
-  dealCoordinators: "" as string,
+  dealCoordinators: getUserData()?.deal_coordinator_id || "",
   supportAgent: "" as string,
   onboarding: [] as string[],
 };
