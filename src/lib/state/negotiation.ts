@@ -19,7 +19,10 @@ export const useNegotiationStore = create<NegotiationState>()(
             [id]: data,
           },
         })),
-      mergeInNegotiations: (byId: Record<string, NegotiationDataType>) => {
+      mergeInNegotiations: (
+        byId: Record<string, NegotiationDataType>,
+        all: boolean
+      ) => {
         set((state) => {
           const updatedNegotiations = { ...state.negotiations };
           let changed = false;
@@ -31,13 +34,15 @@ export const useNegotiationStore = create<NegotiationState>()(
             }
           });
 
-          const incomingIds = new Set(Object.keys(byId));
-          let foundOld = 0;
-          for (const id of Object.keys(updatedNegotiations)) {
-            if (!incomingIds.has(id)) {
-              delete updatedNegotiations[id];
-              changed = true;
-              foundOld++;
+          if (all) {
+            const incomingIds = new Set(Object.keys(byId));
+            let foundOld = 0;
+            for (const id of Object.keys(updatedNegotiations)) {
+              if (!incomingIds.has(id)) {
+                delete updatedNegotiations[id];
+                changed = true;
+                foundOld++;
+              }
             }
           }
 

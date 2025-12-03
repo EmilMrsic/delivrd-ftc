@@ -354,7 +354,6 @@ const FeatureDetails = ({
           label="Arrival To Client"
           selected={arrivalToClient}
           onDateChange={(date) => {
-            console.log("got date change:");
             setArrivalToClient(date);
             handleDateChange(date, "arrivalToClient");
           }}

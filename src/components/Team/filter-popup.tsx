@@ -45,8 +45,6 @@ const FilterPopup = ({
   const supportAgent = useFiltersStore((state) => state.supportAgent);
   const setSupportAgent = useFiltersStore((state) => state.setSupportAgent);
 
-  console.log("got filters:", filters);
-
   return (
     <div className="flex flex-wrap gap-4 items-start w-full">
       <div className="space-y-2">

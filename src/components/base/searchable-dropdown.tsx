@@ -81,10 +81,6 @@ const SearchableDropdown: React.FC<EditableDropdownProps> = ({
     value: option,
   }));
 
-  if (label === "Drivetrain") {
-    console.log("got label:", label, value);
-  }
-
   return (
     <Field className="w-full">
       <Label className="font-bold w-fit whitespace-nowrap">{label}:</Label>

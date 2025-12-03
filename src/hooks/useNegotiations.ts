@@ -43,7 +43,7 @@ export const useNegotiations = (
   const cacheKey = config.all ? `negotiations` : `negotiation-${id}`;
 
   const negotiationsQuery = useQuery<any>({
-    queryKey: [cacheKey], //, filters],
+    queryKey: [cacheKey, filters],
     queryFn: async () => {
       const path = config.all
         ? `negotiation`
@@ -78,7 +78,10 @@ export const useNegotiations = (
         byId[negotiation.id] = negotiation;
       });
 
-      mergeInNegotiations(byId);
+      mergeInNegotiations(
+        byId,
+        (config.all && Object.keys(filters).length === 0) || false
+      );
     }
   }, [negotiationsQuery.data]);
 

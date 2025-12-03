@@ -60,15 +60,6 @@ const useTeamDashboard = (
       delete allFilters.id;
     }
 
-    console.log("updating filters", userFilters, allFilters);
-    if (Object.keys(userFilters.filter || {}).length === 0 && !config.id) {
-      if (!userFilters.filter) {
-        userFilters.filter = {};
-      }
-
-      userFilters.filter.dealCoordinatorId = getUserData()?.deal_coordinator_id;
-    }
-
     return [userFilters, allFilters];
   }, [config, searchAll]);
 
@@ -78,7 +69,7 @@ const useTeamDashboard = (
     // team,
     isLoading,
   } = useNegotiations({
-    all: true,
+    all: Object.keys(userFilters.filter || {}).length > 0,
     archive: archive,
     ...userFilters,
   });
@@ -133,11 +124,11 @@ const useTeamDashboard = (
     negotiatorData: negotiatorData,
     setNegotiatorData,
     loading: !negotiations && isLoading,
-    loadingAll: false, //isLoadingAll,
+    loadingAll: isLoadingAll,
     refetch: refetch,
     searchAll,
     setSearchAll,
-    refetchAll: () => {}, //refetchAll,
+    refetchAll: refetchAll,
     archive,
     setArchive,
   };

@@ -42,8 +42,6 @@ export const DealsOverviewBoard = ({
         mode: mode,
       });
 
-      console.log("got res:", res);
-
       return res;
     },
   });
