@@ -142,11 +142,9 @@ export const InputField = (props: {
       lastName,
       evalFn,
     } = props;
-
     if (disabled) {
       return;
     }
-
     if (negotiationId && field) {
       if (evalFn) {
         const result = evalFn(value);

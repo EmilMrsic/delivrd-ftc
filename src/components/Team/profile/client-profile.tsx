@@ -259,12 +259,6 @@ export const ClientProfile = ({
       }
     }
 
-    //   return {
-    //     ...prevState,
-    //     [keyName]: value,
-    //   };
-    // }
-    // console.log("in handle update:");
     setNegotiation({
       ...negotiation,
       [keyName]: value,

@@ -25,6 +25,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   onChange,
   negotiationId,
   field,
+  parentKey,
   userField,
   onBlur,
 }) => {
@@ -43,37 +44,23 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   const handleBlur = async () => {
     if (negotiationId && field) {
       try {
-        // const usersQuery = query(
-        //   collection(db, "users"),
-        //   where("negotiation_id", "array-contains", negotiationId)
-        // );
-
-        // const userSnapshot = await getDocs(usersQuery);
-
-        // if (userSnapshot.empty) {
-        //   console.error(
-        //     "No user found with this negotiationId:",
-        //     negotiationId
-        //   );
-        //   return;
-        // }
-
-        // const userDoc = userSnapshot.docs[0];
-        // const userDocRef = doc(db, "users", userDoc.id);
-        // if (userField)
-        //   await updateDoc(userDocRef, {
-        //     [userField]: value,
-        //   });
-
         const negotiationDocRef = doc(
           db,
           "delivrd_negotiations",
           negotiationId
         );
 
-        await updateDoc(negotiationDocRef, {
-          [field]: value,
-        });
+        let keyName = field;
+        if (parentKey) {
+          keyName = parentKey + "." + field;
+        }
+        let useableValue = value;
+
+        const updateObject = {
+          [keyName]: useableValue,
+        };
+
+        await updateDoc(negotiationDocRef, updateObject);
 
         toast({
           title: "Field Updated",
