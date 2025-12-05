@@ -17,7 +17,6 @@ export const useVehicles = () => {
         mergeInVehicles(result.clients);
       }
 
-      result.clients;
       return result;
     },
   });
