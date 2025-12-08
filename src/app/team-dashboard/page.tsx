@@ -226,15 +226,16 @@ export default function DealList() {
         tableName = "delivrd_archive";
       }
 
-      await updateDoc(doc(db, tableName, id ?? ""), {
+      const updateObject: { stage: string; close_date?: string } = {
         stage: newStage,
-      });
+      };
 
       if (newStage !== "Closed") {
-        await updateDoc(doc(db, tableName, id ?? ""), {
-          close_date: "",
-        });
+        updateObject.close_date = "";
       }
+
+      await updateDoc(doc(db, tableName, id ?? ""), updateObject);
+      updateNegotiationInStore(id, updateObject);
 
       refetch(
         formattedCachedFilters?.dealCoordinatorId as string,
