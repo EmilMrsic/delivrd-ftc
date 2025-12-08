@@ -444,6 +444,9 @@ export const SupportAgents = ({
 
   return (
     <>
+      <div className="text-center text-2xl text-red-500 font-bold mt-4">
+        Your Dedicated Deal Support Team
+      </div>
       <div className="flex justify-between space-x-4 mt-4 justify-content-evenly p-6">
         {supportTeam.map((member, index) => {
           return (
