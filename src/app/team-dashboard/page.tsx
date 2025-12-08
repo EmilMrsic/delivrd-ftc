@@ -234,9 +234,12 @@ export default function DealList() {
         updateObject.close_date = "";
       }
 
+      console.log("updating stage in db");
       await updateDoc(doc(db, tableName, id ?? ""), updateObject);
+      console.log("calling update in store");
       updateNegotiationInStore(id, updateObject);
 
+      console.log("calling refetch");
       refetch(
         formattedCachedFilters?.dealCoordinatorId as string,
         formattedCachedFilters

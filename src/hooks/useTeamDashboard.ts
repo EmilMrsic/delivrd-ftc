@@ -114,6 +114,13 @@ const useTeamDashboard = (
       .filter((n) => n);
   }, [storedNegotiationIds, allStoredNegotiations]);
 
+  console.log(
+    "total negotiations in store:",
+    Object.keys(allStoredNegotiations).length
+  );
+
+  console.log("user negotiations in store:", storedNegotiationIds.length);
+
   return {
     allNegotiations: allNegotiations,
     negotiations: negotiations,
