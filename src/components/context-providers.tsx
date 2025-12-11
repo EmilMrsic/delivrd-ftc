@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { getUserData } from "@/lib/user";
+import { startFirestoreSync } from "@/lib/helpers/browserStore";
 
 export const ContextProviders = ({
   children,
@@ -34,6 +35,10 @@ export const ContextProviders = ({
   //     }
   //   }
   // }, [path]);
+
+  useEffect(() => {
+    if (getUserData()?.privilege === "Team") startFirestoreSync();
+  }, []);
 
   return (
     <>

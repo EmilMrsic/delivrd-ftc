@@ -13,7 +13,7 @@ import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { useLoggedInUser } from "./useLoggedInUser";
 import { useNegotiationStore } from "@/lib/state/negotiation";
 import { useDealNegotiators } from "./useDealNegotiators";
-import {shallow} from 'zustand/shallow'
+import { shallow } from "zustand/shallow";
 
 type GroupedBidComments = {
   [bid_id: string]: BidComments[];
@@ -37,20 +37,19 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
 
   const config = useMemo(() => {
     return {
-    all: true,
-    profile: true,
-    filter: {
-      id: negotiationId,
-    },
-  }
-  }, [negotiationId])
-  
+      all: true,
+      profile: true,
+      filter: {
+        id: negotiationId,
+      },
+    };
+  }, [negotiationId]);
 
-  const {
-    negotiations: negotiationsFromUseNegotiations,
-    isLoading,
-    refetch,
-  } = useNegotiations(config);
+  // const {
+  //   negotiations: negotiationsFromUseNegotiations,
+  //   isLoading,
+  //   refetch,
+  // } = useNegotiations(config);
 
   // useEffect(() => {
   //   if (negotiationsFromUseNegotiations) {
@@ -178,7 +177,6 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     getDealNegotiatorData();
   }, [storedNegotiation]);
 
-
   return {
     dealNegotiator,
     setDealNegotiator,
@@ -194,8 +192,8 @@ const useTeamProfile = ({ negotiationId }: { negotiationId: string }) => {
     setIncomingBids,
     bidCommentsByBidId,
     setBidCommentsByBidId,
-    isLoading,
-    refetch,
+    isLoading: false,
+    refetch: () => {},
     fetchBidComments,
     fetchBids,
   };

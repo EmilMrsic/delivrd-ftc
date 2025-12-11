@@ -56,7 +56,6 @@ export const useNegotiations = (
         mode: config.mode,
       });
 
-      console.log("finished calling backend");
       return request;
     },
     enabled: false, //refreshedAt === null,

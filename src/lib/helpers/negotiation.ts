@@ -384,13 +384,10 @@ export const updateNegotiationInStore = (
   negotiationId: string,
   negotiation: Partial<NegotiationDataType>
 ) => {
-  console.log("fetching from store");
   const existingNegotiation =
     useNegotiationStore.getState().negotiations[negotiationId];
-  console.log("updating in store");
   useNegotiationStore.getState().setNegotiation(negotiationId, {
     ...existingNegotiation,
     ...negotiation,
   });
-  console.log("updating in store");
 };

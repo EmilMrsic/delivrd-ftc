@@ -1,7 +1,11 @@
 // "use client";
 
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
@@ -27,7 +31,10 @@ const app = initializeApp(firebaseConfig);
 // Firebase Services
 const storage = getStorage(app);
 const auth = getAuth(app);
-const db = getFirestore(app);
+// const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache(),
+});
 
 // Initialize Firebase Messaging
 let messaging: any;
