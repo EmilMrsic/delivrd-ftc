@@ -63,6 +63,7 @@ export interface DealerVehiclesState {
 export interface TeamDashboardFiltersState {
   hasIncomingBids: boolean;
   hasTradeInBids: boolean;
+  hasFastLane: boolean;
   updateFilter: (filter: Partial<TeamDashboardFiltersState>) => void;
   clearFilters: () => void;
 }

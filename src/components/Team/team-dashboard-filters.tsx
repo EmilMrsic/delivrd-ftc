@@ -31,6 +31,10 @@ export const TeamDashboardFilters = ({
   const hasTradeInBids = useTeamDashboardFiltersState(
     (state) => state.hasTradeInBids
   );
+
+  const hasFastLane = useTeamDashboardFiltersState(
+    (state) => state.hasFastLane
+  );
   // const clearFilterState = useTeamDashboardFiltersState(
   //   (state) => state.clearFilters
   // );
@@ -115,6 +119,16 @@ export const TeamDashboardFilters = ({
               />
               <label htmlFor="trade_ins" className="text-nowrap">
                 Has Trade-In Bids
+              </label>
+              <Checkbox
+                id="fast_lane"
+                checked={hasFastLane}
+                onCheckedChange={(checked) =>
+                  updateFilter({ hasFastLane: checked as boolean })
+                }
+              />
+              <label htmlFor="fast_lane" className="text-nowrap">
+                Fast Lane
               </label>
             </div>
             <div className="mt-2 mr-0 ml-auto w-fit">

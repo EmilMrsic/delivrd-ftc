@@ -97,6 +97,7 @@ export const TeamDashboardClientNameDisplay = ({
   return (
     <>
       <div>
+        {deal.fastLane && <span className="text-2xl">🏁</span>}
         <div>
           <Link
             href={`/team-profile?id=${deal.id}`}

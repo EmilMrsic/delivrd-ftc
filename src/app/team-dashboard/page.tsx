@@ -38,6 +38,7 @@ import {
 import { useNotificationsState } from "@/lib/state/notifications";
 import { useUserState } from "@/lib/state/user";
 import { getUserData } from "@/lib/user";
+import { useTeamDashboardFiltersState } from "@/lib/state/team-dashboard-filters";
 
 const DEFAULT_FILTERS = {
   stages: "" as string,
@@ -130,6 +131,10 @@ export default function DealList() {
     direction: "ascending", // default direction
   });
 
+  const clearStateFilters = useTeamDashboardFiltersState(
+    (state) => state.clearFilters
+  );
+
   useEffect(() => {
     sessionStorage.setItem("teamDashboardFilters", JSON.stringify(filters));
     // setLoading(true);
@@ -206,6 +211,7 @@ export default function DealList() {
 
   const clearFilters = () => {
     setFilters(DEFAULT_FILTERS);
+    clearStateFilters();
     // setLoading(true);
   };
 

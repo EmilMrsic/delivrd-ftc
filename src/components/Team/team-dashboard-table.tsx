@@ -88,6 +88,11 @@ const TeamDashboardTable = ({
   const hasTradeInBids = useTeamDashboardFiltersState(
     (state) => state.hasTradeInBids
   );
+
+  const hasFastLane = useTeamDashboardFiltersState(
+    (state) => state.hasFastLane
+  );
+
   const [paidNegotiations, setPaidNegotiations] = useState<
     NegotiationDataType[]
   >([]);
@@ -218,8 +223,13 @@ const TeamDashboardTable = ({
 
   useEffect(() => {
     const { key, direction } = sortConfig;
+    console.log("in filters", hasFastLane);
     const filtered = allNegotiations
       ? allNegotiations.filter((item) => {
+          if (hasFastLane && !item.fastLane) {
+            return false;
+          }
+
           if (
             hasTradeInBids &&
             (!item?.totalTradeInBids || item.totalTradeInBids <= 0)
@@ -251,7 +261,13 @@ const TeamDashboardTable = ({
     ) as NegotiationDataType[];
 
     setPaidNegotiations(sorted);
-  }, [allNegotiations, searchTerm, hasIncomingBids, hasTradeInBids]);
+  }, [
+    allNegotiations,
+    searchTerm,
+    hasIncomingBids,
+    hasTradeInBids,
+    hasFastLane,
+  ]);
 
   useEffect(() => {
     if (negotiations) {

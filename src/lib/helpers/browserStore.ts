@@ -8,6 +8,8 @@ import { NegotiationDataType } from "../models/team";
 let started = false;
 let initialized = false;
 
+// 🏁
+
 export function startFirestoreSync() {
   if (started) return;
   started = true;

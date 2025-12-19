@@ -87,7 +87,7 @@ const ClientDetails = ({
 
   return (
     <TailwindPlusCard
-      title="Client Overview"
+      title={`Client Overview ${negotiation?.fastLane ? "🏁" : ""}`}
       icon={User}
       actions={() => (
         <div className="flex items-center gap-2">

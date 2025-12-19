@@ -93,6 +93,7 @@ export const NegotiationDataModel = z.object({
   initialLoomLink: z.string().optional(),
   searchResultsUrl: z.string().optional(),
   fromArchive: z.boolean().optional(),
+  fastLane: z.boolean().default(false),
 });
 
 export const DealNegotiatorModel = z.object({
