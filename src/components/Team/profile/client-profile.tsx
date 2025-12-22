@@ -236,22 +236,21 @@ export const ClientProfile = ({
     toast({ title: "Comment added successfully" });
   };
 
-  const handleChange = (updateObject: {
+  const handleChange = <T = string,>(updateObject: {
     key: string;
-    newValue: string;
+    newValue: T;
     parentKey?: string;
-  }) => {
-    // (prevState: any) => {
+  }): void => {
     if (!negotiation) return;
 
     const { key, newValue, parentKey } = updateObject;
 
-    let value = newValue;
-    let keyName = parentKey ? parentKey : key;
+    let value: unknown = newValue;
+    const keyName = parentKey ?? key;
+
     if (parentKey) {
       const parentVal = negotiation[parentKey as keyof NegotiationDataType];
       if (typeof parentVal === "object" && parentVal !== null) {
-        // @ts-ignore
         value = {
           ...(parentVal as Record<string, unknown>),
           [key]: newValue,
@@ -264,6 +263,35 @@ export const ClientProfile = ({
       [keyName]: value,
     });
   };
+
+  // const handleChange = <T = string,>(updateObject: {
+  //   key: string;
+  //   newValue: T;
+  //   parentKey?: string;
+  // }) => {
+  //   // (prevState: any) => {
+  //   if (!negotiation) return;
+
+  //   const { key, newValue, parentKey } = updateObject;
+
+  //   let value = newValue;
+  //   let keyName = parentKey ? parentKey : key;
+  //   if (parentKey) {
+  //     const parentVal = negotiation[parentKey as keyof NegotiationDataType];
+  //     if (typeof parentVal === "object" && parentVal !== null) {
+  //       // @ts-ignore
+  //       value = {
+  //         ...(parentVal as Record<string, unknown>),
+  //         [key]: newValue,
+  //       };
+  //     }
+  //   }
+
+  //   setNegotiation({
+  //     ...negotiation,
+  //     [keyName]: value,
+  //   });
+  // };
 
   const parseComment = (comment: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;

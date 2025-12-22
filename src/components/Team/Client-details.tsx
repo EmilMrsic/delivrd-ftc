@@ -13,7 +13,7 @@ import { InputField } from "../base/input-field";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
 import { DealNegotiator } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, updateBidInFirebase } from "@/lib/utils";
 import { TailwindPlusCard } from "../tailwind-plus/card";
 import { DealNegotiatorType, NegotiationDataType } from "@/lib/models/team";
 import { TailwindPlusToggle } from "../tailwind-plus/toggle";
@@ -24,7 +24,11 @@ import {
 import { DealNegotiatorDropdown } from "./deal-negotiator-dropdown";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
-import { removeNegotiatorFromNegotiations } from "@/lib/helpers/negotiation";
+import {
+  removeNegotiatorFromNegotiations,
+  updateNegotiationInFirebase,
+  updateNegotiationInStore,
+} from "@/lib/helpers/negotiation";
 import { Accordion } from "../ui/accordion";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -32,9 +36,9 @@ import Link from "next/link";
 type ClientDetailsProps = {
   negotiation: NegotiationDataType | null;
   negotiationId: string | null;
-  handleChange: (updateObject: {
+  handleChange: <T = string>(updateObject: {
     key: string;
-    newValue: string;
+    newValue: T;
     parentKey?: string;
   }) => void;
   dealNegotiator?: DealNegotiator;
@@ -90,24 +94,46 @@ const ClientDetails = ({
       title={`Client Overview ${negotiation?.fastLane ? "🏁" : ""}`}
       icon={User}
       actions={() => (
-        <div className="flex items-center gap-2">
-          {!clientMode && (
-            <TailwindPlusToggle
-              checked={isBlur}
-              label="Stream mode"
-              onToggle={(toggle) => {
-                localStorage.setItem("streamMode", toggle.toString());
-                setIsBlur(toggle);
-              }}
-            />
-          )}
-          {allowClientModeToggle && (
-            <TailwindPlusToggle
-              checked={clientMode}
-              label="Client mode"
-              onToggle={() => setClientMode(!clientMode)}
-            />
-          )}
+        <div className="">
+          <div className="flex items-center gap-2">
+            {!clientMode && (
+              <TailwindPlusToggle
+                checked={isBlur}
+                label="Stream mode"
+                onToggle={(toggle) => {
+                  localStorage.setItem("streamMode", toggle.toString());
+                  setIsBlur(toggle);
+                }}
+              />
+            )}
+            {allowClientModeToggle && (
+              <TailwindPlusToggle
+                checked={clientMode}
+                label="Client mode"
+                onToggle={() => setClientMode(!clientMode)}
+              />
+            )}
+          </div>
+          <div className="mt-2 mr-0 ml-auto">
+            {!clientMode && (
+              <TailwindPlusToggle
+                checked={negotiation?.fastLane || false}
+                label="Fast Lane"
+                onToggle={(toggle) => {
+                  updateNegotiationInFirebase(negotiationId ?? "", {
+                    fastLane: toggle || false,
+                  });
+                  updateNegotiationInStore(negotiationId ?? "", {
+                    fastLane: toggle || false,
+                  });
+                  handleChange<boolean>({
+                    key: "fastLane",
+                    newValue: toggle || false,
+                  });
+                }}
+              />
+            )}
+          </div>
         </div>
       )}
     >

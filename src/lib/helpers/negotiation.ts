@@ -18,6 +18,7 @@ import {
   where,
   doc,
   updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { chunk } from "lodash";
@@ -380,10 +381,30 @@ export const removeDealSupportAgentFromNegotiation = async (
   }
 };
 
+export const updateNegotiationInFirebase = async (
+  negotiationId: string,
+  negotiation: Partial<NegotiationDataType>
+) => {
+  try {
+    const negotiationRef = doc(db, "delivrd_negotiations", negotiationId);
+    const snap = await getDoc(negotiationRef);
+    await updateDoc(negotiationRef, {
+      ...snap.data(),
+      ...negotiation,
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error updating negotiation:", error);
+    return false;
+  }
+};
+
 export const updateNegotiationInStore = (
   negotiationId: string,
   negotiation: Partial<NegotiationDataType>
 ) => {
+  // console.log("updating negotiation in store:", negotiationId, negotiation);
   const existingNegotiation =
     useNegotiationStore.getState().negotiations[negotiationId];
   useNegotiationStore.getState().setNegotiation(negotiationId, {
